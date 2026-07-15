@@ -30,8 +30,10 @@ namespace RealEstateApp.Core.Domain.Entities
         public SaleType? SaleType { get; set; }
 
         public ICollection<PropertyImage>? Images { get; set; }
-        public ICollection<Improvement>? Improvements { get; set; }
+        public ICollection<PropertyImprovement>? PropertyImprovements { get; set; }
         public ICollection<Offer>? Offers { get; set; }
         public ICollection<Chat>? Chats { get; set; }
+        public ICollection<Favorite>? Favorites { get; set; }
+        public ICollection<MortgageSimulation>? MortgageSimulations { get; set; }
     }
 }

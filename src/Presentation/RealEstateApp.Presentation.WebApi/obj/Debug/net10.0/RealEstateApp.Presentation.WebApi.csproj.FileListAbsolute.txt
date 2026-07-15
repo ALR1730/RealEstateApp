@@ -87,3 +87,5 @@ C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Pr
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\obj\Debug\net10.0\RealEstateApp.Presentation.WebApi.pdb
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\obj\Debug\net10.0\RealEstateApp.Presentation.WebApi.genruntimeconfig.cache
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\obj\Debug\net10.0\ref\RealEstateApp.Presentation.WebApi.dll
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite.dll
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\NetTopologySuite.IO.SqlServerBytes.dll

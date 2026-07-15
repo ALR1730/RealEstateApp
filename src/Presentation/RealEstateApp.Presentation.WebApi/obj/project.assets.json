@@ -329,6 +329,28 @@
           }
         }
       },
+      "Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite/10.0.10": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Data.SqlClient": "6.1.1",
+          "Microsoft.EntityFrameworkCore.SqlServer": "10.0.10",
+          "NetTopologySuite": "2.6.0",
+          "NetTopologySuite.IO.SqlServerBytes": "2.1.0"
+        },
+        "compile": {
+          "lib/net10.0/Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "build/net10.0/_._": {}
+        }
+      },
       "Microsoft.Identity.Client/4.73.1": {
         "type": "package",
         "dependencies": {
@@ -496,6 +518,22 @@
           }
         }
       },
+      "NetTopologySuite.IO.SqlServerBytes/2.1.0": {
+        "type": "package",
+        "dependencies": {
+          "NetTopologySuite": "[2.0.0, 3.0.0-A)"
+        },
+        "compile": {
+          "lib/netstandard2.0/NetTopologySuite.IO.SqlServerBytes.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/NetTopologySuite.IO.SqlServerBytes.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "System.ClientModel/1.5.1": {
         "type": "package",
         "dependencies": {
@@ -634,6 +672,7 @@
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "10.0.10",
           "Microsoft.EntityFrameworkCore.InMemory": "10.0.10",
           "Microsoft.EntityFrameworkCore.SqlServer": "10.0.10",
+          "Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite": "10.0.10",
           "NetTopologySuite": "2.6.0",
           "RealEstateApp.Core.Application": "1.0.0"
         },
@@ -642,7 +681,10 @@
         },
         "runtime": {
           "bin/placeholder/RealEstateApp.Infrastructure.Persistence.dll": {}
-        }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
       },
       "RealEstateApp.Infrastructure.Shared/1.0.0": {
         "type": "project",
@@ -1022,6 +1064,22 @@
         "microsoft.entityframeworkcore.sqlserver.nuspec"
       ]
     },
+    "Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite/10.0.10": {
+      "sha512": "eZ3k4kPsMv7o/AkF83rB89YokqaXRW735rG2Iq334+RUGhtka47vCCYpwmv5MeGWY+09YRh5fh5zdg/XwW54WA==",
+      "type": "package",
+      "path": "microsoft.entityframeworkcore.sqlserver.nettopologysuite/10.0.10",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "PACKAGE.md",
+        "build/net10.0/Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite.targets",
+        "lib/net10.0/Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite.dll",
+        "lib/net10.0/Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite.xml",
+        "microsoft.entityframeworkcore.sqlserver.nettopologysuite.10.0.10.nupkg.sha512",
+        "microsoft.entityframeworkcore.sqlserver.nettopologysuite.nuspec"
+      ]
+    },
     "Microsoft.Identity.Client/4.73.1": {
       "sha512": "NnDLS8QwYqO5ZZecL2oioi1LUqjh5Ewk4bMLzbgiXJbQmZhDLtKwLxL3DpGMlQAJ2G4KgEnvGPKa+OOgffeJbw==",
       "type": "package",
@@ -1271,6 +1329,20 @@
         "nettopologysuite.nuspec"
       ]
     },
+    "NetTopologySuite.IO.SqlServerBytes/2.1.0": {
+      "sha512": "R4BcV19f2l6EjHSjh/EHwLhYQHrOov9vig1EW5oBm0iqlZOgaIJm5tBnlbFnYlvdYOPuf5p0Qtf8PCVwH77Wbg==",
+      "type": "package",
+      "path": "nettopologysuite.io.sqlserverbytes/2.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "icon.png",
+        "lib/netstandard2.0/NetTopologySuite.IO.SqlServerBytes.dll",
+        "lib/netstandard2.0/NetTopologySuite.IO.SqlServerBytes.xml",
+        "nettopologysuite.io.sqlserverbytes.2.1.0.nupkg.sha512",
+        "nettopologysuite.io.sqlserverbytes.nuspec"
+      ]
+    },
     "System.ClientModel/1.5.1": {
       "sha512": "k2jKSO0X45IqhVOT9iQB4xralNN9foRQsRvXBTyRpAVxyzCJlG895T9qYrQWbcJ6OQXxOouJQ37x5nZH5XKK+A==",
       "type": "package",
@@ -1466,6 +1538,7 @@
     "net10.0": [
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 10.0.10",
       "Microsoft.AspNetCore.OpenApi >= 10.0.10",
+      "RealEstateApp.Core.Application >= 1.0.0",
       "RealEstateApp.Infrastructure.Persistence >= 1.0.0",
       "RealEstateApp.Infrastructure.Shared >= 1.0.0"
     ]
@@ -1504,6 +1577,9 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
+            "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj": {
+              "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj"
+            },
             "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\RealEstateApp.Infrastructure.Persistence.csproj": {
               "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\RealEstateApp.Infrastructure.Persistence.csproj"
             },

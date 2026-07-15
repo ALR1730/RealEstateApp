@@ -16,3 +16,6 @@ C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Infrastructure\RealEstateApp.
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Infrastructure\RealEstateApp.Infrastructure.Persistence\obj\Debug\net10.0\refint\RealEstateApp.Infrastructure.Persistence.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Infrastructure\RealEstateApp.Infrastructure.Persistence\obj\Debug\net10.0\RealEstateApp.Infrastructure.Persistence.pdb
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Infrastructure\RealEstateApp.Infrastructure.Persistence\obj\Debug\net10.0\ref\RealEstateApp.Infrastructure.Persistence.dll
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Infrastructure\RealEstateApp.Infrastructure.Persistence\obj\Debug\net10.0\EFCoreSqlServerNetTopologySuite.cs
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Infrastructure\RealEstateApp.Infrastructure.Persistence\bin\Debug\net10.0\RealEstateApp.Infrastructure.Persistence.runtimeconfig.json
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Infrastructure\RealEstateApp.Infrastructure.Persistence\obj\Debug\net10.0\RealEstateApp.Infrastructure.Persistence.genruntimeconfig.cache

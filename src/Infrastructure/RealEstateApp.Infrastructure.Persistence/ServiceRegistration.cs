@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,8 @@ namespace RealEstateApp.Infrastructure.Persistence
     {
         public static void AddPersistenceInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            #region DbContext
+
             if (configuration.GetValue<bool>("UseInMemoryDatabase"))
             {
                 services.AddDbContext<ApplicationDbContext>(options =>
@@ -21,12 +24,47 @@ namespace RealEstateApp.Infrastructure.Persistence
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(
                         configuration.GetConnectionString("DefaultConnection"),
-                        b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+                        m =>
+                        {
+                            m.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+                            m.UseNetTopologySuite();
+                        }));
             }
 
+            #endregion
+
+            #region Identity
+
+            services.AddIdentity<IdentityUser, IdentityRole>(options =>
+            {
+                // Configuración de contraseña
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequiredLength = 6;
+
+                // Configuración de lockout
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+
+                // Configuración de usuario
+                options.User.RequireUniqueEmail = true;
+
+                // Requiere confirmación de email
+                options.SignIn.RequireConfirmedEmail = true;
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+
+            #endregion
+
             #region Repositories
+
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             // Registrar repositorios específicos aquí
+
             #endregion
         }
     }
