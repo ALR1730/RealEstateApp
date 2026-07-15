@@ -1,23 +1,54 @@
-🛠️ Stack TecnológicoFramework Base: .NET 9.0 (C# 13)Capa Web / API: ASP.NET Core MVC & ASP.NET Core Web API 9.0ORM & Acceso a Datos: Entity Framework Core 9.0 (Enfoque Code First)Base de Datos Motor: Microsoft SQL ServerIdentidad y Seguridad: ASP.NET Core Identity & JWT Bearer AuthenticationMapeo de Objetos: AutoMapperValidación de Datos: DataAnnotations & FluentValidation ExtensionsGeolocalización Avanzada: NetTopologySuite (Sistemas de Información Geográfica)Maquetación UI: HTML5, CSS3, JavaScript (Vainilla ES6+) & Bootstrap 5Herramientas de API: Swagger / OpenAPI 3.0 Documentation⚙️ Instalación y ConfiguraciónPrerrequisitosTener instalado .NET 9.0 SDK.Instancia local o remota de SQL Server / LocalDB activa.Pasos para el Despliegue LocalClonación del Repositorio:Bashgit clone [https://github.com/tu-usuario/RealEstateApp.git](https://github.com/tu-usuario/RealEstateApp.git)
-cd RealEstateApp
-Configuración de las Cadenas de Conexión:Modifique las variables en el archivo appsettings.json tanto en la capa RealEstateApp.Presentation.WebApp como en RealEstateApp.Presentation.WebApi:JSON"ConnectionStrings": {
-  "DefaultConnection": "Server=TU_SERVIDOR_SQL;Database=RealEstateDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
-}
-Ejecución de Migraciones de Datos:Abra una terminal en la raíz de la solución y actualice el estado de su base de datos (Entity Framework creará el esquema automáticamente):Bashdotnet ef database update --project RealEstateApp.Infrastructure.Persistence --startup-project RealEstateApp.Presentation.WebApp
-Lanzamiento de las Aplicaciones:Para levantar el portal web interactivo (MVC):Bashdotnet run --project RealEstateApp.Presentation.WebApp
-Para ejecutar el servidor de la Web API de manera simultánea:Bashdotnet run --project RealEstateApp.Presentation.WebApi
-🗄️ Inicialización de Datos Comunes (Seed Data)El sistema cuenta con un proceso de Seed Automático integrado en la persistencia. En el primer inicio de la aplicación, se darán de alta de forma automática los roles estructurales y los siguientes perfiles de prueba en estado Activo:RolNombre de Usuario / CorreoContraseña por DefectoPermisos / AccesoAdministradoradmin_user / admin@realestate.comSecurePassword123!Acceso total al Backoffice, métricas y mantenimientos centrales.Agente Inmobiliarioagente_user / agente@realestate.comSecurePassword123!Gestión de propiedades asignadas, control de ofertas y chats.Clientecliente_user / cliente@realestate.comSecurePassword123!Buscador, marcaje de favoritos, chat y simulación de préstamos.Desarrolladordev_user / dev@realestate.comSecurePassword123!Autorizado exclusivamente para el consumo seguro de la Web API vía JWT.📄 LicenciaEste ecosistema de software se distribuye bajo la licencia estándar MIT. Para mayor información, lea los términos del archivo LICENSE adjunto en la raíz del repositorio."""with open("README.md", "w", encoding="utf-8") as file:file.write(readme_content)print("README.md creado de manera exitosa.")Tu archivo Markdown (README.md) está listo
-[file-tag: code-generated-file-0-1784130783113476343]
+# RealEstateApp 🏠💼
 
-He generado un **README.md** profesional, estructurado y altamente técnico para tu repositorio. 
+[![.NET Version](https://img.shields.io/badge/.NET-9.0-blue.svg)](https://dotnet.microsoft.com/)
+[![Architecture](https://img.shields.io/badge/Architecture-Onion-orange.svg)]()
+[![License](https://img.shields.io/badge/License-MIT-green.svg)]()
 
-El documento incluye:
-1. **Badges/Escudos visuales** de las tecnologías principales.
-2. **Resumen ejecutivo** resaltando el enfoque transaccional y la arquitectura.
-3. **Módulos detallados** por rol, incluyendo las mejoras avanzadas discutidas (simulador de financiamiento, reglas de automatización en las ofertas y control de portafolio).
-4. **Árbol de Arquitectura (Onion Architecture)**, que mapea visualmente cómo se estructuran las 6 capas principales (Domain, Application, Persistence, Shared, WebApp, WebApi) para brindar mucha presencia técnica.
-5. **Stack Tecnológico completo** .NET 9, Entity Framework Core 9, NetTopologySuite, AutoMapper, JWT, Swagger.
-6. **Pasos de instalación** claros con comandos de CLI (`dotnet run`, `dotnet ef`).
-7. **Tabla de usuarios Seed** preconfigurados, ideal para quienes deseen descargar o revisar el código del proyecto de inmediato. 
+**RealEstateApp** es una plataforma web de nivel empresarial, robusta y altamente escalable diseñada para modernizar y optimizar el mercado inmobiliario digital. Este ecosistema conecta de forma fluida a **Clientes, Agentes Inmobiliarios y Administradores**, transformando el flujo tradicional de catálogos estáticos en una experiencia completamente interactiva y transaccional que abarca mensajería interna, ofertas estructuradas y simulación de financiamiento bancario.
 
-Si deseas integrar el texto en tu Github, GitLab o Azure DevOps, solo debes copiar el contenido del archivo generado o subirlo a la raíz de tu proyecto.
+El proyecto implementa con rigurosidad los mejores estándares de la industria, destacando una separación absoluta de responsabilidades mediante **Onion Architecture (100% consistente)** y la exposición segura de servicios estructurados a través de una **Web API protegida por JSON Web Tokens (JWT)**.
+
+---
+
+## 🚀 Características Principales
+
+### 👤 Módulo Público (Visitantes)
+* **Catálogo Inmobiliario Dinámico:** Listado en tiempo real de propiedades disponibles ordenadas de forma cronológica inversa (de la más reciente a la más antigua).
+* **Búsqueda por Código Único:** Formulario de consulta inmediata mediante un identificador numérico único de 6 dígitos generado automáticamente por el sistema.
+* **Filtros Avanzados Combinables:** Motores de filtrado paralelos por categoría/tipo de propiedad, rangos de precio (DOP), cantidad de habitaciones y cantidad de baños.
+* **Directorio de Agentes Públicos:** Catálogo organizado alfabéticamente de agentes activos con acceso directo al portafolio exclusivo de sus inmuebles disponibles.
+
+### 🛍️ Módulo de Clientes (Autenticados)
+* **Gestión de Favoritos:** Panel personalizado ("Mis Propiedades") para el marcaje, seguimiento y desmarcaje de inmuebles de interés. Las propiedades vendidas se depuran automáticamente del listado.
+* **Módulo de Chat Integrado:** Canal bidireccional y privado asociado a cada propiedad para interactuar directamente con el agente responsable.
+* **Estructura de Ofertas y Financiamiento:** Envío formal de propuestas económicas especificando montos, cálculo automático de cuotas y planes de financiamiento. Historial transparente con estados dinámicos (*Pendiente, Aceptada, Rechazada*).
+
+### 👔 Módulo de Agentes Inmobiliarios
+* **Control de Portafolio Inmobiliario:** Mantenimiento completo (CRUD) de propiedades asociando múltiples imágenes, descripciones detalladas, tipos de operaciones y mejoras estructurales del inmueble.
+* **Automatización de Reglas de Negocio:** Panel central de ofertas recibidas. Al aceptar una propuesta, el sistema actualiza de forma atómica el estado del inmueble a *Reservado/Vendido*, rechaza masivamente el resto de ofertas competidoras para evitar errores humanos y deshabilita nuevas solicitudes.
+* **Bandeja de Conversaciones:** Gestión ordenada de hilos de mensajería segmentados por cliente y propiedad específica.
+
+### ⚙️ Módulo de Administración (Backoffice)
+* **Dashboard de Indicadores Globales:** Panel ejecutivo con contadores exactos de propiedades disponibles frente a vendidas, y desglose de usuarios activos/inactivos por rol.
+* **Mantenimientos de Catálogos Núcleo:** Gestión dinámica de tipos de propiedades, tipos de ventas/operaciones y mejoras estructurales requeridas por la capa de negocio.
+* **Auditoría y Gestión de Cuentas:** Activación, inactivación y borrado físico/lógico de agentes en cascada, garantizando la eliminación limpia de registros huérfanos o inconsistencias en cascada (favoritos, ofertas, chats e imágenes).
+
+### 🌐 Web API y Seguridad Externa (Desarrolladores)
+* **Endpoints Protegidos:** Controladores REST optimizados (`PropertyController`, `AgentController`, etc.) para interactuar externamente con la data maestra de la plataforma.
+* **Autenticación Basada en Tokens:** Implementación estricta de seguridad con **JWT utilizando el esquema Bearer**.
+* **Documentación Viva:** Integración con **Swagger UI** para la exploración interactiva y autogeneración de contratos de servicios.
+
+---
+
+## 🏗️ Arquitectura del Software
+
+El ecosistema se rige al 100% bajo el patrón arquitectónico **Onion Architecture** (Arquitectura de Cebolla), aislando por completo el núcleo del negocio y las reglas de aplicación frente a frameworks, sistemas de bases de datos o la interfaz de usuario.
+
+```text
+└── RealEstateApp
+    ├── RealEstateApp.Core.Domain          # Entidades de dominio puras, Enums, configuraciones de negocio y POCOs.
+    ├── RealEstateApp.Core.Application     # Lógica de aplicación, Interfaces de Servicios/Repositorios, DTOs, ViewModels, perfiles de AutoMapper y validaciones del sistema.
+    ├── RealEstateApp.Infrastructure.Persistence  # DbContext (Entity Framework Core Code First), Repositorios Genéricos/Específicos, inicializadores de datos (Seeds) y Migraciones.
+    ├── RealEstateApp.Infrastructure.Shared       # Implementaciones de infraestructura cruzada: IEmailService, Storage de imágenes en la nube (AWS S3/Azure Blobs), pasarelas de pago y GIS.
+    ├── RealEstateApp.Presentation.WebApp         # Interfaz de usuario final basada en ASP.NET Core MVC 9, Bootstrap 5 y arquitectura de ViewModels limpios.
+    └── RealEstateApp.Presentation.WebApi         # Servicios REST (Controladores de API expuestos, políticas JWT y middlewares de Swagger).
