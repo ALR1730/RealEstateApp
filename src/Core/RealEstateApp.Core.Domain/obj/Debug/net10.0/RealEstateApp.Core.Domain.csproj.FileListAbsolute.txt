@@ -1,0 +1,12 @@
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Core\RealEstateApp.Core.Domain\bin\Debug\net10.0\RealEstateApp.Core.Domain.deps.json
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Core\RealEstateApp.Core.Domain\bin\Debug\net10.0\RealEstateApp.Core.Domain.dll
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Core\RealEstateApp.Core.Domain\bin\Debug\net10.0\RealEstateApp.Core.Domain.pdb
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Core\RealEstateApp.Core.Domain\obj\Debug\net10.0\RealEstateApp.Core.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Core\RealEstateApp.Core.Domain\obj\Debug\net10.0\RealEstateApp.Core.Domain.AssemblyInfoInputs.cache
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Core\RealEstateApp.Core.Domain\obj\Debug\net10.0\RealEstateApp.Core.Domain.AssemblyInfo.cs
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Core\RealEstateApp.Core.Domain\obj\Debug\net10.0\RealEstateApp.Core.Domain.csproj.CoreCompileInputs.cache
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Core\RealEstateApp.Core.Domain\obj\Debug\net10.0\RealEstateApp.Core.Domain.sourcelink.json
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Core\RealEstateApp.Core.Domain\obj\Debug\net10.0\RealEstateApp.Core.Domain.dll
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Core\RealEstateApp.Core.Domain\obj\Debug\net10.0\refint\RealEstateApp.Core.Domain.dll
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Core\RealEstateApp.Core.Domain\obj\Debug\net10.0\RealEstateApp.Core.Domain.pdb
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Core\RealEstateApp.Core.Domain\obj\Debug\net10.0\ref\RealEstateApp.Core.Domain.dll
