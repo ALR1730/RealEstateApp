@@ -6,11 +6,12 @@ namespace RealEstateApp.Infrastructure.Shared
 {
     public static class ServiceRegistration
     {
-        public static void AddSharedInfrastructure(this IServiceCollection services)
+        public static void AddSharedInfrastructure(this IServiceCollection services, string webRootPath = "wwwroot")
         {
             services.AddTransient<IEmailService, EmailService>();
-            services.AddTransient<IFileStorageService, FileStorageService>();
-            // Registrar pasarela de pago o servicios adicionales aquí
+            services.AddTransient<IFileStorageService>(provider => new FileStorageService(webRootPath));
+            services.AddTransient<IFinancingService, FinancingService>();
+            services.AddTransient<IPaymentService, PaymentService>();
         }
     }
 }

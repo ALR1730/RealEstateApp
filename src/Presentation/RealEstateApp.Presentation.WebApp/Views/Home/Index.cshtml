@@ -1,8 +1,184 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model List<RealEstateApp.Core.Application.ViewModels.Property.PropertyViewModel>
+@{
+    ViewData["Title"] = "Portal Inmobiliario";
+    var filters = ViewBag.Filters as RealEstateApp.Core.Application.ViewModels.Property.PropertyFilterViewModel ?? new RealEstateApp.Core.Application.ViewModels.Property.PropertyFilterViewModel();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Section -->
+<section class="hero-section text-center">
+    <div class="container position-relative">
+        <h1 class="hero-title mb-3">Encuentra el Inmueble de tus Sueños</h1>
+        <p class="hero-subtitle mb-4 max-w-2xl mx-auto">
+            Explora las mejores casas, apartamentos y villas disponibles. Simula tu hipoteca en tiempo real y oferta directamente.
+        </p>
+
+        <!-- Buscador Rápido por Código de 6 dígitos -->
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <form asp-action="Index" method="get" class="d-flex gap-2 bg-white p-2 rounded-pill shadow-lg">
+                    <input type="text" name="Code" value="@filters.Code" class="form-control border-0 bg-transparent px-4 font-heading" 
+                           placeholder="Buscar por Código (Ej: A1B2C3)" maxlength="6" style="text-transform: uppercase;" />
+                    <button type="submit" class="btn btn-primary-gradient rounded-pill px-4">
+                        <i class="bi bi-search me-1"></i> Buscar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container pb-5">
+    <!-- Card de Filtros Combinados -->
+    <div class="search-filter-card mb-5">
+        <form asp-action="Index" method="get" id="filterForm">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="font-heading mb-0 text-dark"><i class="bi bi-sliders text-info me-2"></i> Filtros Combinados</h5>
+                @if (filters.PropertyTypeId.HasValue || filters.SaleTypeId.HasValue || filters.MinPrice.HasValue || filters.MaxPrice.HasValue || filters.MinRooms.HasValue || filters.MinBathrooms.HasValue || !string.IsNullOrEmpty(filters.Code))
+                {
+                    <a asp-action="Index" class="btn btn-sm btn-link text-danger text-decoration-none fw-medium">
+                        <i class="bi bi-x-circle me-1"></i> Limpiar Filtros
+                    </a>
+                }
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">Tipo de Propiedad</label>
+                    <select name="PropertyTypeId" class="form-select form-select-custom">
+                        <option value="">Todos los tipos</option>
+                        @if (filters.PropertyTypes != null)
+                        {
+                            foreach (var item in filters.PropertyTypes)
+                            {
+                                <option value="@item.Id" selected="@(filters.PropertyTypeId == item.Id)">@item.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">Tipo de Venta</label>
+                    <select name="SaleTypeId" class="form-select form-select-custom">
+                        <option value="">Todas las modalidades</option>
+                        @if (filters.SaleTypes != null)
+                        {
+                            foreach (var item in filters.SaleTypes)
+                            {
+                                <option value="@item.Id" selected="@(filters.SaleTypeId == item.Id)">@item.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">Precio Mínimo</label>
+                    <input type="number" name="MinPrice" value="@filters.MinPrice" class="form-control form-control-custom" placeholder="$ Mínimo" step="1000" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">Precio Máximo</label>
+                    <input type="number" name="MaxPrice" value="@filters.MaxPrice" class="form-control form-control-custom" placeholder="$ Máximo" step="1000" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">Habitaciones Mínimas</label>
+                    <input type="number" name="MinRooms" value="@filters.MinRooms" class="form-control form-control-custom" placeholder="Ej: 2" min="0" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">Baños Mínimos</label>
+                    <input type="number" name="MinBathrooms" value="@filters.MinBathrooms" class="form-control form-control-custom" placeholder="Ej: 1" min="0" />
+                </div>
+
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary-gradient w-100 py-2">
+                        <i class="bi bi-funnel-fill me-2"></i> Aplicar Filtros
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Grilla de Resultados de Propiedades -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="font-heading mb-0">Propiedades Disponibles (@Model.Count)</h4>
+        <span class="text-muted small">Ordenadas por lo más reciente</span>
+    </div>
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
+            <i class="bi bi-house-x fs-1 text-muted d-block mb-3"></i>
+            <h5 class="font-heading text-dark">No se encontraron propiedades</h5>
+            <p class="text-muted small">Intenta ajustar los criterios de búsqueda o limpiar los filtros activos.</p>
+            <a asp-action="Index" class="btn btn-outline-custom rounded-pill mt-2">Ver Todas las Propiedades</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-property">
+                        <div class="img-container">
+                            <span class="code-badge">@item.Code</span>
+                            
+                            @{
+                                var statusClass = item.Status == "Disponible" ? "badge-disponible" :
+                                                  item.Status == "Reservada" ? "badge-reservada" : "badge-vendida";
+                            }
+                            <span class="status-badge @statusClass">@item.Status</span>
+
+                            @if (item.Images != null && item.Images.Count > 0)
+                            {
+                                <img src="@item.Images[0]" alt="@item.Code" />
+                            }
+                            else
+                            {
+                                <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80" alt="Placeholder" />
+                            }
+
+                            <div class="price-tag">
+                                @item.Price.ToString("C0")
+                            </div>
+
+                            @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Client"))
+                            {
+                                <form asp-controller="Favorites" asp-action="Toggle" method="post" class="d-inline">
+                                    <input type="hidden" name="propertyId" value="@item.Id" />
+                                    <button type="submit" class="fav-btn-overlay @(item.IsFavorite ? "active" : "")" title="Guardar en favoritos">
+                                        <i class="bi @(item.IsFavorite ? "bi-heart-fill" : "bi-heart")"></i>
+                                    </button>
+                                </form>
+                            }
+                        </div>
+
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-light text-primary border">@item.PropertyTypeName</span>
+                                    <span class="badge bg-light text-dark border">@item.SaleTypeName</span>
+                                </div>
+                                <p class="text-muted small mb-3 text-truncate-2">@item.Description</p>
+                            </div>
+
+                            <div>
+                                <hr class="my-3 opacity-25">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="metric-pill"><i class="bi bi-door-open-fill"></i> @item.Rooms Habs</span>
+                                    <span class="metric-pill"><i class="bi bi-droplet-fill"></i> @item.Bathrooms Baños</span>
+                                    <span class="metric-pill"><i class="bi bi-aspect-ratio-fill"></i> @item.SizeInMeters m²</span>
+                                </div>
+
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-custom w-100 py-2">
+                                    Ver Detalle <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>

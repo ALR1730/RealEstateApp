@@ -1,0 +1,58 @@
+@model List<RealEstateApp.Core.Application.ViewModels.Chat.ChatViewModel>
+@{
+    ViewData["Title"] = "Mis Mensajes y Chats";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="font-heading fw-bold text-dark mb-1"><i class="bi bi-chat-dots-fill text-info me-2"></i> Hilos de Conversación</h2>
+            <p class="text-muted small mb-0">Comunicación directa por propiedad entre cliente y agente inmobiliario.</p>
+        </div>
+    </div>
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
+            <i class="bi bi-chat-square-x fs-1 text-muted d-block mb-3"></i>
+            <h5 class="font-heading text-dark">No tienes mensajes ni conversaciones activas</h5>
+            <p class="text-muted small">Haz clic en "Contactar Agente" desde cualquier detalle de inmueble para iniciar un chat.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary-gradient rounded-pill px-4 mt-2">
+                <i class="bi bi-search me-1"></i> Ver Catálogo
+            </a>
+        </div>
+    }
+    else
+    {
+        <!-- Agrupar los chats por propiedad -->
+        var groupedChats = Model.GroupBy(c => c.PropertyId).ToList();
+
+        <div class="row g-3">
+            @foreach (var group in groupedChats)
+            {
+                var latestMsg = group.First();
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-primary px-3 py-1 rounded-pill">Propiedad #@latestMsg.PropertyCode</span>
+                                <span class="small text-muted">@latestMsg.SentAt.ToString("dd/MM/yyyy")</span>
+                            </div>
+
+                            <p class="text-secondary small mb-3 text-truncate-2">
+                                <i class="bi bi-quote me-1"></i>@latestMsg.MessageContent
+                            </p>
+                        </div>
+
+                        <div>
+                            <hr class="my-3 opacity-25">
+                            <a asp-action="Thread" asp-route-propertyId="@latestMsg.PropertyId" asp-route-agentId="@latestMsg.AgenteId" class="btn btn-outline-custom w-100 py-2">
+                                Abrir Conversación <i class="bi bi-chat-text ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

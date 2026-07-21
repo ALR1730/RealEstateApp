@@ -3,8 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
+using RealEstateApp.Core.Application.Interfaces.Services;
+using RealEstateApp.Core.Domain.Settings;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
 using RealEstateApp.Infrastructure.Persistence.Repositories;
+using RealEstateApp.Infrastructure.Persistence.Services;
 
 namespace RealEstateApp.Infrastructure.Persistence
 {
@@ -60,10 +63,21 @@ namespace RealEstateApp.Infrastructure.Persistence
 
             #endregion
 
+            #region Services
+
+            services.Configure<JWTSettings>(configuration.GetSection("JWTSettings"));
+            services.AddTransient<IAccountService, AccountService>();
+
+            #endregion
+
             #region Repositories
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            // Registrar repositorios específicos aquí
+            services.AddScoped<IPropertyRepository, PropertyRepository>();
+            services.AddScoped<IOfferRepository, OfferRepository>();
+            services.AddScoped<IChatRepository, ChatRepository>();
+            services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+            services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
 
             #endregion
         }

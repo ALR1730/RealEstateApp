@@ -13,7 +13,6 @@ namespace RealEstateApp.Core.Application.DTOs.Account
         public bool HasError { get; set; }
         public string? Error { get; set; }
 
-        [JsonIgnore]
         public string? JWToken { get; set; }
     }
 }

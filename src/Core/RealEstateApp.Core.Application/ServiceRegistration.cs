@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using RealEstateApp.Core.Application.Interfaces.Services;
+using RealEstateApp.Core.Application.Services;
 
 namespace RealEstateApp.Core.Application
 {
@@ -8,7 +10,19 @@ namespace RealEstateApp.Core.Application
         public static void AddApplicationLayer(this IServiceCollection services)
         {
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
-            // Registrar validaciones, mediador o servicios de aplicación aquí
+
+            #region Application Services
+
+            services.AddTransient<IPropertyService, PropertyService>();
+            services.AddTransient<IPropertyTypeService, PropertyTypeService>();
+            services.AddTransient<ISaleTypeService, SaleTypeService>();
+            services.AddTransient<IImprovementService, ImprovementService>();
+            services.AddTransient<IOfferService, OfferService>();
+            services.AddTransient<IChatService, ChatService>();
+            services.AddTransient<IFavoriteService, FavoriteService>();
+            services.AddTransient<IAgentService, AgentService>();
+
+            #endregion
         }
     }
 }

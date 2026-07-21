@@ -1,0 +1,290 @@
+@model RealEstateApp.Core.Application.ViewModels.Property.PropertyViewModel
+@{
+    ViewData["Title"] = $"Inmueble {Model.Code}";
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb & Header Header -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Catálogo</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Código @Model.Code</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary px-3 py-2 fs-6">@Model.PropertyTypeName</span>
+                <span class="badge bg-secondary px-3 py-2 fs-6">@Model.SaleTypeName</span>
+                @{
+                    var statusClass = Model.Status == "Disponible" ? "badge-disponible" :
+                                      Model.Status == "Reservada" ? "badge-reservada" : "badge-vendida";
+                }
+                <span class="status-badge position-relative top-0 right-0 @statusClass px-3 py-2 fs-6">@Model.Status</span>
+            </div>
+            <h2 class="font-heading fw-bold text-dark mb-0">Propiedad @Model.Code</h2>
+        </div>
+
+        <div class="text-md-end">
+            <span class="text-muted small d-block">Precio de Venta</span>
+            <h2 class="font-heading text-primary fw-bold mb-0">@Model.Price.ToString("C0")</h2>
+        </div>
+    </div>
+
+    <!-- Galería de Imágenes Carousel -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-8">
+            @if (Model.Images != null && Model.Images.Count > 0)
+            {
+                <div id="propertyGallery" class="carousel slide rounded-4 overflow-hidden shadow-lg" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        @for (int i = 0; i < Model.Images.Count; i++)
+                        {
+                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                <img src="@Model.Images[i]" class="d-block w-100" style="height: 480px; object-fit: cover;" alt="Imagen @(i+1)">
+                            </div>
+                        }
+                    </div>
+                    @if (Model.Images.Count > 1)
+                    {
+                        <button class="carousel-control-prev" type="button" data-bs-target="#propertyGallery" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Anterior</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#propertyGallery" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Siguiente</span>
+                        </button>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="rounded-4 overflow-hidden shadow-sm border bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                    <span class="text-muted"><i class="bi bi-image fs-1 d-block text-center mb-2"></i> Sin imágenes disponibles</span>
+                </div>
+            }
+
+            <!-- Descripción y Características -->
+            <div class="card border-0 shadow-sm rounded-4 mt-4 p-4">
+                <h4 class="font-heading fw-bold mb-3">Descripción del Inmueble</h4>
+                <p class="text-secondary lead fs-6 mb-4">@Model.Description</p>
+
+                <h5 class="font-heading fw-bold mb-3">Detalles Principales</h5>
+                <div class="row g-3 text-center mb-4">
+                    <div class="col-4 col-md-3">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <i class="bi bi-door-open-fill text-primary fs-3 d-block mb-1"></i>
+                            <span class="fw-bold d-block">@Model.Rooms</span>
+                            <span class="text-muted small">Habitaciones</span>
+                        </div>
+                    </div>
+                    <div class="col-4 col-md-3">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <i class="bi bi-droplet-fill text-info fs-3 d-block mb-1"></i>
+                            <span class="fw-bold d-block">@Model.Bathrooms</span>
+                            <span class="text-muted small">Baños</span>
+                        </div>
+                    </div>
+                    <div class="col-4 col-md-3">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <i class="bi bi-aspect-ratio-fill text-success fs-3 d-block mb-1"></i>
+                            <span class="fw-bold d-block">@Model.SizeInMeters</span>
+                            <span class="text-muted small">Metros²</span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <i class="bi bi-cash-coin text-warning fs-3 d-block mb-1"></i>
+                            <span class="fw-bold d-block">@Model.MontoSeparacion.ToString("C0")</span>
+                            <span class="text-muted small">Separación</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Mejoras -->
+                @if (Model.Improvements != null && Model.Improvements.Count > 0)
+                {
+                    <h5 class="font-heading fw-bold mb-3">Mejoras e Instalaciones</h5>
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        @foreach (var imp in Model.Improvements)
+                        {
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-2 rounded-pill">
+                                <i class="bi bi-check-circle-fill me-1"></i> @imp
+                            </span>
+                        }
+                    </div>
+                }
+
+                <!-- Video y Tour 360 -->
+                @if (!string.IsNullOrEmpty(Model.VideoUrl) || !string.IsNullOrEmpty(Model.Tour360Url))
+                {
+                    <h5 class="font-heading fw-bold mb-3">Recorrido Multimedia</h5>
+                    <div class="d-flex flex-wrap gap-3">
+                        @if (!string.IsNullOrEmpty(Model.VideoUrl))
+                        {
+                            <a href="@Model.VideoUrl" target="_blank" class="btn btn-outline-danger rounded-pill px-4">
+                                <i class="bi bi-youtube me-2"></i> Ver Video de la Propiedad
+                            </a>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Tour360Url))
+                        {
+                            <a href="@Model.Tour360Url" target="_blank" class="btn btn-outline-info rounded-pill px-4">
+                                <i class="bi bi-badge-3d me-2"></i> Realizar Tour Virtual 360°
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Simulador de Hipoteca Interactivo -->
+            <div class="card border-0 shadow-sm rounded-4 mt-4 p-4 bg-white">
+                <h4 class="font-heading fw-bold mb-3 d-flex align-items-center gap-2">
+                    <i class="bi bi-calculator-fill text-primary"></i> Simulador Hipotecario
+                </h4>
+                <p class="text-muted small mb-4">Calcula la cuota fija mensual estimada mediante el sistema de amortización francesa.</p>
+
+                <form id="mortgageForm" class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Precio del Inmueble</label>
+                        <input type="number" id="calcPrice" class="form-control form-control-custom" value="@Model.Price" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Inicial / Enganche ($)</label>
+                        <input type="number" id="calcDownPayment" class="form-control form-control-custom" value="@(Model.Price * (Model.PorcentajeInicialRequerido / 100m))" min="0" step="1000" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Tasa Anual Estimada (%)</label>
+                        <input type="number" id="calcRate" class="form-control form-control-custom" value="8.5" step="0.1" min="0.1" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Plazo del Crédito (Años)</label>
+                        <select id="calcYears" class="form-select form-select-custom">
+                            <option value="5">5 Años</option>
+                            <option value="10">10 Años</option>
+                            <option value="15" selected>15 Años</option>
+                            <option value="20">20 Años</option>
+                            <option value="25">25 Años</option>
+                            <option value="30">30 Años</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="button" id="btnCalculate" class="btn btn-primary-gradient w-100 py-2">
+                            <i class="bi bi-calculator me-1"></i> Calcular Amortización
+                        </button>
+                    </div>
+                </form>
+
+                <div id="mortgageResults" class="d-none alert alert-info border-0 rounded-3 p-4">
+                    <div class="row text-center g-3">
+                        <div class="col-md-4">
+                            <span class="text-muted small d-block">Cuota Mensual Estimada</span>
+                            <h3 id="resInstallment" class="font-heading text-primary fw-bold mb-0">$0</h3>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-muted small d-block">Monto del Préstamo</span>
+                            <h4 id="resLoan" class="font-heading text-dark fw-bold mb-0">$0</h4>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-muted small d-block">Total Intereses</span>
+                            <h4 id="resInterest" class="font-heading text-secondary fw-bold mb-0">$0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar de Agente y Acciones de Cliente -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-lg rounded-4 p-4 sticky-top" style="top: 90px;">
+                <h5 class="font-heading fw-bold mb-3">Agente Inmobiliario</h5>
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 55px; height: 55px;">
+                        @(string.IsNullOrEmpty(Model.AgentName) ? "A" : Model.AgentName.Substring(0, 1).ToUpper())
+                    </div>
+                    <div>
+                        <h6 class="font-heading mb-0 text-dark">@Model.AgentName</h6>
+                        <span class="text-muted small">Agente Certificado</span>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mb-4">
+                    @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Client"))
+                    {
+                        @if (Model.Status == "Disponible")
+                        {
+                            <a asp-controller="Offers" asp-action="Create" asp-route-propertyId="@Model.Id" class="btn btn-primary-gradient py-3 font-heading fw-bold">
+                                <i class="bi bi-cash-coin me-2"></i> Enviar Oferta
+                            </a>
+                        }
+
+                        <a asp-controller="Chats" asp-action="Thread" asp-route-propertyId="@Model.Id" asp-route-agentId="@Model.AgentId" class="btn btn-outline-custom py-2 font-heading fw-bold">
+                            <i class="bi bi-chat-dots me-2"></i> Mensaje Directo al Agente
+                        </a>
+
+                        <form asp-controller="Favorites" asp-action="Toggle" method="post" class="d-grid mt-1">
+                            <input type="hidden" name="propertyId" value="@Model.Id" />
+                            <button type="submit" class="btn @(Model.IsFavorite ? "btn-danger" : "btn-outline-danger") py-2 font-heading">
+                                <i class="bi @(Model.IsFavorite ? "bi-heart-fill" : "bi-heart") me-2"></i>
+                                @(Model.IsFavorite ? "Eliminar de Favoritos" : "Guardar en Favoritos")
+                            </button>
+                        </form>
+                    }
+                    else if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <div class="alert alert-light border small text-muted text-center mb-0">
+                            <i class="bi bi-info-circle me-1"></i> Conectado con perfil de gestión.
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-primary-gradient py-3 font-heading fw-bold">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Iniciar Sesión para Ofertar
+                        </a>
+                    }
+                </div>
+
+                <div class="bg-light p-3 rounded-3 border">
+                    <h6 class="font-heading fw-bold text-dark mb-2">Geolocalización</h6>
+                    <p class="small text-muted mb-2">
+                        <i class="bi bi-geo-alt-fill text-danger me-1"></i> Lat: @Model.Latitude, Long: @Model.Longitude
+                    </p>
+                    <a href="https://www.google.com/maps/search/?api=1&query=@Model.Latitude,@Model.Longitude" target="_blank" class="btn btn-sm btn-outline-secondary w-100">
+                        <i class="bi bi-map me-1"></i> Abrir en Google Maps
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#btnCalculate").click(function () {
+                var price = parseFloat($("#calcPrice").val());
+                var downPayment = parseFloat($("#calcDownPayment").val()) || 0;
+                var rate = parseFloat($("#calcRate").val()) || 8.5;
+                var years = parseInt($("#calcYears").val()) || 15;
+
+                $.post("/Home/CalculateMortgage", { price: price, downPayment: downPayment, rate: rate, years: years }, function (data) {
+                    if (data && data.length > 0) {
+                        var installment = data[0].installment;
+                        var loan = price - downPayment;
+                        var totalInterest = 0;
+                        data.forEach(function (item) {
+                            totalInterest += item.interest;
+                        });
+
+                        $("#resInstallment").text("$" + installment.toLocaleString('en-US', {minimumFractionDigits: 2}));
+                        $("#resLoan").text("$" + loan.toLocaleString('en-US'));
+                        $("#resInterest").text("$" + totalInterest.toLocaleString('en-US', {minimumFractionDigits: 2}));
+
+                        $("#mortgageResults").removeClass("d-none");
+                    }
+                });
+            });
+        });
+    </script>
+}

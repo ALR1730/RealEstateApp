@@ -1,0 +1,28 @@
+@{
+    ViewData["Title"] = "Activación Pendiente";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 text-center">
+            <div class="card border-0 shadow-lg rounded-4 p-5">
+                <div class="d-inline-flex p-4 rounded-circle bg-warning bg-opacity-10 text-warning mb-4 mx-auto" style="width: 90px; height: 90px; align-items: center; justify-content: center;">
+                    <i class="bi bi-hourglass-split fs-1"></i>
+                </div>
+                <h3 class="font-heading fw-bold mb-3">Cuenta Pendiente de Aprobación</h3>
+                <p class="text-secondary lead fs-6 mb-4">
+                    Su cuenta de <strong>Agente Inmobiliario</strong> ha sido registrada exitosamente.
+                    Por políticas de seguridad, requiere ser <strong>activada manualmente por un Administrador</strong> antes de poder iniciar sesión y gestionar inmuebles.
+                </p>
+                <div class="alert alert-light border rounded-3 p-3 mb-4 text-muted small">
+                    <i class="bi bi-info-circle me-1"></i> Recibirás una notificación una vez que el Administrador apruebe tu perfil.
+                </div>
+                <div>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-custom px-4 py-2 rounded-pill font-heading fw-bold">
+                        <i class="bi bi-house-door me-2"></i> Volver al Catálogo Público
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

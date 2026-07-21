@@ -12,7 +12,6 @@ C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Pr
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\Azure.Identity.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\Microsoft.AspNetCore.OpenApi.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\Microsoft.Bcl.Cryptography.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\Microsoft.Data.SqlClient.dll
@@ -89,3 +88,6 @@ C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Pr
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\obj\Debug\net10.0\ref\RealEstateApp.Presentation.WebApi.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\NetTopologySuite.IO.SqlServerBytes.dll
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll

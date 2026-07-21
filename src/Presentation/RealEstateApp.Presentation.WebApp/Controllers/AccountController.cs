@@ -1,0 +1,173 @@
+using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using RealEstateApp.Core.Application.DTOs.Account;
+using RealEstateApp.Core.Application.Interfaces.Services;
+using RealEstateApp.Core.Application.ViewModels.Account;
+using RealEstateApp.Core.Domain.Enums;
+
+namespace RealEstateApp.Presentation.WebApp.Controllers
+{
+    public class AccountController : Controller
+    {
+        private readonly IAccountService _accountService;
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
+
+        public AccountController(
+            IAccountService accountService,
+            SignInManager<IdentityUser> signInManager,
+            UserManager<IdentityUser> userManager)
+        {
+            _accountService = accountService;
+            _signInManager = signInManager;
+            _userManager = userManager;
+        }
+
+        [HttpGet]
+        public IActionResult Login(string? returnUrl = null)
+        {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToLocal(returnUrl);
+            }
+
+            return View(new LoginViewModel { ReturnUrl = returnUrl });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+
+            var user = await _userManager.FindByEmailAsync(vm.Email) 
+                       ?? await _userManager.FindByNameAsync(vm.Email);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "No existe una cuenta asociada a este correo o usuario.");
+                return View(vm);
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                ModelState.AddModelError(string.Empty, "Su cuenta no ha sido activada por correo electrónico. Revise su bandeja de entrada.");
+                return View(vm);
+            }
+
+            if (user.LockoutEnabled && user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
+            {
+                return RedirectToAction(nameof(PendingActivation));
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(user.UserName!, vm.Password, vm.RememberMe, lockoutOnFailure: true);
+
+            if (result.Succeeded)
+            {
+                return RedirectToLocal(vm.ReturnUrl);
+            }
+
+            if (result.IsLockedOut)
+            {
+                return RedirectToAction(nameof(PendingActivation));
+            }
+
+            ModelState.AddModelError(string.Empty, "Credenciales incorrectas. Verifique su usuario/correo y contraseña.");
+            return View(vm);
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(new RegisterViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+
+            var origin = $"{Request.Scheme}://{Request.Host}";
+            var selectedRole = vm.UserType == "Agent" ? Roles.Agent.ToString() : Roles.Client.ToString();
+
+            var request = new RegisterRequest
+            {
+                FirstName = vm.FirstName,
+                LastName = vm.LastName,
+                Email = vm.Email,
+                UserName = vm.UserName,
+                Password = vm.Password,
+                ConfirmPassword = vm.ConfirmPassword,
+                Phone = vm.Phone
+            };
+
+            var response = await _accountService.RegisterUserAsync(request, selectedRole, origin);
+
+            if (response.HasError)
+            {
+                ModelState.AddModelError(string.Empty, response.Error ?? "Error en el registro de usuario.");
+                return View(vm);
+            }
+
+            if (selectedRole == Roles.Agent.ToString())
+            {
+                return RedirectToAction(nameof(PendingActivation));
+            }
+
+            ViewBag.Message = $"¡Registro exitoso! Hemos enviado un enlace de confirmación a su correo ({vm.Email}). Por favor verifique su cuenta para poder iniciar sesión.";
+            return View("ConfirmEmailResult");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            var result = await _accountService.ConfirmAccountAsync(userId, token);
+            ViewBag.Message = result;
+            return View("ConfirmEmailResult");
+        }
+
+        [HttpGet]
+        public IActionResult PendingActivation()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
+        private IActionResult RedirectToLocal(string? returnUrl)
+        {
+            if (Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            return RedirectToAction("Index", "Home");
+        }
+    }
+}

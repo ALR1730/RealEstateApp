@@ -1,0 +1,81 @@
+@model RealEstateApp.Core.Application.ViewModels.Chat.SaveChatViewModel
+@{
+    ViewData["Title"] = "Chat de Propiedad";
+    var property = ViewBag.Property as RealEstateApp.Core.Application.ViewModels.Property.PropertyViewModel;
+    var messages = ViewBag.Messages as List<RealEstateApp.Core.Application.ViewModels.Chat.ChatViewModel> ?? new List<RealEstateApp.Core.Application.ViewModels.Chat.ChatViewModel>();
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Mis Chats</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Details" asp-route-id="@Model.PropertyId">Propiedad @(property?.Code)</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Hilo de Mensajes</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="chat-container">
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-building-check fs-3 text-info"></i>
+                        <div>
+                            <h6 class="font-heading text-white fw-bold mb-0">Mensajes del Inmueble @(property?.Code)</h6>
+                            <span class="small text-white-50">Precio: @property?.Price.ToString("C0") | @property?.PropertyTypeName</span>
+                        </div>
+                    </div>
+                    <a asp-controller="Home" asp-action="Details" asp-route-id="@Model.PropertyId" class="btn btn-sm btn-outline-light rounded-pill">
+                        Ver Propiedad
+                    </a>
+                </div>
+
+                <!-- Chat Messages Body -->
+                <div class="chat-messages" id="chatThread">
+                    @if (messages.Count == 0)
+                    {
+                        <div class="text-center my-auto py-5">
+                            <i class="bi bi-chat-left-dots fs-1 text-muted d-block mb-2"></i>
+                            <p class="text-muted small">No hay mensajes previos en este hilo. ¡Sé el primero en escribir!</p>
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var msg in messages)
+                        {
+                            <div class="chat-bubble @(msg.IsMine ? "chat-bubble-mine" : "chat-bubble-other")">
+                                <div>@msg.MessageContent</div>
+                                <div class="chat-time">@msg.SentAt.ToString("hh:mm tt | dd/MM")</div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <!-- Chat Input Form -->
+                <div class="chat-input-area">
+                    <form asp-action="Send" method="post" class="d-flex gap-2">
+                        <input type="hidden" asp-for="PropertyId" />
+                        <input type="hidden" asp-for="RecipientId" />
+
+                        <input asp-for="MessageContent" class="form-control form-control-custom rounded-pill px-4" placeholder="Escribe un mensaje..." autocomplete="off" required />
+                        <button type="submit" class="btn btn-primary-gradient rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 46px; height: 46px; flex-shrink: 0;">
+                            <i class="bi bi-send-fill fs-5"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var chatThread = document.getElementById("chatThread");
+            if (chatThread) {
+                chatThread.scrollTop = chatThread.scrollHeight;
+            }
+        });
+    </script>
+}

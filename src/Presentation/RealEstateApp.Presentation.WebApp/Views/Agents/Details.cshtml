@@ -1,0 +1,101 @@
+@model RealEstateApp.Core.Application.ViewModels.Agent.AgentViewModel
+@{
+    ViewData["Title"] = $"Agente {Model.FullName}";
+}
+
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Directorio de Agentes</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.FullName</li>
+        </ol>
+    </nav>
+
+    <!-- Header Agente -->
+    <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 mb-5" style="background: var(--bg-gradient-hero); color: #ffffff;">
+        <div class="row align-items-center g-4">
+            <div class="col-auto">
+                <div class="bg-white text-primary agent-avatar d-flex align-items-center justify-content-center fw-bold fs-1 shadow-lg" style="width: 110px; height: 110px;">
+                    @(string.IsNullOrEmpty(Model.FullName?.Trim()) ? Model.Email.Substring(0, 1).ToUpper() : Model.FullName.Substring(0, 1).ToUpper())
+                </div>
+            </div>
+            <div class="col">
+                <span class="badge bg-info text-dark px-3 py-1 rounded-pill mb-2 font-heading fw-bold">Agente Inmobiliario</span>
+                <h2 class="font-heading text-white fw-bold mb-2">@Model.FullName</h2>
+                <div class="d-flex flex-wrap gap-4 text-white-50 small">
+                    <span><i class="bi bi-envelope me-1 text-info"></i> @Model.Email</span>
+                    <span><i class="bi bi-telephone me-1 text-info"></i> @(string.IsNullOrEmpty(Model.Phone) ? "No registrado" : Model.Phone)</span>
+                    <span><i class="bi bi-building me-1 text-info"></i> @Model.PropertiesCount Propiedades Publicadas</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Portafolio de Inmuebles del Agente -->
+    <h4 class="font-heading fw-bold mb-4">Portafolio de Inmuebles (@(Model.Properties?.Count ?? 0))</h4>
+
+    @if (Model.Properties == null || Model.Properties.Count == 0)
+    {
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
+            <i class="bi bi-building-x fs-1 text-muted d-block mb-3"></i>
+            <h5 class="font-heading text-dark">Este agente no tiene propiedades publicadas actualmente</h5>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var item in Model.Properties)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-property">
+                        <div class="img-container">
+                            <span class="code-badge">@item.Code</span>
+                            
+                            @{
+                                var statusClass = item.Status == "Disponible" ? "badge-disponible" :
+                                                  item.Status == "Reservada" ? "badge-reservada" : "badge-vendida";
+                            }
+                            <span class="status-badge @statusClass">@item.Status</span>
+
+                            @if (item.Images != null && item.Images.Count > 0)
+                            {
+                                <img src="@item.Images[0]" alt="@item.Code" />
+                            }
+                            else
+                            {
+                                <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80" alt="Placeholder" />
+                            }
+
+                            <div class="price-tag">
+                                @item.Price.ToString("C0")
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-light text-primary border">@item.PropertyTypeName</span>
+                                    <span class="badge bg-light text-dark border">@item.SaleTypeName</span>
+                                </div>
+                                <p class="text-muted small mb-3 text-truncate-2">@item.Description</p>
+                            </div>
+
+                            <div>
+                                <hr class="my-3 opacity-25">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="metric-pill"><i class="bi bi-door-open-fill"></i> @item.Rooms Habs</span>
+                                    <span class="metric-pill"><i class="bi bi-droplet-fill"></i> @item.Bathrooms Baños</span>
+                                    <span class="metric-pill"><i class="bi bi-aspect-ratio-fill"></i> @item.SizeInMeters m²</span>
+                                </div>
+
+                                <a asp-controller="Home" asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-custom w-100 py-2">
+                                    Ver Detalle del Inmueble <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,86 @@
+@model List<RealEstateApp.Core.Application.ViewModels.Offer.OfferViewModel>
+@{
+    ViewData["Title"] = "Mis Ofertas";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="font-heading fw-bold text-dark mb-1"><i class="bi bi-cash-stack text-success me-2"></i> Mis Propuestas Económicas</h2>
+            <p class="text-muted small mb-0">Historial y estado de las ofertas que has enviado a los agentes inmobiliarios.</p>
+        </div>
+        <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">@Model.Count Ofertas</span>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center gap-2">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+            <div>@TempData["SuccessMessage"]</div>
+        </div>
+    }
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
+            <i class="bi bi-cash-coin fs-1 text-muted d-block mb-3"></i>
+            <h5 class="font-heading text-dark">Aún no has enviado ofertas económicas</h5>
+            <p class="text-muted small">Explora las propiedades disponibles y envía tu propuesta directamente al agente.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary-gradient rounded-pill px-4 mt-2">
+                <i class="bi bi-search me-1"></i> Ver Inmuebles
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-muted small text-uppercase font-heading">
+                        <tr>
+                            <th class="py-3 px-4">Inmueble</th>
+                            <th class="py-3">Precio Lista</th>
+                            <th class="py-3">Monto Ofertado</th>
+                            <th class="py-3">Fecha</th>
+                            <th class="py-3">Estado</th>
+                            <th class="py-3 px-4 text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var offer in Model)
+                        {
+                            <tr>
+                                <td class="py-3 px-4">
+                                    <span class="fw-bold font-heading text-dark d-block">Código @offer.PropertyCode</span>
+                                    <span class="small text-muted">ID: #@offer.PropertyId</span>
+                                </td>
+                                <td>@offer.PropertyPrice.ToString("C0")</td>
+                                <td><span class="fw-bold text-success fs-6 font-heading">@offer.MontoOfertado.ToString("C0")</span></td>
+                                <td class="small text-muted">@offer.FechaOferta.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                <td>
+                                    @if (offer.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill"><i class="bi bi-hourglass-split me-1"></i> Pendiente</span>
+                                    }
+                                    else if (offer.Status == "Accepted")
+                                    {
+                                        <span class="badge bg-success px-3 py-2 rounded-pill"><i class="bi bi-check-circle-fill me-1"></i> Aceptada</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger px-3 py-2 rounded-pill"><i class="bi bi-x-circle-fill me-1"></i> Rechazada</span>
+                                    }
+                                </td>
+                                <td class="py-3 px-4 text-end">
+                                    <a asp-controller="Home" asp-action="Details" asp-route-id="@offer.PropertyId" class="btn btn-sm btn-outline-custom">
+                                        Ver Inmueble <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

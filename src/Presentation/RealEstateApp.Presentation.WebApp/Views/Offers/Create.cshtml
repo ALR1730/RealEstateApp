@@ -1,0 +1,101 @@
+@model RealEstateApp.Core.Application.ViewModels.Offer.SaveOfferViewModel
+@{
+    ViewData["Title"] = "Enviar Propuesta Económica";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-dark text-white p-4 text-center border-0" style="background: var(--bg-gradient-hero) !important;">
+                    <div class="d-inline-flex p-3 rounded-circle bg-white bg-opacity-10 mb-3">
+                        <i class="bi bi-cash-stack fs-1 text-info"></i>
+                    </div>
+                    <h3 class="font-heading text-white fw-bold mb-1">Nueva Propuesta Económica</h3>
+                    <p class="small text-white-50 mb-0">Inmueble Código: <strong>@Model.PropertyCode</strong> | Precio de Lista: <strong>@Model.PropertyPrice?.ToString("C0")</strong></p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                    {
+                        <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4">
+                            @Html.ValidationSummary(true, "", new { @class = "mb-0" })
+                        </div>
+                    }
+
+                    <form asp-action="Create" method="post" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="PropertyId" />
+
+                        <div class="mb-4">
+                            <label asp-for="MontoOfertado" class="form-label fw-bold text-dark small"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-currency-dollar text-success fs-5"></i></span>
+                                <input asp-for="MontoOfertado" id="inputOfferAmount" class="form-control form-control-custom border-start-0 fs-5 font-heading fw-bold" placeholder="0.00" step="1000" />
+                            </div>
+                            <span asp-validation-for="MontoOfertado" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Tarjeta de Análisis Dinámico de la Oferta -->
+                        <div id="offerAnalysis" class="alert alert-light border rounded-3 p-3 mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="small text-muted">Diferencia con el precio de lista:</span>
+                                <span id="offerDiffBadge" class="badge bg-secondary">Calculando...</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div id="offerProgressBar" class="progress-bar bg-primary" role="progressbar" style="width: 100%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="PreApprovalLetter" class="form-label fw-bold text-dark small"></label>
+                            <input asp-for="PreApprovalLetter" type="file" class="form-control form-control-custom" accept=".pdf,.png,.jpg,.jpeg" />
+                            <div class="form-text small">Adjunte su carta de pre-aprobación emitida por su entidad bancaria (PDF o Imagen).</div>
+                            <span asp-validation-for="PreApprovalLetter" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary-gradient py-3 font-heading fw-bold">
+                                <i class="bi bi-send-fill me-2"></i> Enviar Oferta Oficial
+                            </button>
+                            <a asp-controller="Home" asp-action="Details" asp-route-id="@Model.PropertyId" class="btn btn-outline-custom py-2">
+                                Cancelar y Volver
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var listPrice = parseFloat("@Model.PropertyPrice") || 0;
+
+            function updateAnalysis() {
+                var offerAmount = parseFloat($("#inputOfferAmount").val()) || 0;
+                if (listPrice > 0 && offerAmount > 0) {
+                    var diff = offerAmount - listPrice;
+                    var percent = ((offerAmount / listPrice) * 100).toFixed(1);
+
+                    var badge = $("#offerDiffBadge");
+                    var bar = $("#offerProgressBar");
+
+                    bar.css("width", Math.min(percent, 100) + "%");
+
+                    if (diff >= 0) {
+                        badge.removeClass().addClass("badge bg-success").text("+" + diff.toLocaleString('en-US') + " (" + percent + "%)");
+                        bar.removeClass().addClass("progress-bar bg-success");
+                    } else {
+                        badge.removeClass().addClass("badge bg-warning text-dark").text(diff.toLocaleString('en-US') + " (" + percent + "%)");
+                        bar.removeClass().addClass("progress-bar bg-warning");
+                    }
+                }
+            }
+
+            $("#inputOfferAmount").on("input", updateAnalysis);
+            updateAnalysis();
+        });
+    </script>
+}
