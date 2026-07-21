@@ -55,6 +55,14 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return View(vm);
             }
 
+            // Validación de Seguridad Cruzada: Desarrolladores no pueden ingresar a la WebApp MVC
+            var isDeveloper = await _userManager.IsInRoleAsync(user, Roles.Developer.ToString());
+            if (isDeveloper)
+            {
+                ModelState.AddModelError(string.Empty, "Acceso Denegado: Las cuentas con rol Desarrollador están restringidas exclusivamente al consumo de la Web API REST.");
+                return View(vm);
+            }
+
             if (!user.EmailConfirmed)
             {
                 ModelState.AddModelError(string.Empty, "Su cuenta no ha sido activada por correo electrónico. Revise su bandeja de entrada.");

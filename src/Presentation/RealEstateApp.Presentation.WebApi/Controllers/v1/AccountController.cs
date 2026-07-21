@@ -32,6 +32,16 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return BadRequest(response);
             }
 
+            // Validación de Seguridad Cruzada: Clientes y Agentes no pueden consumir la Web API REST
+            if (response.Roles != null && (response.Roles.Contains(Roles.Client.ToString()) || response.Roles.Contains(Roles.Agent.ToString())))
+            {
+                return BadRequest(new AuthenticationResponse
+                {
+                    HasError = true,
+                    Error = "Acceso Denegado: Las cuentas con rol Cliente o Agente no tienen permitido el acceso a los servicios REST de la Web API."
+                });
+            }
+
             return Ok(response);
         }
 
