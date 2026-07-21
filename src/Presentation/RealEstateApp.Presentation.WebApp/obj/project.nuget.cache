@@ -1,11 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "jhf0FVP35f4=",
+  "dgSpecHash": "gS8DxYf3Maw=",
   "success": true,
   "projectFilePath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Presentation\\RealEstateApp.Presentation.WebApp\\RealEstateApp.Presentation.WebApp.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\DELL\\.nuget\\packages\\automapper\\16.2.0\\automapper.16.2.0.nupkg.sha512",
-    "C:\\Users\\DELL\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.1\\automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",
     "C:\\Users\\DELL\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\DELL\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",
     "C:\\Users\\DELL\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
@@ -58,18 +57,5 @@
     "C:\\Users\\DELL\\.nuget\\packages\\system.security.cryptography.pkcs\\9.0.4\\system.security.cryptography.pkcs.9.0.4.nupkg.sha512",
     "C:\\Users\\DELL\\.nuget\\packages\\system.security.cryptography.protecteddata\\9.0.4\\system.security.cryptography.protecteddata.9.0.4.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1608",
-      "level": "Warning",
-      "message": "Detected package version outside of dependency constraint: AutoMapper.Extensions.Microsoft.DependencyInjection 12.0.1 requires AutoMapper (= 12.0.1) but version AutoMapper 16.2.0 was resolved.",
-      "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Presentation\\RealEstateApp.Presentation.WebApp\\RealEstateApp.Presentation.WebApp.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Presentation\\RealEstateApp.Presentation.WebApp\\RealEstateApp.Presentation.WebApp.csproj",
-      "libraryId": "AutoMapper",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    }
-  ]
+  "logs": []
 }
