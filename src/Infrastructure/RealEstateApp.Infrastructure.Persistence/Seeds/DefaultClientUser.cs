@@ -1,31 +1,43 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using RealEstateApp.Core.Domain.Enums;
 
 namespace RealEstateApp.Infrastructure.Persistence.Seeds
 {
     /// <summary>
-    /// Crea el usuario cliente por defecto.
-    /// Email: client@realestate.com | Password: Client123!
+    /// Crea los usuarios clientes por defecto.
+    /// Client 1: client@realestate.com | Password: Client123!
+    /// Client 2: client2@realestate.com | Password: Client123!
     /// </summary>
     public static class DefaultClientUser
     {
         public static async Task SeedAsync(UserManager<IdentityUser> userManager)
         {
-            var defaultUser = new IdentityUser
+            var clients = new List<(string userName, string email, string phone)>
             {
-                UserName = "clientuser",
-                Email = "client@realestate.com",
-                EmailConfirmed = true,
-                PhoneNumberConfirmed = true
+                ("clientuser", "client@realestate.com", "809-555-0301"),
+                ("clientuser2", "client2@realestate.com", "809-555-0302")
             };
 
-            var user = await userManager.FindByEmailAsync(defaultUser.Email);
-            if (user == null)
+            foreach (var (userName, email, phone) in clients)
             {
-                var result = await userManager.CreateAsync(defaultUser, "Client123!");
-                if (result.Succeeded)
+                var user = await userManager.FindByEmailAsync(email);
+                if (user == null)
                 {
-                    await userManager.AddToRoleAsync(defaultUser, Roles.Client.ToString());
+                    var newUser = new IdentityUser
+                    {
+                        UserName = userName,
+                        Email = email,
+                        PhoneNumber = phone,
+                        EmailConfirmed = true,
+                        PhoneNumberConfirmed = true
+                    };
+                    var result = await userManager.CreateAsync(newUser, "Client123!");
+                    if (result.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(newUser, Roles.Client.ToString());
+                    }
                 }
             }
         }

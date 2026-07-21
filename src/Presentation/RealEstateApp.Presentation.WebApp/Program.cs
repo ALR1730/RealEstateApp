@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using RealEstateApp.Core.Application;
 using RealEstateApp.Infrastructure.Persistence;
+using RealEstateApp.Infrastructure.Persistence.Contexts;
 using RealEstateApp.Infrastructure.Persistence.Seeds;
 using RealEstateApp.Infrastructure.Shared;
 
@@ -20,6 +21,13 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
+builder.Services.AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["GoogleAuth:ClientId"] ?? "DUMMY_GOOGLE_CLIENT_ID";
+        options.ClientSecret = builder.Configuration["GoogleAuth:ClientSecret"] ?? "DUMMY_GOOGLE_CLIENT_SECRET";
+    });
+
 var app = builder.Build();
 
 // Ejecutar Seeds al iniciar la aplicación
@@ -30,12 +38,14 @@ using (var scope = app.Services.CreateScope())
     {
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+        var dbContext = services.GetRequiredService<ApplicationDbContext>();
 
         await DefaultRoles.SeedAsync(roleManager);
         await DefaultAdminUser.SeedAsync(userManager);
         await DefaultAgentUser.SeedAsync(userManager);
         await DefaultClientUser.SeedAsync(userManager);
         await DefaultDeveloperUser.SeedAsync(userManager);
+        await DefaultRealEstateData.SeedAsync(dbContext, userManager);
     }
     catch (Exception ex)
     {

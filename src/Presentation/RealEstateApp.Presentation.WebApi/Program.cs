@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using RealEstateApp.Core.Application;
 using RealEstateApp.Core.Domain.Settings;
 using RealEstateApp.Infrastructure.Persistence;
+using RealEstateApp.Infrastructure.Persistence.Contexts;
 using RealEstateApp.Infrastructure.Persistence.Seeds;
 using RealEstateApp.Infrastructure.Shared;
 
@@ -112,12 +113,14 @@ using (var scope = app.Services.CreateScope())
     {
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+        var dbContext = services.GetRequiredService<ApplicationDbContext>();
 
         await DefaultRoles.SeedAsync(roleManager);
         await DefaultAdminUser.SeedAsync(userManager);
         await DefaultAgentUser.SeedAsync(userManager);
         await DefaultClientUser.SeedAsync(userManager);
         await DefaultDeveloperUser.SeedAsync(userManager);
+        await DefaultRealEstateData.SeedAsync(dbContext, userManager);
     }
     catch (Exception ex)
     {
