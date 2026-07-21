@@ -1,0 +1,117 @@
+@{
+    ViewData["Title"] = "Dashboard Administrador";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="font-heading fw-bold text-dark mb-1"><i class="bi bi-speedometer2 text-primary me-2"></i> Dashboard de Indicadores</h2>
+            <p class="text-muted small mb-0">Resumen en tiempo real del estado general del sistema y usuarios.</p>
+        </div>
+    </div>
+
+    <!-- Grilla de KPI Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-4 border-success">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small font-heading">Propiedades Disponibles</span>
+                    <i class="bi bi-house-check-fill text-success fs-3"></i>
+                </div>
+                <h2 class="font-heading fw-bold text-dark mb-0">@ViewBag.TotalAvailableProperties</h2>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-4 border-warning">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small font-heading">Propiedades Reservadas</span>
+                    <i class="bi bi-house-dash-fill text-warning fs-3"></i>
+                </div>
+                <h2 class="font-heading fw-bold text-dark mb-0">@ViewBag.TotalReservedProperties</h2>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-4 border-danger">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small font-heading">Propiedades Vendidas</span>
+                    <i class="bi bi-house-heart-fill text-danger fs-3"></i>
+                </div>
+                <h2 class="font-heading fw-bold text-dark mb-0">@ViewBag.TotalSoldProperties</h2>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-4 border-info">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small font-heading">Agentes Activos</span>
+                    <i class="bi bi-person-check-fill text-info fs-3"></i>
+                </div>
+                <h2 class="font-heading fw-bold text-dark mb-0">@ViewBag.TotalActiveAgents</h2>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-4 border-secondary">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small font-heading">Agentes Inactivos</span>
+                    <i class="bi bi-person-x-fill text-secondary fs-3"></i>
+                </div>
+                <h2 class="font-heading fw-bold text-dark mb-0">@ViewBag.TotalInactiveAgents</h2>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-4 border-primary">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small font-heading">Clientes Registrados</span>
+                    <i class="bi bi-people-fill text-primary fs-3"></i>
+                </div>
+                <h2 class="font-heading fw-bold text-dark mb-0">@ViewBag.TotalClients</h2>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-4 border-dark">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small font-heading">Desarrolladores</span>
+                    <i class="bi bi-code-slash text-dark fs-3"></i>
+                </div>
+                <h2 class="font-heading fw-bold text-dark mb-0">@ViewBag.TotalDevelopers</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enlaces Rápidos de Gestión -->
+    <h4 class="font-heading fw-bold mb-3">Accesos Directos de Administración</h4>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <a asp-action="Agents" class="btn btn-outline-custom w-100 p-4 text-start rounded-4 d-flex align-items-center gap-3">
+                <i class="bi bi-person-gear fs-1 text-primary"></i>
+                <div>
+                    <h6 class="font-heading fw-bold mb-0 text-dark">Gestión de Agentes</h6>
+                    <span class="small text-muted">Activar, inactivar o eliminar agentes</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a asp-controller="AdminPropertyTypes" asp-action="Index" class="btn btn-outline-custom w-100 p-4 text-start rounded-4 d-flex align-items-center gap-3">
+                <i class="bi bi-building fs-1 text-success"></i>
+                <div>
+                    <h6 class="font-heading fw-bold mb-0 text-dark">Tipos de Propiedades</h6>
+                    <span class="small text-muted">Mantenimiento de categorías</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a asp-controller="AdminSaleTypes" asp-action="Index" class="btn btn-outline-custom w-100 p-4 text-start rounded-4 d-flex align-items-center gap-3">
+                <i class="bi bi-tags fs-1 text-info"></i>
+                <div>
+                    <h6 class="font-heading fw-bold mb-0 text-dark">Tipos de Ventas</h6>
+                    <span class="small text-muted">Mantenimiento de modalidades</span>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>

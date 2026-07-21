@@ -1,0 +1,160 @@
+@model RealEstateApp.Core.Application.ViewModels.Property.SavePropertyViewModel
+@{
+    ViewData["Title"] = $"Editar Propiedad {Model.Code}";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-dark text-white p-4 text-center border-0" style="background: var(--bg-gradient-hero) !important;">
+                    <h3 class="font-heading text-white fw-bold mb-1">Editar Propiedad Código: @Model.Code</h3>
+                    <p class="small text-white-50 mb-0">Modifica las características y gestiona las imágenes del inmueble</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                    {
+                        <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4">
+                            @Html.ValidationSummary(true, "", new { @class = "mb-0" })
+                        </div>
+                    }
+
+                    <form asp-action="EditProperty" method="post" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="Code" />
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="PropertyTypeId" class="form-label fw-bold text-dark small"></label>
+                                <select asp-for="PropertyTypeId" class="form-select form-select-custom">
+                                    <option value="">-- Seleccione Tipo de Propiedad --</option>
+                                    @if (Model.PropertyTypes != null)
+                                    {
+                                        foreach (var type in Model.PropertyTypes)
+                                        {
+                                            <option value="@type.Id">@type.Name</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="PropertyTypeId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="SaleTypeId" class="form-label fw-bold text-dark small"></label>
+                                <select asp-for="SaleTypeId" class="form-select form-select-custom">
+                                    <option value="">-- Seleccione Tipo de Venta --</option>
+                                    @if (Model.SaleTypes != null)
+                                    {
+                                        foreach (var type in Model.SaleTypes)
+                                        {
+                                            <option value="@type.Id">@type.Name</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="SaleTypeId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Price" class="form-label fw-bold text-dark small"></label>
+                                <input asp-for="Price" class="form-control form-control-custom" step="1000" />
+                                <span asp-validation-for="Price" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="MontoSeparacion" class="form-label fw-bold text-dark small"></label>
+                                <input asp-for="MontoSeparacion" class="form-control form-control-custom" step="500" />
+                                <span asp-validation-for="MontoSeparacion" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="PorcentajeInicialRequerido" class="form-label fw-bold text-dark small"></label>
+                                <input asp-for="PorcentajeInicialRequerido" class="form-control form-control-custom" min="1" max="100" />
+                                <span asp-validation-for="PorcentajeInicialRequerido" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Rooms" class="form-label fw-bold text-dark small"></label>
+                                <input asp-for="Rooms" class="form-control form-control-custom" min="0" />
+                                <span asp-validation-for="Rooms" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Bathrooms" class="form-label fw-bold text-dark small"></label>
+                                <input asp-for="Bathrooms" class="form-control form-control-custom" min="0" />
+                                <span asp-validation-for="Bathrooms" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="SizeInMeters" class="form-label fw-bold text-dark small"></label>
+                                <input asp-for="SizeInMeters" class="form-control form-control-custom" min="1" />
+                                <span asp-validation-for="SizeInMeters" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Description" class="form-label fw-bold text-dark small"></label>
+                                <textarea asp-for="Description" class="form-control form-control-custom" rows="4"></textarea>
+                                <span asp-validation-for="Description" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Latitude" class="form-label fw-bold text-dark small"></label>
+                                <input asp-for="Latitude" class="form-control form-control-custom" step="0.0001" />
+                                <span asp-validation-for="Latitude" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Longitude" class="form-label fw-bold text-dark small"></label>
+                                <input asp-for="Longitude" class="form-control form-control-custom" step="0.0001" />
+                                <span asp-validation-for="Longitude" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="VideoUrl" class="form-label fw-bold text-dark small"></label>
+                                <input asp-for="VideoUrl" class="form-control form-control-custom" />
+                                <span asp-validation-for="VideoUrl" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Tour360Url" class="form-label fw-bold text-dark small"></label>
+                                <input asp-for="Tour360Url" class="form-control form-control-custom" />
+                                <span asp-validation-for="Tour360Url" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Imágenes Existentes -->
+                            @if (Model.ExistingImages != null && Model.ExistingImages.Count > 0)
+                            {
+                                <div class="col-12">
+                                    <label class="form-label fw-bold text-dark small d-block mb-2">Imágenes Actuales de la Galería:</label>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        @foreach (var imgUrl in Model.ExistingImages)
+                                        {
+                                            <div class="position-relative rounded-3 overflow-hidden border" style="width: 120px; height: 90px;">
+                                                <img src="@imgUrl" class="w-100 h-100" style="object-fit: cover;" />
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="col-12">
+                                <label asp-for="Files" class="form-label fw-bold text-dark small"></label>
+                                <input asp-for="Files" type="file" multiple class="form-control form-control-custom" accept="image/*" />
+                                <div class="form-text small">Agregar imágenes adicionales a la galería.</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary-gradient flex-grow-1 py-3 font-heading fw-bold">
+                                <i class="bi bi-save-fill me-2"></i> Guardar Cambios
+                            </button>
+                            <a asp-action="Properties" class="btn btn-outline-custom py-3 px-4">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

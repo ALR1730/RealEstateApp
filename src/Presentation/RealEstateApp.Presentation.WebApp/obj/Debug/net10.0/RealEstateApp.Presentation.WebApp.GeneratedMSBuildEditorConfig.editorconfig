@@ -51,12 +51,92 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxSZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/AdminImprovements/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5JbXByb3ZlbWVudHNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/AdminImprovements/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5JbXByb3ZlbWVudHNcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/AdminImprovements/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5JbXByb3ZlbWVudHNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/AdminPropertyTypes/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5Qcm9wZXJ0eVR5cGVzXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/AdminPropertyTypes/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5Qcm9wZXJ0eVR5cGVzXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/AdminPropertyTypes/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5Qcm9wZXJ0eVR5cGVzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/AdminSaleTypes/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5TYWxlVHlwZXNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/AdminSaleTypes/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5TYWxlVHlwZXNcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/AdminSaleTypes/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5TYWxlVHlwZXNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Admin/Admins.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRtaW5zLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Admin/Agents.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWdlbnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Admin/CreateAdmin.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQ3JlYXRlQWRtaW4uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Admin/CreateDeveloper.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQ3JlYXRlRGV2ZWxvcGVyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Admin/Dashboard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRGFzaGJvYXJkLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Admin/DeleteAgent.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRGVsZXRlQWdlbnQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Admin/Developers.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRGV2ZWxvcGVycy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Agents/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWdlbnRzXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Agents/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWdlbnRzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Agent/CreateProperty.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWdlbnRcQ3JlYXRlUHJvcGVydHkuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Agent/EditProperty.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWdlbnRcRWRpdFByb3BlcnR5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Agent/Offers.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWdlbnRcT2ZmZXJzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Agent/Properties.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWdlbnRcUHJvcGVydGllcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Chats/Index.cshtml]

@@ -17,6 +17,11 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         /// </summary>
         public string? Code { get; set; }
 
+        /// <summary>
+        /// ID del agente propietario de la propiedad.
+        /// </summary>
+        public string AgentId { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "El precio es requerido")]
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio debe ser mayor a cero")]
         [DataType(DataType.Currency)]

@@ -125,15 +125,14 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Enable Swagger UI in development and production
+// Enable Swagger UI in development and production (servido directamente en la raíz /)
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "RealEstateApp API v1");
-    c.RoutePrefix = "swagger";
+    c.RoutePrefix = string.Empty; // Permite abrir http://localhost:5196/ directamente
 });
 
-app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthentication();

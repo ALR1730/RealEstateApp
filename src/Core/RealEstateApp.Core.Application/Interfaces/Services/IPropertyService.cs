@@ -6,15 +6,17 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
 {
     /// <summary>
     /// Servicio de aplicación para gestión de propiedades.
-    /// CRUD, filtros combinados y cambio de estado.
+    /// CRUD, filtros combinados, gestión de imágenes y cambio de estado.
     /// </summary>
     public interface IPropertyService
     {
         Task<List<PropertyViewModel>> GetAllViewModel();
         Task<PropertyViewModel?> GetByIdViewModel(int id);
+        Task<SavePropertyViewModel?> GetByIdSaveViewModel(int id);
         Task<SavePropertyViewModel> Add(SavePropertyViewModel vm);
         Task Update(SavePropertyViewModel vm, int id);
         Task Delete(int id);
+        Task DeleteImage(int imageId);
 
         /// <summary>
         /// Filtra propiedades por criterios combinados.

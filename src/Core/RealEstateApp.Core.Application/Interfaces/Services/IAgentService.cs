@@ -15,5 +15,6 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         Task<List<AgentDto>> GetAllDtoAsync();
         Task<AgentDto?> GetByIdDtoAsync(string id);
         Task ChangeStatusAsync(string agentId, bool isActive);
+        Task DeleteAgentCascadeAsync(string agentId);
     }
 }

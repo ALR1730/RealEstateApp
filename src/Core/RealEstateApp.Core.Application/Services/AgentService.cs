@@ -14,24 +14,39 @@ using RealEstateApp.Core.Domain.Enums;
 namespace RealEstateApp.Core.Application.Services
 {
     /// <summary>
-    /// Servicio de aplicación para consultar agentes y modificar su estado.
+    /// Servicio de aplicación para consultar agentes, modificar su estado y eliminación física en cascada.
     /// </summary>
     public class AgentService : IAgentService
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IPropertyRepository _propertyRepository;
         private readonly IAccountService _accountService;
+        private readonly IOfferRepository _offerRepository;
+        private readonly IChatRepository _chatRepository;
+        private readonly IFavoriteRepository _favoriteRepository;
+        private readonly IPropertyImageRepository _propertyImageRepository;
+        private readonly IFileStorageService _fileStorageService;
         private readonly IMapper _mapper;
 
         public AgentService(
             UserManager<IdentityUser> userManager,
             IPropertyRepository propertyRepository,
             IAccountService accountService,
+            IOfferRepository offerRepository,
+            IChatRepository chatRepository,
+            IFavoriteRepository favoriteRepository,
+            IPropertyImageRepository propertyImageRepository,
+            IFileStorageService fileStorageService,
             IMapper mapper)
         {
             _userManager = userManager;
             _propertyRepository = propertyRepository;
             _accountService = accountService;
+            _offerRepository = offerRepository;
+            _chatRepository = chatRepository;
+            _favoriteRepository = favoriteRepository;
+            _propertyImageRepository = propertyImageRepository;
+            _fileStorageService = fileStorageService;
             _mapper = mapper;
         }
 
@@ -51,7 +66,7 @@ namespace RealEstateApp.Core.Application.Services
                 {
                     Id = user.Id,
                     FirstName = user.UserName ?? string.Empty,
-                    LastName = string.Empty, // Se mapea desde nombre o claims
+                    LastName = string.Empty,
                     Email = user.Email ?? string.Empty,
                     Phone = user.PhoneNumber,
                     IsActive = isActive,
@@ -174,6 +189,71 @@ namespace RealEstateApp.Core.Application.Services
             }
 
             await _accountService.ChangeUserStatusAsync(agentId, isActive);
+        }
+
+        public async Task DeleteAgentCascadeAsync(string agentId)
+        {
+            var agent = await _userManager.FindByIdAsync(agentId);
+            if (agent == null)
+            {
+                throw new Exception($"El agente con ID '{agentId}' no existe");
+            }
+
+            // 1. Obtener todas las propiedades de este agente
+            var properties = await _propertyRepository.GetAllAsync();
+            var agentProperties = properties.Where(p => p.AgentId == agentId).ToList();
+
+            foreach (var prop in agentProperties)
+            {
+                // A. Borrar imágenes físicas de disco e imágenes en BD
+                var images = await _propertyImageRepository.GetByPropertyIdAsync(prop.Id);
+                foreach (var img in images)
+                {
+                    await _fileStorageService.DeleteFileAsync(img.ImageUrl, "properties");
+                    await _propertyImageRepository.DeleteAsync(img);
+                }
+
+                // B. Limpiar favoritos de la propiedad
+                var favorites = await _favoriteRepository.GetAllAsync();
+                var propFavs = favorites.Where(f => f.PropertyId == prop.Id).ToList();
+                foreach (var fav in propFavs)
+                {
+                    await _favoriteRepository.DeleteAsync(fav);
+                }
+
+                // C. Limpiar ofertas de la propiedad
+                var offers = await _offerRepository.GetByPropertyIdAsync(prop.Id);
+                foreach (var offer in offers)
+                {
+                    await _offerRepository.DeleteAsync(offer);
+                }
+
+                // D. Limpiar chats vinculados a la propiedad
+                var chats = await _chatRepository.GetAllAsync();
+                var propChats = chats.Where(c => c.PropertyId == prop.Id).ToList();
+                foreach (var chat in propChats)
+                {
+                    await _chatRepository.DeleteAsync(chat);
+                }
+
+                // E. Eliminar la propiedad
+                await _propertyRepository.DeleteAsync(prop);
+            }
+
+            // 2. Limpiar cualquier chat del agente que no esté vinculado a propiedades específicas
+            var remainingChats = await _chatRepository.GetAllAsync();
+            var agentChats = remainingChats.Where(c => c.ClienteId == agentId || c.AgenteId == agentId || c.SenderId == agentId).ToList();
+            foreach (var chat in agentChats)
+            {
+                await _chatRepository.DeleteAsync(chat);
+            }
+
+            // 3. Eliminar usuario de Identity
+            var result = await _userManager.DeleteAsync(agent);
+            if (!result.Succeeded)
+            {
+                throw new Exception($"Error al eliminar el agente: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
         }
     }
 }

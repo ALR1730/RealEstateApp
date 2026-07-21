@@ -12,16 +12,24 @@ namespace RealEstateApp.Core.Application.Services
 {
     /// <summary>
     /// Servicio de aplicación para propiedades.
-    /// CRUD, filtros combinados, búsqueda por código y gestión por agente.
+    /// CRUD, gestión de imágenes, filtros combinados, búsqueda por código y gestión por agente.
     /// </summary>
     public class PropertyService : IPropertyService
     {
         private readonly IPropertyRepository _propertyRepository;
+        private readonly IPropertyImageRepository _propertyImageRepository;
+        private readonly IFileStorageService _fileStorageService;
         private readonly IMapper _mapper;
 
-        public PropertyService(IPropertyRepository propertyRepository, IMapper mapper)
+        public PropertyService(
+            IPropertyRepository propertyRepository,
+            IPropertyImageRepository propertyImageRepository,
+            IFileStorageService fileStorageService,
+            IMapper mapper)
         {
             _propertyRepository = propertyRepository;
+            _propertyImageRepository = propertyImageRepository;
+            _fileStorageService = fileStorageService;
             _mapper = mapper;
         }
 
@@ -38,17 +46,47 @@ namespace RealEstateApp.Core.Application.Services
             return _mapper.Map<PropertyViewModel>(property);
         }
 
+        public async Task<SavePropertyViewModel?> GetByIdSaveViewModel(int id)
+        {
+            var property = await _propertyRepository.GetByIdAsync(id);
+            if (property == null) return null;
+
+            var vm = _mapper.Map<SavePropertyViewModel>(property);
+            var images = await _propertyImageRepository.GetByPropertyIdAsync(id);
+            vm.ExistingImages = images.Select(i => i.ImageUrl).ToList();
+
+            return vm;
+        }
+
         public async Task<SavePropertyViewModel> Add(SavePropertyViewModel vm)
         {
             var property = _mapper.Map<Property>(vm);
 
-            // Autogenerar código único de 6 dígitos
+            // Autogenerar código único de 6 dígitos y establecer estado
             property.Code = GenerateUniqueCode();
             property.Status = "Disponible";
 
+            // Guardar entidad de propiedad
             property = await _propertyRepository.AddAsync(property);
 
-            // Retornar el VM con el ID generado
+            // Guardar imágenes si fueron subidas
+            if (vm.Files != null && vm.Files.Count > 0)
+            {
+                foreach (var file in vm.Files.Take(15))
+                {
+                    if (file.Length > 0)
+                    {
+                        using var stream = file.OpenReadStream();
+                        var imageUrl = await _fileStorageService.UploadFileAsync(stream, file.FileName, "properties");
+                        await _propertyImageRepository.AddAsync(new PropertyImage
+                        {
+                            PropertyId = property.Id,
+                            ImageUrl = imageUrl
+                        });
+                    }
+                }
+            }
+
             var result = _mapper.Map<SavePropertyViewModel>(property);
             return result;
         }
@@ -59,7 +97,6 @@ namespace RealEstateApp.Core.Application.Services
             if (property == null)
                 throw new Exception($"No se encontró la propiedad con ID {id}");
 
-            // Mapear solo los campos editables, preservar Code, AgentId, Status
             property.Price = vm.Price;
             property.Rooms = vm.Rooms;
             property.Bathrooms = vm.Bathrooms;
@@ -75,6 +112,30 @@ namespace RealEstateApp.Core.Application.Services
             property.PorcentajeInicialRequerido = vm.PorcentajeInicialRequerido;
 
             await _propertyRepository.UpdateAsync(property);
+
+            // Si se subieron nuevas imágenes
+            if (vm.Files != null && vm.Files.Count > 0)
+            {
+                var existingImages = await _propertyImageRepository.GetByPropertyIdAsync(id);
+                var currentCount = existingImages.Count;
+
+                foreach (var file in vm.Files)
+                {
+                    if (currentCount >= 15) break;
+
+                    if (file.Length > 0)
+                    {
+                        using var stream = file.OpenReadStream();
+                        var imageUrl = await _fileStorageService.UploadFileAsync(stream, file.FileName, "properties");
+                        await _propertyImageRepository.AddAsync(new PropertyImage
+                        {
+                            PropertyId = id,
+                            ImageUrl = imageUrl
+                        });
+                        currentCount++;
+                    }
+                }
+            }
         }
 
         public async Task Delete(int id)
@@ -83,14 +144,31 @@ namespace RealEstateApp.Core.Application.Services
             if (property == null)
                 throw new Exception($"No se encontró la propiedad con ID {id}");
 
+            // Eliminar imágenes de disco e imágenes en BD
+            var images = await _propertyImageRepository.GetByPropertyIdAsync(id);
+            foreach (var img in images)
+            {
+                await _fileStorageService.DeleteFileAsync(img.ImageUrl, "properties");
+                await _propertyImageRepository.DeleteAsync(img);
+            }
+
             await _propertyRepository.DeleteAsync(property);
+        }
+
+        public async Task DeleteImage(int imageId)
+        {
+            var img = await _propertyImageRepository.GetByIdAsync(imageId);
+            if (img != null)
+            {
+                await _fileStorageService.DeleteFileAsync(img.ImageUrl, "properties");
+                await _propertyImageRepository.DeleteAsync(img);
+            }
         }
 
         public async Task<List<PropertyViewModel>> GetAllWithFilters(PropertyFilterViewModel filters)
         {
             var allProperties = await _propertyRepository.GetAllAsync();
 
-            // Aplicar filtros combinados
             var query = allProperties.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(filters.Code))
@@ -143,9 +221,6 @@ namespace RealEstateApp.Core.Application.Services
             return _mapper.Map<PropertyViewModel>(property);
         }
 
-        /// <summary>
-        /// Genera un código alfanumérico único de 6 dígitos.
-        /// </summary>
         private static string GenerateUniqueCode()
         {
             return Guid.NewGuid().ToString("N")[..6].ToUpper();
