@@ -330,6 +330,58 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   margin: 0 auto 1rem auto;
 }
 
+.chat-container.whatsapp-theme {
+  background: #efeae2;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  border: 1px solid #d1d7db;
+}
+
+.chat-header.whatsapp-header {
+  background: #075e54;
+  color: #ffffff;
+  padding: 0.85rem 1.25rem;
+}
+
+.chat-messages.whatsapp-bg {
+  background-color: #efeae2;
+  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.chat-bubble.whatsapp-bubble-mine {
+  align-self: flex-end;
+  background: #dcf8c6;
+  color: #111b21;
+  border-bottom-right-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+
+.chat-bubble.whatsapp-bubble-other {
+  align-self: flex-start;
+  background: #ffffff;
+  color: #111b21;
+  border-bottom-left-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+
+.wa-badge {
+  font-size: 0.68rem;
+  background: #25d366;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.chat-input-area.whatsapp-input {
+  background: #f0f2f5;
+  border-top: 1px solid #d1d7db;
+}
+
 /* Chat UI Container */
 .chat-container {
   background: #ffffff;

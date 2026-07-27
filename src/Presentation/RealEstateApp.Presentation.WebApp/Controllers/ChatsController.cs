@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -113,6 +114,45 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 
             string? targetCliente = userId == property?.AgentId ? vm.RecipientId : userId;
             return RedirectToAction(nameof(Thread), new { propertyId = vm.PropertyId, clienteId = targetCliente, agentId = property?.AgentId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetThreadMessagesJson(int propertyId, string? agentId = null, string? clienteId = null)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var property = await _propertyService.GetByIdViewModel(propertyId);
+            if (property == null)
+            {
+                return NotFound();
+            }
+
+            var currentUserId = userId;
+            string targetAgentId = property.AgentId;
+            string targetClienteId = currentUserId;
+
+            if (currentUserId == property.AgentId)
+            {
+                targetClienteId = !string.IsNullOrEmpty(clienteId) ? clienteId : (agentId != property.AgentId && !string.IsNullOrEmpty(agentId) ? agentId : string.Empty);
+            }
+
+            var messages = await _chatService.GetChatThread(targetClienteId, targetAgentId, propertyId, currentUserId);
+
+            var result = messages.Select(m => new
+            {
+                m.Id,
+                m.MessageContent,
+                SentAtFormatted = m.SentAt.ToString("hh:mm tt | dd/MM"),
+                m.IsMine,
+                m.IsWhatsApp,
+                m.SenderId
+            });
+
+            return Json(result);
         }
     }
 }

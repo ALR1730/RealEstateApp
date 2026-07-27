@@ -1,8 +1,11 @@
 @model RealEstateApp.Core.Application.ViewModels.Chat.SaveChatViewModel
 @{
-    ViewData["Title"] = "Chat de Propiedad";
+    ViewData["Title"] = "Chat vía WhatsApp - Propiedad " + (ViewBag.Property?.Code);
     var property = ViewBag.Property as RealEstateApp.Core.Application.ViewModels.Property.PropertyViewModel;
     var messages = ViewBag.Messages as List<RealEstateApp.Core.Application.ViewModels.Chat.ChatViewModel> ?? new List<RealEstateApp.Core.Application.ViewModels.Chat.ChatViewModel>();
+    string agentPhone = "+18095550199";
+    string waText = Uri.EscapeDataString($"Hola, estoy interesado en el inmueble código {property?.Code} ({property?.PropertyTypeName}) publicado en RealEstateApp.");
+    string waLink = $"https://wa.me/{agentPhone.Replace("+", "").Replace(" ", "").Replace("-", "")}?text={waText}";
 }
 
 <div class="container py-4">
@@ -10,66 +13,130 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-action="Index">Mis Chats</a></li>
             <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Details" asp-route-id="@Model.PropertyId">Propiedad @(property?.Code)</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Hilo de Mensajes</li>
+            <li class="breadcrumb-item active" aria-current="page">WhatsApp Chat Sync</li>
         </ol>
     </nav>
 
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <div class="chat-container">
-                <!-- Chat Header -->
-                <div class="chat-header">
+            <div class="chat-container whatsapp-theme">
+                <!-- WhatsApp Header -->
+                <div class="chat-header whatsapp-header d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-building-check fs-3 text-info"></i>
+                        <div class="bg-white rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; flex-shrink: 0;">
+                            <i class="bi bi-whatsapp text-success fs-3"></i>
+                        </div>
                         <div>
-                            <h6 class="font-heading text-white fw-bold mb-0">Mensajes del Inmueble @(property?.Code)</h6>
+                            <h6 class="font-heading text-white fw-bold mb-0 d-flex align-items-center gap-2">
+                                Chat WhatsApp - Inmueble @(property?.Code)
+                                <span class="badge bg-success text-white font-monospace" style="font-size: 0.7rem;">Sincronizado</span>
+                            </h6>
                             <span class="small text-white-50">Precio: @property?.Price.ToString("C0") | @property?.PropertyTypeName</span>
                         </div>
                     </div>
-                    <a asp-controller="Home" asp-action="Details" asp-route-id="@Model.PropertyId" class="btn btn-sm btn-outline-light rounded-pill">
-                        Ver Propiedad
-                    </a>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="@waLink" target="_blank" class="btn btn-sm btn-success rounded-pill px-3 font-heading fw-bold d-flex align-items-center gap-1 shadow-sm">
+                            <i class="bi bi-whatsapp"></i> Abrir en WhatsApp
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#waSimulatorModal">
+                            <i class="bi bi-phone-vibrate me-1"></i> Simulador Webhook
+                        </button>
+                        <a asp-controller="Home" asp-action="Details" asp-route-id="@Model.PropertyId" class="btn btn-sm btn-outline-light rounded-circle" title="Ver detalle del inmueble">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Chat Messages Body -->
-                <div class="chat-messages" id="chatThread">
+                <div class="chat-messages whatsapp-bg" id="chatThread" style="max-height: 480px; min-height: 380px;">
                     @if (messages.Count == 0)
                     {
-                        <div class="text-center my-auto py-5">
-                            <i class="bi bi-chat-left-dots fs-1 text-muted d-block mb-2"></i>
-                            <p class="text-muted small">No hay mensajes previos en este hilo. ¡Sé el primero en escribir!</p>
+                        <div class="text-center my-auto py-5" id="noMessagesPlaceholder">
+                            <i class="bi bi-whatsapp fs-1 text-success d-block mb-2 opacity-75"></i>
+                            <p class="text-muted small mb-1">No hay mensajes previos. Los mensajes enviados por la app o WhatsApp se sincronizarán aquí.</p>
+                            <span class="badge bg-light text-dark border">WhatsApp Business Cloud API Live</span>
                         </div>
                     }
                     else
                     {
                         foreach (var msg in messages)
                         {
-                            <div class="chat-bubble @(msg.IsMine ? "chat-bubble-mine" : "chat-bubble-other")">
-                                <div>@msg.MessageContent</div>
-                                <div class="chat-time">@msg.SentAt.ToString("hh:mm tt | dd/MM")</div>
+                            <div class="chat-bubble @(msg.IsMine ? "whatsapp-bubble-mine" : "whatsapp-bubble-other")" data-msg-id="@msg.Id">
+                                <div class="d-flex align-items-center justify-content-between mb-1 gap-2">
+                                    <span class="wa-badge">
+                                        <i class="bi bi-whatsapp"></i> WhatsApp Sync
+                                    </span>
+                                </div>
+                                <div class="message-text">@msg.MessageContent</div>
+                                <div class="chat-time text-end mt-1 d-flex align-items-center justify-content-end gap-1" style="font-size: 0.72rem; opacity: 0.7;">
+                                    <span>@msg.SentAt.ToString("hh:mm tt | dd/MM")</span>
+                                    @if (msg.IsMine)
+                                    {
+                                        <i class="bi bi-check2-all text-primary" title="Entregado por WhatsApp"></i>
+                                    }
+                                </div>
                             </div>
                         }
                     }
                 </div>
 
-                <!-- Chat Input Form -->
-                <div class="chat-input-area">
+                <!-- WhatsApp Input Form -->
+                <div class="chat-input-area whatsapp-input">
                     @if (!ViewData.ModelState.IsValid)
                     {
                         <div class="text-danger small px-3 mb-2">
                             @Html.ValidationSummary(false, "", new { @class = "mb-0" })
                         </div>
                     }
-                    <form asp-action="Send" method="post" class="d-flex gap-2">
+                    <form asp-action="Send" method="post" class="d-flex gap-2 align-items-center" id="sendChatForm">
                         <input type="hidden" asp-for="PropertyId" />
                         <input type="hidden" asp-for="RecipientId" />
 
-                        <input asp-for="MessageContent" class="form-control form-control-custom rounded-pill px-4" placeholder="Escribe un mensaje..." autocomplete="off" required />
-                        <button type="submit" class="btn btn-primary-gradient rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 46px; height: 46px; flex-shrink: 0;">
-                            <i class="bi bi-send-fill fs-5"></i>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-0 text-success ps-3">
+                                <i class="bi bi-whatsapp fs-5"></i>
+                            </span>
+                            <input asp-for="MessageContent" id="messageInput" class="form-control border-0 py-2 shadow-none" placeholder="Escribe un mensaje para enviar por WhatsApp..." autocomplete="off" required />
+                        </div>
+                        <button type="submit" class="btn btn-success rounded-circle d-flex align-items-center justify-content-center p-0 shadow-sm" style="width: 46px; height: 46px; flex-shrink: 0; background-color: #25D366; border: none;">
+                            <i class="bi bi-send-fill fs-5 text-white"></i>
                         </button>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Simulador de Webhook de WhatsApp -->
+<div class="modal fade" id="waSimulatorModal" tabindex="-1" aria-labelledby="waSimulatorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header bg-success text-white rounded-top-4">
+                <h5 class="modal-title font-heading fw-bold d-flex align-items-center gap-2" id="waSimulatorModalLabel">
+                    <i class="bi bi-whatsapp"></i> Simulador Webhook WhatsApp
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small">
+                    Simula la recepción de un mensaje entrante enviado desde un cliente de WhatsApp externo al Webhook de la aplicación (<code>/api/whatsapp/webhook</code>).
+                </p>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-dark small">Número de WhatsApp del Remitente</label>
+                    <input type="text" id="simSenderPhone" class="form-control rounded-3" value="+18095550199" placeholder="+18095550199" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-dark small">Contenido del Mensaje de WhatsApp</label>
+                    <textarea id="simMessageContent" class="form-control rounded-3" rows="3" placeholder="Hola, me interesa agendar una cita para ver esta propiedad."></textarea>
+                </div>
+                <div id="simAlert" class="alert d-none small py-2 mb-0"></div>
+            </div>
+            <div class="modal-footer bg-light rounded-bottom-4">
+                <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" id="btnSimulateReceive" class="btn btn-success rounded-pill px-4 fw-bold">
+                    <i class="bi bi-box-arrow-in-down me-1"></i> Simular Recepción de WhatsApp
+                </button>
             </div>
         </div>
     </div>
@@ -82,6 +149,104 @@
             if (chatThread) {
                 chatThread.scrollTop = chatThread.scrollHeight;
             }
+
+            var propertyId = @Model.PropertyId;
+            var agentId = "@ViewBag.AgentId";
+            var clienteId = "@ViewBag.ClienteId";
+            var lastCount = @messages.Count;
+
+            // Auto-polling cada 3 segundos para sincronización en tiempo real
+            setInterval(function () {
+                $.ajax({
+                    url: '/Chats/GetThreadMessagesJson',
+                    type: 'GET',
+                    data: { propertyId: propertyId, agentId: agentId, clienteId: clienteId },
+                    success: function (data) {
+                        if (data && data.length !== lastCount) {
+                            lastCount = data.length;
+                            renderMessages(data);
+                        }
+                    }
+                });
+            }, 3000);
+
+            function renderMessages(messages) {
+                var $container = $('#chatThread');
+                $container.empty();
+
+                if (messages.length === 0) {
+                    $container.append(`
+                        <div class="text-center my-auto py-5">
+                            <i class="bi bi-whatsapp fs-1 text-success d-block mb-2 opacity-75"></i>
+                            <p class="text-muted small mb-1">No hay mensajes previos.</p>
+                        </div>
+                    `);
+                    return;
+                }
+
+                messages.forEach(function (msg) {
+                    var bubbleClass = msg.isMine ? 'whatsapp-bubble-mine' : 'whatsapp-bubble-other';
+                    var checkHtml = msg.isMine ? '<i class="bi bi-check2-all text-primary" title="Entregado por WhatsApp"></i>' : '';
+
+                    var html = `
+                        <div class="chat-bubble ${bubbleClass}" data-msg-id="${msg.id}">
+                            <div class="d-flex align-items-center justify-content-between mb-1 gap-2">
+                                <span class="wa-badge">
+                                    <i class="bi bi-whatsapp"></i> WhatsApp Sync
+                                </span>
+                            </div>
+                            <div class="message-text">${escapeHtml(msg.messageContent)}</div>
+                            <div class="chat-time text-end mt-1 d-flex align-items-center justify-content-end gap-1" style="font-size: 0.72rem; opacity: 0.7;">
+                                <span>${msg.sentAtFormatted}</span>
+                                ${checkHtml}
+                            </div>
+                        </div>
+                    `;
+                    $container.append(html);
+                });
+
+                if (chatThread) {
+                    chatThread.scrollTop = chatThread.scrollHeight;
+                }
+            }
+
+            function escapeHtml(text) {
+                return $('<div>').text(text).html();
+            }
+
+            // Simulador de recepción de WhatsApp vía Webhook
+            $('#btnSimulateReceive').click(function () {
+                var sender = $('#simSenderPhone').val();
+                var msgText = $('#simMessageContent').val();
+                var $alert = $('#simAlert');
+
+                if (!msgText.trim()) {
+                    $alert.removeClass('d-none alert-success').addClass('alert-danger').text('Por favor ingresa un mensaje').show();
+                    return;
+                }
+
+                $.ajax({
+                    url: '/api/whatsapp/webhook',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        senderPhone: sender,
+                        messageContent: msgText,
+                        propertyId: propertyId
+                    }),
+                    success: function (res) {
+                        $alert.removeClass('d-none alert-danger').addClass('alert-success').text('¡Mensaje de WhatsApp recibido e integrado!').show();
+                        $('#simMessageContent').val('');
+                        setTimeout(function () {
+                            $('#waSimulatorModal').modal('hide');
+                            $alert.addClass('d-none');
+                        }, 1200);
+                    },
+                    error: function (err) {
+                        $alert.removeClass('d-none alert-success').addClass('alert-danger').text('Error al procesar webhook').show();
+                    }
+                });
+            });
         });
     </script>
 }

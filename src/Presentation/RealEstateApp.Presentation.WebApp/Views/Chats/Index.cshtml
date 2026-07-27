@@ -1,30 +1,34 @@
 @model List<RealEstateApp.Core.Application.ViewModels.Chat.ChatViewModel>
 @{
-    ViewData["Title"] = "Mis Mensajes y Chats";
+    ViewData["Title"] = "Mis Mensajes y Chats WhatsApp";
 }
 
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="font-heading fw-bold text-dark mb-1"><i class="bi bi-chat-dots-fill text-info me-2"></i> Hilos de Conversación</h2>
-            <p class="text-muted small mb-0">Comunicación directa por propiedad entre cliente y agente inmobiliario.</p>
+            <h2 class="font-heading fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                <i class="bi bi-whatsapp text-success me-1"></i> Hilos de Conversación WhatsApp
+            </h2>
+            <p class="text-muted small mb-0">Comunicación directa y sincronizada vía WhatsApp Business entre cliente y agente inmobiliario.</p>
         </div>
+        <span class="badge bg-success px-3 py-2 rounded-pill font-monospace" style="font-size: 0.82rem;">
+            <i class="bi bi-patch-check-fill me-1"></i> WhatsApp API Synced
+        </span>
     </div>
 
     @if (Model == null || Model.Count == 0)
     {
         <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
-            <i class="bi bi-chat-square-x fs-1 text-muted d-block mb-3"></i>
-            <h5 class="font-heading text-dark">No tienes mensajes ni conversaciones activas</h5>
-            <p class="text-muted small">Haz clic en "Contactar Agente" desde cualquier detalle de inmueble para iniciar un chat.</p>
-            <a asp-controller="Home" asp-action="Index" class="btn btn-primary-gradient rounded-pill px-4 mt-2">
-                <i class="bi bi-search me-1"></i> Ver Catálogo
+            <i class="bi bi-whatsapp fs-1 text-success d-block mb-3 opacity-75"></i>
+            <h5 class="font-heading text-dark">No tienes conversaciones de WhatsApp activas</h5>
+            <p class="text-muted small">Haz clic en "Mensaje Directo" o "Contactar por WhatsApp" desde cualquier inmueble para iniciar.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-success rounded-pill px-4 mt-2">
+                <i class="bi bi-search me-1"></i> Explorar Inmuebles
             </a>
         </div>
     }
     else
     {
-        <!-- Agrupar los chats por propiedad -->
         var groupedChats = Model.GroupBy(c => c.PropertyId).ToList();
 
         <div class="row g-3">
@@ -35,8 +39,16 @@
                     <div class="card border-0 shadow-sm rounded-4 h-100 p-4 d-flex flex-column justify-content-between">
                         <div>
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="badge bg-primary px-3 py-1 rounded-pill">Propiedad #@latestMsg.PropertyCode</span>
+                                <span class="badge bg-success px-3 py-1 rounded-pill d-inline-flex align-items-center gap-1">
+                                    <i class="bi bi-building"></i> Propiedad #@latestMsg.PropertyCode
+                                </span>
                                 <span class="small text-muted">@latestMsg.SentAt.ToString("dd/MM/yyyy")</span>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-1 my-2">
+                                <span class="wa-badge">
+                                    <i class="bi bi-whatsapp"></i> WhatsApp
+                                </span>
                             </div>
 
                             <p class="text-secondary small mb-3 text-truncate-2">
@@ -46,8 +58,8 @@
 
                         <div>
                             <hr class="my-3 opacity-25">
-                            <a asp-action="Thread" asp-route-propertyId="@latestMsg.PropertyId" asp-route-agentId="@latestMsg.AgenteId" asp-route-clienteId="@latestMsg.ClienteId" class="btn btn-outline-custom w-100 py-2">
-                                Abrir Conversación <i class="bi bi-chat-text ms-1"></i>
+                            <a asp-action="Thread" asp-route-propertyId="@latestMsg.PropertyId" asp-route-agentId="@latestMsg.AgenteId" asp-route-clienteId="@latestMsg.ClienteId" class="btn btn-outline-success w-100 py-2 rounded-pill fw-bold">
+                                Abrir WhatsApp Chat <i class="bi bi-whatsapp ms-1"></i>
                             </a>
                         </div>
                     </div>

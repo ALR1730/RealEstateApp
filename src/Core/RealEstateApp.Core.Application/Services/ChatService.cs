@@ -17,15 +17,18 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IChatRepository _chatRepository;
         private readonly IPropertyRepository _propertyRepository;
         private readonly IMapper _mapper;
+        private readonly IWhatsAppService _whatsAppService;
 
         public ChatService(
             IChatRepository chatRepository,
             IPropertyRepository propertyRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IWhatsAppService whatsAppService)
         {
             _chatRepository = chatRepository;
             _propertyRepository = propertyRepository;
             _mapper = mapper;
+            _whatsAppService = whatsAppService;
         }
 
         public async Task<List<ChatViewModel>> GetChatThread(
@@ -48,6 +51,7 @@ namespace RealEstateApp.Core.Application.Services
             var chat = _mapper.Map<Chat>(vm);
             chat.SenderId = senderId;
             chat.SentAt = DateTime.UtcNow;
+            chat.IsWhatsApp = true;
 
             var property = await _propertyRepository.GetByIdAsync(vm.PropertyId);
 
@@ -73,6 +77,10 @@ namespace RealEstateApp.Core.Application.Services
             }
 
             await _chatRepository.AddAsync(chat);
+
+            // Despachar vía WhatsApp API / Servicio
+            string recipientPhone = chat.ClienteId;
+            await _whatsAppService.SendWhatsAppMessageAsync(recipientPhone, vm.MessageContent);
         }
 
         public async Task<List<ChatViewModel>> GetUserChats(string userId)

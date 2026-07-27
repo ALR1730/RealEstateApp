@@ -317,8 +317,8 @@
                             </a>
                         }
 
-                        <a asp-controller="Chats" asp-action="Thread" asp-route-propertyId="@Model.Id" asp-route-agentId="@Model.AgentId" class="btn btn-outline-custom py-2 font-heading fw-bold">
-                            <i class="bi bi-chat-dots me-2"></i> Mensaje Directo al Agente
+                        <a asp-controller="Chats" asp-action="Thread" asp-route-propertyId="@Model.Id" asp-route-agentId="@Model.AgentId" class="btn btn-success py-2 font-heading fw-bold d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi bi-whatsapp fs-5"></i> Chat Directo vía WhatsApp
                         </a>
 
                         <form asp-controller="Favorites" asp-action="Toggle" method="post" class="d-grid mt-1">

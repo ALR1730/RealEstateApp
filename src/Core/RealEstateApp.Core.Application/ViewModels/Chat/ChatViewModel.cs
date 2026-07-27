@@ -23,5 +23,10 @@ namespace RealEstateApp.Core.Application.ViewModels.Chat
         /// Indica si el mensaje fue enviado por el usuario actual.
         /// </summary>
         public bool IsMine { get; set; }
+
+        /// <summary>
+        /// Indica si el mensaje fue transmitido / sincronizado vía WhatsApp.
+        /// </summary>
+        public bool IsWhatsApp { get; set; } = true;
     }
 }

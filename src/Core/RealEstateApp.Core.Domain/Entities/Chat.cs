@@ -13,5 +13,7 @@ namespace RealEstateApp.Core.Domain.Entities
         public string MessageContent { get; set; } = string.Empty;
         public string SenderId { get; set; } = string.Empty; // Indica quién envió (ClienteId o AgenteId)
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
+        public bool IsWhatsApp { get; set; } = true;
+        public string? WhatsAppMessageId { get; set; }
     }
 }
