@@ -7,6 +7,14 @@ using RealEstateApp.Infrastructure.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configurar cultura por defecto para República Dominicana (es-DO con símbolo RD$)
+var defaultCulture = new System.Globalization.CultureInfo("es-DO");
+defaultCulture.NumberFormat.CurrencySymbol = "RD$ ";
+defaultCulture.NumberFormat.CurrencyPositivePattern = 0;
+defaultCulture.NumberFormat.CurrencyNegativePattern = 0;
+System.Globalization.CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
+System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -70,6 +78,15 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+var supportedCultures = new[] { defaultCulture };
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(defaultCulture),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+});
+
 app.UseRouting();
 
 app.UseAuthentication();

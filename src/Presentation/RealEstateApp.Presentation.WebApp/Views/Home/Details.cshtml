@@ -138,76 +138,141 @@
                 }
             </div>
 
-            <!-- Simulador de Hipoteca Interactivo -->
-            <div class="card border-0 shadow-sm rounded-4 mt-4 p-4 bg-white">
-                <h4 class="font-heading fw-bold mb-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-calculator-fill text-primary"></i> Simulador Hipotecario
-                </h4>
-                <p class="text-muted small mb-4">Calcula la cuota fija mensual estimada mediante el sistema de amortización francesa.</p>
+            <!-- Simulador de Hipoteca Profesional Interactivo -->
+            <div class="card border-0 shadow-lg rounded-4 mt-4 p-4 p-md-5 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="font-heading fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                            <i class="bi bi-calculator-fill text-primary"></i> Simulador Hipotecario
+                        </h4>
+                        <p class="text-muted small mb-0">Calcula tus cuotas, costo total del crédito y tabla de amortización por el sistema francés.</p>
+                    </div>
+                    <span class="badge bg-light text-primary border rounded-pill px-3 py-2 font-heading">
+                        <i class="bi bi-shield-check me-1"></i> Tasa Fija
+                    </span>
+                </div>
 
-                <form id="mortgageForm" class="row g-3 mb-4">
+                <form id="mortgageForm" class="row g-4 mb-4">
+                    <!-- Precio del Inmueble -->
                     <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">Precio del Inmueble ($)</label>
-                        <input type="number" id="calcPrice" class="form-control form-control-custom" value="@Model.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)" step="1000" />
+                        <label class="form-label small fw-bold text-dark">Precio del Inmueble (RD$)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 fw-bold text-primary">RD$</span>
+                            <input type="number" id="calcPrice" class="form-control form-control-custom fw-bold" value="@Model.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)" step="1000" />
+                        </div>
                     </div>
+
+                    <!-- Inicial / Enganche -->
                     <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">Inicial / Enganche ($)</label>
-                        <input type="number" id="calcDownPayment" class="form-control form-control-custom" value="@((Model.Price * (Model.PorcentajeInicialRequerido / 100m)).ToString(System.Globalization.CultureInfo.InvariantCulture))" min="0" step="1000" />
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label small fw-bold text-dark mb-0">Enganche / Inicial (RD$)</label>
+                            <span id="downPaymentPercentBadge" class="badge bg-primary-soft text-primary small">@Model.PorcentajeInicialRequerido.ToString("N0")%</span>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 fw-bold text-success">RD$</span>
+                            <input type="number" id="calcDownPayment" class="form-control form-control-custom fw-bold" value="@((Model.Price * (Model.PorcentajeInicialRequerido / 100m)).ToString(System.Globalization.CultureInfo.InvariantCulture))" min="0" step="1000" />
+                        </div>
                     </div>
+
+                    <!-- Tasa Anual Estimada -->
                     <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">Tasa Anual Estimada (%)</label>
-                        <input type="number" id="calcRate" class="form-control form-control-custom" value="8.5" step="0.1" min="0.1" />
+                        <label class="form-label small fw-bold text-dark">Tasa de Interés Anual (%)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-percent text-warning"></i></span>
+                            <input type="number" id="calcRate" class="form-control form-control-custom fw-bold" value="8.5" step="0.1" min="0.1" max="30" />
+                        </div>
                     </div>
+
+                    <!-- Plazo del Crédito -->
                     <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">Plazo del Crédito (Años)</label>
-                        <select id="calcYears" class="form-select form-select-custom">
-                            <option value="5">5 Años</option>
-                            <option value="10">10 Años</option>
-                            <option value="15" selected>15 Años</option>
-                            <option value="20">20 Años</option>
-                            <option value="25">25 Años</option>
-                            <option value="30">30 Años</option>
-                        </select>
+                        <label class="form-label small fw-bold text-dark">Plazo del Crédito (Años)</label>
+                        <div class="d-flex gap-1 flex-wrap" id="yearsPillGroup">
+                            <input type="hidden" id="calcYears" value="15" />
+                            <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="5">5 Años</button>
+                            <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="10">10 Años</button>
+                            <button type="button" class="btn btn-sm btn-primary-gradient pill-year-btn active" data-years="15">15 Años</button>
+                            <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="20">20 Años</button>
+                            <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="25">25 Años</button>
+                            <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="30">30 Años</button>
+                        </div>
                     </div>
-                    <div class="col-12">
-                        <button type="button" id="btnCalculate" class="btn btn-primary-gradient w-100 py-3 font-heading fw-bold">
-                            <i class="bi bi-calculator me-1"></i> Calcular Amortización
+
+                    <div class="col-12 mt-4">
+                        <button type="button" id="btnCalculate" class="btn btn-primary-gradient w-100 py-3 font-heading fw-bold shadow-sm">
+                            <i class="bi bi-calculator me-2"></i> Calcular Amortización y Resultados
                         </button>
                     </div>
                 </form>
 
-                <div id="mortgageResults" class="d-none alert alert-info border-0 rounded-4 p-4 shadow-sm">
-                    <div class="row text-center g-3 mb-3">
-                        <div class="col-md-4">
-                            <span class="text-muted small d-block font-heading">Cuota Mensual Estimada</span>
-                            <h3 id="resInstallment" class="font-heading text-primary fw-bold mb-0">$0</h3>
+                <!-- Resultados del Cálculo -->
+                <div id="mortgageResults" class="d-none">
+                    <!-- Resumen de Tarjetas KPI -->
+                    <div class="card border-0 bg-light rounded-4 p-4 mb-4">
+                        <div class="row text-center g-3">
+                            <div class="col-md-3 border-end border-sm-0">
+                                <span class="text-muted small font-heading d-block mb-1">Cuota Mensual Estimada</span>
+                                <h3 id="resInstallment" class="font-heading text-primary fw-bold mb-0">$0</h3>
+                                <span class="badge bg-primary text-white mt-1 px-2 py-1 small">Fija Mensual</span>
+                            </div>
+                            <div class="col-md-3 border-end border-sm-0">
+                                <span class="text-muted small font-heading d-block mb-1">Monto del Préstamo</span>
+                                <h4 id="resLoan" class="font-heading text-dark fw-bold mb-0">$0</h4>
+                                <span class="small text-muted">Financiado por banco</span>
+                            </div>
+                            <div class="col-md-3 border-end border-sm-0">
+                                <span class="text-muted small font-heading d-block mb-1">Total Intereses</span>
+                                <h4 id="resInterest" class="font-heading text-danger fw-bold mb-0">$0</h4>
+                                <span class="small text-muted">Acumulado en plazo</span>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="text-muted small font-heading d-block mb-1">Costo Total del Crédito</span>
+                                <h4 id="resTotalCost" class="font-heading text-success fw-bold mb-0">$0</h4>
+                                <span class="small text-muted">Préstamo + Intereses</span>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <span class="text-muted small d-block font-heading">Monto del Préstamo</span>
-                            <h4 id="resLoan" class="font-heading text-dark fw-bold mb-0">$0</h4>
-                        </div>
-                        <div class="col-md-4">
-                            <span class="text-muted small d-block font-heading">Total Intereses</span>
-                            <h4 id="resInterest" class="font-heading text-secondary fw-bold mb-0">$0</h4>
+
+                        <!-- Barra Proporcional de Distribución -->
+                        <div class="mt-4 pt-3 border-top">
+                            <div class="d-flex justify-content-between small text-muted font-heading mb-1">
+                                <span>Distribución Financiera del Inmueble</span>
+                                <span id="distSummaryText">Inicial vs Préstamo vs Interés</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 14px;">
+                                <div id="barDownPayment" class="progress-bar bg-success" role="progressbar" style="width: 20%" title="Enganche / Inicial"></div>
+                                <div id="barPrincipal" class="progress-bar bg-primary" role="progressbar" style="width: 50%" title="Capital Prestado"></div>
+                                <div id="barInterest" class="progress-bar bg-danger" role="progressbar" style="width: 30%" title="Intereses Totales"></div>
+                            </div>
+                            <div class="d-flex justify-content-center gap-4 mt-2 small font-heading">
+                                <span><i class="bi bi-circle-fill text-success me-1"></i> Enganche (<span id="pctDown">0%</span>)</span>
+                                <span><i class="bi bi-circle-fill text-primary me-1"></i> Capital (<span id="pctPrincipal">0%</span>)</span>
+                                <span><i class="bi bi-circle-fill text-danger me-1"></i> Intereses (<span id="pctInterest">0%</span>)</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="text-center">
-                        <button class="btn btn-sm btn-outline-primary font-heading rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#amortizationTableCollapse">
-                            <i class="bi bi-table me-1"></i> Ver Tabla Completa de Amortización
-                        </button>
+                    <!-- Botones de Acción de Tabla -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="font-heading fw-bold text-dark mb-0"><i class="bi bi-table text-primary me-1"></i> Tabla de Amortización Francesa</h6>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-secondary font-heading" type="button" onclick="window.print();">
+                                <i class="bi bi-printer me-1"></i> Imprimir / Guardar
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary font-heading rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#amortizationTableCollapse">
+                                <i class="bi bi-eye me-1"></i> Mostrar / Ocultar Tabla
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="collapse mt-3" id="amortizationTableCollapse">
-                        <div class="table-responsive bg-white rounded-3 p-2 border" style="max-height: 300px; overflow-y: auto;">
-                            <table class="table table-sm table-hover text-center small mb-0">
-                                <thead class="bg-light sticky-top">
+                    <div class="collapse show" id="amortizationTableCollapse">
+                        <div class="table-responsive bg-white rounded-4 border shadow-sm" style="max-height: 350px; overflow-y: auto;">
+                            <table class="table table-sm table-hover text-center align-middle small mb-0">
+                                <thead class="bg-light sticky-top font-heading text-uppercase text-muted">
                                     <tr>
-                                        <th>Mes</th>
-                                        <th>Cuota</th>
-                                        <th>Interés</th>
-                                        <th>Capital</th>
-                                        <th>Balance</th>
+                                        <th class="py-2">Mes</th>
+                                        <th class="py-2">Cuota Fija</th>
+                                        <th class="py-2">Interés (Rojo)</th>
+                                        <th class="py-2">Abono Capital (Verde)</th>
+                                        <th class="py-2">Saldo Pendiente</th>
                                     </tr>
                                 </thead>
                                 <tbody id="amortizationTableBody">
@@ -224,7 +289,7 @@
             <div class="card border-0 shadow-lg rounded-4 p-4 sticky-top" style="top: 90px;">
                 <h5 class="font-heading fw-bold mb-3">Agente Inmobiliario</h5>
                 <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 55px; height: 55px;">
+                    <div class="avatar-lg bg-primary-soft text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 54px; height: 54px;">
                         @(string.IsNullOrEmpty(Model.AgentName) ? "A" : Model.AgentName.Substring(0, 1).ToUpper())
                     </div>
                     <div>
@@ -295,6 +360,28 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
+            // Manejador del selector de años en botones pill
+            $(".pill-year-btn").click(function () {
+                $(".pill-year-btn").removeClass("btn-primary-gradient active").addClass("btn-outline-custom");
+                $(this).removeClass("btn-outline-custom").addClass("btn-primary-gradient active");
+                $("#calcYears").val($(this).data("years"));
+                calculateMortgage();
+            });
+
+            // Actualizar porcentaje de inicial cuando cambia el monto de inicial o precio
+            function updateDownPaymentPercentage() {
+                var price = parseFloat($("#calcPrice").val()) || 0;
+                var down = parseFloat($("#calcDownPayment").val()) || 0;
+                if (price > 0) {
+                    var pct = Math.min(100, Math.max(0, (down / price) * 100));
+                    $("#downPaymentPercentBadge").text(pct.toFixed(1) + "%");
+                }
+            }
+
+            $("#calcPrice, #calcDownPayment").on("input change", function () {
+                updateDownPaymentPercentage();
+            });
+
             function calculateMortgage() {
                 var price = parseFloat($("#calcPrice").val());
                 var downPayment = parseFloat($("#calcDownPayment").val()) || 0;
@@ -302,46 +389,60 @@
                 var years = parseInt($("#calcYears").val()) || 15;
 
                 if (isNaN(price) || price <= 0) {
-                    alert("Por favor ingrese un precio válido.");
+                    alert("Por favor ingrese un precio de inmueble válido.");
                     return;
                 }
 
-                $.post("/Home/CalculateMortgage", { price: price, downPayment: downPayment, rate: rate, years: years }, function (data) {
-                    if (data && data.length > 0) {
-                        var firstItem = data[0];
-                        var installment = firstItem.installment;
-                        var loan = price - downPayment;
-                        var totalInterest = 0;
-                        
+                $.post("/Home/CalculateMortgage", { price: price, downPayment: downPayment, rate: rate, years: years }, function (res) {
+                    if (res && res.schedule && res.schedule.length > 0) {
                         var tbody = $("#amortizationTableBody");
                         tbody.empty();
 
-                        data.forEach(function (item) {
-                            totalInterest += item.interest;
+                        res.schedule.forEach(function (item) {
                             var row = "<tr>" +
-                                "<td>" + item.month + "</td>" +
-                                "<td>$" + item.installment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + "</td>" +
-                                "<td class='text-danger'>$" + item.interest.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + "</td>" +
-                                "<td class='text-success'>$" + item.principal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + "</td>" +
-                                "<td>$" + item.remainingBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + "</td>" +
+                                "<td class='fw-bold text-dark'>Mes " + item.period + "</td>" +
+                                "<td class='fw-bold text-primary'>RD$ " + item.installment.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + "</td>" +
+                                "<td class='text-danger'>RD$ " + item.interest.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + "</td>" +
+                                "<td class='text-success fw-bold'>RD$ " + item.principal.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + "</td>" +
+                                "<td class='text-muted'>RD$ " + item.remainingBalance.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + "</td>" +
                                 "</tr>";
                             tbody.append(row);
                         });
 
-                        $("#resInstallment").text("$" + installment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
-                        $("#resLoan").text("$" + loan.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
-                        $("#resInterest").text("$" + totalInterest.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $("#resInstallment").text("RD$ " + res.monthlyInstallment.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $("#resLoan").text("RD$ " + res.loanAmount.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $("#resInterest").text("RD$ " + res.totalInterest.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $("#resTotalCost").text("RD$ " + res.totalCost.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+
+                        // Calcular porcentajes de la barra proporcional
+                        var totalCapitalPlusInterestPlusDown = res.propertyPrice + res.totalInterest;
+                        var pctDown = totalCapitalPlusInterestPlusDown > 0 ? (res.downPayment / totalCapitalPlusInterestPlusDown) * 100 : 0;
+                        var pctPrincipal = totalCapitalPlusInterestPlusDown > 0 ? (res.loanAmount / totalCapitalPlusInterestPlusDown) * 100 : 0;
+                        var pctInterest = totalCapitalPlusInterestPlusDown > 0 ? (res.totalInterest / totalCapitalPlusInterestPlusDown) * 100 : 0;
+
+                        $("#barDownPayment").css("width", pctDown.toFixed(1) + "%");
+                        $("#barPrincipal").css("width", pctPrincipal.toFixed(1) + "%");
+                        $("#barInterest").css("width", pctInterest.toFixed(1) + "%");
+
+                        $("#pctDown").text(res.downPaymentPercentage.toFixed(1) + "%");
+                        $("#pctPrincipal").text((100 - res.downPaymentPercentage).toFixed(1) + "%");
+                        var interestPctOfLoan = res.loanAmount > 0 ? ((res.totalInterest / res.loanAmount) * 100).toFixed(1) : "0";
+                        $("#pctInterest").text(interestPctOfLoan + "% del préstamo");
 
                         $("#mortgageResults").removeClass("d-none");
                     }
                 }).fail(function () {
-                    alert("Ocurrió un error al calcular la amortización. Verifique los datos.");
+                    alert("Ocurrió un error al calcular la amortización hipotecaria. Verifique los datos.");
                 });
             }
 
             $("#btnCalculate").click(function () {
                 calculateMortgage();
             });
+
+            // Auto-calcular en carga inicial para mostrar datos predeterminados
+            updateDownPaymentPercentage();
+            calculateMortgage();
         });
     </script>
 }

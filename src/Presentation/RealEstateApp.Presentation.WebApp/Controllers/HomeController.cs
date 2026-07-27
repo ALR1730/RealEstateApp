@@ -129,8 +129,8 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         [HttpPost]
         public IActionResult CalculateMortgage(decimal price, decimal downPayment, decimal rate, int years)
         {
-            var schedule = _financingService.GenerateAmortizationSchedule(price, downPayment, rate, years);
-            return Json(schedule);
+            var simulation = _financingService.CalculateMortgage(price, downPayment, rate, years);
+            return Json(simulation);
         }
     }
 }

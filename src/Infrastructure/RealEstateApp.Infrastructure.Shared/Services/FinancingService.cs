@@ -90,5 +90,41 @@ namespace RealEstateApp.Infrastructure.Shared.Services
 
             return schedule;
         }
+
+        public MortgageSimulationResult CalculateMortgage(
+            decimal propertyPrice, decimal downPayment, decimal annualRate, int termInYears)
+        {
+            var schedule = GenerateAmortizationSchedule(propertyPrice, downPayment, annualRate, termInYears);
+
+            decimal loanAmount = propertyPrice > downPayment ? propertyPrice - downPayment : 0;
+            decimal totalInterest = 0;
+            decimal monthlyInstallment = 0;
+
+            if (schedule.Count > 0)
+            {
+                monthlyInstallment = schedule[0].Installment;
+                foreach (var item in schedule)
+                {
+                    totalInterest += item.Interest;
+                }
+            }
+
+            decimal downPaymentPercentage = propertyPrice > 0 ? Math.Round((downPayment / propertyPrice) * 100m, 2) : 0;
+
+            return new MortgageSimulationResult
+            {
+                PropertyPrice = Math.Round(propertyPrice, 2),
+                DownPayment = Math.Round(downPayment, 2),
+                DownPaymentPercentage = downPaymentPercentage,
+                LoanAmount = Math.Round(loanAmount, 2),
+                AnnualRate = Math.Round(annualRate, 2),
+                TermInYears = termInYears,
+                TotalMonths = termInYears * 12,
+                MonthlyInstallment = Math.Round(monthlyInstallment, 2),
+                TotalInterest = Math.Round(totalInterest, 2),
+                TotalCost = Math.Round(loanAmount + totalInterest, 2),
+                Schedule = schedule
+            };
+        }
     }
 }
