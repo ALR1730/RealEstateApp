@@ -93,7 +93,9 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 if (!string.IsNullOrEmpty(userId))
                 {
                     var userOffers = await _offerService.GetByClienteId(userId);
-                    isBuyerWithAcceptedOffer = userOffers.Any(o => o.PropertyId == id && o.Status == "Aceptada");
+                    isBuyerWithAcceptedOffer = userOffers.Any(o => o.PropertyId == id && 
+                        (string.Equals(o.Status, "Accepted", StringComparison.OrdinalIgnoreCase) || 
+                         string.Equals(o.Status, "Aceptada", StringComparison.OrdinalIgnoreCase)));
                 }
             }
 
