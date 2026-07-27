@@ -1,54 +1,104 @@
-# RealEstateApp 🏠💼
+# 🏢 RealEstateApp — Plataforma Integral de Gestión e Intermediación Inmobiliaria 🏠💼
 
-[![.NET Version](https://img.shields.io/badge/.NET-9.0-blue.svg)](https://dotnet.microsoft.com/)
-[![Architecture](https://img.shields.io/badge/Architecture-Onion-orange.svg)]()
-[![License](https://img.shields.io/badge/License-MIT-green.svg)]()
-
-**RealEstateApp** es una plataforma web de nivel empresarial, robusta y altamente escalable diseñada para modernizar y optimizar el mercado inmobiliario digital. Este ecosistema conecta de forma fluida a **Clientes, Agentes Inmobiliarios y Administradores**, transformando el flujo tradicional de catálogos estáticos en una experiencia completamente interactiva y transaccional que abarca mensajería interna, ofertas estructuradas y simulación de financiamiento bancario.
-
-El proyecto implementa con rigurosidad los mejores estándares de la industria, destacando una separación absoluta de responsabilidades mediante **Onion Architecture (100% consistente)** y la exposición segura de servicios estructurados a través de una **Web API protegida por JSON Web Tokens (JWT)**.
+[![Moneda](https://img.shields.io/badge/Moneda-RD%24%20Pesos%20Dominicanos-blue.svg)]()
+[![Tecnología](https://img.shields.io/badge/.NET-10.0%20%2F%20ASP.NET%20Core-purple.svg)](https://dotnet.microsoft.com/)
+[![Arquitectura](https://img.shields.io/badge/Arquitectura-Empresarial%20Onion-orange.svg)]()
+[![Estado](https://img.shields.io/badge/Estado-Listo%20para%20Producci%C3%B3n-brightgreen.svg)]()
 
 ---
 
-## 🚀 Características Principales
+## 📌 Resumen Ejecutivo para la Alta Dirección
 
-### 👤 Módulo Público (Visitantes)
-* **Catálogo Inmobiliario Dinámico:** Listado en tiempo real de propiedades disponibles ordenadas de forma cronológica inversa (de la más reciente a la más antigua).
-* **Búsqueda por Código Único:** Formulario de consulta inmediata mediante un identificador numérico único de 6 dígitos generado automáticamente por el sistema.
-* **Filtros Avanzados Combinables:** Motores de filtrado paralelos por categoría/tipo de propiedad, rangos de precio (DOP), cantidad de habitaciones y cantidad de baños.
-* **Directorio de Agentes Públicos:** Catálogo organizado alfabéticamente de agentes activos con acceso directo al portafolio exclusivo de sus inmuebles disponibles.
+**RealEstateApp** es un ecosistema tecnológico transaccional de última generación diseñado específicamente para **firmas inmobiliarias, desarrolladoras de proyectos y corredores de bienes raíces**. 
 
-### 🛍️ Módulo de Clientes (Autenticados)
-* **Gestión de Favoritos:** Panel personalizado ("Mis Propiedades") para el marcaje, seguimiento y desmarcaje de inmuebles de interés. Las propiedades vendidas se depuran automáticamente del listado.
-* **Módulo de Chat Integrado:** Canal bidireccional y privado asociado a cada propiedad para interactuar directamente con el agente responsable.
-* **Estructura de Ofertas y Financiamiento:** Envío formal de propuestas económicas especificando montos, cálculo automático de cuotas y planes de financiamiento. Historial transparente con estados dinámicos (*Pendiente, Aceptada, Rechazada*).
-
-### 👔 Módulo de Agentes Inmobiliarios
-* **Control de Portafolio Inmobiliario:** Mantenimiento completo (CRUD) de propiedades asociando múltiples imágenes, descripciones detalladas, tipos de operaciones y mejoras estructurales del inmueble.
-* **Automatización de Reglas de Negocio:** Panel central de ofertas recibidas. Al aceptar una propuesta, el sistema actualiza de forma atómica el estado del inmueble a *Reservado/Vendido*, rechaza masivamente el resto de ofertas competidoras para evitar errores humanos y deshabilita nuevas solicitudes.
-* **Bandeja de Conversaciones:** Gestión ordenada de hilos de mensajería segmentados por cliente y propiedad específica.
-
-### ⚙️ Módulo de Administración (Backoffice)
-* **Dashboard de Indicadores Globales:** Panel ejecutivo con contadores exactos de propiedades disponibles frente a vendidas, y desglose de usuarios activos/inactivos por rol.
-* **Mantenimientos de Catálogos Núcleo:** Gestión dinámica de tipos de propiedades, tipos de ventas/operaciones y mejoras estructurales requeridas por la capa de negocio.
-* **Auditoría y Gestión de Cuentas:** Activación, inactivación y borrado físico/lógico de agentes en cascada, garantizando la eliminación limpia de registros huérfanos o inconsistencias en cascada (favoritos, ofertas, chats e imágenes).
-
-### 🌐 Web API y Seguridad Externa (Desarrolladores)
-* **Endpoints Protegidos:** Controladores REST optimizados (`PropertyController`, `AgentController`, etc.) para interactuar externamente con la data maestra de la plataforma.
-* **Autenticación Basada en Tokens:** Implementación estricta de seguridad con **JWT utilizando el esquema Bearer**.
-* **Documentación Viva:** Integración con **Swagger UI** para la exploración interactiva y autogeneración de contratos de servicios.
+La plataforma transforma el flujo tradicional de catálogos pasivos en una **plataforma interactiva de aceleración de ventas**, automatizando el ciclo completo de negocio: desde la captación del prospecto y la simulación crediticia en **Pesos Dominicanos (RD$)**, hasta la negociación de ofertas en tiempo real y el cierre de ventas garantizado sin riesgos de duplicidad.
 
 ---
 
-## 🏗️ Arquitectura del Software
+## 💡 Propuesta de Valor y Ventajas de Negocio
 
-El ecosistema se rige al 100% bajo el patrón arquitectónico **Onion Architecture** (Arquitectura de Cebolla), aislando por completo el núcleo del negocio y las reglas de aplicación frente a frameworks, sistemas de bases de datos o la interfaz de usuario.
+### 🎯 1. Aceleración del Cierre de Ventas y Automatización de Ofertas (Regla Atómica)
+- **Eliminación del Error Humano:** Al aceptar una propuesta económica, el sistema cambia instantáneamente el estado del inmueble a **"Vendida"**, rechazando automáticamente en cascada las demás ofertas pendientes y bloqueando nuevas solicitudes.
+- **Acceso Exclusivo al Comprador:** El comprador que cierra la negociación conserva acceso exclusivo a la propiedad para continuar la comunicación con su agente, manteniendo la privacidad hacia el público general.
+
+### 💰 2. Simulador Hipotecario Profesional en Pesos Dominicanos (RD$)
+- **Empoderamiento Financiero del Comprador:** Herramienta interactiva adaptada al mercado de República Dominicana con cálculo de cuota fija mensual bajo el **Sistema de Amortización Francés**.
+- **Desglose Transparente:** Muestra gráfica del enganche/inicial, capital prestado e intereses totales acumulados, permitiendo al cliente **imprimir o descargar su tabla amortizada en PDF** antes de realizar una oferta.
+
+### 💬 3. Comunicación Directa y Retención de Prospectos (Leads)
+- **Chat Privado por Inmueble:** Cada propiedad cuenta con su propio hilo de mensajería directa entre el cliente interesado y el agente asignado, eliminando la fuga de prospectos a canales externos sin trazabilidad.
+
+### 📊 4. Control Directivo y Cuadro de Mando Ejecutivo (Dashboard KPIs)
+- **Visibilidad 360° en Tiempo Real:** Métricas clave de propiedades (Disponibles, Reservadas, Vendidas) y fuerza de ventas (Agentes Activos/Inactivos).
+- **Gestión Flexibilizada:** Permite a la gerencia reasignar inmuebles entre agentes o retirar publicaciones con un solo clic.
+
+---
+
+## 👥 Experiencia por Perfil de Usuario (Flujos de Trabajo)
+
+### 🛒 Para el Cliente / Inversionista (Comprador)
+* **Búsqueda Avanzada:** Filtrado multicriterio por tipo de propiedad (Apartamento, Villa, Penthouse, Casa), tipo de venta, rango de precios (RD$), habitaciones y baños.
+* **Simulación de Crédito Dinámica:** Ajuste de plazo (5 a 30 años) y tasa de interés anual para calcular la capacidad de pago.
+* **Módulo de Ofertas y Favoritos:** Historial transparente con estado de ofertas (*Pendiente, Aceptada, Rechazada*) y panel de favoritos actualizado.
+
+### 👔 Para el Agente Inmobiliario (Corredor)
+* **Gestión de Publicaciones:** Carga de portafolio con hasta 15 fotografías, geolocalización de Google Maps, enlaces a Video Tour y Tour Virtual 360°.
+* **Bandeja de Negociaciones:** Visualización de propuestas recibidas y gestión de clientes mediante hilos de mensajería organizados por propiedad.
+
+### 🏢 Para la Dirección Inmobiliaria (Administrador)
+* **Gobierno de la Plataforma:** Control total sobre corredores (activación, inactivación y eliminación segura), usuarios desarrolladores y administradores.
+* **Reasignación de Cartera:** Transferencia ágil de propiedades entre agentes ante cambios de personal.
+* **Mantenimiento de Catálogos Núcleo:** Gestión de categorías de propiedades, modalidades de negocio y amenidades/mejoras.
+
+---
+
+## 📱 Ecosistema Digital Escalable (Web API JWT)
+
+Para empresas que buscan expandirse a aplicaciones móviles (iOS / Android) o integrarse con portales inmobiliarios internacionales (MLS):
+
+- **API REST Protegida:** Endpoints seguros autenticados mediante **Tokens JWT (JSON Web Tokens)**.
+- **Documentación Swagger UI:** Interfaz gráfica interactiva para que equipos de desarrollo conecten fácilmente el sistema con CRM externos o aplicaciones nativas.
+
+---
+
+## 🎬 Guía para Demostración Interactiva (Demo Rápido)
+
+Para visualizar el funcionamiento en vivo de la plataforma, utilice cualquiera de los siguientes perfiles de prueba preconfigurados:
+
+| Rol de Usuario | Correo Electrónico (Login) | Contraseña | Objetivo de la Demostración |
+| :--- | :--- | :--- | :--- |
+| **🏢 Administrador** | `adminuser@realestate.com` | `Admin123!` | Ver Dashboard de KPIs, reasignación de propiedades y gestión global. |
+| **👔 Agente Inmobiliario** | `agentuser@realestate.com` | `Agent123!` | Ver inmuebles del portafolio, aceptar ofertas y responder chats. |
+| **🛒 Cliente Comprador** | `clientuser@realestate.com` | `Client123!` | Enviar ofertas, simular hipoteca en RD$ y chatear con agentes. |
+| **💻 Desarrollador API** | `developeruser@realestate.com` | `Developer123!` | Consultar servicios web expuestos mediante JWT. |
+
+---
+
+## 🛠️ Arquitectura Técnica de Clase Empresarial
+
+El sistema está construido bajo los más altos estándares de ingeniería de software mediante la **Arquitectura Onion (Clean Architecture)** en **.NET 10**:
 
 ```text
 └── RealEstateApp
-    ├── RealEstateApp.Core.Domain          # Entidades de dominio puras, Enums, configuraciones de negocio y POCOs.
-    ├── RealEstateApp.Core.Application     # Lógica de aplicación, Interfaces de Servicios/Repositorios, DTOs, ViewModels, perfiles de AutoMapper y validaciones del sistema.
-    ├── RealEstateApp.Infrastructure.Persistence  # DbContext (Entity Framework Core Code First), Repositorios Genéricos/Específicos, inicializadores de datos (Seeds) y Migraciones.
-    ├── RealEstateApp.Infrastructure.Shared       # Implementaciones de infraestructura cruzada: IEmailService, Storage de imágenes en la nube (AWS S3/Azure Blobs), pasarelas de pago y GIS.
-    ├── RealEstateApp.Presentation.WebApp         # Interfaz de usuario final basada en ASP.NET Core MVC 9, Bootstrap 5 y arquitectura de ViewModels limpios.
-    └── RealEstateApp.Presentation.WebApi         # Servicios REST (Controladores de API expuestos, políticas JWT y middlewares de Swagger).
+    ├── RealEstateApp.Core.Domain          # Entidades de negocio puras (Propiedades, Ofertas, Chats, Usuarios).
+    ├── RealEstateApp.Core.Application     # Lógica de aplicación, simulador financiero, contratos de repositorios y DTOs.
+    ├── RealEstateApp.Infrastructure.Persistence  # Base de datos SQL Server mediante EF Core con Code First y Eager Loading.
+    ├── RealEstateApp.Infrastructure.Shared       # Servicios de infraestructura compartida (Cultura es-DO, Simulador Francés).
+    ├── RealEstateApp.Presentation.WebApp         # Aplicación Web MVC con diseño responsivo, glassmorphism y Bootstrap 5.
+    └── RealEstateApp.Presentation.WebApi         # Servicios Web REST expuestos con seguridad JWT y Swagger UI.
+```
+
+---
+
+## 📋 Instrucciones de Despliegue y Ejecución
+
+1. **Requisitos Previos:** tener instalado [.NET 9 SDK o .NET 10 SDK](https://dotnet.microsoft.com/) y SQL Server / LocalDB.
+2. **Ejecución de la Aplicación Web:**
+   ```powershell
+   dotnet run --project src/Presentation/RealEstateApp.Presentation.WebApp
+   ```
+3. **Acceso en el Navegador:** Navegue a `http://localhost:5000` o la URL configurada en consola. La base de datos y los datos iniciales de prueba se inicializarán automáticamente.
+
+---
+
+© 2026 **RealEstateApp** — Solución Tecnológica para el Sector Inmobiliario. Todos los derechos reservados.
