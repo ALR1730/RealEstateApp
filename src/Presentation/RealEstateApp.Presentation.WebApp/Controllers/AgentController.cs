@@ -101,6 +101,19 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         public async Task<IActionResult> EditProperty(SavePropertyViewModel vm)
         {
             var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var existing = await _propertyService.GetByIdSaveViewModel(vm.Id);
+            if (existing == null || existing.AgentId != userId)
+            {
+                return RedirectToAction(nameof(Properties));
+            }
+
+            vm.AgentId = userId;
+
             if (!ModelState.IsValid)
             {
                 await PopulateDropdowns(vm);

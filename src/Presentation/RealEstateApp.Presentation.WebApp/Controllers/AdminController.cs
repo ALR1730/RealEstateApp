@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Account;
+using RealEstateApp.Core.Application.ViewModels.Property;
 using RealEstateApp.Core.Domain.Enums;
 
 namespace RealEstateApp.Presentation.WebApp.Controllers
@@ -145,6 +146,102 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             return RedirectToAction(nameof(Developers));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleDeveloperStatus(string developerId, bool isActive)
+        {
+            try
+            {
+                await _accountService.ChangeUserStatusAsync(developerId, isActive);
+                var text = isActive ? "activado" : "inactivado";
+                TempData["SuccessMessage"] = $"El desarrollador fue {text} exitosamente.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Developers));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditDeveloper(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            if (!roles.Contains(Roles.Developer.ToString()))
+            {
+                return NotFound();
+            }
+
+            var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
+
+            var vm = new EditDeveloperViewModel
+            {
+                Id = user.Id,
+                FirstName = user.UserName ?? string.Empty,
+                LastName = string.Empty,
+                Email = user.Email ?? string.Empty,
+                UserName = user.UserName ?? string.Empty,
+                Phone = user.PhoneNumber,
+                IsActive = isActive
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditDeveloper(EditDeveloperViewModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+
+            var user = await _userManager.FindByIdAsync(vm.Id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.Email = vm.Email;
+            user.UserName = vm.UserName;
+            user.PhoneNumber = vm.Phone;
+
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                foreach (var error in updateResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View(vm);
+            }
+
+            if (!string.IsNullOrEmpty(vm.Password))
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resetResult = await _userManager.ResetPasswordAsync(user, token, vm.Password);
+                if (!resetResult.Succeeded)
+                {
+                    foreach (var error in resetResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return View(vm);
+                }
+            }
+
+            TempData["SuccessMessage"] = "Desarrollador modificado exitosamente.";
+            return RedirectToAction(nameof(Developers));
+        }
+
         public async Task<IActionResult> Admins()
         {
             var admins = await _userManager.GetUsersInRoleAsync(Roles.Admin.ToString());
@@ -186,6 +283,107 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 
             TempData["SuccessMessage"] = "Administrador registrado exitosamente.";
             return RedirectToAction(nameof(Admins));
+        }
+
+        public async Task<IActionResult> Properties()
+        {
+            var properties = await _propertyService.GetAllViewModel();
+            var agents = await _agentService.GetAllViewModelAsync();
+            var agentMap = agents.ToDictionary(a => a.Id, a => a.FullName);
+
+            foreach (var prop in properties)
+            {
+                if (!string.IsNullOrEmpty(prop.AgentId) && agentMap.TryGetValue(prop.AgentId, out var agentName))
+                {
+                    prop.AgentName = agentName;
+                }
+                else if (!string.IsNullOrEmpty(prop.AgentId))
+                {
+                    var agentUser = await _userManager.FindByIdAsync(prop.AgentId);
+                    prop.AgentName = agentUser?.UserName ?? agentUser?.Email ?? "Agente Desconocido";
+                }
+                else
+                {
+                    prop.AgentName = "Sin Agente Asignado";
+                }
+            }
+
+            return View(properties);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteProperty(int id)
+        {
+            try
+            {
+                await _propertyService.Delete(id);
+                TempData["SuccessMessage"] = "La propiedad fue eliminada exitosamente por el administrador.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Properties));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ReassignProperty(int id)
+        {
+            var property = await _propertyService.GetByIdViewModel(id);
+            if (property == null)
+            {
+                return NotFound();
+            }
+
+            var agents = await _agentService.GetAllViewModelAsync();
+            var currentAgent = agents.FirstOrDefault(a => a.Id == property.AgentId);
+
+            var vm = new ReassignPropertyViewModel
+            {
+                PropertyId = property.Id,
+                PropertyCode = property.Code,
+                PropertyTypeName = property.PropertyTypeName,
+                Price = property.Price,
+                CurrentAgentId = property.AgentId,
+                CurrentAgentName = currentAgent != null ? currentAgent.FullName : "Sin Agente Asignado",
+                NewAgentId = property.AgentId,
+                Agents = agents.Where(a => a.IsActive).ToList()
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReassignProperty(ReassignPropertyViewModel vm)
+        {
+            if (string.IsNullOrEmpty(vm.NewAgentId))
+            {
+                ModelState.AddModelError(nameof(vm.NewAgentId), "Debe seleccionar un agente válido.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var agents = await _agentService.GetAllViewModelAsync();
+                vm.Agents = agents.Where(a => a.IsActive).ToList();
+                return View(vm);
+            }
+
+            try
+            {
+                await _propertyService.ReassignAgent(vm.PropertyId, vm.NewAgentId);
+                TempData["SuccessMessage"] = "La propiedad fue reasignada exitosamente al nuevo agente.";
+                return RedirectToAction(nameof(Properties));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                var agents = await _agentService.GetAllViewModelAsync();
+                vm.Agents = agents.Where(a => a.IsActive).ToList();
+                return View(vm);
+            }
         }
     }
 }

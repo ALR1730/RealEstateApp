@@ -28,11 +28,16 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
+        public IActionResult Login(string? returnUrl = null, string? remoteError = null)
         {
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 return RedirectToLocal(returnUrl);
+            }
+
+            if (!string.IsNullOrEmpty(remoteError))
+            {
+                ModelState.AddModelError(string.Empty, $"Error de autenticación externa: {remoteError}");
             }
 
             return View(new LoginViewModel { ReturnUrl = returnUrl });

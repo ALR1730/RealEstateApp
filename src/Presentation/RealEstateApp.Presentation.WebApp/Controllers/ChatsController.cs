@@ -37,7 +37,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             return View(chats);
         }
 
-        public async Task<IActionResult> Thread(int propertyId, string agentId)
+        public async Task<IActionResult> Thread(int propertyId, string? agentId = null, string? clienteId = null)
         {
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
@@ -51,20 +51,32 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return NotFound();
             }
 
-            // Si quien consulta es el propio agente de la propiedad, el recipient es el cliente del chat
             var currentUserId = userId;
-            var targetAgentId = string.IsNullOrEmpty(agentId) ? property.AgentId : agentId;
-            var targetClienteId = currentUserId == targetAgentId ? agentId : currentUserId;
+            string targetAgentId = property.AgentId;
+            string targetClienteId = currentUserId;
+
+            if (currentUserId == property.AgentId)
+            {
+                // Quien consulta es el agente del inmueble
+                targetClienteId = !string.IsNullOrEmpty(clienteId) ? clienteId : (agentId != property.AgentId && !string.IsNullOrEmpty(agentId) ? agentId : string.Empty);
+            }
 
             var messages = await _chatService.GetChatThread(targetClienteId, targetAgentId, propertyId, currentUserId);
 
+            // Si el cliente aún no está definido (ej. primer render sin mensajes), tomarlo del primer mensaje existente si hubiere
+            if (currentUserId == property.AgentId && string.IsNullOrEmpty(targetClienteId) && messages.Count > 0)
+            {
+                targetClienteId = messages[0].ClienteId;
+            }
+
             ViewBag.Property = property;
             ViewBag.AgentId = targetAgentId;
+            ViewBag.ClienteId = targetClienteId;
 
             var vm = new SaveChatViewModel
             {
                 PropertyId = propertyId,
-                RecipientId = currentUserId == targetAgentId ? targetClienteId : targetAgentId
+                RecipientId = currentUserId == property.AgentId ? targetClienteId : targetAgentId
             };
 
             ViewBag.Messages = messages;
@@ -81,13 +93,26 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
+            var property = await _propertyService.GetByIdViewModel(vm.PropertyId);
+
             if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Thread), new { propertyId = vm.PropertyId, agentId = vm.RecipientId });
+                string targetAgent = property?.AgentId ?? string.Empty;
+                string targetClient = userId == targetAgent ? vm.RecipientId : userId;
+                var threadMessages = await _chatService.GetChatThread(targetClient, targetAgent, vm.PropertyId, userId);
+
+                ViewBag.Property = property;
+                ViewBag.AgentId = targetAgent;
+                ViewBag.ClienteId = targetClient;
+                ViewBag.Messages = threadMessages;
+
+                return View("Thread", vm);
             }
 
             await _chatService.SendMessage(vm, userId);
-            return RedirectToAction(nameof(Thread), new { propertyId = vm.PropertyId, agentId = vm.RecipientId });
+
+            string? targetCliente = userId == property?.AgentId ? vm.RecipientId : userId;
+            return RedirectToAction(nameof(Thread), new { propertyId = vm.PropertyId, clienteId = targetCliente, agentId = property?.AgentId });
         }
     }
 }

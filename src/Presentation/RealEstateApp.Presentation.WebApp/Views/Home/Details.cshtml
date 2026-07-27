@@ -234,6 +234,15 @@
                 </div>
 
                 <div class="d-grid gap-2 mb-4">
+                    @if (ViewBag.IsBuyerWithAcceptedOffer == true)
+                    {
+                        <div class="alert alert-success border-0 shadow-sm rounded-3 p-3 mb-2 text-center">
+                            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                            <strong>¡Tu oferta por esta propiedad fue aceptada!</strong>
+                            <p class="small mb-0 mt-1">Puedes continuar comunicándote con el agente a través del botón de mensaje directo.</p>
+                        </div>
+                    }
+
                     @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Client"))
                     {
                         @if (Model.Status == "Disponible")

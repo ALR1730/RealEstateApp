@@ -15,11 +15,16 @@ namespace RealEstateApp.Core.Application.Services
     public class ChatService : IChatService
     {
         private readonly IChatRepository _chatRepository;
+        private readonly IPropertyRepository _propertyRepository;
         private readonly IMapper _mapper;
 
-        public ChatService(IChatRepository chatRepository, IMapper mapper)
+        public ChatService(
+            IChatRepository chatRepository,
+            IPropertyRepository propertyRepository,
+            IMapper mapper)
         {
             _chatRepository = chatRepository;
+            _propertyRepository = propertyRepository;
             _mapper = mapper;
         }
 
@@ -44,11 +49,28 @@ namespace RealEstateApp.Core.Application.Services
             chat.SenderId = senderId;
             chat.SentAt = DateTime.UtcNow;
 
-            // Determinar roles: si el sender es el RecipientId's agent o client
-            // La lógica de asignación de ClienteId/AgenteId se resuelve aquí
-            // basándose en quién envía y quién recibe
-            chat.ClienteId = vm.RecipientId; // Se ajusta en el controlador según contexto
-            chat.AgenteId = senderId;        // Se ajusta en el controlador según contexto
+            var property = await _propertyRepository.GetByIdAsync(vm.PropertyId);
+
+            if (property != null)
+            {
+                if (senderId == property.AgentId)
+                {
+                    // El emisor es el agente de la propiedad
+                    chat.AgenteId = senderId;
+                    chat.ClienteId = vm.RecipientId;
+                }
+                else
+                {
+                    // El emisor es el cliente
+                    chat.AgenteId = property.AgentId;
+                    chat.ClienteId = senderId;
+                }
+            }
+            else
+            {
+                chat.ClienteId = vm.RecipientId;
+                chat.AgenteId = senderId;
+            }
 
             await _chatRepository.AddAsync(chat);
         }

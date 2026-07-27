@@ -115,6 +115,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRGV2ZWxvcGVycy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Admin/EditDeveloper.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRWRpdERldmVsb3Blci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Admin/Properties.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cUHJvcGVydGllcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Admin/ReassignProperty.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cUmVhc3NpZ25Qcm9wZXJ0eS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/DELL/Desktop/New folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Agents/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWdlbnRzXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 

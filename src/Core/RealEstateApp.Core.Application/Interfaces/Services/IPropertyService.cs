@@ -32,5 +32,10 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         /// Busca una propiedad por su código único de 6 dígitos.
         /// </summary>
         Task<PropertyViewModel?> GetByCode(string code);
+
+        /// <summary>
+        /// Reasigna una propiedad a un nuevo agente.
+        /// </summary>
+        Task ReassignAgent(int propertyId, string newAgentId);
     }
 }

@@ -31,6 +31,12 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         {
             var propertyViewModels = await _propertyService.GetAllWithFilters(filter);
 
+            var isAgentOrAdmin = User.Identity != null && User.Identity.IsAuthenticated && (User.IsInRole("Agent") || User.IsInRole("Admin") || User.IsInRole("Developer"));
+            if (!isAgentOrAdmin && propertyViewModels != null)
+            {
+                propertyViewModels = propertyViewModels.Where(p => p.Status != "Vendida").ToList();
+            }
+
             if (propertyViewModels == null || propertyViewModels.Count == 0)
             {
                 return NoContent();
@@ -51,7 +57,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         {
             var propertyViewModel = await _propertyService.GetByIdViewModel(id);
 
-            if (propertyViewModel == null)
+            var isAgentOrAdmin = User.Identity != null && User.Identity.IsAuthenticated && (User.IsInRole("Agent") || User.IsInRole("Admin") || User.IsInRole("Developer"));
+            if (propertyViewModel == null || (!isAgentOrAdmin && propertyViewModel.Status == "Vendida"))
             {
                 return NotFound(new { hasError = true, error = $"No se encontró ninguna propiedad con el ID {id}" });
             }
@@ -71,7 +78,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         {
             var propertyViewModel = await _propertyService.GetByCode(code);
 
-            if (propertyViewModel == null)
+            var isAgentOrAdmin = User.Identity != null && User.Identity.IsAuthenticated && (User.IsInRole("Agent") || User.IsInRole("Admin") || User.IsInRole("Developer"));
+            if (propertyViewModel == null || (!isAgentOrAdmin && propertyViewModel.Status == "Vendida"))
             {
                 return NotFound(new { hasError = true, error = $"No se encontró ninguna propiedad con el código '{code}'" });
             }

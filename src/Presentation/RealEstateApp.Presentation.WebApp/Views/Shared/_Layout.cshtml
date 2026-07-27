@@ -84,23 +84,18 @@
                                         <i class="bi bi-speedometer2 me-1"></i> Dashboard
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Agents" ? "active" : "")" 
-                                       asp-controller="Admin" asp-action="Agents">
-                                        <i class="bi bi-person-gear me-1"></i> Agentes
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() != "Dashboard" ? "active" : "")" 
+                                       href="#" id="adminManageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-person-gear me-1"></i> Gestión 
                                     </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Developers" ? "active" : "")" 
-                                       asp-controller="Admin" asp-action="Developers">
-                                        <i class="bi bi-code-slash me-1"></i> Desarrolladores
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Admins" ? "active" : "")" 
-                                       asp-controller="Admin" asp-action="Admins">
-                                        <i class="bi bi-shield-lock me-1"></i> Admins
-                                    </a>
+                                    <ul class="dropdown-menu shadow-lg border-0" aria-labelledby="adminManageDropdown">
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Properties"><i class="bi bi-building me-2 text-primary"></i> Propiedades</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Agents"><i class="bi bi-person-badge me-2 text-info"></i> Agentes</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Developers"><i class="bi bi-code-slash me-2 text-dark"></i> Desarrolladores</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Admins"><i class="bi bi-shield-lock me-2 text-warning"></i> Administradores</a></li>
+                                    </ul>
                                 </li>
                             }
 

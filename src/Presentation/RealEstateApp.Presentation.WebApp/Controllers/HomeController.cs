@@ -16,6 +16,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         private readonly ISaleTypeService _saleTypeService;
         private readonly IFavoriteService _favoriteService;
         private readonly IFinancingService _financingService;
+        private readonly IOfferService _offerService;
         private readonly UserManager<IdentityUser> _userManager;
 
         public HomeController(
@@ -24,6 +25,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             ISaleTypeService saleTypeService,
             IFavoriteService favoriteService,
             IFinancingService financingService,
+            IOfferService offerService,
             UserManager<IdentityUser> userManager)
         {
             _propertyService = propertyService;
@@ -31,6 +33,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             _saleTypeService = saleTypeService;
             _favoriteService = favoriteService;
             _financingService = financingService;
+            _offerService = offerService;
             _userManager = userManager;
         }
 
@@ -38,6 +41,13 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         {
             // Cargar propiedades filtradas
             var properties = await _propertyService.GetAllWithFilters(filters);
+
+            // Las propiedades vendidas solo son visibles para Agentes, Administradores y Desarrolladores
+            var isAgentOrAdmin = User.Identity != null && User.Identity.IsAuthenticated && (User.IsInRole("Agent") || User.IsInRole("Admin") || User.IsInRole("Developer"));
+            if (!isAgentOrAdmin)
+            {
+                properties = properties.Where(p => p.Status != "Vendida").ToList();
+            }
 
             // Poblar dropdowns para el formulario de filtro
             var propTypes = await _propertyTypeService.GetAllViewModel();
@@ -69,8 +79,27 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var property = await _propertyService.GetByIdViewModel(id);
-
             if (property == null)
+            {
+                return NotFound();
+            }
+
+            var isAgentOrAdmin = User.Identity != null && User.Identity.IsAuthenticated && (User.IsInRole("Agent") || User.IsInRole("Admin") || User.IsInRole("Developer"));
+
+            bool isBuyerWithAcceptedOffer = false;
+            if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Client"))
+            {
+                var userId = _userManager.GetUserId(User);
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    var userOffers = await _offerService.GetByClienteId(userId);
+                    isBuyerWithAcceptedOffer = userOffers.Any(o => o.PropertyId == id && o.Status == "Aceptada");
+                }
+            }
+
+            ViewBag.IsBuyerWithAcceptedOffer = isBuyerWithAcceptedOffer;
+
+            if (property.Status == "Vendida" && !isAgentOrAdmin && !isBuyerWithAcceptedOffer)
             {
                 return NotFound();
             }

@@ -238,3 +238,4 @@ C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Pr
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\RealEstateApp.Presentation.WebApp.genruntimeconfig.cache
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\ref\RealEstateApp.Presentation.WebApp.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.Google.dll
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\7f1pduwhsl-{0}-erqm7oim67-erqm7oim67.gz

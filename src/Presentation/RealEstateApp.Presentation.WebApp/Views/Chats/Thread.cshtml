@@ -54,6 +54,12 @@
 
                 <!-- Chat Input Form -->
                 <div class="chat-input-area">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="text-danger small px-3 mb-2">
+                            @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+                        </div>
+                    }
                     <form asp-action="Send" method="post" class="d-flex gap-2">
                         <input type="hidden" asp-for="PropertyId" />
                         <input type="hidden" asp-for="RecipientId" />

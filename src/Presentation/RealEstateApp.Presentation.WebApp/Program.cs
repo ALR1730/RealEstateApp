@@ -26,6 +26,13 @@ builder.Services.AddAuthentication()
     {
         options.ClientId = builder.Configuration["GoogleAuth:ClientId"] ?? "DUMMY_GOOGLE_CLIENT_ID";
         options.ClientSecret = builder.Configuration["GoogleAuth:ClientSecret"] ?? "DUMMY_GOOGLE_CLIENT_SECRET";
+        options.Events.OnRemoteFailure = context =>
+        {
+            var errorMessage = context.Failure?.Message ?? "Error al autenticar con el proveedor externo.";
+            context.Response.Redirect($"/Account/Login?remoteError={Uri.EscapeDataString(errorMessage)}");
+            context.HandleResponse();
+            return Task.CompletedTask;
+        };
     });
 
 var app = builder.Build();
