@@ -117,6 +117,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 /* Cards (Shadcn style) */
 .card-property {
+  cursor: pointer;
   border: 1px solid #e2e8f0;
   border-radius: var(--radius-lg);
   background: #ffffff;

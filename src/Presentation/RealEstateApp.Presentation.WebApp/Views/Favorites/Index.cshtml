@@ -29,7 +29,7 @@
             @foreach (var item in Model)
             {
                 <div class="col-md-6 col-lg-4">
-                    <div class="card-property">
+                    <div class="card-property" data-href="@Url.Action("Details", "Home", new { id = item.PropertyId })">
                         <div class="img-container">
                             <span class="code-badge">@item.PropertyCode</span>
                             <span class="status-badge badge-disponible">@item.PropertyStatus</span>
