@@ -13,10 +13,10 @@
                 </div>
 
                 <div class="card-body p-4 p-md-5">
-                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                    @if (!ViewData.ModelState.IsValid)
                     {
                         <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4">
-                            @Html.ValidationSummary(true, "", new { @class = "mb-0" })
+                            @Html.ValidationSummary(false, "", new { @class = "mb-0" })
                         </div>
                     }
 
@@ -24,6 +24,18 @@
                         <input type="hidden" asp-for="Id" />
 
                         <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label fw-medium text-dark small"></label>
+                                <input asp-for="FirstName" class="form-control form-control-custom" />
+                                <span asp-validation-for="FirstName" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label fw-medium text-dark small"></label>
+                                <input asp-for="LastName" class="form-control form-control-custom" />
+                                <span asp-validation-for="LastName" class="text-danger small"></span>
+                            </div>
+
                             <div class="col-md-6">
                                 <label asp-for="UserName" class="form-label fw-medium text-dark small"></label>
                                 <input asp-for="UserName" class="form-control form-control-custom" />

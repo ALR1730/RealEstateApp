@@ -180,12 +180,15 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             }
 
             var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
+            var claims = await _userManager.GetClaimsAsync(user);
+            var firstName = claims.FirstOrDefault(c => c.Type == "FirstName")?.Value ?? string.Empty;
+            var lastName = claims.FirstOrDefault(c => c.Type == "LastName")?.Value ?? string.Empty;
 
             var vm = new EditDeveloperViewModel
             {
                 Id = user.Id,
-                FirstName = user.UserName ?? string.Empty,
-                LastName = string.Empty,
+                FirstName = firstName,
+                LastName = lastName,
                 Email = user.Email ?? string.Empty,
                 UserName = user.UserName ?? string.Empty,
                 Phone = user.PhoneNumber,
@@ -210,6 +213,22 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return NotFound();
             }
 
+            // Validar unicidad de Email
+            var userByEmail = await _userManager.FindByEmailAsync(vm.Email);
+            if (userByEmail != null && userByEmail.Id != user.Id)
+            {
+                ModelState.AddModelError("Email", $"El correo '{vm.Email}' ya está registrado por otro usuario.");
+                return View(vm);
+            }
+
+            // Validar unicidad de UserName
+            var userByUsername = await _userManager.FindByNameAsync(vm.UserName);
+            if (userByUsername != null && userByUsername.Id != user.Id)
+            {
+                ModelState.AddModelError("UserName", $"El usuario '{vm.UserName}' ya está registrado por otro usuario.");
+                return View(vm);
+            }
+
             user.Email = vm.Email;
             user.UserName = vm.UserName;
             user.PhoneNumber = vm.Phone;
@@ -224,7 +243,13 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return View(vm);
             }
 
-            if (!string.IsNullOrEmpty(vm.Password))
+            // Actualizar claims de Nombre y Apellido
+            var currentClaims = await _userManager.GetClaimsAsync(user);
+            await UpdateUserClaim(user, currentClaims, "FirstName", vm.FirstName);
+            await UpdateUserClaim(user, currentClaims, "LastName", vm.LastName);
+
+            // Cambiar contraseña si se especificó
+            if (!string.IsNullOrWhiteSpace(vm.Password))
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var resetResult = await _userManager.ResetPasswordAsync(user, token, vm.Password);
@@ -240,6 +265,19 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 
             TempData["SuccessMessage"] = "Desarrollador modificado exitosamente.";
             return RedirectToAction(nameof(Developers));
+        }
+
+        private async Task UpdateUserClaim(IdentityUser user, IList<System.Security.Claims.Claim> existingClaims, string claimType, string value)
+        {
+            var existingClaim = existingClaims.FirstOrDefault(c => c.Type == claimType);
+            if (existingClaim != null)
+            {
+                await _userManager.ReplaceClaimAsync(user, existingClaim, new System.Security.Claims.Claim(claimType, value ?? string.Empty));
+            }
+            else
+            {
+                await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim(claimType, value ?? string.Empty));
+            }
         }
 
         public async Task<IActionResult> Admins()
