@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RealEstateApp.Presentation.WebApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+abc596137513264d763fc086eab6f6886136bd32")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+02e2b89d49dc51126561135c8c96bc6729df44eb")]
 [assembly: System.Reflection.AssemblyProductAttribute("RealEstateApp.Presentation.WebApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RealEstateApp.Presentation.WebApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

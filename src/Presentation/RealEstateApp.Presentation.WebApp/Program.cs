@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using RealEstateApp.Core.Application;
 using RealEstateApp.Infrastructure.Persistence;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
@@ -45,15 +46,17 @@ builder.Services.AddAuthentication()
 
 var app = builder.Build();
 
-// Ejecutar Seeds al iniciar la aplicación
+// Ejecutar Seeds y Migraciones al iniciar la aplicación
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
+        var dbContext = services.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync();
+
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-        var dbContext = services.GetRequiredService<ApplicationDbContext>();
 
         await DefaultRoles.SeedAsync(roleManager);
         await DefaultAdminUser.SeedAsync(userManager);
