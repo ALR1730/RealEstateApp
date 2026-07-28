@@ -97,16 +97,63 @@
                                 <span asp-validation-for="Description" class="text-danger small"></span>
                             </div>
 
-                            <div class="col-md-6">
-                                <label asp-for="Latitude" class="form-label fw-bold text-dark small"></label>
-                                <input asp-for="Latitude" class="form-control form-control-custom" step="0.0001" />
-                                <span asp-validation-for="Latitude" class="text-danger small"></span>
-                            </div>
+                            <!-- Selección de Ubicación por Mapa Interactivo -->
+                            <div class="col-12 my-3">
+                                <div class="card bg-light border-0 shadow-sm rounded-4 p-3">
+                                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                                        <div>
+                                            <h6 class="font-heading fw-bold text-dark mb-0">
+                                                <i class="bi bi-geo-alt-fill text-danger me-2"></i>Ubicación Geográfica en el Mapa
+                                            </h6>
+                                            <span class="text-muted small">Modifique la posición arrastrando el marcador o buscando una nueva dirección.</span>
+                                        </div>
+                                        <button type="button" id="useCurrentLocationBtn" class="btn btn-sm btn-outline-primary rounded-pill font-heading">
+                                            <i class="bi bi-crosshair me-1"></i> Usar mi ubicación actual
+                                        </button>
+                                    </div>
 
-                            <div class="col-md-6">
-                                <label asp-for="Longitude" class="form-label fw-bold text-dark small"></label>
-                                <input asp-for="Longitude" class="form-control form-control-custom" step="0.0001" />
-                                <span asp-validation-for="Longitude" class="text-danger small"></span>
+                                    <!-- Buscador de Lugares/Direcciones -->
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                        <input type="text" id="mapSearchInput" class="form-control border-start-0 ps-0" placeholder="Escriba una ciudad, sector o dirección (ej: Piantini, Santo Domingo)..." />
+                                        <button type="button" id="mapSearchBtn" class="btn btn-primary font-heading px-4">
+                                            Buscar Dirección
+                                        </button>
+                                    </div>
+
+                                    <!-- Accesos rápidos a ciudades -->
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3 small">
+                                        <span class="fw-bold text-muted me-1">Centrar en:</span>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill city-preset-btn" data-lat="18.4861" data-lng="-69.9312">Santo Domingo</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill city-preset-btn" data-lat="19.4517" data-lng="-70.6970">Santiago</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill city-preset-btn" data-lat="18.5601" data-lng="-68.3725">Punta Cana</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill city-preset-btn" data-lat="19.7808" data-lng="-70.6871">Puerto Plata</button>
+                                    </div>
+
+                                    <!-- Contenedor del Mapa -->
+                                    <div id="propertyMap" class="rounded-3 border shadow-inner mb-3 position-relative overflow-hidden" style="height: 360px; z-index: 1;"></div>
+
+                                    <!-- Campos de Coordenadas Sincronizados -->
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <label asp-for="Latitude" class="form-label fw-bold text-dark small"></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-compass text-secondary"></i></span>
+                                                <input asp-for="Latitude" id="Latitude" class="form-control border-start-0 ps-0" step="any" readonly />
+                                            </div>
+                                            <span asp-validation-for="Latitude" class="text-danger small"></span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label asp-for="Longitude" class="form-label fw-bold text-dark small"></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-compass-fill text-secondary"></i></span>
+                                                <input asp-for="Longitude" id="Longitude" class="form-control border-start-0 ps-0" step="any" readonly />
+                                            </div>
+                                            <span asp-validation-for="Longitude" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="col-md-6">
@@ -158,3 +205,127 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var initialLat = parseFloat($("#Latitude").val()) || 18.4861;
+            var initialLng = parseFloat($("#Longitude").val()) || -69.9312;
+
+            var map = L.map('propertyMap').setView([initialLat, initialLng], 14);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            var customIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            var marker = L.marker([initialLat, initialLng], {
+                draggable: true,
+                icon: customIcon
+            }).addTo(map);
+
+            marker.bindPopup("<b>Ubicación Guardada de la Propiedad</b><br>Arrastre este marcador o haga clic en el mapa para modificar").openPopup();
+
+            function updatePosition(lat, lng) {
+                var cleanLat = parseFloat(lat).toFixed(6);
+                var cleanLng = parseFloat(lng).toFixed(6);
+                $("#Latitude").val(cleanLat);
+                $("#Longitude").val(cleanLng);
+            }
+
+            marker.on('dragend', function (e) {
+                var position = marker.getLatLng();
+                updatePosition(position.lat, position.lng);
+            });
+
+            map.on('click', function (e) {
+                marker.setLatLng(e.latlng);
+                updatePosition(e.latlng.lat, e.latlng.lng);
+            });
+
+            updatePosition(initialLat, initialLng);
+
+            $(".city-preset-btn").click(function () {
+                var lat = parseFloat($(this).data("lat"));
+                var lng = parseFloat($(this).data("lng"));
+                map.setView([lat, lng], 14);
+                marker.setLatLng([lat, lng]);
+                updatePosition(lat, lng);
+            });
+
+            $("#useCurrentLocationBtn").click(function () {
+                if (navigator.geolocation) {
+                    var btn = $(this);
+                    btn.html('<span class="spinner-border spinner-border-sm me-1"></span> Buscando GPS...');
+                    btn.prop("disabled", true);
+
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        var userLat = position.coords.latitude;
+                        var userLng = position.coords.longitude;
+                        map.setView([userLat, userLng], 16);
+                        marker.setLatLng([userLat, userLng]);
+                        updatePosition(userLat, userLng);
+                        btn.html('<i class="bi bi-crosshair me-1"></i> Ubicación detectada');
+                        btn.prop("disabled", false);
+                    }, function (error) {
+                        alert("No se pudo obtener la ubicación GPS del navegador. Seleccione la posición en el mapa.");
+                        btn.html('<i class="bi bi-crosshair me-1"></i> Usar mi ubicación actual');
+                        btn.prop("disabled", false);
+                    });
+                } else {
+                    alert("Su navegador no soporta geolocalización GPS.");
+                }
+            });
+
+            function performSearch() {
+                var query = $("#mapSearchInput").val().trim();
+                if (!query) return;
+
+                var btn = $("#mapSearchBtn");
+                btn.html('<span class="spinner-border spinner-border-sm me-1"></span> Buscando...');
+                btn.prop("disabled", true);
+
+                $.getJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query), function (data) {
+                    btn.html('Buscar Dirección');
+                    btn.prop("disabled", false);
+
+                    if (data && data.length > 0) {
+                        var firstResult = data[0];
+                        var searchLat = parseFloat(firstResult.lat);
+                        var searchLng = parseFloat(firstResult.lon);
+                        map.setView([searchLat, searchLng], 15);
+                        marker.setLatLng([searchLat, searchLng]);
+                        updatePosition(searchLat, searchLng);
+                    } else {
+                        alert("No se encontraron resultados para: '" + query + "'. Intente con una referencia de dirección más amplia.");
+                    }
+                }).fail(function () {
+                    btn.html('Buscar Dirección');
+                    btn.prop("disabled", false);
+                    alert("Error al buscar la dirección.");
+                });
+            }
+
+            $("#mapSearchBtn").click(performSearch);
+
+            $("#mapSearchInput").keypress(function (e) {
+                if (e.which == 13) {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+        });
+    </script>
+}

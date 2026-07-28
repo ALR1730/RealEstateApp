@@ -241,6 +241,59 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             return RedirectToLocal(returnUrl);
         }
 
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var profileVm = await _accountService.GetProfileAsync(userId);
+            if (profileVm == null)
+            {
+                return NotFound();
+            }
+
+            return View(profileVm);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Profile(EditProfileViewModel vm)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId) || userId != vm.Id)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+
+            var result = await _accountService.UpdateProfileAsync(vm);
+
+            if (result.HasError)
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Ocurrió un error al actualizar su perfil.");
+                return View(result);
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                await _signInManager.RefreshSignInAsync(user);
+            }
+
+            TempData["SuccessMessage"] = "Su perfil ha sido actualizado exitosamente.";
+            return RedirectToAction(nameof(Profile));
+        }
+
         private IActionResult RedirectToLocal(string? returnUrl)
         {
             if (Url.IsLocalUrl(returnUrl))

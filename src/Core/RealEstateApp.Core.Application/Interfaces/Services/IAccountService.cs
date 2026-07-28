@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using RealEstateApp.Core.Application.DTOs.Account;
+using RealEstateApp.Core.Application.ViewModels.Account;
 
 namespace RealEstateApp.Core.Application.Interfaces.Services
 {
@@ -15,5 +16,7 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         Task<string> ConfirmAccountAsync(string userId, string token);
         Task ChangeUserStatusAsync(string userId, bool isActive);
         Task SignOutAsync();
+        Task<EditProfileViewModel?> GetProfileAsync(string userId);
+        Task<EditProfileViewModel> UpdateProfileAsync(EditProfileViewModel model);
     }
 }

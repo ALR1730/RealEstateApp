@@ -1,9 +1,11 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.Interfaces.Services;
+using RealEstateApp.Core.Application.ViewModels.Account;
 using RealEstateApp.Core.Domain.Enums;
 
 namespace RealEstateApp.Presentation.WebApi.Controllers.v1
@@ -98,6 +100,58 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         public async Task<IActionResult> ConfirmEmailAsync([FromQuery] string userId, [FromQuery] string token)
         {
             var result = await _accountService.ConfirmAccountAsync(userId, token);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Obtiene los datos del perfil del usuario autenticado.
+        /// </summary>
+        [Authorize]
+        [HttpGet("profile")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EditProfileViewModel))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetProfileAsync()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var profile = await _accountService.GetProfileAsync(userId);
+            if (profile == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(profile);
+        }
+
+        /// <summary>
+        /// Actualiza los datos del perfil del usuario autenticado.
+        /// </summary>
+        [Authorize]
+        [HttpPut("profile")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EditProfileViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> UpdateProfileAsync([FromForm] EditProfileViewModel model)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            model.Id = userId;
+            var result = await _accountService.UpdateProfileAsync(model);
+
+            if (result.HasError)
+            {
+                return BadRequest(result);
+            }
+
             return Ok(result);
         }
     }

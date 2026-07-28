@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.Interfaces.Services;
+using RealEstateApp.Core.Application.ViewModels.Account;
 using RealEstateApp.Core.Domain.Enums;
 using RealEstateApp.Core.Domain.Settings;
 
@@ -24,17 +25,20 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailService _emailService;
+        private readonly IFileStorageService _fileStorageService;
         private readonly JWTSettings _jwtSettings;
 
         public AccountService(
             UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager,
             IEmailService emailService,
+            IFileStorageService fileStorageService,
             IOptions<JWTSettings> jwtSettings)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _emailService = emailService;
+            _fileStorageService = fileStorageService;
             _jwtSettings = jwtSettings.Value;
         }
 
@@ -215,6 +219,114 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
         public Task SignOutAsync()
         {
             return Task.CompletedTask;
+        }
+
+        public async Task<EditProfileViewModel?> GetProfileAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return null;
+
+            var claims = await _userManager.GetClaimsAsync(user);
+            var firstNameClaim = claims.FirstOrDefault(c => c.Type == "FirstName")?.Value ?? user.UserName ?? string.Empty;
+            var lastNameClaim = claims.FirstOrDefault(c => c.Type == "LastName")?.Value ?? string.Empty;
+            var profilePictureClaim = claims.FirstOrDefault(c => c.Type == "ProfilePicture")?.Value ?? string.Empty;
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault() ?? string.Empty;
+
+            return new EditProfileViewModel
+            {
+                Id = user.Id,
+                FirstName = firstNameClaim,
+                LastName = lastNameClaim,
+                Email = user.Email ?? string.Empty,
+                UserName = user.UserName ?? string.Empty,
+                Phone = user.PhoneNumber,
+                ProfilePictureUrl = profilePictureClaim,
+                Role = role
+            };
+        }
+
+        public async Task<EditProfileViewModel> UpdateProfileAsync(EditProfileViewModel model)
+        {
+            var user = await _userManager.FindByIdAsync(model.Id);
+            if (user == null)
+            {
+                model.HasError = true;
+                model.ErrorMessage = "El usuario especificado no existe.";
+                return model;
+            }
+
+            // 1. Cambio opcional de contraseña
+            if (!string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                if (string.IsNullOrWhiteSpace(model.CurrentPassword))
+                {
+                    model.HasError = true;
+                    model.ErrorMessage = "Debe ingresar su contraseña actual para poder establecer una nueva contraseña.";
+                    return model;
+                }
+
+                var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+                if (!changePasswordResult.Succeeded)
+                {
+                    model.HasError = true;
+                    model.ErrorMessage = string.Join(", ", changePasswordResult.Errors.Select(e => e.Description));
+                    return model;
+                }
+            }
+
+            // 2. Carga y actualización de foto de perfil
+            if (model.ProfilePictureFile != null && model.ProfilePictureFile.Length > 0)
+            {
+                var existingClaims = await _userManager.GetClaimsAsync(user);
+                var oldPicture = existingClaims.FirstOrDefault(c => c.Type == "ProfilePicture")?.Value;
+                if (!string.IsNullOrEmpty(oldPicture))
+                {
+                    await _fileStorageService.DeleteFileAsync(oldPicture, "profiles");
+                }
+
+                using var stream = model.ProfilePictureFile.OpenReadStream();
+                model.ProfilePictureUrl = await _fileStorageService.UploadFileAsync(stream, model.ProfilePictureFile.FileName, "profiles");
+            }
+
+            // 3. Actualizar propiedades principales de IdentityUser
+            user.Email = model.Email;
+            user.UserName = model.UserName;
+            user.PhoneNumber = model.Phone;
+
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                model.HasError = true;
+                model.ErrorMessage = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+                return model;
+            }
+
+            // 4. Actualizar o agregar Claims
+            var currentClaims = await _userManager.GetClaimsAsync(user);
+            await UpdateUserClaim(user, currentClaims, "FirstName", model.FirstName);
+            await UpdateUserClaim(user, currentClaims, "LastName", model.LastName);
+            if (!string.IsNullOrEmpty(model.ProfilePictureUrl))
+            {
+                await UpdateUserClaim(user, currentClaims, "ProfilePicture", model.ProfilePictureUrl);
+            }
+
+            model.HasError = false;
+            return model;
+        }
+
+        private async Task UpdateUserClaim(IdentityUser user, IList<Claim> existingClaims, string claimType, string value)
+        {
+            var existingClaim = existingClaims.FirstOrDefault(c => c.Type == claimType);
+            if (existingClaim != null)
+            {
+                await _userManager.ReplaceClaimAsync(user, existingClaim, new Claim(claimType, value));
+            }
+            else
+            {
+                await _userManager.AddClaimAsync(user, new Claim(claimType, value));
+            }
         }
 
         private async Task<JwtSecurityToken> GenerateJwtTokenAsync(IdentityUser user)
