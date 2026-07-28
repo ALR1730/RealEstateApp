@@ -18,10 +18,12 @@
                 <span class="badge bg-primary px-3 py-2 fs-6">@Model.PropertyTypeName</span>
                 <span class="badge bg-secondary px-3 py-2 fs-6">@Model.SaleTypeName</span>
                 @{
-                    var statusClass = Model.Status == "Disponible" ? "badge-disponible" :
+                    var displayStatus = (Model.Status == "Disponible" && Model.IsFinanciable) ? "Financiable" : Model.Status;
+                    var statusClass = displayStatus == "Financiable" ? "badge-financiable" :
+                                      Model.Status == "Disponible" ? "badge-disponible" :
                                       Model.Status == "Reservada" ? "badge-reservada" : "badge-vendida";
                 }
-                <span class="status-badge position-relative top-0 right-0 @statusClass px-3 py-2 fs-6">@Model.Status</span>
+                <span class="status-badge position-relative top-0 right-0 @statusClass px-3 py-2 fs-6">@displayStatus</span>
             </div>
             <h2 class="font-heading fw-bold text-dark mb-0">Propiedad @Model.Code</h2>
         </div>

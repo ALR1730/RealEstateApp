@@ -21,6 +21,7 @@ namespace RealEstateApp.Core.Domain.Entities
         public string? Tour360Url { get; set; }
         public decimal MontoSeparacion { get; set; }
         public int PorcentajeInicialRequerido { get; set; }
+        public bool IsFinanciable { get; set; } = false;
 
         // Relaciones
         public int PropertyTypeId { get; set; }

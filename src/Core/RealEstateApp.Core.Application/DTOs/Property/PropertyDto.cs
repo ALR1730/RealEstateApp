@@ -56,6 +56,8 @@ namespace RealEstateApp.Core.Application.DTOs.Property
         [Range(0, 100)]
         public int PorcentajeInicialRequerido { get; set; }
 
+        public bool IsFinanciable { get; set; }
+
         /// <summary>
         /// URLs de las imágenes de la propiedad.
         /// </summary>

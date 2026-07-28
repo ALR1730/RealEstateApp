@@ -38,6 +38,7 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         // Campos financieros
         public decimal MontoSeparacion { get; set; }
         public int PorcentajeInicialRequerido { get; set; }
+        public bool IsFinanciable { get; set; }
 
         // Listas resueltas
         public List<string> Images { get; set; } = new();

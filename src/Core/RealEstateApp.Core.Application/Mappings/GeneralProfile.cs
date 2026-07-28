@@ -158,6 +158,7 @@ namespace RealEstateApp.Core.Application.Mappings
                 .ForMember(dest => dest.PropertyBathrooms, opt => opt.MapFrom(src => src.Property != null ? src.Property.Bathrooms : 0))
                 .ForMember(dest => dest.PropertySizeInMeters, opt => opt.MapFrom(src => src.Property != null ? src.Property.SizeInMeters : 0))
                 .ForMember(dest => dest.PropertyStatus, opt => opt.MapFrom(src => src.Property != null ? src.Property.Status : string.Empty))
+                .ForMember(dest => dest.IsFinanciable, opt => opt.MapFrom(src => src.Property != null && src.Property.IsFinanciable))
                 .ForMember(dest => dest.PropertyMainImage, opt => opt.MapFrom(src =>
                     src.Property != null && src.Property.Images != null && src.Property.Images.Any()
                         ? src.Property.Images.First().ImageUrl

@@ -52,10 +52,12 @@
                             <span class="code-badge">@item.Code</span>
                             
                             @{
-                                var statusClass = item.Status == "Disponible" ? "badge-disponible" :
+                                var displayStatus = (item.Status == "Disponible" && item.IsFinanciable) ? "Financiable" : item.Status;
+                                var statusClass = displayStatus == "Financiable" ? "badge-financiable" :
+                                                  item.Status == "Disponible" ? "badge-disponible" :
                                                   item.Status == "Reservada" ? "badge-reservada" : "badge-vendida";
                             }
-                            <span class="status-badge @statusClass">@item.Status</span>
+                            <span class="status-badge @statusClass">@displayStatus</span>
 
                             @if (item.Images != null && item.Images.Count > 0)
                             {

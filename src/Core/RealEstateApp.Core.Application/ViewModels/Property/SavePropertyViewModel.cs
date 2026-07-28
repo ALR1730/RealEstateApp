@@ -90,6 +90,9 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         [Display(Name = "Porcentaje Inicial Requerido (%)")]
         public int PorcentajeInicialRequerido { get; set; }
 
+        [Display(Name = "¿Pre-investigación para Financiamiento aprobada?")]
+        public bool IsFinanciable { get; set; }
+
         /// <summary>
         /// Archivos de imagen subidos por el formulario.
         /// Se permiten hasta 15 imágenes por propiedad.

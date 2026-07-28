@@ -111,6 +111,7 @@ namespace RealEstateApp.Core.Application.Services
             property.Tour360Url = vm.Tour360Url;
             property.MontoSeparacion = vm.MontoSeparacion;
             property.PorcentajeInicialRequerido = vm.PorcentajeInicialRequerido;
+            property.IsFinanciable = vm.IsFinanciable;
 
             await _propertyRepository.UpdateAsync(property);
 

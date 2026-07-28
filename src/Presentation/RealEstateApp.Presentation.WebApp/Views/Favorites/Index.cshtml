@@ -32,7 +32,11 @@
                     <div class="card-property" data-href="@Url.Action("Details", "Home", new { id = item.PropertyId })">
                         <div class="img-container">
                             <span class="code-badge">@item.PropertyCode</span>
-                            <span class="status-badge badge-disponible">@item.PropertyStatus</span>
+                            @{
+                                var favStatus = (item.PropertyStatus == "Disponible" && item.IsFinanciable) ? "Financiable" : item.PropertyStatus;
+                                var favStatusClass = favStatus == "Financiable" ? "badge-financiable" : "badge-disponible";
+                            }
+                            <span class="status-badge @favStatusClass">@favStatus</span>
 
                             @if (!string.IsNullOrEmpty(item.PropertyMainImage))
                             {

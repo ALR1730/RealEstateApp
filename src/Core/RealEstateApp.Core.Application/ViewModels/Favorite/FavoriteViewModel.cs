@@ -18,6 +18,7 @@ namespace RealEstateApp.Core.Application.ViewModels.Favorite
         public int PropertyBathrooms { get; set; }
         public decimal PropertySizeInMeters { get; set; }
         public string PropertyStatus { get; set; } = string.Empty;
+        public bool IsFinanciable { get; set; }
         public string? PropertyMainImage { get; set; }
     }
 }
