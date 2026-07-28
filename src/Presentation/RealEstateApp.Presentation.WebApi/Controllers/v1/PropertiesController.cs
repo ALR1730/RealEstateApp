@@ -7,8 +7,11 @@ using RealEstateApp.Core.Application.DTOs.Property;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Property;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 {
+    [Authorize(Roles = "Developer,Admin")]
     public class PropertiesController : BaseApiController
     {
         private readonly IPropertyService _propertyService;

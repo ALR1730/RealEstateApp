@@ -1,0 +1,97 @@
+@model Microsoft.AspNetCore.Identity.IdentityUser
+@{
+    ViewData["Title"] = "Panel del Desarrollador";
+}
+
+<div class="container py-5">
+    <!-- Encabezado Principal -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-4 bg-white">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill font-heading fw-bold mb-2">
+                    <i class="bi bi-code-slash me-1"></i> Acceso a la Web API REST
+                </span>
+                <h2 class="font-heading text-dark fw-bold display-6 mb-1">Panel del Desarrollador</h2>
+                <p class="text-muted mb-0">Gestiona tus credenciales y consume los servicios RESTful de RealEstateApp.</p>
+            </div>
+            <div>
+                <a href="http://localhost:5196/index.html" target="_blank" class="btn btn-primary-gradient btn-lg px-4 font-heading fw-bold rounded-pill shadow-sm">
+                    <i class="bi bi-box-arrow-up-right me-2"></i> Abrir Swagger UI (API Docs)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Tarjeta de Datos del Desarrollador -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
+                <h5 class="font-heading fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                    <i class="bi bi-person-badge-fill text-primary"></i> Credenciales de Desarrollador
+                </h5>
+
+                <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3">
+                    <div class="avatar-lg bg-primary-soft text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold fs-3" style="width: 54px; height: 54px;">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div>
+                        <h6 class="font-heading fw-bold mb-0 text-dark">@Model.UserName</h6>
+                        <span class="badge bg-primary rounded-pill mt-1">Rol: Developer</span>
+                    </div>
+                </div>
+
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom">
+                        <span class="text-muted"><i class="bi bi-envelope me-2"></i>Correo Electrónico:</span>
+                        <strong class="text-dark">@Model.Email</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom">
+                        <span class="text-muted"><i class="bi bi-shield-check me-2"></i>Estado de Cuenta:</span>
+                        <span class="badge bg-success rounded-pill"><i class="bi bi-check-circle-fill me-1"></i> Activo / Verificado</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom">
+                        <span class="text-muted"><i class="bi bi-key-fill me-2"></i>ID de Usuario:</span>
+                        <code class="text-primary font-mono">@Model.Id</code>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                        <span class="text-muted"><i class="bi bi-diagram-3 me-2"></i>Base URL (API):</span>
+                        <code class="text-dark">http://localhost:5196/api/v1</code>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Guía de Autenticación JWT -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
+                <h5 class="font-heading fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-lock-fill text-success"></i> Autenticación y Obtención de Token JWT
+                </h5>
+                <p class="text-muted small mb-4">
+                    Para consumir los endpoints protegidos de la API, envía una solicitud <code>POST</code> a <code>/api/v1/Account/authenticate</code> con tus credenciales:
+                </p>
+
+                <!-- Bloque de Ejemplo cURL -->
+                <div class="mb-3">
+                    <span class="small font-heading fw-bold text-muted d-block mb-2"><i class="bi bi-terminal me-1"></i> Solicitud HTTP / cURL:</span>
+                    <pre class="bg-dark text-light p-3 rounded-3 small font-mono mb-0" style="overflow-x: auto;">curl -X 'POST' \
+  'http://localhost:5196/api/v1/Account/authenticate' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "email": "@Model.Email",
+  "password": "TuContraseña"
+}'</pre>
+                </div>
+
+                <!-- Bloque de Uso de Header Bearer -->
+                <div>
+                    <span class="small font-heading fw-bold text-muted d-block mb-2"><i class="bi bi-header me-1"></i> Uso en Peticiones (Header HTTP):</span>
+                    <div class="p-3 bg-light rounded-3 border">
+                        <code class="text-dark font-mono">Authorization: Bearer &lt;tu_jwtoken_obtenido&gt;</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

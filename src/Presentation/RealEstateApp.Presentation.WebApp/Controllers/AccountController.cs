@@ -61,15 +61,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return View(vm);
             }
 
-            // Validación de Seguridad Cruzada: Desarrolladores no pueden ingresar a la WebApp MVC
-            var isDeveloper = await _userManager.IsInRoleAsync(user, Roles.Developer.ToString());
-            if (isDeveloper)
-            {
-                ModelState.AddModelError(string.Empty, "Acceso Denegado: Las cuentas con rol Desarrollador están restringidas exclusivamente al consumo de la Web API REST.");
-                return View(vm);
-            }
-
-            if (!user.EmailConfirmed)
+            if (!user.EmailConfirmed && !await _userManager.IsInRoleAsync(user, Roles.Developer.ToString()))
             {
                 ModelState.AddModelError(string.Empty, "Su cuenta no ha sido activada por correo electrónico. Revise su bandeja de entrada.");
                 return View(vm);
@@ -84,6 +76,11 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 
             if (result.Succeeded)
             {
+                var isDeveloperUser = await _userManager.IsInRoleAsync(user, Roles.Developer.ToString());
+                if (isDeveloperUser)
+                {
+                    return RedirectToAction(nameof(DeveloperPanel));
+                }
                 return RedirectToLocal(vm.ReturnUrl);
             }
 
@@ -117,7 +114,12 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             }
 
             var origin = $"{Request.Scheme}://{Request.Host}";
-            var selectedRole = vm.UserType == "Agent" ? Roles.Agent.ToString() : Roles.Client.ToString();
+            var selectedRole = vm.UserType switch
+            {
+                "Agent" => Roles.Agent.ToString(),
+                "Developer" => Roles.Developer.ToString(),
+                _ => Roles.Client.ToString()
+            };
 
             var request = new RegisterRequest
             {
@@ -143,8 +145,33 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return RedirectToAction(nameof(PendingActivation));
             }
 
+            if (selectedRole == Roles.Developer.ToString())
+            {
+                TempData["SuccessMessage"] = "Cuenta de Desarrollador creada exitosamente. Ya puede iniciar sesión para acceder a su panel y herramientas de API.";
+                return RedirectToAction(nameof(Login));
+            }
+
             ViewBag.Message = $"¡Registro exitoso! Hemos enviado un enlace de confirmación a su correo ({vm.Email}). Por favor verifique su cuenta para poder iniciar sesión.";
             return View("ConfirmEmailResult");
+        }
+
+        [Authorize(Roles = "Developer,Admin")]
+        [HttpGet]
+        public async Task<IActionResult> DeveloperPanel()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
         }
 
         [HttpGet]
