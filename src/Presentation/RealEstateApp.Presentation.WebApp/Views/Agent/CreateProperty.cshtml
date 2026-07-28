@@ -57,43 +57,43 @@
 
                             <div class="col-md-4">
                                 <label asp-for="Price" class="form-label fw-bold text-dark small"></label>
-                                <input asp-for="Price" class="form-control form-control-custom" placeholder="Ej: 150000" step="1000" />
+                                <input asp-for="Price" class="form-control form-control-custom" placeholder="Precio" step="1000" />
                                 <span asp-validation-for="Price" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-4">
                                 <label asp-for="MontoSeparacion" class="form-label fw-bold text-dark small"></label>
-                                <input asp-for="MontoSeparacion" class="form-control form-control-custom" placeholder="Ej: 5000" step="500" />
+                                <input asp-for="MontoSeparacion" class="form-control form-control-custom" placeholder="Monto de separación" step="500" />
                                 <span asp-validation-for="MontoSeparacion" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-4">
                                 <label asp-for="PorcentajeInicialRequerido" class="form-label fw-bold text-dark small"></label>
-                                <input asp-for="PorcentajeInicialRequerido" class="form-control form-control-custom" placeholder="Ej: 20" min="1" max="100" />
+                                <input asp-for="PorcentajeInicialRequerido" class="form-control form-control-custom" placeholder="Porcentaje inicial" min="1" max="100" />
                                 <span asp-validation-for="PorcentajeInicialRequerido" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-4">
                                 <label asp-for="Rooms" class="form-label fw-bold text-dark small"></label>
-                                <input asp-for="Rooms" class="form-control form-control-custom" placeholder="Ej: 3" min="0" />
+                                <input asp-for="Rooms" class="form-control form-control-custom" placeholder="Habitaciones" min="0" />
                                 <span asp-validation-for="Rooms" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-4">
                                 <label asp-for="Bathrooms" class="form-label fw-bold text-dark small"></label>
-                                <input asp-for="Bathrooms" class="form-control form-control-custom" placeholder="Ej: 2" min="0" />
+                                <input asp-for="Bathrooms" class="form-control form-control-custom" placeholder="Baños" min="0" />
                                 <span asp-validation-for="Bathrooms" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-4">
                                 <label asp-for="SizeInMeters" class="form-label fw-bold text-dark small"></label>
-                                <input asp-for="SizeInMeters" class="form-control form-control-custom" placeholder="Ej: 120" min="1" />
+                                <input asp-for="SizeInMeters" class="form-control form-control-custom" placeholder="Metros cuadrados" min="1" />
                                 <span asp-validation-for="SizeInMeters" class="text-danger small"></span>
                             </div>
 
                             <div class="col-12">
                                 <label asp-for="Description" class="form-label fw-bold text-dark small"></label>
-                                <textarea asp-for="Description" class="form-control form-control-custom" rows="4" placeholder="Describa las características de la propiedad..."></textarea>
+                                <textarea asp-for="Description" class="form-control form-control-custom" rows="4" placeholder="Descripción de la propiedad"></textarea>
                                 <span asp-validation-for="Description" class="text-danger small"></span>
                             </div>
 
@@ -115,19 +115,10 @@
                                     <!-- Buscador de Lugares/Direcciones -->
                                     <div class="input-group mb-3">
                                         <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                                        <input type="text" id="mapSearchInput" class="form-control border-start-0 ps-0" placeholder="Escriba una ciudad, sector o dirección (ej: Piantini, Santo Domingo)..." />
+                                        <input type="text" id="mapSearchInput" class="form-control border-start-0 ps-0" placeholder="Buscar dirección o ciudad..." />
                                         <button type="button" id="mapSearchBtn" class="btn btn-primary font-heading px-4">
                                             Buscar Dirección
                                         </button>
-                                    </div>
-
-                                    <!-- Accesos rápidos a ciudades -->
-                                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3 small">
-                                        <span class="fw-bold text-muted me-1">Centrar en:</span>
-                                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill city-preset-btn" data-lat="18.4861" data-lng="-69.9312">Santo Domingo</button>
-                                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill city-preset-btn" data-lat="19.4517" data-lng="-70.6970">Santiago</button>
-                                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill city-preset-btn" data-lat="18.5601" data-lng="-68.3725">Punta Cana</button>
-                                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill city-preset-btn" data-lat="19.7808" data-lng="-70.6871">Puerto Plata</button>
                                     </div>
 
                                     <!-- Contenedor del Mapa -->
@@ -139,7 +130,7 @@
                                             <label asp-for="Latitude" class="form-label fw-bold text-dark small"></label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white border-end-0"><i class="bi bi-compass text-secondary"></i></span>
-                                                <input asp-for="Latitude" id="Latitude" class="form-control border-start-0 ps-0" placeholder="18.4861" step="any" readonly />
+                                                <input asp-for="Latitude" id="Latitude" class="form-control border-start-0 ps-0" placeholder="Latitud" step="any" readonly />
                                             </div>
                                             <span asp-validation-for="Latitude" class="text-danger small"></span>
                                         </div>
@@ -148,7 +139,7 @@
                                             <label asp-for="Longitude" class="form-label fw-bold text-dark small"></label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white border-end-0"><i class="bi bi-compass-fill text-secondary"></i></span>
-                                                <input asp-for="Longitude" id="Longitude" class="form-control border-start-0 ps-0" placeholder="-69.9312" step="any" readonly />
+                                                <input asp-for="Longitude" id="Longitude" class="form-control border-start-0 ps-0" placeholder="Longitud" step="any" readonly />
                                             </div>
                                             <span asp-validation-for="Longitude" class="text-danger small"></span>
                                         </div>
@@ -158,13 +149,13 @@
 
                             <div class="col-md-6">
                                 <label asp-for="VideoUrl" class="form-label fw-bold text-dark small"></label>
-                                <input asp-for="VideoUrl" class="form-control form-control-custom" placeholder="https://youtube.com/..." />
+                                <input asp-for="VideoUrl" class="form-control form-control-custom" placeholder="URL de Video" />
                                 <span asp-validation-for="VideoUrl" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-6">
                                 <label asp-for="Tour360Url" class="form-label fw-bold text-dark small"></label>
-                                <input asp-for="Tour360Url" class="form-control form-control-custom" placeholder="https://matterport.com/..." />
+                                <input asp-for="Tour360Url" class="form-control form-control-custom" placeholder="URL de Tour 360" />
                                 <span asp-validation-for="Tour360Url" class="text-danger small"></span>
                             </div>
 
@@ -259,14 +250,6 @@
             });
 
             updatePosition(initialLat, initialLng);
-
-            $(".city-preset-btn").click(function () {
-                var lat = parseFloat($(this).data("lat"));
-                var lng = parseFloat($(this).data("lng"));
-                map.setView([lat, lng], 14);
-                marker.setLatLng([lat, lng]);
-                updatePosition(lat, lng);
-            });
 
             $("#useCurrentLocationBtn").click(function () {
                 if (navigator.geolocation) {

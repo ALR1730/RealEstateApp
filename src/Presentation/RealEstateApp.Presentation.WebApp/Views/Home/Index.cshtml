@@ -17,7 +17,7 @@
             <div class="col-md-6 col-lg-5">
                 <form asp-action="Index" method="get" class="d-flex gap-2 bg-white p-2 rounded-pill shadow-lg">
                     <input type="text" name="Code" value="@filters.Code" class="form-control border-0 bg-transparent px-4 font-heading" 
-                           placeholder="Buscar por Código (Ej: A1B2C3)" maxlength="6" style="text-transform: uppercase;" />
+                           placeholder="Buscar por Código" maxlength="6" style="text-transform: uppercase;" />
                     <button type="submit" class="btn btn-primary-gradient rounded-pill px-4">
                         <i class="bi bi-search me-1"></i> Buscar
                     </button>
@@ -72,22 +72,22 @@
 
                 <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted">Precio Mínimo</label>
-                    <input type="number" name="MinPrice" value="@filters.MinPrice" class="form-control form-control-custom" placeholder="$ Mínimo" step="1000" />
+                    <input type="number" name="MinPrice" value="@filters.MinPrice" class="form-control form-control-custom" placeholder="Precio Mínimo" step="1000" />
                 </div>
 
                 <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted">Precio Máximo</label>
-                    <input type="number" name="MaxPrice" value="@filters.MaxPrice" class="form-control form-control-custom" placeholder="$ Máximo" step="1000" />
+                    <input type="number" name="MaxPrice" value="@filters.MaxPrice" class="form-control form-control-custom" placeholder="Precio Máximo" step="1000" />
                 </div>
 
                 <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted">Habitaciones Mínimas</label>
-                    <input type="number" name="MinRooms" value="@filters.MinRooms" class="form-control form-control-custom" placeholder="Ej: 2" min="0" />
+                    <input type="number" name="MinRooms" value="@filters.MinRooms" class="form-control form-control-custom" placeholder="Habitaciones" min="0" />
                 </div>
 
                 <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted">Baños Mínimos</label>
-                    <input type="number" name="MinBathrooms" value="@filters.MinBathrooms" class="form-control form-control-custom" placeholder="Ej: 1" min="0" />
+                    <input type="number" name="MinBathrooms" value="@filters.MinBathrooms" class="form-control form-control-custom" placeholder="Baños" min="0" />
                 </div>
 
                 <div class="col-md-6 d-flex align-items-end">
