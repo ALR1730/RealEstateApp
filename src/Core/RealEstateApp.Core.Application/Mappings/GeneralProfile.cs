@@ -132,7 +132,7 @@ namespace RealEstateApp.Core.Application.Mappings
             #region Chat
 
             CreateMap<Chat, ChatViewModel>()
-                .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : string.Empty))
+                .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : (src.PropertyId == -1 ? "SOPORTE-ADMIN" : (src.PropertyId == 0 ? "SOPORTE-DEV" : string.Empty))))
                 .ForMember(dest => dest.ClienteName, opt => opt.Ignore()) // Se resuelve en el servicio
                 .ForMember(dest => dest.AgenteName, opt => opt.Ignore()) // Se resuelve en el servicio
                 .ForMember(dest => dest.SenderName, opt => opt.Ignore()) // Se resuelve en el servicio
