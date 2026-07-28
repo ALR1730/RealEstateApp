@@ -36,7 +36,8 @@
             {
                 var latestMsg = group.First();
                 <div class="col-md-6 col-lg-4">
-                    <div class="card border-0 shadow-sm rounded-4 h-100 p-4 d-flex flex-column justify-content-between">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 p-4 d-flex flex-column justify-content-between card-chat" 
+                         data-href="@Url.Action("Thread", "Chats", new { propertyId = latestMsg.PropertyId, agentId = latestMsg.AgenteId, clienteId = latestMsg.ClienteId })">
                         <div>
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="badge bg-success px-3 py-1 rounded-pill d-inline-flex align-items-center gap-1">

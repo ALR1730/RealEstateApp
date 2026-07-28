@@ -469,3 +469,14 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 .footer-custom a:hover {
   color: #38bdf8;
 }
+
+/* Chat Cards Interactive Styling */
+.card-chat {
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card-chat:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12) !important;
+}
