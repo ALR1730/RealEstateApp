@@ -174,6 +174,25 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             return View(user);
         }
 
+        [Authorize(Roles = "Developer,Admin")]
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> GenerateJwtToken([FromBody] AuthenticationRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
+            {
+                return BadRequest(new AuthenticationResponse { HasError = true, Error = "Debe ingresar el correo y la contraseña." });
+            }
+
+            var response = await _accountService.AuthenticateAsync(request);
+            if (response.HasError)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
         [HttpGet]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {

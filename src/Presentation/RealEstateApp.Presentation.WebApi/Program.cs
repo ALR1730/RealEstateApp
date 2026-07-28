@@ -17,6 +17,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+// Configurar política de CORS para permitir solicitudes desde el WebApp / Developer Panel
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllCors", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // Configurar Swagger/OpenAPI con autenticación Bearer Token
 builder.Services.AddSwaggerGen(c =>
 {
@@ -140,6 +151,7 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseRouting();
+app.UseCors("AllowAllCors");
 
 app.UseAuthentication();
 app.UseAuthorization();

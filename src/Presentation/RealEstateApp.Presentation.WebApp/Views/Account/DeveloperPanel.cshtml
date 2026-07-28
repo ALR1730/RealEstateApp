@@ -12,7 +12,7 @@
                     <i class="bi bi-code-slash me-1"></i> Acceso a la Web API REST
                 </span>
                 <h2 class="font-heading text-dark fw-bold display-6 mb-1">Panel del Desarrollador</h2>
-                <p class="text-muted mb-0">Gestiona tus credenciales y consume los servicios RESTful de RealEstateApp.</p>
+                <p class="text-muted mb-0">Gestiona tus credenciales, genera tus tokens JWT y consume la API RESTful de RealEstateApp.</p>
             </div>
             <div>
                 <a href="http://localhost:5196/index.html" target="_blank" class="btn btn-primary-gradient btn-lg px-4 font-heading fw-bold rounded-pill shadow-sm">
@@ -40,9 +40,9 @@
                     </div>
                 </div>
 
-                <ul class="list-group list-group-flush small">
+                <ul class="list-group list-group-flush small mb-4">
                     <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom">
-                        <span class="text-muted"><i class="bi bi-envelope me-2"></i>Correo Electrónico:</span>
+                        <span class="text-muted"><i class="bi bi-envelope me-2"></i>Correo Conectado:</span>
                         <strong class="text-dark">@Model.Email</strong>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom">
@@ -58,37 +58,80 @@
                         <code class="text-dark">http://localhost:5196/api/v1</code>
                     </li>
                 </ul>
+
+                <div class="alert alert-info border-0 rounded-3 p-3 mb-0 small">
+                    <h6 class="font-heading fw-bold mb-1"><i class="bi bi-info-circle-fill me-1"></i> Cuentas Dev Pre-Cargadas:</h6>
+                    <ul class="mb-0 ps-3">
+                        <li><code>developer@realestate.com</code> | <code>Developer123!</code></li>
+                        <li><code>dev2@realestate.com</code> | <code>Developer123!</code></li>
+                    </ul>
+                </div>
             </div>
         </div>
 
-        <!-- Guía de Autenticación JWT -->
+        <!-- Generador y Autenticador Interactivo de Token JWT -->
         <div class="col-lg-7">
             <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
                 <h5 class="font-heading fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-shield-lock-fill text-success"></i> Autenticación y Obtención de Token JWT
+                    <i class="bi bi-shield-lock-fill text-success"></i> Generador y Autenticador de Token JWT
                 </h5>
-                <p class="text-muted small mb-4">
-                    Para consumir los endpoints protegidos de la API, envía una solicitud <code>POST</code> a <code>/api/v1/Account/authenticate</code> con tus credenciales:
+                <p class="text-muted small mb-3">
+                    Ingresa el correo y la contraseña de tu cuenta de desarrollador para generar y autenticar tu **Token JWT Bearer** en tiempo real.
                 </p>
 
-                <!-- Bloque de Ejemplo cURL -->
-                <div class="mb-3">
-                    <span class="small font-heading fw-bold text-muted d-block mb-2"><i class="bi bi-terminal me-1"></i> Solicitud HTTP / cURL:</span>
-                    <pre class="bg-dark text-light p-3 rounded-3 small font-mono mb-0" style="overflow-x: auto;">curl -X 'POST' \
-  'http://localhost:5196/api/v1/Account/authenticate' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "email": "@Model.Email",
-  "password": "TuContraseña"
-}'</pre>
-                </div>
+                <form id="jwtForm" class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-dark mb-1">Correo Electrónico Dev</label>
+                        <input type="email" id="jwtEmail" class="form-control form-control-custom" value="@Model.Email" placeholder="desarrollador@realestate.com" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-dark mb-1">Contraseña de Cuenta</label>
+                        <input type="password" id="jwtPassword" class="form-control form-control-custom" placeholder="••••••••" value="Developer123!" required />
+                    </div>
+                    <div class="col-12">
+                        <button type="button" id="btnGenerateToken" class="btn btn-primary-gradient w-100 py-2.5 font-heading fw-bold shadow-sm">
+                            <i class="bi bi-key-fill me-1"></i> Generar y Autenticar Token JWT
+                        </button>
+                    </div>
+                </form>
 
-                <!-- Bloque de Uso de Header Bearer -->
-                <div>
-                    <span class="small font-heading fw-bold text-muted d-block mb-2"><i class="bi bi-header me-1"></i> Uso en Peticiones (Header HTTP):</span>
-                    <div class="p-3 bg-light rounded-3 border">
-                        <code class="text-dark font-mono">Authorization: Bearer &lt;tu_jwtoken_obtenido&gt;</code>
+                <div id="jwtAlert" class="alert d-none small py-2 mb-3"></div>
+
+                <!-- Token Result Box -->
+                <div id="tokenResultBox" class="d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small font-heading fw-bold text-dark"><i class="bi bi-file-earmark-code-fill text-primary me-1"></i> Token JWT Bearer Generado:</span>
+                        <button type="button" id="btnCopyToken" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 font-heading">
+                            <i class="bi bi-clipboard me-1"></i> Copiar Token
+                        </button>
+                    </div>
+                    <textarea id="generatedJwtToken" class="form-control font-mono bg-dark text-success p-3 small rounded-3 mb-3" rows="4" readonly></textarea>
+
+                    <div class="p-3 bg-light rounded-3 border mb-3">
+                        <span class="small font-heading fw-bold text-muted d-block mb-1"><i class="bi bi-header me-1"></i> Formato de Cabecera HTTP:</span>
+                        <code class="text-dark font-mono">Authorization: Bearer <span id="jwtHeaderPreview" class="text-primary">eyJhbGciOi...</span></code>
+                    </div>
+
+                    <!-- Probador Interactivo de Endpoints REST -->
+                    <div class="border-top pt-3">
+                        <h6 class="font-heading fw-bold text-dark mb-2"><i class="bi bi-play-circle-fill text-success me-1"></i> Probador de Endpoints REST en Vivo</h6>
+                        <div class="input-group mb-2">
+                            <select id="apiEndpointSelect" class="form-select font-mono small">
+                                <option value="http://localhost:5196/api/v1/Properties">GET /api/v1/Properties (Catálogo)</option>
+                                <option value="http://localhost:5196/api/v1/Agents">GET /api/v1/Agents (Agentes)</option>
+                                <option value="http://localhost:5196/api/v1/PropertyTypes">GET /api/v1/PropertyTypes (Tipos Inmuebles)</option>
+                                <option value="http://localhost:5196/api/v1/SaleTypes">GET /api/v1/SaleTypes (Tipos Ventas)</option>
+                                <option value="http://localhost:5196/api/v1/Improvements">GET /api/v1/Improvements (Mejoras)</option>
+                                <option value="http://localhost:5196/api/v1/Account/profile">GET /api/v1/Account/profile (Perfil)</option>
+                            </select>
+                            <button type="button" id="btnTestEndpoint" class="btn btn-success font-heading fw-bold px-3">
+                                <i class="bi bi-send-fill me-1"></i> Probar
+                            </button>
+                        </div>
+                        <div id="apiTestResponseBox" class="d-none">
+                            <span class="small font-heading fw-bold text-muted d-block mb-1">Respuesta HTTP / JSON:</span>
+                            <pre id="apiTestResponse" class="bg-dark text-light p-3 rounded-3 small font-mono mb-0" style="max-height: 220px; overflow-y: auto;"></pre>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -112,3 +155,94 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#btnGenerateToken").click(function () {
+                var email = $("#jwtEmail").val().trim();
+                var password = $("#jwtPassword").val();
+                var $alert = $("#jwtAlert");
+
+                if (!email || !password) {
+                    $alert.removeClass("d-none alert-success alert-info").addClass("alert-danger").text("Por favor ingresa tu correo y contraseña.").show();
+                    return;
+                }
+
+                $alert.removeClass("d-none alert-danger alert-success").addClass("alert-info").text("Autenticando y generando token JWT...").show();
+
+                function tryAuthenticate(targetUrl, fallbackUrl) {
+                    $.ajax({
+                        url: targetUrl,
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ email: email, password: password }),
+                        success: function (res) {
+                            if (res && res.jwToken) {
+                                $alert.removeClass("alert-info alert-danger").addClass("alert-success").html('<i class="bi bi-check-circle-fill me-1"></i> ¡Token JWT generado y autenticado exitosamente para ' + (res.email || email) + '!');
+                                $("#generatedJwtToken").val(res.jwToken);
+                                $("#jwtHeaderPreview").text(res.jwToken.substring(0, 30) + "...");
+                                $("#tokenResultBox").removeClass("d-none");
+                            } else {
+                                var errorMsg = (res && res.error) ? res.error : "No se pudo generar el token.";
+                                $alert.removeClass("alert-info alert-success").addClass("alert-danger").text(errorMsg);
+                            }
+                        },
+                        error: function (xhr) {
+                            if (fallbackUrl) {
+                                tryAuthenticate(fallbackUrl, null);
+                            } else {
+                                var errObj = xhr.responseJSON;
+                                var msg = (errObj && errObj.error) ? errObj.error : (xhr.responseText ? xhr.responseText : "Error de autenticación. Verifica las credenciales.");
+                                $alert.removeClass("alert-info alert-success").addClass("alert-danger").text(msg);
+                            }
+                        }
+                    });
+                }
+
+                tryAuthenticate('http://localhost:5196/api/v1/Account/authenticate', '/Account/GenerateJwtToken');
+            });
+
+            $("#btnCopyToken").click(function () {
+                var token = $("#generatedJwtToken").val();
+                if (token) {
+                    navigator.clipboard.writeText(token).then(function () {
+                        $("#btnCopyToken").html('<i class="bi bi-check2 me-1"></i> ¡Copiado!');
+                        setTimeout(function () {
+                            $("#btnCopyToken").html('<i class="bi bi-clipboard me-1"></i> Copiar Token');
+                        }, 2000);
+                    });
+                }
+            });
+
+            $("#btnTestEndpoint").click(function () {
+                var url = $("#apiEndpointSelect").val();
+                var token = $("#generatedJwtToken").val();
+                var $respBox = $("#apiTestResponseBox");
+                var $respPre = $("#apiTestResponse");
+
+                if (!token) {
+                    alert("Primero debes generar un Token JWT.");
+                    return;
+                }
+
+                $respPre.text("Enviando petición a " + url + "...");
+                $respBox.removeClass("d-none");
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    success: function (data) {
+                        $respPre.text(JSON.stringify(data, null, 2));
+                    },
+                    error: function (xhr) {
+                        $respPre.text("Status " + xhr.status + " " + xhr.statusText + "\n\n" + JSON.stringify(xhr.responseJSON || xhr.responseText, null, 2));
+                    }
+                });
+            });
+        });
+    </script>
+}
