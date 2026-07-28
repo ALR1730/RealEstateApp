@@ -3,7 +3,101 @@
     ViewData["Title"] = $"Inmueble {Model.Code}";
 }
 
+<style>
+    @@media print {
+        header, footer, nav, .navbar, .breadcrumb, .carousel-control-prev, .carousel-control-next,
+        .no-print, .btn, form, iframe, .modal, #yearsPillGroup, #btnCalculate, .sticky-top,
+        .avatar-lg, .alert {
+            display: none !important;
+        }
+
+        body {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            font-size: 11pt !important;
+        }
+
+        .container {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .row {
+            display: block !important;
+        }
+
+        .col-lg-8, .col-lg-4, .col-md-6, .col-md-3, .col-4 {
+            width: 100% !important;
+            max-width: 100% !important;
+            flex: 0 0 100% !important;
+        }
+
+        #mortgageResults {
+            display: block !important;
+        }
+
+        #amortizationTableCollapse {
+            display: block !important;
+            height: auto !important;
+            visibility: visible !important;
+            overflow: visible !important;
+        }
+
+        .table-responsive {
+            max-height: none !important;
+            overflow: visible !important;
+        }
+
+        table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            margin-top: 15px !important;
+        }
+
+        th, td {
+            border: 1px solid #ccc !important;
+            padding: 6px 8px !important;
+            font-size: 9.5pt !important;
+        }
+
+        thead {
+            display: table-header-group !important;
+            background-color: #f2f2f2 !important;
+        }
+
+        tr {
+            page-break-inside: avoid !important;
+        }
+
+        .card {
+            border: 1px solid #e0e0e0 !important;
+            box-shadow: none !important;
+            margin-bottom: 20px !important;
+            page-break-inside: avoid !important;
+        }
+
+        .print-report-header {
+            display: block !important;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+    }
+
+    .print-report-header {
+        display: none;
+    }
+</style>
+
 <div class="container py-4">
+    <!-- Encabezado exclusivo para impresión PDF -->
+    <div class="print-report-header text-center">
+        <h3 class="fw-bold text-primary mb-1">RealEstateApp - Reporte Inmobiliario e Hipotecario</h3>
+        <p class="text-muted small mb-0">Ficha Técnica de Inmueble y Tabla de Amortización Francesa | Generado el @DateTime.Now.ToString("dd/MM/yyyy")</p>
+    </div>
+
     <!-- Breadcrumb & Header Header -->
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
@@ -329,10 +423,10 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="font-heading fw-bold text-dark mb-0"><i class="bi bi-table text-primary me-1"></i> Tabla de Amortización Francesa</h6>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-secondary font-heading" type="button" onclick="window.print();">
+                    <button id="btnPrintPdf" class="btn btn-sm btn-outline-secondary font-heading no-print" type="button">
                         <i class="bi bi-printer me-1"></i> Imprimir / Guardar
                     </button>
-                    <button class="btn btn-sm btn-outline-primary font-heading rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#amortizationTableCollapse">
+                    <button class="btn btn-sm btn-outline-primary font-heading rounded-pill no-print" type="button" data-bs-toggle="collapse" data-bs-target="#amortizationTableCollapse">
                         <i class="bi bi-eye me-1"></i> Mostrar / Ocultar Tabla
                     </button>
                 </div>
@@ -441,6 +535,17 @@
 
             $("#btnCalculate").click(function () {
                 calculateMortgage();
+            });
+
+            // Evento para guardar / imprimir PDF profesional completo
+            $("#btnPrintPdf").click(function () {
+                if ($("#mortgageResults").hasClass("d-none")) {
+                    calculateMortgage();
+                }
+                $("#amortizationTableCollapse").addClass("show");
+                setTimeout(function () {
+                    window.print();
+                }, 250);
             });
 
             // Auto-calcular en carga inicial para mostrar datos predeterminados
