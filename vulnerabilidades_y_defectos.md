@@ -68,7 +68,9 @@ IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
 
 ---
 
-### 🔴 1.3 Política CORS Permite Todo Origen
+### ✅ ~~1.3 Política CORS Permite Todo Origen~~ — SOLUCIONADO
+
+> **Resuelto**: Se reemplazó `AllowAnyOrigin()` y la política `AllowAllCors` por una política restrictiva `AllowSpecificOrigins` que lee los dominios permitidos desde `AllowedOrigins` en `appsettings.json` (o por defecto puertos locales de WebApp y WebApi) y habilita `AllowCredentials()`.
 
 **Archivo**: [WebApi Program.cs L21-L29](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApi/Program.cs#L21-L29)
 

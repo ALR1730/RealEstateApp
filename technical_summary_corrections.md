@@ -39,13 +39,28 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🌐 Corrección 1.3 — Restricción de Política CORS en Web API
+
+- **Severidad**: 🔴 Crítico (Seguridad)
+- **Componente**: `RealEstateApp.Presentation.WebApi`
+- **Archivos Modificados**:
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/appsettings.json`
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/Program.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se eliminó la política permisiva `AllowAllCors` que utilizaba `policy.AllowAnyOrigin()`.
+  2. Se definió la sección `AllowedOrigins` en `appsettings.json` especificando los dominios autorizados de desarrollo (`http://localhost:5000`, `https://localhost:5001`, `http://localhost:5196`, `https://localhost:7196`).
+  3. En `Program.cs`, se configuró la nueva política `AllowSpecificOrigins` que lee dinámicamente el arreglo de orígenes desde configuración, aplicando `.WithOrigins(...)`, `.AllowAnyHeader()`, `.AllowAnyMethod()` y `.AllowCredentials()`.
+  4. Se actualizó el middleware de pipeline `app.UseCors("AllowSpecificOrigins")`.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
 |---|---|---|---|
 | **1.1** | 🔒 Seguridad | Credenciales Google OAuth en `appsettings.json` | ✅ SOLUCIONADO |
 | **1.2** | 🔒 Seguridad | Clave JWT Signing Key hardcodeada y fallback inseguro | ✅ SOLUCIONADO |
-| **1.3** | 🔒 Seguridad | Política CORS `AllowAnyOrigin()` | ⏳ Pendiente |
+| **1.3** | 🔒 Seguridad | Política CORS `AllowAnyOrigin()` | ✅ SOLUCIONADO |
 | **1.4** | 🔒 Seguridad | Webhook WhatsApp sin autenticación / firma Meta | ⏳ Pendiente |
 | **1.5** | 🔒 Seguridad | CSRF Bypass en `GenerateJwtToken` | ⏳ Pendiente |
 | **1.6** | 🔒 Seguridad | Ausencia de Rate Limiting en endpoints de autenticación | ⏳ Pendiente |

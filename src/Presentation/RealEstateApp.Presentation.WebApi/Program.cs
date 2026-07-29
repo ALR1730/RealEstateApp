@@ -17,14 +17,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Configurar política de CORS para permitir solicitudes desde el WebApp / Developer Panel
+// Configurar política de CORS restrictiva basada en orígenes permitidos
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() 
+    ?? new[] { "http://localhost:5000", "https://localhost:5001", "http://localhost:5196", "https://localhost:7196" };
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllCors", policy =>
+    options.AddPolicy("AllowSpecificOrigins", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -157,7 +161,7 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseRouting();
-app.UseCors("AllowAllCors");
+app.UseCors("AllowSpecificOrigins");
 
 app.UseAuthentication();
 app.UseAuthorization();
