@@ -12,7 +12,7 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         /// <summary>
         /// Obtiene el hilo de mensajes entre un cliente y un agente para una propiedad.
         /// </summary>
-        Task<List<ChatViewModel>> GetChatThread(string clienteId, string agenteId, int propertyId, string currentUserId);
+        Task<List<ChatViewModel>> GetChatThread(string clienteId, string agenteId, int? propertyId, string currentUserId);
 
         /// <summary>
         /// Envía un mensaje en el chat.

@@ -12,11 +12,13 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
     {
         public ChatRepository(ApplicationDbContext dbContext) : base(dbContext) { }
 
-        public async Task<List<Chat>> GetChatThreadAsync(string clienteId, string agenteId, int propertyId)
+        public async Task<List<Chat>> GetChatThreadAsync(string clienteId, string agenteId, int? propertyId)
         {
+            int? targetPropertyId = (propertyId.HasValue && propertyId.Value <= 0) ? null : propertyId;
+
             return await _dbContext.Set<Chat>()
                 .Include(c => c.Property)
-                .Where(c => c.ClienteId == clienteId && c.AgenteId == agenteId && c.PropertyId == propertyId)
+                .Where(c => c.ClienteId == clienteId && c.AgenteId == agenteId && c.PropertyId == targetPropertyId)
                 .OrderBy(c => c.SentAt)
                 .ToListAsync();
         }

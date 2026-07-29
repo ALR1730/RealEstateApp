@@ -272,7 +272,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return RedirectToAction(nameof(Thread), new { propertyId = 0, agentId = targetAgent, clienteId = targetClient });
             }
 
-            var property = await _propertyService.GetByIdViewModel(vm.PropertyId);
+            var property = await _propertyService.GetByIdViewModel(vm.PropertyId ?? 0);
 
             if (!ModelState.IsValid)
             {

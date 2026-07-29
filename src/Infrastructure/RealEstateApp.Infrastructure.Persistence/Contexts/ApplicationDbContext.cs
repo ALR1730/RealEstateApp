@@ -228,6 +228,9 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                     .IsRequired()
                     .HasMaxLength(2000);
 
+                entity.Property(c => c.PropertyId)
+                    .IsRequired(false);
+
                 entity.HasOne(c => c.Property)
                     .WithMany(p => p.Chats)
                     .HasForeignKey(c => c.PropertyId)

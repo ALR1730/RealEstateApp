@@ -330,7 +330,9 @@ offer.PreApprovalLetterUrl = letterUrl;
 
 ---
 
-### 🔴 3.2 Chat de Soporte con PropertyId Inexistente en BD
+### ✅ ~~3.2 Chat de Soporte con PropertyId Inexistente en BD~~ — SOLUCIONADO
+
+> **Resuelto**: Se convirtió la propiedad `PropertyId` a `int?` (nullable) en `Chat.cs`, `ChatViewModel.cs` y `SaveChatViewModel.cs`. Se configuró la clave foránea como opcional (`.IsRequired(false)`) en `ApplicationDbContext.cs`. En `ChatRepository.cs` y `ChatService.cs` se mapean los canales de soporte (PropertyId <= 0) a `PropertyId = null` en la base de datos, garantizando cumplimiento del 100% de la integridad referencial SQL Server sin violaciones de Clave Foránea (`FK_Chats_Properties_PropertyId`).
 
 **Archivo**: [ChatsController.cs L58 y L78](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/ChatsController.cs#L58)
 

@@ -7,7 +7,7 @@ namespace RealEstateApp.Core.Domain.Entities
     {
         public string ClienteId { get; set; } = string.Empty;
         public string AgenteId { get; set; } = string.Empty;
-        public int PropertyId { get; set; }
+        public int? PropertyId { get; set; }
         public Property? Property { get; set; }
 
         public string MessageContent { get; set; } = string.Empty;

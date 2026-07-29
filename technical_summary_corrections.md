@@ -102,6 +102,28 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 💬 Corrección 3.2 — Integridad Referencial y Soporte de Canales de Soporte en Chat (PropertyId Nullable)
+
+- **Severidad**: 🔴 Crítico (Bug Funcional / Base de Datos)
+- **Componentes**: `RealEstateApp.Core.Domain`, `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Domain/Entities/Chat.cs`
+  - `src/Core/RealEstateApp.Core.Application/ViewModels/Chat/ChatViewModel.cs`
+  - `src/Core/RealEstateApp.Core.Application/ViewModels/Chat/SaveChatViewModel.cs`
+  - `src/Core/RealEstateApp.Core.Application/Interfaces/Repositories/IChatRepository.cs`
+  - `src/Core/RealEstateApp.Core.Application/Interfaces/Services/IChatService.cs`
+  - `src/Core/RealEstateApp.Core.Application/Services/ChatService.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/ChatRepository.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Contexts/ApplicationDbContext.cs`
+  - `src/Core/RealEstateApp.Core.Application/Mappings/GeneralProfile.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se modificó la clave foránea `PropertyId` a tipo nulo (`int? PropertyId`) en las entidades `Chat`, `ChatViewModel` y `SaveChatViewModel`.
+  2. En `ApplicationDbContext.cs`, se configuró la relación `.IsRequired(false)` para `PropertyId` manteniendo la eliminación en cascada para propiedades existentes.
+  3. En `ChatRepository.cs` y `ChatService.cs`, se mapearon las peticiones de canales de soporte (PropertyId <= 0) para que persistan `PropertyId = NULL` en la base de datos SQL Server, eliminando las fallas de violaciones de clave foránea `FK_Chats_Properties_PropertyId`.
+  4. Se ajustó el perfil de AutoMapper (`GeneralProfile.cs`) para soportar la conversión segura de `PropertyId` nulo sin lanzar excepciones.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -118,7 +140,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **2.2** | 🏗️ Arquitectura | N+1 `SaveChangesAsync` en `GenericRepository` | ⏳ Pendiente |
 | **2.3** | 🏗️ Arquitectura | Falta de transacciones explícitas en `AcceptOffer` | ⏳ Pendiente |
 | **3.1** | 🐛 Bug | Carta de Pre-aprobación bancaria subida pero no guardada | ✅ SOLUCIONADO |
-| **3.2** | 🐛 Bug | Chats de soporte usan PropertyId (0 y -1) sin validar FK | ⏳ Pendiente |
+| **3.2** | 🐛 Bug | Chats de soporte usan PropertyId (0 y -1) sin validar FK | ✅ SOLUCIONADO |
 | **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ⏳ Pendiente |
 
 ---

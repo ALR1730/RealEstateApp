@@ -8,9 +8,7 @@ namespace RealEstateApp.Core.Application.ViewModels.Chat
     /// </summary>
     public class SaveChatViewModel
     {
-        [Required(ErrorMessage = "La propiedad es requerida")]
-        [Range(1, int.MaxValue, ErrorMessage = "Seleccione una propiedad válida")]
-        public int PropertyId { get; set; }
+        public int? PropertyId { get; set; }
 
         [Required(ErrorMessage = "El mensaje es requerido")]
         [StringLength(2000, ErrorMessage = "El mensaje no puede exceder 2000 caracteres")]

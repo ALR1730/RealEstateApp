@@ -32,7 +32,7 @@ namespace RealEstateApp.Core.Application.Services
         }
 
         public async Task<List<ChatViewModel>> GetChatThread(
-            string clienteId, string agenteId, int propertyId, string currentUserId)
+            string clienteId, string agenteId, int? propertyId, string currentUserId)
         {
             var messages = await _chatRepository.GetChatThreadAsync(clienteId, agenteId, propertyId);
             var viewModels = _mapper.Map<List<ChatViewModel>>(messages);
@@ -53,25 +53,41 @@ namespace RealEstateApp.Core.Application.Services
             chat.SentAt = DateTime.UtcNow;
             chat.IsWhatsApp = true;
 
-            var property = await _propertyRepository.GetByIdAsync(vm.PropertyId);
-
-            if (property != null)
+            // Manejo de Soporte: PropertyId <= 0 se mapea a null en la BD
+            if (vm.PropertyId.HasValue && vm.PropertyId.Value <= 0)
             {
-                if (senderId == property.AgentId)
+                chat.PropertyId = null;
+                chat.ClienteId = vm.RecipientId;
+                chat.AgenteId = senderId;
+            }
+            else if (vm.PropertyId.HasValue)
+            {
+                var property = await _propertyRepository.GetByIdAsync(vm.PropertyId.Value);
+
+                if (property != null)
                 {
-                    // El emisor es el agente de la propiedad
-                    chat.AgenteId = senderId;
-                    chat.ClienteId = vm.RecipientId;
+                    if (senderId == property.AgentId)
+                    {
+                        // El emisor es el agente de la propiedad
+                        chat.AgenteId = senderId;
+                        chat.ClienteId = vm.RecipientId;
+                    }
+                    else
+                    {
+                        // El emisor es el cliente
+                        chat.AgenteId = property.AgentId;
+                        chat.ClienteId = senderId;
+                    }
                 }
                 else
                 {
-                    // El emisor es el cliente
-                    chat.AgenteId = property.AgentId;
-                    chat.ClienteId = senderId;
+                    chat.ClienteId = vm.RecipientId;
+                    chat.AgenteId = senderId;
                 }
             }
             else
             {
+                chat.PropertyId = null;
                 chat.ClienteId = vm.RecipientId;
                 chat.AgenteId = senderId;
             }
