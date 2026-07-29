@@ -165,7 +165,9 @@ builder.Services.AddRateLimiter(options =>
 
 ---
 
-### 🟠 1.7 Sin Sanitización de Contenido de Chat (XSS)
+### ✅ ~~1.7 Sin Sanitización de Contenido de Chat (XSS)~~ — SOLUCIONADO
+
+> **Resuelto**: Se aplicó la codificación de entidad de caracteres de HTML mediante `System.Net.WebUtility.HtmlEncode(vm.MessageContent)` en `ChatService.SendMessage` antes de la persistencia en base de datos. Toda etiqueta o script malicioso inyectado (`<script>`, `<iframe>`, `onload=...`) es codificado y renderizado como texto literal seguro en el cliente, neutralizando por completo el vector de ataque Stored XSS.
 
 **Archivo**: [Chat.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Entities/Chat.cs#L13) / [ChatService.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Services/ChatService.cs#L49-L83)
 

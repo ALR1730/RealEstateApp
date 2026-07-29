@@ -52,6 +52,7 @@ namespace RealEstateApp.Core.Application.Services
             chat.SenderId = senderId;
             chat.SentAt = DateTime.UtcNow;
             chat.IsWhatsApp = true;
+            chat.MessageContent = System.Net.WebUtility.HtmlEncode(vm.MessageContent);
 
             // Manejo de Soporte: PropertyId <= 0 se mapea a null en la BD
             if (vm.PropertyId.HasValue && vm.PropertyId.Value <= 0)

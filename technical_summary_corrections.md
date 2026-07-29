@@ -157,6 +157,18 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🛡️ Corrección 1.7 — Sanitización contra Stored XSS en Mensajería de Chat
+
+- **Severidad**: 🟠 Alta (Seguridad / Stored Cross-Site Scripting)
+- **Componentes**: `RealEstateApp.Core.Application`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Application/Services/ChatService.cs`
+- **Detalles Técnicos de la Solución**:
+  1. En `ChatService.cs` (método `SendMessage`), se aplicó la codificación previa a la persistencia en base de datos utilizando `System.Net.WebUtility.HtmlEncode(vm.MessageContent)`.
+  2. Todo contenido inyectado por clientes o usuarios (`<script>`, `<img src=x onerror=...>`, etc.) es convertido en su representación de entidad de texto HTML seguro (`&lt;script&gt;`), previniendo su ejecución en navegadores o clientes Web/API.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -167,7 +179,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **1.4** | 🔒 Seguridad | Webhook WhatsApp sin autenticación / firma Meta | ✅ SOLUCIONADO |
 | **1.5** | 🔒 Seguridad | CSRF Bypass en `GenerateJwtToken` | ✅ SOLUCIONADO |
 | **1.6** | 🔒 Seguridad | Ausencia de Rate Limiting en endpoints de autenticación | ✅ SOLUCIONADO |
-| **1.7** | 🔒 Seguridad | Sin sanitización HTML/XSS en mensajes de Chat | ⏳ Pendiente |
+| **1.7** | 🔒 Seguridad | Sin sanitización HTML/XSS en mensajes de Chat | ✅ SOLUCIONADO |
 | **1.8** | 🔒 Seguridad | Requisito de contraseña débil (6 caracteres) | ⏳ Pendiente |
 | **2.1** | 🏗️ Arquitectura | Violación Onion Architecture: Identity en Application Layer | ⏳ Pendiente |
 | **2.2** | 🏗️ Arquitectura | N+1 `SaveChangesAsync` en `GenericRepository` | ⏳ Pendiente |
