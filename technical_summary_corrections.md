@@ -1,0 +1,67 @@
+# 🛠️ Ficha Técnica de Correcciones y Parches — RealEstateApp
+
+Este documento registra de manera acumulativa y detallada cada corrección de vulnerabilidad, bug funcional, refactorización y mejora de infraestructura realizada en la solución **RealEstateApp**.
+
+---
+
+## 📅 Registro de Cambios y Correcciones
+
+### 🔐 Corrección 1.1 — Eliminación de Credenciales Google OAuth Hardcodeadas
+
+- **Severidad**: 🔴 Crítico (Seguridad)
+- **Componente**: `RealEstateApp.Presentation.WebApp`
+- **Archivos Modificados**:
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/appsettings.json`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/RealEstateApp.Presentation.WebApp.csproj`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Program.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se eliminaron del archivo `appsettings.json` los valores en texto plano de `GoogleAuth:ClientId` y `GoogleAuth:ClientSecret`, reemplazándolos por cadenas vacías `""`.
+  2. Se habilitó `dotnet user-secrets` en la WebApp generando el `UserSecretsId` `819ef8c1-6685-4d0a-9719-4b8949d5cac8` en el `.csproj`.
+  3. Se almacenaron de forma segura las credenciales reales en el almacén de secretos local del desarrollador (`dotnet user-secrets set`).
+  4. En `Program.cs`, se modificó la registración del middleware `AddGoogle()` para evaluar si `googleClientId` y `googleClientSecret` están presentes en la configuración antes de invocar `AddGoogle()`. Si no están configurados, el sistema emite una advertencia en consola y continúa iniciando limpiamente sin fallar por credenciales DUMMY.
+
+---
+
+### 🔑 Corrección 1.2 — Protección de Clave de Firma de Tokens JWT
+
+- **Severidad**: 🔴 Crítico (Seguridad)
+- **Componentes**: `RealEstateApp.Presentation.WebApi`, `RealEstateApp.Presentation.WebApp`
+- **Archivos Modificados**:
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/appsettings.json`
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/RealEstateApp.Presentation.WebApi.csproj`
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/Program.cs`
+  - Secretos locales en `RealEstateApp.Presentation.WebApp`
+- **Detalles Técnicos de la Solución**:
+  1. Se eliminó la clave secreta `JWTSettings:Key` en texto plano del `appsettings.json` de la Web API.
+  2. Se configuró `dotnet user-secrets` en la Web API generando el `UserSecretsId` `75f5011c-8493-4e5e-86fc-deca8ac9083a`.
+  3. Se guardó la clave de firma JWT en `user-secrets` de la Web API y en los `user-secrets` de la WebApp (necesario para la emisión de tokens en el Panel de Desarrolladores).
+  4. En `WebApi/Program.cs`, se eliminó el valor por defecto inseguro (`"DefaultSecretKey1234567890123456"`) y se agregó una validación estricta al inicio: si `JWTSettings:Key` está vacío o no está configurado, el sistema lanza una `InvalidOperationException` impidiendo que la API levante con claves inseguras o nulas.
+
+---
+
+## 📊 Estado Actual del Plan de Correcciones
+
+| ID | Tipo | Descripción | Estado |
+|---|---|---|---|
+| **1.1** | 🔒 Seguridad | Credenciales Google OAuth en `appsettings.json` | ✅ SOLUCIONADO |
+| **1.2** | 🔒 Seguridad | Clave JWT Signing Key hardcodeada y fallback inseguro | ✅ SOLUCIONADO |
+| **1.3** | 🔒 Seguridad | Política CORS `AllowAnyOrigin()` | ⏳ Pendiente |
+| **1.4** | 🔒 Seguridad | Webhook WhatsApp sin autenticación / firma Meta | ⏳ Pendiente |
+| **1.5** | 🔒 Seguridad | CSRF Bypass en `GenerateJwtToken` | ⏳ Pendiente |
+| **1.6** | 🔒 Seguridad | Ausencia de Rate Limiting en endpoints de autenticación | ⏳ Pendiente |
+| **1.7** | 🔒 Seguridad | Sin sanitización HTML/XSS en mensajes de Chat | ⏳ Pendiente |
+| **1.8** | 🔒 Seguridad | Requisito de contraseña débil (6 caracteres) | ⏳ Pendiente |
+| **2.1** | 🏗️ Arquitectura | Violación Onion Architecture: Identity en Application Layer | ⏳ Pendiente |
+| **2.2** | 🏗️ Arquitectura | N+1 `SaveChangesAsync` en `GenericRepository` | ⏳ Pendiente |
+| **2.3** | 🏗️ Arquitectura | Falta de transacciones explícitas en `AcceptOffer` | ⏳ Pendiente |
+| **3.1** | 🐛 Bug | Carta de Pre-aprobación bancaria subida pero no guardada | ⏳ Pendiente |
+| **3.2** | 🐛 Bug | Chats de soporte usan PropertyId (0 y -1) sin validar FK | ⏳ Pendiente |
+| **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ⏳ Pendiente |
+
+---
+
+## 🧪 Verificación de Compilación
+
+- **Estado de la Solución**: `Build Succeeded`
+- **Errores**: 0
+- **Advertencias**: 0

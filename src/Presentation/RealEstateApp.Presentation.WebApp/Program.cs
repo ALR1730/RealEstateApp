@@ -30,19 +30,34 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
-builder.Services.AddAuthentication()
-    .AddGoogle(options =>
-    {
-        options.ClientId = builder.Configuration["GoogleAuth:ClientId"] ?? "DUMMY_GOOGLE_CLIENT_ID";
-        options.ClientSecret = builder.Configuration["GoogleAuth:ClientSecret"] ?? "DUMMY_GOOGLE_CLIENT_SECRET";
-        options.Events.OnRemoteFailure = context =>
+// Registrar autenticación con Google solo si las credenciales están configuradas
+// Las credenciales deben estar en User Secrets (desarrollo) o variables de entorno (producción)
+// Nunca hardcodear credenciales en appsettings.json
+var googleClientId = builder.Configuration["GoogleAuth:ClientId"];
+var googleClientSecret = builder.Configuration["GoogleAuth:ClientSecret"];
+
+if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+{
+    builder.Services.AddAuthentication()
+        .AddGoogle(options =>
         {
-            var errorMessage = context.Failure?.Message ?? "Error al autenticar con el proveedor externo.";
-            context.Response.Redirect($"/Account/Login?remoteError={Uri.EscapeDataString(errorMessage)}");
-            context.HandleResponse();
-            return Task.CompletedTask;
-        };
-    });
+            options.ClientId = googleClientId;
+            options.ClientSecret = googleClientSecret;
+            options.Events.OnRemoteFailure = context =>
+            {
+                var errorMessage = context.Failure?.Message ?? "Error al autenticar con el proveedor externo.";
+                context.Response.Redirect($"/Account/Login?remoteError={Uri.EscapeDataString(errorMessage)}");
+                context.HandleResponse();
+                return Task.CompletedTask;
+            };
+        });
+}
+else
+{
+    Console.WriteLine("⚠️  [Seguridad] Google OAuth no configurado. Para habilitarlo, ejecute:");
+    Console.WriteLine("    dotnet user-secrets set \"GoogleAuth:ClientId\" \"<su-client-id>\"");
+    Console.WriteLine("    dotnet user-secrets set \"GoogleAuth:ClientSecret\" \"<su-client-secret>\"");
+}
 
 var app = builder.Build();
 

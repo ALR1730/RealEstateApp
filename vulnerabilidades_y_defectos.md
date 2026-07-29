@@ -18,7 +18,9 @@
 
 ## 🔒 1. Vulnerabilidades de Seguridad
 
-### 🔴 1.1 Credenciales de Google OAuth Hardcodeadas en Control de Versiones
+### ✅ ~~1.1 Credenciales de Google OAuth Hardcodeadas en Control de Versiones~~ — SOLUCIONADO
+
+> **Resuelto**: Credenciales movidas a `dotnet user-secrets`. `appsettings.json` ahora tiene valores vacíos. `Program.cs` registra Google Auth condicionalmente solo si las credenciales existen.
 
 **Archivo**: [appsettings.json](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/appsettings.json#L13-L16)
 
@@ -44,7 +46,9 @@ builder.Configuration.AddUserSecrets<Program>();
 
 ---
 
-### 🔴 1.2 Clave JWT Signing Key Hardcodeada y Predecible
+### ✅ ~~1.2 Clave JWT Signing Key Hardcodeada y Predecible~~ — SOLUCIONADO
+
+> **Resuelto**: Clave removida de `appsettings.json`. Se movió a `dotnet user-secrets` en WebApi y WebApp. En `Program.cs` de WebApi se eliminó el fallback inseguro hardcodeado y se requiere obligatoriamente la configuración.
 
 **Archivo**: [WebApi appsettings.json](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApi/appsettings.json#L7)
 

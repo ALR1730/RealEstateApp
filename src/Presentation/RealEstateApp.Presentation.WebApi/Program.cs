@@ -74,6 +74,12 @@ builder.Services.AddApplicationLayer();
 builder.Services.AddPersistenceInfrastructure(builder.Configuration);
 builder.Services.AddSharedInfrastructure();
 
+var jwtKey = builder.Configuration["JWTSettings:Key"];
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException("⚠️ [Seguridad] JWTSettings:Key no está configurado. Configure la clave secreta usando 'dotnet user-secrets' o variables de entorno.");
+}
+
 // Configuración de Autenticación por Tokens JWT Bearer
 builder.Services.AddAuthentication(options =>
 {
@@ -93,7 +99,7 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero,
         ValidIssuer = builder.Configuration["JWTSettings:Issuer"],
         ValidAudience = builder.Configuration["JWTSettings:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWTSettings:Key"] ?? "DefaultSecretKey1234567890123456"))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
     options.Events = new JwtBearerEvents
     {

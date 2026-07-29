@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("75f5011c-8493-4e5e-86fc-deca8ac9083a")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("RealEstateApp.Presentation.WebApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+507b2f48102ca41a0f5d46357316bca993fec59f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1390d0e3fed3e51e7b926053515a00e057985684")]
 [assembly: System.Reflection.AssemblyProductAttribute("RealEstateApp.Presentation.WebApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RealEstateApp.Presentation.WebApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
