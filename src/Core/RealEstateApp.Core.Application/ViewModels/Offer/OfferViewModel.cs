@@ -13,6 +13,7 @@ namespace RealEstateApp.Core.Application.ViewModels.Offer
         public string ClienteId { get; set; } = string.Empty;
         public string ClienteName { get; set; } = string.Empty;
         public DateTime FechaOferta { get; set; }
+        public string? PreApprovalLetterUrl { get; set; }
 
         // Datos de la propiedad
         public int PropertyId { get; set; }

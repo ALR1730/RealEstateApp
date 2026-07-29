@@ -84,6 +84,24 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 📄 Corrección 3.1 — Persistencia y Visualización de Cartas de Pre-Aprobación Bancaria
+
+- **Severidad**: 🔴 Crítico (Bug Funcional)
+- **Componentes**: `RealEstateApp.Core.Domain`, `RealEstateApp.Core.Application`, `RealEstateApp.Presentation.WebApp`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Domain/Entities/Offer.cs`
+  - `src/Core/RealEstateApp.Core.Application/ViewModels/Offer/SaveOfferViewModel.cs`
+  - `src/Core/RealEstateApp.Core.Application/ViewModels/Offer/OfferViewModel.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/OffersController.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Views/Agent/Offers.cshtml`
+- **Detalles Técnicos de la Solución**:
+  1. Se agregó el atributo de persistencia `PreApprovalLetterUrl` a la entidad de dominio `Offer`.
+  2. Se expuso `PreApprovalLetterUrl` en `SaveOfferViewModel` y `OfferViewModel` para el binding y la visualización de la vista.
+  3. En `OffersController.cs`, tras subir el archivo PDF/imagen mediante `_fileStorageService.UploadFileAsync`, se asignó la URL generada en `vm.PreApprovalLetterUrl = letterUrl`.
+  4. En la vista del Agente (`Agent/Offers.cshtml`), se agregó la columna **Carta Bancaria** con el botón **"Ver Carta"** (`<a href="@offer.PreApprovalLetterUrl" target="_blank">`) permitiendo la consulta directa del documento por parte del agente.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -99,7 +117,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **2.1** | 🏗️ Arquitectura | Violación Onion Architecture: Identity en Application Layer | ⏳ Pendiente |
 | **2.2** | 🏗️ Arquitectura | N+1 `SaveChangesAsync` en `GenericRepository` | ⏳ Pendiente |
 | **2.3** | 🏗️ Arquitectura | Falta de transacciones explícitas en `AcceptOffer` | ⏳ Pendiente |
-| **3.1** | 🐛 Bug | Carta de Pre-aprobación bancaria subida pero no guardada | ⏳ Pendiente |
+| **3.1** | 🐛 Bug | Carta de Pre-aprobación bancaria subida pero no guardada | ✅ SOLUCIONADO |
 | **3.2** | 🐛 Bug | Chats de soporte usan PropertyId (0 y -1) sin validar FK | ⏳ Pendiente |
 | **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ⏳ Pendiente |
 

@@ -305,7 +305,9 @@ catch
 
 ## 🐛 3. Bugs Funcionales
 
-### 🔴 3.1 Carta de Pre-Aprobación Bancaria No Se Almacena
+### ✅ ~~3.1 Carta de Pre-Aprobación Bancaria No Se Almacena~~ — SOLUCIONADO
+
+> **Resuelto**: Se agregó la propiedad `PreApprovalLetterUrl` a la entidad `Offer`, a `SaveOfferViewModel` y `OfferViewModel`. En `OffersController.cs` se asignó `vm.PreApprovalLetterUrl = letterUrl` tras la carga del archivo, persistiendo la ruta en la base de datos. Además, en `Agent/Offers.cshtml` se agregó el botón **"Ver Carta"** para que los agentes puedan revisar y descargar los documentos adjuntos de pre-aprobación bancaria.
 
 **Archivo**: [OffersController.cs L77-L82](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/OffersController.cs#L77-L82)
 

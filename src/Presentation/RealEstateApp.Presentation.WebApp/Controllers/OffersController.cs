@@ -78,7 +78,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             {
                 using var stream = vm.PreApprovalLetter.OpenReadStream();
                 var letterUrl = await _fileStorageService.UploadFileAsync(stream, vm.PreApprovalLetter.FileName, "preapprovals");
-                // La URL de la carta queda almacenada para revisión por el agente
+                vm.PreApprovalLetterUrl = letterUrl;
             }
 
             try

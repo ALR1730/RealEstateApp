@@ -28,6 +28,8 @@ namespace RealEstateApp.Core.Application.ViewModels.Offer
         [Display(Name = "Carta de Pre-aprobación Bancaria")]
         public IFormFile? PreApprovalLetter { get; set; }
 
+        public string? PreApprovalLetterUrl { get; set; }
+
         // Campos de solo lectura para mostrar en la vista
         public string? PropertyCode { get; set; }
         public decimal? PropertyPrice { get; set; }

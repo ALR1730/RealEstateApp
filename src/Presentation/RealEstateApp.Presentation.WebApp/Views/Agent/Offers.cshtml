@@ -45,7 +45,7 @@
                         <tr>
                             <th class="py-3 px-4">Inmueble</th>
                             <th class="py-3">Precio Lista</th>
-                            <th class="py-3">Propuesta Cliente</th>
+                            <th class="py-3">Carta Bancaria</th>
                             <th class="py-3">Fecha</th>
                             <th class="py-3">Estado</th>
                             <th class="py-3 px-4 text-end">Acciones</th>
@@ -61,6 +61,18 @@
                                 </td>
                                 <td>@offer.PropertyPrice.ToString("C0")</td>
                                 <td><span class="fw-bold text-success fs-6 font-heading">@offer.MontoOfertado.ToString("C0")</span></td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(offer.PreApprovalLetterUrl))
+                                    {
+                                        <a href="@offer.PreApprovalLetterUrl" target="_blank" class="btn btn-sm btn-outline-info rounded-pill px-2 py-1 small">
+                                            <i class="bi bi-file-earmark-pdf me-1"></i> Ver Carta
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Sin adjunto</span>
+                                    }
+                                </td>
                                 <td class="small text-muted">@offer.FechaOferta.ToString("dd/MM/yyyy hh:mm tt")</td>
                                 <td>
                                     @if (offer.Status == "Pending")
