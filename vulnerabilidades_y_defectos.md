@@ -182,7 +182,9 @@ chat.MessageContent = System.Net.WebUtility.HtmlEncode(vm.MessageContent);
 
 ---
 
-### 🟠 1.8 Contraseña Mínima Débil (6 caracteres)
+### ✅ ~~1.8 Contraseña Mínima Débil (6 caracteres)~~ — SOLUCIONADO
+
+> **Resuelto**: Se incrementó la longitud mínima de contraseña en `IdentityOptions` a 8 caracteres (`options.Password.RequiredLength = 8`) en `Infrastructure.Persistence/ServiceRegistration.cs`, cumpliendo con las directrices de seguridad OWASP. Se actualizaron las anotaciones de validación en `RegisterViewModel.cs`, `EditProfileViewModel.cs` y `EditDeveloperViewModel.cs` para reflejar el requisito de mínimo 8 caracteres.
 
 **Archivo**: [Persistence ServiceRegistration.cs L48](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/ServiceRegistration.cs#L48)
 

@@ -169,6 +169,21 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🔑 Corrección 1.8 — Fortalecimiento de la Política de Contraseñas (OWASP 8+ Caracteres)
+
+- **Severidad**: 🟠 Alta (Seguridad / Autenticación)
+- **Componentes**: `RealEstateApp.Infrastructure.Persistence`, `RealEstateApp.Core.Application`
+- **Archivos Modificados**:
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/ServiceRegistration.cs`
+  - `src/Core/RealEstateApp.Core.Application/ViewModels/Account/RegisterViewModel.cs`
+  - `src/Core/RealEstateApp.Core.Application/ViewModels/Account/EditProfileViewModel.cs`
+  - `src/Core/RealEstateApp.Core.Application/ViewModels/Account/EditDeveloperViewModel.cs`
+- **Detalles Técnicos de la Solución**:
+  1. En `ServiceRegistration.cs` (sección `AddIdentity`), se actualizó `options.Password.RequiredLength = 8;` cumpliendo el estándar OWASP de longitud mínima requerida.
+  2. Se actualizaron las restricciones de DataAnnotation `[StringLength(100, MinimumLength = 8)]` y los mensajes de validación en todos los ViewModels de registro y edición de cuenta.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -180,7 +195,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **1.5** | 🔒 Seguridad | CSRF Bypass en `GenerateJwtToken` | ✅ SOLUCIONADO |
 | **1.6** | 🔒 Seguridad | Ausencia de Rate Limiting en endpoints de autenticación | ✅ SOLUCIONADO |
 | **1.7** | 🔒 Seguridad | Sin sanitización HTML/XSS en mensajes de Chat | ✅ SOLUCIONADO |
-| **1.8** | 🔒 Seguridad | Requisito de contraseña débil (6 caracteres) | ⏳ Pendiente |
+| **1.8** | 🔒 Seguridad | Requisito de contraseña débil (6 caracteres) | ✅ SOLUCIONADO |
 | **2.1** | 🏗️ Arquitectura | Violación Onion Architecture: Identity en Application Layer | ⏳ Pendiente |
 | **2.2** | 🏗️ Arquitectura | N+1 `SaveChangesAsync` en `GenericRepository` | ⏳ Pendiente |
 | **2.3** | 🏗️ Arquitectura | Falta de transacciones explícitas en `AcceptOffer` | ⏳ Pendiente |

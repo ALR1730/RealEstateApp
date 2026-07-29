@@ -34,7 +34,7 @@ namespace RealEstateApp.Core.Application.ViewModels.Account
         [Display(Name = "Teléfono de Contacto")]
         public string? Phone { get; set; }
 
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres")]
         [DataType(DataType.Password)]
         [Display(Name = "Nueva Contraseña (Opcional)")]
         public string? Password { get; set; }

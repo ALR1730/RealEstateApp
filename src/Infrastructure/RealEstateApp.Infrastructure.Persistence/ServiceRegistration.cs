@@ -45,7 +45,7 @@ namespace RealEstateApp.Infrastructure.Persistence
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequiredLength = 6;
+                options.Password.RequiredLength = 8;
 
                 // Configuración de lockout
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);

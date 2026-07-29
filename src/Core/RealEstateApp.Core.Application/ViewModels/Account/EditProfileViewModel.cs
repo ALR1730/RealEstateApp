@@ -45,7 +45,7 @@ namespace RealEstateApp.Core.Application.ViewModels.Account
         [Display(Name = "Contraseña Actual (Requerida si desea cambiar contraseña)")]
         public string? CurrentPassword { get; set; }
 
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "La nueva contraseña debe tener al menos 6 caracteres")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "La nueva contraseña debe tener al menos 8 caracteres")]
         [DataType(DataType.Password)]
         [Display(Name = "Nueva Contraseña (Opcional)")]
         public string? NewPassword { get; set; }
