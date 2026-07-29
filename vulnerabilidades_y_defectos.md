@@ -249,7 +249,9 @@ private readonly UserManager<IdentityUser> _userManager;
 
 ---
 
-### 🟠 2.2 SaveChanges por Cada Operación Individual (N+1 Problem)
+### ✅ ~~2.2 SaveChanges por Cada Operación Individual (N+1 Problem)~~ — SOLUCIONADO
+
+> **Resuelto**: Se incorporaron los métodos en lote `AddRangeAsync`, `UpdateRangeAsync` y `DeleteRangeAsync` a la interfaz `IGenericRepository<T>` e implementación `GenericRepository<T>`. Se refactorizaron operaciones complejas en cascada como `AgentService.DeleteAgentCascadeAsync` y la subida de imágenes en `PropertyService.Add` para agrupar las entidades en el ChangeTracker de EF Core y realizar una única llamada batch a `SaveChangesAsync()`.
 
 **Archivo**: [GenericRepository.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/GenericRepository.cs)
 

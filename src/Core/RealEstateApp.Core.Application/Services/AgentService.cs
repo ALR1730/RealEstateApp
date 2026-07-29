@@ -185,53 +185,58 @@ namespace RealEstateApp.Core.Application.Services
                 throw new Exception($"El agente con ID '{agentId}' no existe");
             }
 
-            // 1. Obtener todas las propiedades de este agente
-            var properties = await _propertyRepository.GetAllAsync();
-            var agentProperties = properties.Where(p => p.AgentId == agentId).ToList();
+            // 1. Obtener todas las propiedades de este agente vía consulta directa en BD
+            var agentProperties = await _propertyRepository.GetByAgentIdAsync(agentId);
 
             foreach (var prop in agentProperties)
             {
-                // A. Borrar imágenes físicas de disco e imágenes en BD
+                // A. Borrar imágenes físicas de disco e imágenes en BD en lote
                 var images = await _propertyImageRepository.GetByPropertyIdAsync(prop.Id);
                 foreach (var img in images)
                 {
                     await _fileStorageService.DeleteFileAsync(img.ImageUrl, "properties");
-                    await _propertyImageRepository.DeleteAsync(img);
+                }
+                if (images.Any())
+                {
+                    await _propertyImageRepository.DeleteRangeAsync(images);
                 }
 
-                // B. Limpiar favoritos de la propiedad
+                // B. Limpiar favoritos de la propiedad en lote
                 var favorites = await _favoriteRepository.GetAllAsync();
                 var propFavs = favorites.Where(f => f.PropertyId == prop.Id).ToList();
-                foreach (var fav in propFavs)
+                if (propFavs.Any())
                 {
-                    await _favoriteRepository.DeleteAsync(fav);
+                    await _favoriteRepository.DeleteRangeAsync(propFavs);
                 }
 
-                // C. Limpiar ofertas de la propiedad
+                // C. Limpiar ofertas de la propiedad en lote
                 var offers = await _offerRepository.GetByPropertyIdAsync(prop.Id);
-                foreach (var offer in offers)
+                if (offers.Any())
                 {
-                    await _offerRepository.DeleteAsync(offer);
+                    await _offerRepository.DeleteRangeAsync(offers);
                 }
 
-                // D. Limpiar chats vinculados a la propiedad
+                // D. Limpiar chats vinculados a la propiedad en lote
                 var chats = await _chatRepository.GetAllAsync();
                 var propChats = chats.Where(c => c.PropertyId == prop.Id).ToList();
-                foreach (var chat in propChats)
+                if (propChats.Any())
                 {
-                    await _chatRepository.DeleteAsync(chat);
+                    await _chatRepository.DeleteRangeAsync(propChats);
                 }
-
-                // E. Eliminar la propiedad
-                await _propertyRepository.DeleteAsync(prop);
             }
 
-            // 2. Limpiar cualquier chat del agente que no esté vinculado a propiedades específicas
+            // E. Eliminar las propiedades en lote
+            if (agentProperties.Any())
+            {
+                await _propertyRepository.DeleteRangeAsync(agentProperties);
+            }
+
+            // 2. Limpiar cualquier chat del agente que no esté vinculado a propiedades específicas en lote
             var remainingChats = await _chatRepository.GetAllAsync();
             var agentChats = remainingChats.Where(c => c.ClienteId == agentId || c.AgenteId == agentId || c.SenderId == agentId).ToList();
-            foreach (var chat in agentChats)
+            if (agentChats.Any())
             {
-                await _chatRepository.DeleteAsync(chat);
+                await _chatRepository.DeleteRangeAsync(agentChats);
             }
 
             // 3. Eliminar usuario de Identity vía servicio de abstracción

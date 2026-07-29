@@ -70,21 +70,26 @@ namespace RealEstateApp.Core.Application.Services
             // Guardar entidad de propiedad
             property = await _propertyRepository.AddAsync(property);
 
-            // Guardar imágenes si fueron subidas
+            // Guardar imágenes si fueron subidas en lote
             if (vm.Files != null && vm.Files.Count > 0)
             {
+                var imageEntities = new List<PropertyImage>();
                 foreach (var file in vm.Files.Take(15))
                 {
                     if (file.Length > 0)
                     {
                         using var stream = file.OpenReadStream();
                         var imageUrl = await _fileStorageService.UploadFileAsync(stream, file.FileName, "properties");
-                        await _propertyImageRepository.AddAsync(new PropertyImage
+                        imageEntities.Add(new PropertyImage
                         {
                             PropertyId = property.Id,
                             ImageUrl = imageUrl
                         });
                     }
+                }
+                if (imageEntities.Any())
+                {
+                    await _propertyImageRepository.AddRangeAsync(imageEntities);
                 }
             }
 

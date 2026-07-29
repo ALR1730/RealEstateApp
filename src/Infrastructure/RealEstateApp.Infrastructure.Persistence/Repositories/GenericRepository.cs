@@ -22,15 +22,33 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
             return entity;
         }
 
+        public virtual async Task AddRangeAsync(IEnumerable<T> entities)
+        {
+            await _dbContext.Set<T>().AddRangeAsync(entities);
+            await _dbContext.SaveChangesAsync();
+        }
+
         public virtual async Task UpdateAsync(T entity)
         {
             _dbContext.Entry(entity).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
         }
 
+        public virtual async Task UpdateRangeAsync(IEnumerable<T> entities)
+        {
+            _dbContext.Set<T>().UpdateRange(entities);
+            await _dbContext.SaveChangesAsync();
+        }
+
         public virtual async Task DeleteAsync(T entity)
         {
             _dbContext.Set<T>().Remove(entity);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public virtual async Task DeleteRangeAsync(IEnumerable<T> entities)
+        {
+            _dbContext.Set<T>().RemoveRange(entities);
             await _dbContext.SaveChangesAsync();
         }
 

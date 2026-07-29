@@ -200,6 +200,22 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### ⚡ Corrección 2.2 — Optimización de Persistencia en Lote (Eliminación del Problema N+1 SaveChanges)
+
+- **Severidad**: 🟠 Alta (Arquitectura / Rendimiento BD)
+- **Componentes**: `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Application/Interfaces/Repositories/IGenericRepository.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/GenericRepository.cs`
+  - `src/Core/RealEstateApp.Core.Application/Services/AgentService.cs`
+  - `src/Core/RealEstateApp.Core.Application/Services/PropertyService.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se agregaron las operaciones en lote `AddRangeAsync`, `UpdateRangeAsync` y `DeleteRangeAsync` a la interfaz genérica `IGenericRepository<T>` y su implementación base `GenericRepository<T>`.
+  2. En `AgentService.DeleteAgentCascadeAsync`, se reemplazaron las iteraciones con llamadas individuales a `DeleteAsync` por llamadas agrupadas en lote a `DeleteRangeAsync` para imágenes, favoritos, ofertas, chats y propiedades.
+  3. En `PropertyService.Add`, se agruparon las imágenes subidas en una lista `imageEntities` y se registraron mediante un único `AddRangeAsync`, reduciendo drásticamente las peticiones repetitivas a la base de datos SQL Server.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -213,7 +229,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **1.7** | 🔒 Seguridad | Sin sanitización HTML/XSS en mensajes de Chat | ✅ SOLUCIONADO |
 | **1.8** | 🔒 Seguridad | Requisito de contraseña débil (6 caracteres) | ✅ SOLUCIONADO |
 | **2.1** | 🏗️ Arquitectura | Violación Onion Architecture: Identity en Application Layer | ✅ SOLUCIONADO |
-| **2.2** | 🏗️ Arquitectura | N+1 `SaveChangesAsync` en `GenericRepository` | ⏳ Pendiente |
+| **2.2** | 🏗️ Arquitectura | N+1 `SaveChangesAsync` en `GenericRepository` | ✅ SOLUCIONADO |
 | **2.3** | 🏗️ Arquitectura | Falta de transacciones explícitas en `AcceptOffer` | ⏳ Pendiente |
 | **3.1** | 🐛 Bug | Carta de Pre-aprobación bancaria subida pero no guardada | ✅ SOLUCIONADO |
 | **3.2** | 🐛 Bug | Chats de soporte usan PropertyId (0 y -1) sin validar FK | ✅ SOLUCIONADO |
