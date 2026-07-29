@@ -184,6 +184,22 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🧅 Corrección 2.1 — Desacoplamiento de Identity en la Capa de Aplicación (Onion Architecture)
+
+- **Severidad**: 🟠 Alta (Arquitectura / Reglas de Dominio)
+- **Componentes**: `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Application/DTOs/Account/AccountUserDto.cs`
+  - `src/Core/RealEstateApp.Core.Application/Interfaces/Services/IAccountService.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Services/AccountService.cs`
+  - `src/Core/RealEstateApp.Core.Application/Services/AgentService.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se creó el DTO abstracto `AccountUserDto` en la capa `Core.Application` para transferir datos de usuario sin depender del espacio de nombres `Microsoft.AspNetCore.Identity`.
+  2. Se expandió la interfaz `IAccountService` con los métodos `GetUsersInRoleAsync`, `GetUserByIdAsync` y `DeleteUserAsync`, implementándolos en `Infrastructure.Persistence/Services/AccountService.cs`.
+  3. Se refactorizó `AgentService.cs` para remover la inyección directa de `UserManager<IdentityUser>` y la directiva `using Microsoft.AspNetCore.Identity;`, restaurando la independencia de la capa `Core.Application` respecto a detalles de infraestructura.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -196,7 +212,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **1.6** | 🔒 Seguridad | Ausencia de Rate Limiting en endpoints de autenticación | ✅ SOLUCIONADO |
 | **1.7** | 🔒 Seguridad | Sin sanitización HTML/XSS en mensajes de Chat | ✅ SOLUCIONADO |
 | **1.8** | 🔒 Seguridad | Requisito de contraseña débil (6 caracteres) | ✅ SOLUCIONADO |
-| **2.1** | 🏗️ Arquitectura | Violación Onion Architecture: Identity en Application Layer | ⏳ Pendiente |
+| **2.1** | 🏗️ Arquitectura | Violación Onion Architecture: Identity en Application Layer | ✅ SOLUCIONADO |
 | **2.2** | 🏗️ Arquitectura | N+1 `SaveChangesAsync` en `GenericRepository` | ⏳ Pendiente |
 | **2.3** | 🏗️ Arquitectura | Falta de transacciones explícitas en `AcceptOffer` | ⏳ Pendiente |
 | **3.1** | 🐛 Bug | Carta de Pre-aprobación bancaria subida pero no guardada | ✅ SOLUCIONADO |

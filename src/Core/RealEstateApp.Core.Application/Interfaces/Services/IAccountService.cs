@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.ViewModels.Account;
@@ -18,5 +19,8 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         Task SignOutAsync();
         Task<EditProfileViewModel?> GetProfileAsync(string userId);
         Task<EditProfileViewModel> UpdateProfileAsync(EditProfileViewModel model);
+        Task<List<AccountUserDto>> GetUsersInRoleAsync(string roleName);
+        Task<AccountUserDto?> GetUserByIdAsync(string id);
+        Task DeleteUserAsync(string userId);
     }
 }

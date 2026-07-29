@@ -231,7 +231,9 @@ if (app.Environment.IsDevelopment())
 
 ## 🏗️ 2. Defectos Arquitectónicos
 
-### 🟠 2.1 Violación de Onion Architecture: Identity en Application Layer
+### ✅ ~~2.1 Violación de Onion Architecture: Identity en Application Layer~~ — SOLUCIONADO
+
+> **Resuelto**: Se desacopló por completo la capa `Core.Application` de la librería de infraestructura `Microsoft.AspNetCore.Identity`. Se creó el DTO `AccountUserDto` y se agregaron los métodos `GetUsersInRoleAsync`, `GetUserByIdAsync` y `DeleteUserAsync` al contrato `IAccountService`, implementándolos en la capa `Infrastructure.Persistence`. `AgentService.cs` ahora consume únicamente las abstracciones del core.
 
 **Archivo**: [AgentService.cs L6](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Services/AgentService.cs#L6)
 

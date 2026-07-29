@@ -361,5 +361,63 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
 
             return jwtToken;
         }
+
+        public async Task<List<AccountUserDto>> GetUsersInRoleAsync(string roleName)
+        {
+            var users = await _userManager.GetUsersInRoleAsync(roleName);
+            var userDtos = new List<AccountUserDto>();
+
+            foreach (var user in users)
+            {
+                var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
+                var roles = await _userManager.GetRolesAsync(user);
+
+                userDtos.Add(new AccountUserDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName ?? string.Empty,
+                    Email = user.Email ?? string.Empty,
+                    PhoneNumber = user.PhoneNumber,
+                    IsActive = isActive,
+                    Roles = roles.ToList()
+                });
+            }
+
+            return userDtos;
+        }
+
+        public async Task<AccountUserDto?> GetUserByIdAsync(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return null;
+
+            var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return new AccountUserDto
+            {
+                Id = user.Id,
+                UserName = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty,
+                PhoneNumber = user.PhoneNumber,
+                IsActive = isActive,
+                Roles = roles.ToList()
+            };
+        }
+
+        public async Task DeleteUserAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new Exception($"El usuario con ID '{userId}' no existe");
+            }
+
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new Exception($"Error al eliminar el usuario: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
+        }
     }
 }

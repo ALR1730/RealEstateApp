@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Identity;
 using RealEstateApp.Core.Application.DTOs.Agent;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
@@ -15,10 +14,10 @@ namespace RealEstateApp.Core.Application.Services
 {
     /// <summary>
     /// Servicio de aplicación para consultar agentes, modificar su estado y eliminación física en cascada.
+    /// Desacoplado 100% de la infraestructura de Identity cumpliendo con la Arquitectura Onion.
     /// </summary>
     public class AgentService : IAgentService
     {
-        private readonly UserManager<IdentityUser> _userManager;
         private readonly IPropertyRepository _propertyRepository;
         private readonly IAccountService _accountService;
         private readonly IOfferRepository _offerRepository;
@@ -29,7 +28,6 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IMapper _mapper;
 
         public AgentService(
-            UserManager<IdentityUser> userManager,
             IPropertyRepository propertyRepository,
             IAccountService accountService,
             IOfferRepository offerRepository,
@@ -39,7 +37,6 @@ namespace RealEstateApp.Core.Application.Services
             IFileStorageService fileStorageService,
             IMapper mapper)
         {
-            _userManager = userManager;
             _propertyRepository = propertyRepository;
             _accountService = accountService;
             _offerRepository = offerRepository;
@@ -52,7 +49,7 @@ namespace RealEstateApp.Core.Application.Services
 
         public async Task<List<AgentViewModel>> GetAllViewModelAsync()
         {
-            var agentUsers = await _userManager.GetUsersInRoleAsync(Roles.Agent.ToString());
+            var agentUsers = await _accountService.GetUsersInRoleAsync(Roles.Agent.ToString());
             var allProperties = await _propertyRepository.GetAllAsync();
 
             var agentVms = new List<AgentViewModel>();
@@ -60,16 +57,15 @@ namespace RealEstateApp.Core.Application.Services
             foreach (var user in agentUsers)
             {
                 var agentProperties = allProperties.Where(p => p.AgentId == user.Id).ToList();
-                var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
 
                 agentVms.Add(new AgentViewModel
                 {
                     Id = user.Id,
-                    FirstName = user.UserName ?? string.Empty,
+                    FirstName = user.UserName,
                     LastName = string.Empty,
-                    Email = user.Email ?? string.Empty,
+                    Email = user.Email,
                     Phone = user.PhoneNumber,
-                    IsActive = isActive,
+                    IsActive = user.IsActive,
                     PropertiesCount = agentProperties.Count,
                     Properties = _mapper.Map<List<PropertyViewModel>>(agentProperties)
                 });
@@ -80,24 +76,20 @@ namespace RealEstateApp.Core.Application.Services
 
         public async Task<AgentViewModel?> GetByIdViewModelAsync(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null) return null;
-
-            var roles = await _userManager.GetRolesAsync(user);
-            if (!roles.Contains(Roles.Agent.ToString())) return null;
+            var user = await _accountService.GetUserByIdAsync(id);
+            if (user == null || !user.Roles.Contains(Roles.Agent.ToString())) return null;
 
             var allProperties = await _propertyRepository.GetAllAsync();
             var agentProperties = allProperties.Where(p => p.AgentId == user.Id).ToList();
-            var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
 
             return new AgentViewModel
             {
                 Id = user.Id,
-                FirstName = user.UserName ?? string.Empty,
+                FirstName = user.UserName,
                 LastName = string.Empty,
-                Email = user.Email ?? string.Empty,
+                Email = user.Email,
                 Phone = user.PhoneNumber,
-                IsActive = isActive,
+                IsActive = user.IsActive,
                 PropertiesCount = agentProperties.Count,
                 Properties = _mapper.Map<List<PropertyViewModel>>(agentProperties)
             };
@@ -105,7 +97,7 @@ namespace RealEstateApp.Core.Application.Services
 
         public async Task<List<AgentDto>> GetAllDtoAsync()
         {
-            var agentUsers = await _userManager.GetUsersInRoleAsync(Roles.Agent.ToString());
+            var agentUsers = await _accountService.GetUsersInRoleAsync(Roles.Agent.ToString());
             var allProperties = await _propertyRepository.GetAllAsync();
 
             var agentDtos = new List<AgentDto>();
@@ -113,16 +105,15 @@ namespace RealEstateApp.Core.Application.Services
             foreach (var user in agentUsers)
             {
                 var agentProperties = allProperties.Where(p => p.AgentId == user.Id).ToList();
-                var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
 
                 agentDtos.Add(new AgentDto
                 {
                     Id = user.Id,
-                    FirstName = user.UserName ?? string.Empty,
+                    FirstName = user.UserName,
                     LastName = string.Empty,
-                    Email = user.Email ?? string.Empty,
+                    Email = user.Email,
                     Phone = user.PhoneNumber,
-                    IsActive = isActive,
+                    IsActive = user.IsActive,
                     PropertiesCount = agentProperties.Count,
                     Properties = agentProperties.Select(p => new AgentPropertyDto
                     {
@@ -142,24 +133,20 @@ namespace RealEstateApp.Core.Application.Services
 
         public async Task<AgentDto?> GetByIdDtoAsync(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null) return null;
-
-            var roles = await _userManager.GetRolesAsync(user);
-            if (!roles.Contains(Roles.Agent.ToString())) return null;
+            var user = await _accountService.GetUserByIdAsync(id);
+            if (user == null || !user.Roles.Contains(Roles.Agent.ToString())) return null;
 
             var allProperties = await _propertyRepository.GetAllAsync();
             var agentProperties = allProperties.Where(p => p.AgentId == user.Id).ToList();
-            var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
 
             return new AgentDto
             {
                 Id = user.Id,
-                FirstName = user.UserName ?? string.Empty,
+                FirstName = user.UserName,
                 LastName = string.Empty,
-                Email = user.Email ?? string.Empty,
+                Email = user.Email,
                 Phone = user.PhoneNumber,
-                IsActive = isActive,
+                IsActive = user.IsActive,
                 PropertiesCount = agentProperties.Count,
                 Properties = agentProperties.Select(p => new AgentPropertyDto
                 {
@@ -176,14 +163,13 @@ namespace RealEstateApp.Core.Application.Services
 
         public async Task ChangeStatusAsync(string agentId, bool isActive)
         {
-            var user = await _userManager.FindByIdAsync(agentId);
+            var user = await _accountService.GetUserByIdAsync(agentId);
             if (user == null)
             {
                 throw new Exception($"No existe un agente registrado con el ID: '{agentId}'");
             }
 
-            var roles = await _userManager.GetRolesAsync(user);
-            if (!roles.Contains(Roles.Agent.ToString()))
+            if (!user.Roles.Contains(Roles.Agent.ToString()))
             {
                 throw new Exception($"El usuario con ID '{agentId}' no tiene el rol de Agente");
             }
@@ -193,7 +179,7 @@ namespace RealEstateApp.Core.Application.Services
 
         public async Task DeleteAgentCascadeAsync(string agentId)
         {
-            var agent = await _userManager.FindByIdAsync(agentId);
+            var agent = await _accountService.GetUserByIdAsync(agentId);
             if (agent == null)
             {
                 throw new Exception($"El agente con ID '{agentId}' no existe");
@@ -248,12 +234,8 @@ namespace RealEstateApp.Core.Application.Services
                 await _chatRepository.DeleteAsync(chat);
             }
 
-            // 3. Eliminar usuario de Identity
-            var result = await _userManager.DeleteAsync(agent);
-            if (!result.Succeeded)
-            {
-                throw new Exception($"Error al eliminar el agente: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-            }
+            // 3. Eliminar usuario de Identity vía servicio de abstracción
+            await _accountService.DeleteUserAsync(agentId);
         }
     }
 }
