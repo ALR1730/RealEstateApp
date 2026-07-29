@@ -54,6 +54,21 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 💬 Corrección 1.4 — Autenticación y Validación HMAC en Webhook de WhatsApp
+
+- **Severidad**: 🔴 Crítico (Seguridad)
+- **Componentes**: `RealEstateApp.Core.Application`, `RealEstateApp.Presentation.WebApp`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Application/DTOs/WhatsApp/WhatsAppSettings.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/WhatsAppWebhookController.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se agregó la propiedad `AppSecret` a la clase `WhatsAppSettings`.
+  2. En `WhatsAppWebhookController.cs`, se implementó la lectura del cuerpo sin procesar (`StreamReader`) del request POST.
+  3. Se agregó la función `IsValidHmacSignature` que calcula el hash **HMAC SHA-256** utilizando la `AppSecret` configurada y compara la firma enviada por Meta en la cabecera `X-Hub-Signature-256` utilizando `CryptographicOperations.FixedTimeEquals` para prevenir ataques de temporización (timing attacks).
+  4. En ambientes que no sean de desarrollo, la API rechaza con `401 Unauthorized` cualquier petición POST sin firma o con firma inválida.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -61,7 +76,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **1.1** | 🔒 Seguridad | Credenciales Google OAuth en `appsettings.json` | ✅ SOLUCIONADO |
 | **1.2** | 🔒 Seguridad | Clave JWT Signing Key hardcodeada y fallback inseguro | ✅ SOLUCIONADO |
 | **1.3** | 🔒 Seguridad | Política CORS `AllowAnyOrigin()` | ✅ SOLUCIONADO |
-| **1.4** | 🔒 Seguridad | Webhook WhatsApp sin autenticación / firma Meta | ⏳ Pendiente |
+| **1.4** | 🔒 Seguridad | Webhook WhatsApp sin autenticación / firma Meta | ✅ SOLUCIONADO |
 | **1.5** | 🔒 Seguridad | CSRF Bypass en `GenerateJwtToken` | ⏳ Pendiente |
 | **1.6** | 🔒 Seguridad | Ausencia de Rate Limiting en endpoints de autenticación | ⏳ Pendiente |
 | **1.7** | 🔒 Seguridad | Sin sanitización HTML/XSS en mensajes de Chat | ⏳ Pendiente |

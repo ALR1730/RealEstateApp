@@ -95,7 +95,9 @@ policy.WithOrigins("https://tudominio.com", "http://localhost:5000")
 
 ---
 
-### 🔴 1.4 Webhook de WhatsApp Sin Autenticación
+### ✅ ~~1.4 Webhook de WhatsApp Sin Autenticación~~ — SOLUCIONADO
+
+> **Resuelto**: Se agregó la propiedad `AppSecret` a `WhatsAppSettings` y se implementó la validación estricta de firma criptográfica **HMAC SHA-256 (`X-Hub-Signature-256`)** en `WhatsAppWebhookController.cs` con comparación segura en tiempo constante (`CryptographicOperations.FixedTimeEquals`), impidiendo la inyección no autorizada de mensajes a través del webhook.
 
 **Archivo**: [WhatsAppWebhookController.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/WhatsAppWebhookController.cs)
 

@@ -1,7 +1,11 @@
 using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using RealEstateApp.Core.Application.Interfaces.Services;
 
 namespace RealEstateApp.Presentation.WebApp.Controllers
@@ -11,10 +15,12 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
     public class WhatsAppWebhookController : ControllerBase
     {
         private readonly IWhatsAppService _whatsAppService;
+        private readonly IHostEnvironment _environment;
 
-        public WhatsAppWebhookController(IWhatsAppService whatsAppService)
+        public WhatsAppWebhookController(IWhatsAppService whatsAppService, IHostEnvironment environment)
         {
             _whatsAppService = whatsAppService;
+            _environment = environment;
         }
 
         /// <summary>
@@ -26,7 +32,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             [FromQuery(Name = "hub.verify_token")] string? verifyToken,
             [FromQuery(Name = "hub.challenge")] string? challenge)
         {
-            if (mode == "subscribe" && verifyToken == _whatsAppService.Settings.VerifyToken)
+            if (mode == "subscribe" && !string.IsNullOrEmpty(verifyToken) && verifyToken == _whatsAppService.Settings.VerifyToken)
             {
                 return Ok(challenge);
             }
@@ -36,19 +42,46 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 
         /// <summary>
         /// Endpoint de recepción de mensajes de WhatsApp (POST).
-        /// Soporta payloads oficiales de Meta WhatsApp Cloud API y peticiones del Simulador Local.
+        /// Valida la firma HMAC SHA-256 de Meta (X-Hub-Signature-256) cuando está configurado AppSecret.
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> ReceiveMessage([FromBody] JsonElement payload)
+        public async Task<IActionResult> ReceiveMessage(
+            [FromHeader(Name = "X-Hub-Signature-256")] string? signature)
         {
             try
             {
+                using var reader = new StreamReader(Request.Body, Encoding.UTF8);
+                string rawBody = await reader.ReadToEndAsync();
+
+                if (string.IsNullOrWhiteSpace(rawBody))
+                {
+                    return BadRequest(new { status = "error", message = "Cuerpo de solicitud vacío" });
+                }
+
+                // Validación de Firma Meta (X-Hub-Signature-256)
+                string appSecret = _whatsAppService.Settings.AppSecret;
+                if (!string.IsNullOrEmpty(appSecret))
+                {
+                    if (string.IsNullOrEmpty(signature) || !IsValidHmacSignature(rawBody, signature, appSecret))
+                    {
+                        return Unauthorized(new { status = "error", message = "Firma HMAC de WhatsApp inválida" });
+                    }
+                }
+                else if (!_environment.IsDevelopment())
+                {
+                    // En producción exige firma si no está deshabilitado explícitamente
+                    return Unauthorized(new { status = "error", message = "AppSecret no configurado para validar webhooks de WhatsApp" });
+                }
+
+                using var payload = JsonDocument.Parse(rawBody);
+                var root = payload.RootElement;
+
                 string senderPhone = "";
                 string messageContent = "";
                 int? propertyId = null;
 
                 // 1. Intentar extraer si es un payload estructurado de Meta WhatsApp Cloud API
-                if (payload.TryGetProperty("entry", out var entryArray) && entryArray.ValueKind == JsonValueKind.Array && entryArray.GetArrayLength() > 0)
+                if (root.TryGetProperty("entry", out var entryArray) && entryArray.ValueKind == JsonValueKind.Array && entryArray.GetArrayLength() > 0)
                 {
                     var entry = entryArray[0];
                     if (entry.TryGetProperty("changes", out var changesArray) && changesArray.ValueKind == JsonValueKind.Array && changesArray.GetArrayLength() > 0)
@@ -72,15 +105,15 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 // 2. Si no es de Meta, intentar leer payload directo de simulación
                 if (string.IsNullOrEmpty(senderPhone) || string.IsNullOrEmpty(messageContent))
                 {
-                    if (payload.TryGetProperty("senderPhone", out var phoneProp))
+                    if (root.TryGetProperty("senderPhone", out var phoneProp))
                     {
                         senderPhone = phoneProp.GetString() ?? "";
                     }
-                    if (payload.TryGetProperty("messageContent", out var msgProp))
+                    if (root.TryGetProperty("messageContent", out var msgProp))
                     {
                         messageContent = msgProp.GetString() ?? "";
                     }
-                    if (payload.TryGetProperty("propertyId", out var propIdProp) && propIdProp.ValueKind == JsonValueKind.Number)
+                    if (root.TryGetProperty("propertyId", out var propIdProp) && propIdProp.ValueKind == JsonValueKind.Number)
                     {
                         propertyId = propIdProp.GetInt32();
                     }
@@ -104,6 +137,27 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             {
                 return StatusCode(500, new { status = "error", message = ex.Message });
             }
+        }
+
+        private static bool IsValidHmacSignature(string payload, string signatureHeader, string secret)
+        {
+            if (string.IsNullOrEmpty(signatureHeader) || !signatureHeader.StartsWith("sha256=", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            string expectedHash = signatureHeader["sha256=".Length..].Trim();
+            byte[] secretBytes = Encoding.UTF8.GetBytes(secret);
+            byte[] payloadBytes = Encoding.UTF8.GetBytes(payload);
+
+            using var hmac = new HMACSHA256(secretBytes);
+            byte[] hashBytes = hmac.ComputeHash(payloadBytes);
+            string computedHash = Convert.ToHexString(hashBytes).ToLowerInvariant();
+
+            return CryptographicOperations.FixedTimeEquals(
+                Encoding.UTF8.GetBytes(computedHash),
+                Encoding.UTF8.GetBytes(expectedHash.ToLowerInvariant())
+            );
         }
     }
 }
