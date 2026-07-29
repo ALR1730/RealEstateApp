@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Account;
@@ -23,6 +24,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         /// Inicia sesión y genera el token de autenticación JWT Bearer.
         /// </summary>
         [HttpPost("authenticate")]
+        [EnableRateLimiting("AuthPolicy")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthenticationResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AuthenticateAsync([FromBody] AuthenticationRequest request)

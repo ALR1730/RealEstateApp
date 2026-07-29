@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Hosting;
 using RealEstateApp.Core.Application.Interfaces.Services;
 
@@ -12,6 +13,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 {
     [ApiController]
     [Route("api/whatsapp/webhook")]
+    [EnableRateLimiting("WebhookPolicy")]
     public class WhatsAppWebhookController : ControllerBase
     {
         private readonly IWhatsAppService _whatsAppService;

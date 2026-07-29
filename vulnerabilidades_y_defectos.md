@@ -138,7 +138,9 @@ public async Task<IActionResult> GenerateJwtToken(...)
 
 ---
 
-### 🟠 1.6 Sin Rate Limiting en Endpoints Sensibles
+### ✅ ~~1.6 Sin Rate Limiting en Endpoints Sensibles~~ — SOLUCIONADO
+
+> **Resuelto**: Se configuró la infraestructura de `Microsoft.AspNetCore.RateLimiting` en `WebApp/Program.cs` y `WebApi/Program.cs`. Se crearon las políticas `AuthPolicy` (límite de 5 peticiones/minuto para Login, Register, token JWT) y `WebhookPolicy` (límite de 60 peticiones/minuto para WhatsApp Webhook), aplicando el middleware `app.UseRateLimiter()` y los atributos `[EnableRateLimiting]` en los controladores correspondientes.
 
 **Problema**: No existe rate limiting en:
 - Login (`POST /Account/Login`)

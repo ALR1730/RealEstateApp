@@ -139,6 +139,24 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🛡️ Corrección 1.6 — Rate Limiting en Endpoints Sensibles y Webhooks
+
+- **Severidad**: 🟠 Alta (Seguridad / Anti-Bruteforce & Anti-DDoS)
+- **Componentes**: `RealEstateApp.Presentation.WebApp`, `RealEstateApp.Presentation.WebApi`
+- **Archivos Modificados**:
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Program.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/Program.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AccountController.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/WhatsAppWebhookController.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/Controllers/v1/AccountController.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se registró el middleware nativo `Microsoft.AspNetCore.RateLimiting` en `WebApp/Program.cs` y `WebApi/Program.cs`.
+  2. Se definió la política `AuthPolicy` con una ventana fija de 1 minuto y máximo 5 solicitudes (`PermitLimit = 5`, `QueueLimit = 0`), retornando `429 Too Many Requests` ante excesos.
+  3. Se definió la política `WebhookPolicy` con un límite de 60 solicitudes por minuto para proteger el webhook de recepción de mensajes.
+  4. Se decoraron las acciones sensibles (`Login` POST, `Register` POST, `GenerateJwtToken` POST, `AuthenticateAsync` POST y `WhatsAppWebhookController`) con `[EnableRateLimiting]`.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -148,7 +166,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **1.3** | 🔒 Seguridad | Política CORS `AllowAnyOrigin()` | ✅ SOLUCIONADO |
 | **1.4** | 🔒 Seguridad | Webhook WhatsApp sin autenticación / firma Meta | ✅ SOLUCIONADO |
 | **1.5** | 🔒 Seguridad | CSRF Bypass en `GenerateJwtToken` | ✅ SOLUCIONADO |
-| **1.6** | 🔒 Seguridad | Ausencia de Rate Limiting en endpoints de autenticación | ⏳ Pendiente |
+| **1.6** | 🔒 Seguridad | Ausencia de Rate Limiting en endpoints de autenticación | ✅ SOLUCIONADO |
 | **1.7** | 🔒 Seguridad | Sin sanitización HTML/XSS en mensajes de Chat | ⏳ Pendiente |
 | **1.8** | 🔒 Seguridad | Requisito de contraseña débil (6 caracteres) | ⏳ Pendiente |
 | **2.1** | 🏗️ Arquitectura | Violación Onion Architecture: Identity en Application Layer | ⏳ Pendiente |
