@@ -18,6 +18,7 @@ System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 
 // Registrar capas de la arquitectura Onion
 builder.Services.AddApplicationLayer();

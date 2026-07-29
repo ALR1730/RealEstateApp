@@ -119,7 +119,9 @@ public async Task<IActionResult> ReceiveMessage(
 
 ---
 
-### 🔴 1.5 CSRF Bypass en GenerateJwtToken
+### ✅ ~~1.5 CSRF Bypass en GenerateJwtToken~~ — SOLUCIONADO
+
+> **Resuelto**: Se eliminó el atributo `[IgnoreAntiforgeryToken]` y se reemplazó por `[ValidateAntiForgeryToken]` en `AccountController.cs`. Además, se configuró el servicio Antiforgery en `Program.cs` para admitir la cabecera `RequestVerificationToken` y se actualizó `DeveloperPanel.cshtml` enviando `@Html.AntiForgeryToken()` en la cabecera del request AJAX.
 
 **Archivo**: [AccountController.cs L177-L179](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AccountController.cs#L177-L179)
 

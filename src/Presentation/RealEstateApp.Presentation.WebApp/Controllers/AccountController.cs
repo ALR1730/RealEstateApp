@@ -176,7 +176,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 
         [Authorize(Roles = "Developer,Admin")]
         [HttpPost]
-        [IgnoreAntiforgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> GenerateJwtToken([FromBody] AuthenticationRequest request)
         {
             if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))

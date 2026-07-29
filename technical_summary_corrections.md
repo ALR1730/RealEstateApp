@@ -69,6 +69,21 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🛡️ Corrección 1.5 — Remoción de Bypass CSRF y Encriptación de Tokens AntiForgery en AJAX
+
+- **Severidad**: 🔴 Crítico (Seguridad)
+- **Componente**: `RealEstateApp.Presentation.WebApp`
+- **Archivos Modificados**:
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AccountController.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Program.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Views/Account/DeveloperPanel.cshtml`
+- **Detalles Técnicos de la Solución**:
+  1. Se eliminó el atributo `[IgnoreAntiforgeryToken]` del método `GenerateJwtToken` en `AccountController.cs` y se reemplazó por el atributo de validación de seguridad `[ValidateAntiForgeryToken]`.
+  2. En `Program.cs` de la WebApp, se configuró la cabecera del servicio Antiforgery `AddAntiforgery(options => options.HeaderName = "RequestVerificationToken")`.
+  3. En `DeveloperPanel.cshtml`, se inyectó `@Html.AntiForgeryToken()` dentro del formulario y se modificó la llamada `$.ajax` agregando la cabecera `RequestVerificationToken` extraída dinámicamente de la vista.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -77,7 +92,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **1.2** | 🔒 Seguridad | Clave JWT Signing Key hardcodeada y fallback inseguro | ✅ SOLUCIONADO |
 | **1.3** | 🔒 Seguridad | Política CORS `AllowAnyOrigin()` | ✅ SOLUCIONADO |
 | **1.4** | 🔒 Seguridad | Webhook WhatsApp sin autenticación / firma Meta | ✅ SOLUCIONADO |
-| **1.5** | 🔒 Seguridad | CSRF Bypass en `GenerateJwtToken` | ⏳ Pendiente |
+| **1.5** | 🔒 Seguridad | CSRF Bypass en `GenerateJwtToken` | ✅ SOLUCIONADO |
 | **1.6** | 🔒 Seguridad | Ausencia de Rate Limiting en endpoints de autenticación | ⏳ Pendiente |
 | **1.7** | 🔒 Seguridad | Sin sanitización HTML/XSS en mensajes de Chat | ⏳ Pendiente |
 | **1.8** | 🔒 Seguridad | Requisito de contraseña débil (6 caracteres) | ⏳ Pendiente |
