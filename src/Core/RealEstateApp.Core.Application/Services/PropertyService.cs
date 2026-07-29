@@ -169,56 +169,19 @@ namespace RealEstateApp.Core.Application.Services
 
         public async Task<List<PropertyViewModel>> GetAllWithFilters(PropertyFilterViewModel filters)
         {
-            var allProperties = await _propertyRepository.GetAllAsync();
-
-            var query = allProperties.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(filters.Code))
-                query = query.Where(p => p.Code.Equals(filters.Code, StringComparison.OrdinalIgnoreCase));
-
-            if (filters.PropertyTypeId.HasValue)
-                query = query.Where(p => p.PropertyTypeId == filters.PropertyTypeId.Value);
-
-            if (filters.SaleTypeId.HasValue)
-                query = query.Where(p => p.SaleTypeId == filters.SaleTypeId.Value);
-
-            if (filters.MinPrice.HasValue)
-                query = query.Where(p => p.Price >= filters.MinPrice.Value);
-
-            if (filters.MaxPrice.HasValue)
-                query = query.Where(p => p.Price <= filters.MaxPrice.Value);
-
-            if (filters.MinRooms.HasValue)
-                query = query.Where(p => p.Rooms >= filters.MinRooms.Value);
-
-            if (filters.MaxRooms.HasValue)
-                query = query.Where(p => p.Rooms <= filters.MaxRooms.Value);
-
-            if (filters.MinBathrooms.HasValue)
-                query = query.Where(p => p.Bathrooms >= filters.MinBathrooms.Value);
-
-            if (filters.MaxBathrooms.HasValue)
-                query = query.Where(p => p.Bathrooms <= filters.MaxBathrooms.Value);
-
-            if (!string.IsNullOrWhiteSpace(filters.AgentId))
-                query = query.Where(p => p.AgentId == filters.AgentId);
-
-            return _mapper.Map<List<PropertyViewModel>>(query.ToList());
+            var properties = await _propertyRepository.GetWithFiltersAsync(filters);
+            return _mapper.Map<List<PropertyViewModel>>(properties);
         }
 
         public async Task<List<PropertyViewModel>> GetByAgentId(string agentId)
         {
-            var allProperties = await _propertyRepository.GetAllAsync();
-            var agentProperties = allProperties.Where(p => p.AgentId == agentId).ToList();
-            return _mapper.Map<List<PropertyViewModel>>(agentProperties);
+            var properties = await _propertyRepository.GetByAgentIdAsync(agentId);
+            return _mapper.Map<List<PropertyViewModel>>(properties);
         }
 
         public async Task<PropertyViewModel?> GetByCode(string code)
         {
-            var allProperties = await _propertyRepository.GetAllAsync();
-            var property = allProperties.FirstOrDefault(p =>
-                p.Code.Equals(code, StringComparison.OrdinalIgnoreCase));
-
+            var property = await _propertyRepository.GetByCodeAsync(code);
             if (property == null) return null;
             return _mapper.Map<PropertyViewModel>(property);
         }

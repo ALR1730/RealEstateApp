@@ -47,5 +47,104 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .Include(p => p.Chats)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
+
+        /// <summary>
+        /// Obtiene propiedades aplicando filtros combinados directamente en la base de datos (IQueryable).
+        /// </summary>
+        public async Task<List<Property>> GetWithFiltersAsync(RealEstateApp.Core.Application.ViewModels.Property.PropertyFilterViewModel filters)
+        {
+            var query = _dbContext.Set<Property>()
+                .Include(p => p.PropertyType)
+                .Include(p => p.SaleType)
+                .Include(p => p.Images)
+                .Include(p => p.PropertyImprovements!)
+                    .ThenInclude(pi => pi.Improvement)
+                .Include(p => p.Favorites)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(filters.Code))
+            {
+                query = query.Where(p => p.Code == filters.Code);
+            }
+
+            if (filters.PropertyTypeId.HasValue)
+            {
+                query = query.Where(p => p.PropertyTypeId == filters.PropertyTypeId.Value);
+            }
+
+            if (filters.SaleTypeId.HasValue)
+            {
+                query = query.Where(p => p.SaleTypeId == filters.SaleTypeId.Value);
+            }
+
+            if (filters.MinPrice.HasValue)
+            {
+                query = query.Where(p => p.Price >= filters.MinPrice.Value);
+            }
+
+            if (filters.MaxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price <= filters.MaxPrice.Value);
+            }
+
+            if (filters.MinRooms.HasValue)
+            {
+                query = query.Where(p => p.Rooms >= filters.MinRooms.Value);
+            }
+
+            if (filters.MaxRooms.HasValue)
+            {
+                query = query.Where(p => p.Rooms <= filters.MaxRooms.Value);
+            }
+
+            if (filters.MinBathrooms.HasValue)
+            {
+                query = query.Where(p => p.Bathrooms >= filters.MinBathrooms.Value);
+            }
+
+            if (filters.MaxBathrooms.HasValue)
+            {
+                query = query.Where(p => p.Bathrooms <= filters.MaxBathrooms.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filters.AgentId))
+            {
+                query = query.Where(p => p.AgentId == filters.AgentId);
+            }
+
+            return await query.OrderByDescending(p => p.Created).ToListAsync();
+        }
+
+        /// <summary>
+        /// Obtiene todas las propiedades asociadas a un agente específico filtrando a nivel de base de datos.
+        /// </summary>
+        public async Task<List<Property>> GetByAgentIdAsync(string agentId)
+        {
+            return await _dbContext.Set<Property>()
+                .Include(p => p.PropertyType)
+                .Include(p => p.SaleType)
+                .Include(p => p.Images)
+                .Include(p => p.PropertyImprovements!)
+                    .ThenInclude(pi => pi.Improvement)
+                .Include(p => p.Favorites)
+                .Where(p => p.AgentId == agentId)
+                .OrderByDescending(p => p.Created)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Obtiene una propiedad por su código único de 6 dígitos mediante consulta a base de datos.
+        /// </summary>
+        public async Task<Property?> GetByCodeAsync(string code)
+        {
+            return await _dbContext.Set<Property>()
+                .Include(p => p.PropertyType)
+                .Include(p => p.SaleType)
+                .Include(p => p.Images)
+                .Include(p => p.PropertyImprovements!)
+                    .ThenInclude(pi => pi.Improvement)
+                .Include(p => p.Favorites)
+                .FirstOrDefaultAsync(p => p.Code == code);
+        }
     }
 }

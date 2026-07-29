@@ -124,6 +124,21 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### ⚡ Corrección 4.1 — Filtrado Directo en Base de Datos (IQueryable vs Enumerable RAM)
+
+- **Severidad**: 🔴 Crítico (Rendimiento)
+- **Componentes**: `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Application/Interfaces/Repositories/IPropertyRepository.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/PropertyRepository.cs`
+  - `src/Core/RealEstateApp.Core.Application/Services/PropertyService.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se declararon e implementaron los métodos `GetWithFiltersAsync`, `GetByAgentIdAsync` y `GetByCodeAsync` en la capa de persistencia (`PropertyRepository.cs`).
+  2. Las consultas ahora construyen expresiones `IQueryable<Property>` dinámicas utilizando `.Where(...)` de Entity Framework Core, traduciendo directamente los filtros a cláusulas SQL nativas `WHERE Code = @p0`, `WHERE Price >= @p0 AND Price <= @p1`, `WHERE AgentId = @p0`, etc.
+  3. En `PropertyService.cs`, se eliminaron las llamadas a `_propertyRepository.GetAllAsync()` seguidas de `.AsEnumerable()`, eliminando por completo la carga innecesaria de todo el catálogo de inmuebles en la memoria RAM del servidor web.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -141,7 +156,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **2.3** | 🏗️ Arquitectura | Falta de transacciones explícitas en `AcceptOffer` | ⏳ Pendiente |
 | **3.1** | 🐛 Bug | Carta de Pre-aprobación bancaria subida pero no guardada | ✅ SOLUCIONADO |
 | **3.2** | 🐛 Bug | Chats de soporte usan PropertyId (0 y -1) sin validar FK | ✅ SOLUCIONADO |
-| **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ⏳ Pendiente |
+| **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ✅ SOLUCIONADO |
 
 ---
 

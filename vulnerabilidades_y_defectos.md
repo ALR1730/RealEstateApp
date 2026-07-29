@@ -472,7 +472,9 @@ if (property == null || property.AgentId != _userManager.GetUserId(User))
 
 ## ⚡ 4. Defectos de Rendimiento
 
-### 🔴 4.1 Filtrado de Propiedades Carga Todo a Memoria
+### ✅ ~~4.1 Filtrado de Propiedades Carga Todo a Memoria~~ — SOLUCIONADO
+
+> **Resuelto**: Se agregaron los métodos `GetWithFiltersAsync`, `GetByAgentIdAsync` y `GetByCodeAsync` en `IPropertyRepository` y se implementó el filtrado a nivel de base de datos con `IQueryable` en `PropertyRepository.cs`. Se actualizó `PropertyService.cs` para delegar la ejecución a la base de datos SQL Server, traduciendo directamente los filtros a cláusulas SQL `WHERE` y evitando la carga masiva en RAM.
 
 **Archivo**: [PropertyService.cs L170-L207](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Services/PropertyService.cs#L170-L207)
 
