@@ -270,6 +270,23 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 👤 Corrección 3.3 — Lectura y Mapeo de Nombres y Apellidos de Agentes desde User Claims
+
+- **Severidad**: 🟠 Alta (Bug Funcional / UI)
+- **Componentes**: `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Application/DTOs/Account/AccountUserDto.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Services/AccountService.cs`
+  - `src/Core/RealEstateApp.Core.Application/Services/AgentService.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Seeds/DefaultAgentUser.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se agregaron las propiedades `FirstName`, `LastName` y `ProfilePictureUrl` al DTO abstracto `AccountUserDto.cs`.
+  2. En `AccountService.cs` (`GetUsersInRoleAsync` y `GetUserByIdAsync`), se leen los claims `"FirstName"`, `"LastName"` y `"ProfilePicture"` del usuario registrado y se mapean al DTO.
+  3. En `AgentService.cs`, se actualizaron los mapeos para asignar `FirstName = user.FirstName` y `LastName = user.LastName`.
+  4. En `DefaultAgentUser.cs`, se aseguraron los claims de nombre y apellido para los agentes de prueba de la solución, resolviendo el problema de despliegue donde los agentes mostraban su username con apellido vacío.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -290,6 +307,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **2.4** | 🏗️ Arquitectura | Archivos `Class1.cs` placeholder residuales | ✅ SOLUCIONADO |
 | **3.1** | 🐛 Bug | Carta de Pre-aprobación bancaria subida pero no guardada | ✅ SOLUCIONADO |
 | **3.2** | 🐛 Bug | Chats de soporte usan PropertyId (0 y -1) sin validar FK | ✅ SOLUCIONADO |
+| **3.3** | 🐛 Bug | Nombres de agentes usan UserName y apellido vacío | ✅ SOLUCIONADO |
 | **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ✅ SOLUCIONADO |
 
 ---

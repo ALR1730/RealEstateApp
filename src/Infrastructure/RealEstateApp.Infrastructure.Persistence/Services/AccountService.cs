@@ -371,13 +371,21 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
             {
                 var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
                 var roles = await _userManager.GetRolesAsync(user);
+                var claims = await _userManager.GetClaimsAsync(user);
+
+                var firstNameClaim = claims.FirstOrDefault(c => c.Type == "FirstName")?.Value;
+                var lastNameClaim = claims.FirstOrDefault(c => c.Type == "LastName")?.Value;
+                var profilePictureClaim = claims.FirstOrDefault(c => c.Type == "ProfilePicture")?.Value;
 
                 userDtos.Add(new AccountUserDto
                 {
                     Id = user.Id,
                     UserName = user.UserName ?? string.Empty,
+                    FirstName = !string.IsNullOrWhiteSpace(firstNameClaim) ? firstNameClaim : (user.UserName ?? string.Empty),
+                    LastName = lastNameClaim ?? string.Empty,
                     Email = user.Email ?? string.Empty,
                     PhoneNumber = user.PhoneNumber,
+                    ProfilePictureUrl = profilePictureClaim,
                     IsActive = isActive,
                     Roles = roles.ToList()
                 });
@@ -393,13 +401,21 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
 
             var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
             var roles = await _userManager.GetRolesAsync(user);
+            var claims = await _userManager.GetClaimsAsync(user);
+
+            var firstNameClaim = claims.FirstOrDefault(c => c.Type == "FirstName")?.Value;
+            var lastNameClaim = claims.FirstOrDefault(c => c.Type == "LastName")?.Value;
+            var profilePictureClaim = claims.FirstOrDefault(c => c.Type == "ProfilePicture")?.Value;
 
             return new AccountUserDto
             {
                 Id = user.Id,
                 UserName = user.UserName ?? string.Empty,
+                FirstName = !string.IsNullOrWhiteSpace(firstNameClaim) ? firstNameClaim : (user.UserName ?? string.Empty),
+                LastName = lastNameClaim ?? string.Empty,
                 Email = user.Email ?? string.Empty,
                 PhoneNumber = user.PhoneNumber,
+                ProfilePictureUrl = profilePictureClaim,
                 IsActive = isActive,
                 Roles = roles.ToList()
             };

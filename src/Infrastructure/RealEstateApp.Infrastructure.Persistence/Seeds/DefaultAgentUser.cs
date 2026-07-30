@@ -16,14 +16,14 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
     {
         public static async Task SeedAsync(UserManager<IdentityUser> userManager)
         {
-            var agents = new List<(string userName, string email, string phone, bool isActive)>
+            var agents = new List<(string userName, string email, string phone, string firstName, string lastName, bool isActive)>
             {
-                ("agentuser", "agent@realestate.com", "809-555-0201", true),
-                ("agentuser2", "agent2@realestate.com", "809-555-0202", true),
-                ("agentuser3", "agent3@realestate.com", "809-555-0203", false)
+                ("agentuser", "agent@realestate.com", "809-555-0201", "Carlos", "Mendoza", true),
+                ("agentuser2", "agent2@realestate.com", "809-555-0202", "Ana", "Gómez", true),
+                ("agentuser3", "agent3@realestate.com", "809-555-0203", "Pedro", "Martínez", false)
             };
 
-            foreach (var (userName, email, phone, isActive) in agents)
+            foreach (var (userName, email, phone, firstName, lastName, isActive) in agents)
             {
                 var user = await userManager.FindByEmailAsync(email);
                 if (user == null)
@@ -42,6 +42,20 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                     if (result.Succeeded)
                     {
                         await userManager.AddToRoleAsync(newUser, Roles.Agent.ToString());
+                        await userManager.AddClaimAsync(newUser, new System.Security.Claims.Claim("FirstName", firstName));
+                        await userManager.AddClaimAsync(newUser, new System.Security.Claims.Claim("LastName", lastName));
+                    }
+                }
+                else
+                {
+                    var claims = await userManager.GetClaimsAsync(user);
+                    if (!claims.Any(c => c.Type == "FirstName"))
+                    {
+                        await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("FirstName", firstName));
+                    }
+                    if (!claims.Any(c => c.Type == "LastName"))
+                    {
+                        await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("LastName", lastName));
                     }
                 }
             }

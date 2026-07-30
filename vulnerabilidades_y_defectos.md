@@ -370,7 +370,9 @@ return RedirectToAction(nameof(Thread), new { propertyId = -1, ... });
 
 ---
 
-### 🟠 3.3 Nombres de Agentes Incorrectos (No Lee Claims)
+### ✅ ~~3.3 Nombres de Agentes Incorrectos (No Lee Claims)~~ — SOLUCIONADO
+
+> **Resuelto**: Se incorporaron las propiedades `FirstName` y `LastName` en `AccountUserDto.cs`. En `AccountService.cs` (`GetUsersInRoleAsync` y `GetUserByIdAsync`), se leen los claims `"FirstName"` y `"LastName"` del usuario y se transfieren al DTO. Finalmente, en `AgentService.cs` y `DefaultAgentUser.cs`, se mapearon correctamente los nombres y apellidos, mostrando los nombres completos de los agentes en toda la aplicación.
 
 **Archivo**: [AgentService.cs L68-L69](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Services/AgentService.cs#L68-L69)
 

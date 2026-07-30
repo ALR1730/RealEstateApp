@@ -61,8 +61,8 @@ namespace RealEstateApp.Core.Application.Services
                 agentVms.Add(new AgentViewModel
                 {
                     Id = user.Id,
-                    FirstName = user.UserName,
-                    LastName = string.Empty,
+                    FirstName = string.IsNullOrWhiteSpace(user.FirstName) ? user.UserName : user.FirstName,
+                    LastName = user.LastName,
                     Email = user.Email,
                     Phone = user.PhoneNumber,
                     IsActive = user.IsActive,
@@ -85,8 +85,8 @@ namespace RealEstateApp.Core.Application.Services
             return new AgentViewModel
             {
                 Id = user.Id,
-                FirstName = user.UserName,
-                LastName = string.Empty,
+                FirstName = string.IsNullOrWhiteSpace(user.FirstName) ? user.UserName : user.FirstName,
+                LastName = user.LastName,
                 Email = user.Email,
                 Phone = user.PhoneNumber,
                 IsActive = user.IsActive,
@@ -109,8 +109,8 @@ namespace RealEstateApp.Core.Application.Services
                 agentDtos.Add(new AgentDto
                 {
                     Id = user.Id,
-                    FirstName = user.UserName,
-                    LastName = string.Empty,
+                    FirstName = string.IsNullOrWhiteSpace(user.FirstName) ? user.UserName : user.FirstName,
+                    LastName = user.LastName,
                     Email = user.Email,
                     Phone = user.PhoneNumber,
                     IsActive = user.IsActive,
@@ -142,8 +142,8 @@ namespace RealEstateApp.Core.Application.Services
             return new AgentDto
             {
                 Id = user.Id,
-                FirstName = user.UserName,
-                LastName = string.Empty,
+                FirstName = string.IsNullOrWhiteSpace(user.FirstName) ? user.UserName : user.FirstName,
+                LastName = user.LastName,
                 Email = user.Email,
                 Phone = user.PhoneNumber,
                 IsActive = user.IsActive,
