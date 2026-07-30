@@ -389,6 +389,21 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🌐 Corrección 5.1 — Restricción de Encabezados de Host (`AllowedHosts`)
+
+- **Severidad**: 🟠 Alta (Configuración de Seguridad / Host Header Injection)
+- **Componentes**: `RealEstateApp.Presentation.WebApp`, `RealEstateApp.Presentation.WebApi`
+- **Archivos Modificados**:
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/appsettings.json`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/appsettings.Development.json`
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/appsettings.json`
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/appsettings.Development.json`
+- **Detalles Técnicos de la Solución**:
+  1. Se actualizó `appsettings.json` reemplazando la configuración permisiva `AllowedHosts: "*"` por listas explícitas de dominios autorizados (`localhost;127.0.0.1;realestateapp.com` para WebApp y `api.realestateapp.com` para WebApi).
+  2. Se añadió la propiedad `AllowedHosts: "*"` exclusivamente en los archivos de entorno de desarrollo local (`appsettings.Development.json`).
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -418,6 +433,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **4.2** | ⚡ Rendimiento | `DeleteAgentCascade` ejecuta cientos de queries individuales | ✅ SOLUCIONADO |
 | **4.3** | ⚡ Rendimiento | Sin paginación en listado de propiedades | ✅ SOLUCIONADO |
 | **4.4** | ⚡ Rendimiento | `AgentController.Offers` carga todas las ofertas del sistema | ✅ SOLUCIONADO |
+| **5.1** | ⚙️ Configuración | `AllowedHosts` permite cualquier host | ✅ SOLUCIONADO |
 
 ---
 

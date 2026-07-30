@@ -592,7 +592,9 @@ var agentOffers = allOffers.FindAll(o => agentPropertyIds.Contains(o.PropertyId)
 
 ## ⚙️ 5. Problemas de Configuración
 
-### 🟠 5.1 AllowedHosts Acepta Todo
+### ✅ ~~5.1 AllowedHosts Acepta Todo~~ — SOLUCIONADO
+
+> **Resuelto**: Se restringió la directiva `AllowedHosts` en la plantilla de configuración de producción de ambos proyectos (`appsettings.json`) delimitando estrictamente los dominios autorizados (`localhost;127.0.0.1;realestateapp.com` para WebApp y `api.realestateapp.com` para WebApi). Se aisló la directiva de comodín `"*"` únicamente en los archivos de desarrollo local (`appsettings.Development.json`), mitigando vulnerabilidades de Host Header Injection.
 
 **Archivos**: Ambos `appsettings.json`
 
