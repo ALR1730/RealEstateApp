@@ -231,6 +231,19 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🛡️ Corrección 1.9 — Protección de Seeds de Usuarios de Prueba en Producción
+
+- **Severidad**: 🟡 Media (Seguridad / Autenticación)
+- **Componentes**: `RealEstateApp.Presentation.WebApp`, `RealEstateApp.Presentation.WebApi`
+- **Archivos Modificados**:
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Program.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/Program.cs`
+- **Detalles Técnicos de la Solución**:
+  1. En `WebApp/Program.cs` y `WebApi/Program.cs`, se envolvieron las ejecuciones de los seeds de demostración (`DefaultAdminUser`, `DefaultAgentUser`, `DefaultClientUser`, `DefaultDeveloperUser` y `DefaultRealEstateData`) dentro del guard `if (app.Environment.IsDevelopment())`.
+  2. Los roles esenciales del sistema (`DefaultRoles.SeedAsync`) se mantienen ejecutándose en todos los ambientes para garantizar el funcionamiento inicial sin comprometer cuentas ni contraseñas de prueba en producción.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -243,6 +256,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **1.6** | 🔒 Seguridad | Ausencia de Rate Limiting en endpoints de autenticación | ✅ SOLUCIONADO |
 | **1.7** | 🔒 Seguridad | Sin sanitización HTML/XSS en mensajes de Chat | ✅ SOLUCIONADO |
 | **1.8** | 🔒 Seguridad | Requisito de contraseña débil (6 caracteres) | ✅ SOLUCIONADO |
+| **1.9** | 🔒 Seguridad | Guard de ambiente en seeds de usuarios de prueba | ✅ SOLUCIONADO |
 | **2.1** | 🏗️ Arquitectura | Violación Onion Architecture: Identity en Application Layer | ✅ SOLUCIONADO |
 | **2.2** | 🏗️ Arquitectura | N+1 `SaveChangesAsync` en `GenericRepository` | ✅ SOLUCIONADO |
 | **2.3** | 🏗️ Arquitectura | Falta de transacciones explícitas en `AcceptOffer` | ✅ SOLUCIONADO |

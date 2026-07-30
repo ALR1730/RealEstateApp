@@ -154,11 +154,16 @@ using (var scope = app.Services.CreateScope())
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
 
         await DefaultRoles.SeedAsync(roleManager);
-        await DefaultAdminUser.SeedAsync(userManager);
-        await DefaultAgentUser.SeedAsync(userManager);
-        await DefaultClientUser.SeedAsync(userManager);
-        await DefaultDeveloperUser.SeedAsync(userManager);
-        await DefaultRealEstateData.SeedAsync(dbContext, userManager);
+
+        // Seeding de usuarios de prueba y datos de demostración solo en ambiente de desarrollo
+        if (app.Environment.IsDevelopment())
+        {
+            await DefaultAdminUser.SeedAsync(userManager);
+            await DefaultAgentUser.SeedAsync(userManager);
+            await DefaultClientUser.SeedAsync(userManager);
+            await DefaultDeveloperUser.SeedAsync(userManager);
+            await DefaultRealEstateData.SeedAsync(dbContext, userManager);
+        }
     }
     catch (Exception ex)
     {

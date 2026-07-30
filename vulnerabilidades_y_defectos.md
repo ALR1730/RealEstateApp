@@ -196,7 +196,9 @@ options.Password.RequiredLength = 6;
 
 ---
 
-### 🟡 1.9 Credenciales de Prueba Documentadas en README
+### ✅ ~~1.9 Credenciales de Prueba Documentadas en README / Seeds en Producción~~ — SOLUCIONADO
+
+> **Resuelto**: Se condicionó el seeding automático de usuarios de prueba y datos de demostración a entornos de desarrollo únicamente mediante el guard `if (app.Environment.IsDevelopment())` en `WebApp/Program.cs` y `WebApi/Program.cs`. Los roles base del sistema se continúan poblando de forma segura en todos los ambientes.
 
 **Archivo**: [README.md L68-L73](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/README.md#L68-L73)
 
