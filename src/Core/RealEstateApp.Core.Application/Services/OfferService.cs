@@ -43,6 +43,12 @@ namespace RealEstateApp.Core.Application.Services
             return _mapper.Map<List<OfferViewModel>>(offers);
         }
 
+        public async Task<List<OfferViewModel>> GetByPropertyIds(IEnumerable<int> propertyIds)
+        {
+            var offers = await _offerRepository.GetByPropertyIdsAsync(propertyIds);
+            return _mapper.Map<List<OfferViewModel>>(offers);
+        }
+
         public async Task<List<OfferViewModel>> GetByClienteId(string clienteId)
         {
             var offers = await _offerRepository.GetByClienteIdAsync(clienteId);

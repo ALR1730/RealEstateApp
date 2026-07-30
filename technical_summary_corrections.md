@@ -372,6 +372,23 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🏷️ Corrección 4.4 — Consulta Filtrada de Ofertas del Agente (`AgentController.Offers`)
+
+- **Severidad**: 🟡 Media (Rendimiento / Carga Masiva)
+- **Componentes**: `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`, `RealEstateApp.Presentation.WebApp`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Application/Interfaces/Repositories/IOfferRepository.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/OfferRepository.cs`
+  - `src/Core/RealEstateApp.Core.Application/Interfaces/Services/IOfferService.cs`
+  - `src/Core/RealEstateApp.Core.Application/Services/OfferService.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AgentController.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se implementó `GetByPropertyIdsAsync(IEnumerable<int> propertyIds)` en `OfferRepository.cs` y `OfferService.cs`.
+  2. Se actualizó `AgentController.Offers()` sustituyendo la invocación a `_offerService.GetAllViewModel()` por `_offerService.GetByPropertyIds(agentPropertyIds)`.
+  3. Las ofertas se filtran directamente en la base de datos con `WHERE PropertyId IN (...)`, reduciendo la transferencia de datos y eliminando el filtrado en memoria C#.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -400,6 +417,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ✅ SOLUCIONADO |
 | **4.2** | ⚡ Rendimiento | `DeleteAgentCascade` ejecuta cientos de queries individuales | ✅ SOLUCIONADO |
 | **4.3** | ⚡ Rendimiento | Sin paginación en listado de propiedades | ✅ SOLUCIONADO |
+| **4.4** | ⚡ Rendimiento | `AgentController.Offers` carga todas las ofertas del sistema | ✅ SOLUCIONADO |
 
 ---
 

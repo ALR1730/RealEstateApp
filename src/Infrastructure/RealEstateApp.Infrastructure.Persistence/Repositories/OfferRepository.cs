@@ -30,6 +30,15 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Offer>> GetByPropertyIdsAsync(IEnumerable<int> propertyIds)
+        {
+            return await _dbContext.Set<Offer>()
+                .Include(o => o.Property)
+                .Where(o => propertyIds.Contains(o.PropertyId))
+                .OrderByDescending(o => o.FechaOferta)
+                .ToListAsync();
+        }
+
         public override async Task<List<Offer>> GetAllAsync()
         {
             return await _dbContext.Set<Offer>()

@@ -575,7 +575,9 @@ Con crecimiento de datos, las vistas se volverán lentas e inutilizables.
 
 ---
 
-### 🟡 4.4 Agente.Offers Carga Todas las Ofertas del Sistema
+### ✅ ~~4.4 Agente.Offers Carga Todas las Ofertas del Sistema~~ — SOLUCIONADO
+
+> **Resuelto**: Se agregaron los métodos `GetByPropertyIdsAsync` en `IOfferRepository`/`OfferRepository` y `GetByPropertyIds` en `IOfferService`/`OfferService`. Se actualizó `AgentController.Offers()` para obtener únicamente las ofertas pertenecientes a las propiedades del agente autenticado mediante un filtro `WHERE PropertyId IN (...)` directamente en SQL Server, evitando cargar todas las ofertas del sistema en memoria.
 
 **Archivo**: [AgentController.Offers L159](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AgentController.cs#L159)
 

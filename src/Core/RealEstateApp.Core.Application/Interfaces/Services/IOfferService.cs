@@ -13,6 +13,7 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
     {
         Task<List<OfferViewModel>> GetAllViewModel();
         Task<List<OfferViewModel>> GetByPropertyId(int propertyId);
+        Task<List<OfferViewModel>> GetByPropertyIds(IEnumerable<int> propertyIds);
         Task<List<OfferViewModel>> GetByClienteId(string clienteId);
         Task<SaveOfferViewModel> Add(SaveOfferViewModel vm, string clienteId);
 

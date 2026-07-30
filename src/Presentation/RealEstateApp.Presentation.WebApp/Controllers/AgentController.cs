@@ -167,12 +167,10 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Obtener propiedades del agente y sus ofertas
+            // Obtener propiedades del agente y sus ofertas filtradas directamente en la BD
             var agentProperties = await _propertyService.GetByAgentId(userId);
-            var allOffers = await _offerService.GetAllViewModel();
-
-            var agentPropertyIds = agentProperties.Select(p => p.Id).ToHashSet();
-            var agentOffers = allOffers.FindAll(o => agentPropertyIds.Contains(o.PropertyId));
+            var agentPropertyIds = agentProperties.Select(p => p.Id).ToList();
+            var agentOffers = await _offerService.GetByPropertyIds(agentPropertyIds);
 
             return View(agentOffers);
         }
