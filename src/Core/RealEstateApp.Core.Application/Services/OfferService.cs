@@ -70,39 +70,14 @@ namespace RealEstateApp.Core.Application.Services
         }
 
         /// <summary>
-        /// Regla de Negocio Atómica:
+        /// Regla de Negocio Atómica en Transacción Explícita de BD:
         /// 1. Aceptar la oferta seleccionada
         /// 2. Cambiar el estado de la propiedad a "Vendida"
         /// 3. Rechazar en cascada todas las demás ofertas pendientes de esa propiedad
         /// </summary>
         public async Task AcceptOffer(int offerId)
         {
-            var offer = await _offerRepository.GetByIdAsync(offerId);
-            if (offer == null)
-                throw new Exception("La oferta no existe");
-
-            if (offer.Status != OfferStatus.Pending)
-                throw new Exception("Solo se pueden aceptar ofertas pendientes");
-
-            // 1. Aceptar la oferta
-            offer.Status = OfferStatus.Accepted;
-            await _offerRepository.UpdateAsync(offer);
-
-            // 2. Cambiar la propiedad a "Vendida"
-            var property = await _propertyRepository.GetByIdAsync(offer.PropertyId);
-            if (property != null)
-            {
-                property.Status = "Vendida";
-                await _propertyRepository.UpdateAsync(property);
-            }
-
-            // 3. Rechazar en cascada todas las demás ofertas pendientes
-            var otherOffers = await _offerRepository.GetByPropertyIdAsync(offer.PropertyId);
-            foreach (var otherOffer in otherOffers.Where(o => o.Id != offerId && o.Status == OfferStatus.Pending))
-            {
-                otherOffer.Status = OfferStatus.Rejected;
-                await _offerRepository.UpdateAsync(otherOffer);
-            }
+            await _offerRepository.AcceptOfferTransactionAsync(offerId);
         }
 
         public async Task RejectOffer(int offerId)

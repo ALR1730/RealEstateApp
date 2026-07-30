@@ -216,6 +216,21 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### ⚛️ Corrección 2.3 — Transacciones Explícitas y Operaciones Atómicas (`AcceptOffer`)
+
+- **Severidad**: 🟠 Alta (Arquitectura / Consistencia de Datos)
+- **Componentes**: `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Application/Interfaces/Repositories/IOfferRepository.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/OfferRepository.cs`
+  - `src/Core/RealEstateApp.Core.Application/Services/OfferService.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se declaró `AcceptOfferTransactionAsync(int offerId)` en `IOfferRepository.cs` e implementó en `OfferRepository.cs`.
+  2. Se envolvió toda la regla de negocio (marcar oferta seleccionada como `Accepted`, cambiar estado de la propiedad a `"Vendida"`, y rechazar en lote el resto de ofertas como `Rejected`) dentro de una transacción explícita de Entity Framework Core (`using var transaction = await _dbContext.Database.BeginTransactionAsync()`).
+  3. Ante cualquier fallo en los 3 pasos, se invoca `RollbackAsync()` previniendo estados inconsistentes en la base de datos (por ejemplo, ofertas aceptadas con inmuebles que permanecen como "Disponibles").
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -230,7 +245,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **1.8** | 🔒 Seguridad | Requisito de contraseña débil (6 caracteres) | ✅ SOLUCIONADO |
 | **2.1** | 🏗️ Arquitectura | Violación Onion Architecture: Identity en Application Layer | ✅ SOLUCIONADO |
 | **2.2** | 🏗️ Arquitectura | N+1 `SaveChangesAsync` en `GenericRepository` | ✅ SOLUCIONADO |
-| **2.3** | 🏗️ Arquitectura | Falta de transacciones explícitas en `AcceptOffer` | ⏳ Pendiente |
+| **2.3** | 🏗️ Arquitectura | Falta de transacciones explícitas en `AcceptOffer` | ✅ SOLUCIONADO |
 | **3.1** | 🐛 Bug | Carta de Pre-aprobación bancaria subida pero no guardada | ✅ SOLUCIONADO |
 | **3.2** | 🐛 Bug | Chats de soporte usan PropertyId (0 y -1) sin validar FK | ✅ SOLUCIONADO |
 | **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ✅ SOLUCIONADO |

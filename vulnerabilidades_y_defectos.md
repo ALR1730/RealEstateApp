@@ -276,7 +276,9 @@ public interface IUnitOfWork : IDisposable
 
 ---
 
-### 🟠 2.3 Falta de Transacciones en Operaciones Atómicas
+### ✅ ~~2.3 Falta de Transacciones en Operaciones Atómicas~~ — SOLUCIONADO
+
+> **Resuelto**: Se implementó `AcceptOfferTransactionAsync` en `OfferRepository.cs` haciendo uso de transacciones explícitas de base de datos (`using var transaction = await _dbContext.Database.BeginTransactionAsync()`). Toda la regla de negocio (aceptación de oferta, cambio de estado de la propiedad a "Vendida" y rechazo en lote de ofertas pendientes) se ejecuta de forma atómica con commit único y rollback automático ante cualquier fallo.
 
 **Archivo**: [OfferService.AcceptOffer](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Services/OfferService.cs#L78-L106)
 

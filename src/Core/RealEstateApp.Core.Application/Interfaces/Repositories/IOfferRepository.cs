@@ -15,5 +15,11 @@ namespace RealEstateApp.Core.Application.Interfaces.Repositories
         /// Obtiene todas las ofertas realizadas por un cliente.
         /// </summary>
         Task<List<Offer>> GetByClienteIdAsync(string clienteId);
+
+        /// <summary>
+        /// Ejecuta de forma atómica bajo una transacción explícita la aceptación de una oferta,
+        /// la actualización de la propiedad a "Vendida" y el rechazo masivo del resto de ofertas pendientes.
+        /// </summary>
+        Task AcceptOfferTransactionAsync(int offerId);
     }
 }

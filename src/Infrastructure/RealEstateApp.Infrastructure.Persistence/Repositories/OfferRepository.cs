@@ -37,5 +37,51 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .OrderByDescending(o => o.FechaOferta)
                 .ToListAsync();
         }
+
+        public async Task AcceptOfferTransactionAsync(int offerId)
+        {
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var offer = await _dbContext.Set<Offer>().FirstOrDefaultAsync(o => o.Id == offerId);
+                if (offer == null)
+                {
+                    throw new System.Exception("La oferta no existe");
+                }
+
+                if (offer.Status != RealEstateApp.Core.Domain.Enums.OfferStatus.Pending)
+                {
+                    throw new System.Exception("Solo se pueden aceptar ofertas pendientes");
+                }
+
+                // 1. Aceptar la oferta elegida
+                offer.Status = RealEstateApp.Core.Domain.Enums.OfferStatus.Accepted;
+
+                // 2. Marcar la propiedad como "Vendida"
+                var property = await _dbContext.Set<Property>().FirstOrDefaultAsync(p => p.Id == offer.PropertyId);
+                if (property != null)
+                {
+                    property.Status = "Vendida";
+                }
+
+                // 3. Rechazar en cascada todas las demás ofertas pendientes de esa propiedad
+                var otherOffers = await _dbContext.Set<Offer>()
+                    .Where(o => o.PropertyId == offer.PropertyId && o.Id != offerId && o.Status == RealEstateApp.Core.Domain.Enums.OfferStatus.Pending)
+                    .ToListAsync();
+
+                foreach (var otherOffer in otherOffers)
+                {
+                    otherOffer.Status = RealEstateApp.Core.Domain.Enums.OfferStatus.Rejected;
+                }
+
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 }
