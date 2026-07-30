@@ -256,6 +256,20 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🧹 Corrección 2.4 — Limpieza de Archivos Residuales `Class1.cs`
+
+- **Severidad**: 🟡 Media (Limpieza de Código / Mantenimiento)
+- **Componentes**: `RealEstateApp.Core.Domain`, `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`, `RealEstateApp.Infrastructure.Shared`
+- **Archivos Eliminados**:
+  - `src/Core/RealEstateApp.Core.Domain/Class1.cs`
+  - `src/Core/RealEstateApp.Core.Application/Class1.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Class1.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Shared/Class1.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se eliminaron los 4 archivos `Class1.cs` autogenerados durante la creación inicial de las bibliotecas de clases de .NET, asegurando un proyecto limpio sin clases vacías ni código residual.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -273,6 +287,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **2.1** | 🏗️ Arquitectura | Violación Onion Architecture: Identity en Application Layer | ✅ SOLUCIONADO |
 | **2.2** | 🏗️ Arquitectura | N+1 `SaveChangesAsync` en `GenericRepository` | ✅ SOLUCIONADO |
 | **2.3** | 🏗️ Arquitectura | Falta de transacciones explícitas en `AcceptOffer` | ✅ SOLUCIONADO |
+| **2.4** | 🏗️ Arquitectura | Archivos `Class1.cs` placeholder residuales | ✅ SOLUCIONADO |
 | **3.1** | 🐛 Bug | Carta de Pre-aprobación bancaria subida pero no guardada | ✅ SOLUCIONADO |
 | **3.2** | 🐛 Bug | Chats de soporte usan PropertyId (0 y -1) sin validar FK | ✅ SOLUCIONADO |
 | **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ✅ SOLUCIONADO |

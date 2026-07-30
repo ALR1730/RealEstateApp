@@ -307,7 +307,9 @@ catch
 
 ---
 
-### 🟡 2.4 Archivos Class1.cs Placeholder Residuales
+### ✅ ~~2.4 Archivos Class1.cs Placeholder Residuales~~ — SOLUCIONADO
+
+> **Resuelto**: Se eliminaron los 4 archivos `Class1.cs` sobrantes creados por la plantilla por defecto de .NET en las capas de Domain, Application, Persistence y Shared, manteniendo la solución limpia de archivos no utilizados.
 
 **Archivos**:
 - [Domain/Class1.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Class1.cs)
