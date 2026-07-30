@@ -244,6 +244,18 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🛡️ Corrección 1.10 — Restricción de Swagger UI a Ambiente de Desarrollo (`WebApi`)
+
+- **Severidad**: 🟡 Media (Seguridad / Exposición de Información)
+- **Componentes**: `RealEstateApp.Presentation.WebApi`
+- **Archivos Modificados**:
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/Program.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se envolvió la llamada a los middlewares `app.UseSwagger()` y `app.UseSwaggerUI(...)` dentro del condicional `if (app.Environment.IsDevelopment())`.
+  2. Esto previene que en ambientes de producción se exponga la especificación OpenAPI (`/swagger/v1/swagger.json`) e interfaz de usuario interactiva, mitigando intentos de reconocimiento y mapeo de endpoints.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -257,6 +269,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **1.7** | 🔒 Seguridad | Sin sanitización HTML/XSS en mensajes de Chat | ✅ SOLUCIONADO |
 | **1.8** | 🔒 Seguridad | Requisito de contraseña débil (6 caracteres) | ✅ SOLUCIONADO |
 | **1.9** | 🔒 Seguridad | Guard de ambiente en seeds de usuarios de prueba | ✅ SOLUCIONADO |
+| **1.10** | 🔒 Seguridad | Restricción de Swagger UI a ambiente de desarrollo | ✅ SOLUCIONADO |
 | **2.1** | 🏗️ Arquitectura | Violación Onion Architecture: Identity en Application Layer | ✅ SOLUCIONADO |
 | **2.2** | 🏗️ Arquitectura | N+1 `SaveChangesAsync` en `GenericRepository` | ✅ SOLUCIONADO |
 | **2.3** | 🏗️ Arquitectura | Falta de transacciones explícitas en `AcceptOffer` | ✅ SOLUCIONADO |

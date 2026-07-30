@@ -171,13 +171,16 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Enable Swagger UI in development and production (servido directamente en la raíz /)
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+// Enable Swagger UI solo en ambiente de desarrollo para prevenir reconocimiento y exposición de endpoints en producción
+if (app.Environment.IsDevelopment())
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "RealEstateApp API v1");
-    c.RoutePrefix = string.Empty; // Permite abrir http://localhost:5196/ directamente
-});
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "RealEstateApp API v1");
+        c.RoutePrefix = string.Empty; // Permite abrir http://localhost:5196/ directamente en desarrollo
+    });
+}
 
 app.UseRouting();
 app.UseCors("AllowSpecificOrigins");

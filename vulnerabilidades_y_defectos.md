@@ -208,7 +208,9 @@ options.Password.RequiredLength = 6;
 
 ---
 
-### 🟡 1.10 Swagger Habilitado en Producción
+### ✅ ~~1.10 Swagger Habilitado Incondicionalmente en Producción~~ — SOLUCIONADO
+
+> **Resuelto**: Se restringió la carga del middleware de Swagger UI en `WebApi/Program.cs` dentro del condicional `if (app.Environment.IsDevelopment())`. En entornos de producción, los esquemas de OpenAPI y la interfaz de documentación interactiva permanecen desactivados para evitar reconocimiento expuesto del mapa de la API.
 
 **Archivo**: [WebApi Program.cs L146-L151](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApi/Program.cs#L146-L151)
 
