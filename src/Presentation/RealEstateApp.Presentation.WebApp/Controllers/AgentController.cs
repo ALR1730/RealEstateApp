@@ -141,6 +141,19 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteProperty(int id)
         {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var existing = await _propertyService.GetByIdSaveViewModel(id);
+            if (existing == null || existing.AgentId != userId)
+            {
+                TempData["ErrorMessage"] = "No tiene permisos para eliminar esta propiedad.";
+                return RedirectToAction(nameof(Properties));
+            }
+
             await _propertyService.Delete(id);
             TempData["SuccessMessage"] = "Propiedad eliminada correctamente.";
             return RedirectToAction(nameof(Properties));

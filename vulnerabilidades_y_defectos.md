@@ -471,7 +471,9 @@ var userId = _httpContextAccessor.HttpContext?.User
 
 ---
 
-### 🟡 3.7 DeleteProperty del Agente No Verifica Propiedad del Agente
+### ✅ ~~3.7 DeleteProperty del Agente No Verifica Propiedad del Agente~~ — SOLUCIONADO
+
+> **Resuelto**: Se incorporó la validación de pertenencia en `AgentController.DeleteProperty` (`existing.AgentId != userId`). Si un usuario autenticado como agente intenta enviar una solicitud para eliminar una propiedad perteneciente a otro agente, la operación se deniega y se redirige con un mensaje de error sin modificar la base de datos.
 
 **Archivo**: [AgentController.cs L140-L147](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AgentController.cs#L140-L147)
 

@@ -329,6 +329,19 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🛡️ Corrección 3.7 — Validación de Pertenencia del Agente en la Eliminación de Propiedades
+
+- **Severidad**: 🟡 Media (Bug Funcional / Seguridad de Autorización)
+- **Componentes**: `RealEstateApp.Presentation.WebApp`
+- **Archivos Modificados**:
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AgentController.cs`
+- **Detalles Técnicos de la Solución**:
+  1. En el método HTTP POST `DeleteProperty(int id)` de `AgentController.cs`, se consulta la propiedad `GetByIdSaveViewModel(id)` antes de proceder con el borrado.
+  2. Se verifica que el identificador del usuario autenticado coincida con `existing.AgentId`.
+  3. En caso de discrepancia o propiedad inexistente, la solicitud se rechaza y se notifica al usuario con un mensaje de error mediante `TempData["ErrorMessage"]`, impidiendo que un agente pueda eliminar inmuebles asignados a otro agente.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -353,6 +366,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **3.4** | 🐛 Bug | Ruta de confirmación email apunta a API en lugar de WebApp | ✅ SOLUCIONADO |
 | **3.5** | 🐛 Bug | Posibles colisiones en autogeneración de código de propiedad | ✅ SOLUCIONADO |
 | **3.6** | 🐛 Bug | Campos de auditoría `CreatedBy`/`LastModifiedBy` siempre "System" | ✅ SOLUCIONADO |
+| **3.7** | 🐛 Bug | `DeleteProperty` de agente no valida pertenencia del inmueble | ✅ SOLUCIONADO |
 | **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ✅ SOLUCIONADO |
 
 ---
