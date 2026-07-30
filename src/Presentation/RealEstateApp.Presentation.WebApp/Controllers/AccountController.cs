@@ -116,13 +116,14 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return View(vm);
             }
 
-            var origin = $"{Request.Scheme}://{Request.Host}";
-            var selectedRole = vm.UserType switch
+            if (vm.UserType == "Developer")
             {
-                "Agent" => Roles.Agent.ToString(),
-                "Developer" => Roles.Developer.ToString(),
-                _ => Roles.Client.ToString()
-            };
+                ModelState.AddModelError(string.Empty, "El registro de cuentas de Desarrollador está reservado exclusivamente para los administradores del sistema.");
+                return View(vm);
+            }
+
+            var origin = $"{Request.Scheme}://{Request.Host}";
+            var selectedRole = vm.UserType == "Agent" ? Roles.Agent.ToString() : Roles.Client.ToString();
 
             var request = new RegisterRequest
             {
@@ -146,12 +147,6 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             if (selectedRole == Roles.Agent.ToString())
             {
                 return RedirectToAction(nameof(PendingActivation));
-            }
-
-            if (selectedRole == Roles.Developer.ToString())
-            {
-                TempData["SuccessMessage"] = "Cuenta de Desarrollador creada exitosamente. Ya puede iniciar sesión para acceder a su panel y herramientas de API.";
-                return RedirectToAction(nameof(Login));
             }
 
             ViewBag.Message = $"¡Registro exitoso! Hemos enviado un enlace de confirmación a su correo ({vm.Email}). Por favor verifique su cuenta para poder iniciar sesión.";

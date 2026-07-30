@@ -72,8 +72,9 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         }
 
         /// <summary>
-        /// Registra un nuevo usuario Desarrollador en el sistema para acceso a la API REST.
+        /// Registra un nuevo usuario Desarrollador en el sistema para acceso a la API REST (Reservado para Administradores).
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpPost("register-developer")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegisterResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

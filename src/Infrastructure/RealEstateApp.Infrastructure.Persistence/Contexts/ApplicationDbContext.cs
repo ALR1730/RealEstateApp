@@ -62,6 +62,9 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                 entity.Property(p => p.Price)
                     .HasColumnType("decimal(18,2)");
 
+                entity.Property(p => p.SizeInMeters)
+                    .HasColumnType("decimal(18,2)");
+
                 entity.Property(p => p.MontoSeparacion)
                     .HasColumnType("decimal(18,2)");
 

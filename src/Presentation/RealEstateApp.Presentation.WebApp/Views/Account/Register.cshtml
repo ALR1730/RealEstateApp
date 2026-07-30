@@ -28,19 +28,14 @@
                         <div class="mb-4 text-center">
                             <label class="form-label fw-bold text-dark d-block mb-3">Quiero registrarme como:</label>
                             <div class="btn-group w-100 role-selector" role="group">
-                                <input type="radio" class="btn-check" name="UserType" id="userTypeClient" value="Client" @(Model.UserType != "Agent" && Model.UserType != "Developer" ? "checked" : "") autocomplete="off">
+                                <input type="radio" class="btn-check" name="UserType" id="userTypeClient" value="Client" @(Model.UserType != "Agent" ? "checked" : "") autocomplete="off">
                                 <label class="btn btn-outline-primary py-3 rounded-start-3 fw-bold" for="userTypeClient">
                                     <i class="bi bi-person-heart fs-4 d-block mb-1"></i> Cliente (Comprador)
                                 </label>
 
                                 <input type="radio" class="btn-check" name="UserType" id="userTypeAgent" value="Agent" @(Model.UserType == "Agent" ? "checked" : "") autocomplete="off">
-                                <label class="btn btn-outline-primary py-3 fw-bold" for="userTypeAgent">
+                                <label class="btn btn-outline-primary py-3 rounded-end-3 fw-bold" for="userTypeAgent">
                                     <i class="bi bi-building-fill-gear fs-4 d-block mb-1"></i> Agente Inmobiliario
-                                </label>
-
-                                <input type="radio" class="btn-check" name="UserType" id="userTypeDeveloper" value="Developer" @(Model.UserType == "Developer" ? "checked" : "") autocomplete="off">
-                                <label class="btn btn-outline-primary py-3 rounded-end-3 fw-bold" for="userTypeDeveloper">
-                                    <i class="bi bi-code-slash fs-4 d-block mb-1"></i> Desarrollador (API)
                                 </label>
                             </div>
                             <span asp-validation-for="UserType" class="text-danger small"></span>
