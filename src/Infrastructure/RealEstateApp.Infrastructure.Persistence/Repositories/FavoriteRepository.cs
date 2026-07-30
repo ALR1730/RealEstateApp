@@ -37,5 +37,12 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
             return await _dbContext.Set<Favorite>()
                 .FirstOrDefaultAsync(f => f.ClienteId == clienteId && f.PropertyId == propertyId);
         }
+
+        public async Task<List<Favorite>> GetByPropertyIdAsync(int propertyId)
+        {
+            return await _dbContext.Set<Favorite>()
+                .Where(f => f.PropertyId == propertyId)
+                .ToListAsync();
+        }
     }
 }

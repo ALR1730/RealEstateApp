@@ -201,24 +201,22 @@ namespace RealEstateApp.Core.Application.Services
                     await _propertyImageRepository.DeleteRangeAsync(images);
                 }
 
-                // B. Limpiar favoritos de la propiedad en lote
-                var favorites = await _favoriteRepository.GetAllAsync();
-                var propFavs = favorites.Where(f => f.PropertyId == prop.Id).ToList();
+                // B. Limpiar favoritos de la propiedad en lote vía SQL en BD
+                var propFavs = await _favoriteRepository.GetByPropertyIdAsync(prop.Id);
                 if (propFavs.Any())
                 {
                     await _favoriteRepository.DeleteRangeAsync(propFavs);
                 }
 
-                // C. Limpiar ofertas de la propiedad en lote
+                // C. Limpiar ofertas de la propiedad en lote vía SQL en BD
                 var offers = await _offerRepository.GetByPropertyIdAsync(prop.Id);
                 if (offers.Any())
                 {
                     await _offerRepository.DeleteRangeAsync(offers);
                 }
 
-                // D. Limpiar chats vinculados a la propiedad en lote
-                var chats = await _chatRepository.GetAllAsync();
-                var propChats = chats.Where(c => c.PropertyId == prop.Id).ToList();
+                // D. Limpiar chats vinculados a la propiedad en lote vía SQL en BD
+                var propChats = await _chatRepository.GetByPropertyIdAsync(prop.Id);
                 if (propChats.Any())
                 {
                     await _chatRepository.DeleteRangeAsync(propChats);
@@ -232,8 +230,7 @@ namespace RealEstateApp.Core.Application.Services
             }
 
             // 2. Limpiar cualquier chat del agente que no esté vinculado a propiedades específicas en lote
-            var remainingChats = await _chatRepository.GetAllAsync();
-            var agentChats = remainingChats.Where(c => c.ClienteId == agentId || c.AgenteId == agentId || c.SenderId == agentId).ToList();
+            var agentChats = await _chatRepository.GetByUserIdAsync(agentId);
             if (agentChats.Any())
             {
                 await _chatRepository.DeleteRangeAsync(agentChats);

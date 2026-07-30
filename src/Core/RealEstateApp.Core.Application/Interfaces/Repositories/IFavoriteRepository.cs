@@ -15,5 +15,9 @@ namespace RealEstateApp.Core.Application.Interfaces.Repositories
         /// Verifica si un favorito ya existe para el cliente y propiedad dados.
         /// </summary>
         Task<Favorite?> GetByClienteAndPropertyAsync(string clienteId, int propertyId);
+        /// <summary>
+        /// Obtiene todos los favoritos registrados para una propiedad.
+        /// </summary>
+        Task<List<Favorite>> GetByPropertyIdAsync(int propertyId);
     }
 }

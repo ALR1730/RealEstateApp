@@ -342,6 +342,36 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### ⚡ Corrección 4.2 — Optimización de Eliminación en Cascada del Agente (`DeleteAgentCascadeAsync`)
+
+- **Severidad**: 🔴 Crítica / 🟠 Alta (Rendimiento / Múltiples Consultas N+1)
+- **Componentes**: `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Application/Interfaces/Repositories/IFavoriteRepository.cs`
+  - `src/Core/RealEstateApp.Core.Application/Interfaces/Repositories/IChatRepository.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/FavoriteRepository.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/ChatRepository.cs`
+  - `src/Core/RealEstateApp.Core.Application/Services/AgentService.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se implementaron los métodos `GetByPropertyIdAsync` en `FavoriteRepository` y `ChatRepository`, así como `GetByUserIdAsync` en `ChatRepository`, ejecutando consultas SQL filtradas directamente en la base de datos.
+  2. Se refactorizó `DeleteAgentCascadeAsync` en `AgentService.cs` eliminando por completo las llamadas masivas `GetAllAsync()` en RAM.
+  3. Se combinó la recuperación directa filtrada en BD con la eliminación en lote `DeleteRangeAsync`, eliminando cientos de queries individuales N+1 y llamadas repetitivas a `SaveChangesAsync`.
+
+---
+
+### 📄 Corrección 4.3 — Soporte de Paginación en Consultas de Listado de Propiedades
+
+- **Severidad**: 🟠 Alta (Rendimiento / Carga Masiva)
+- **Componentes**: `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Application/ViewModels/Property/PropertyFilterViewModel.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/PropertyRepository.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se añadieron las propiedades opcionales `PageNumber` y `PageSize` al ViewModel de filtrado de propiedades `PropertyFilterViewModel.cs`.
+  2. En `PropertyRepository.cs` (`GetWithFiltersAsync`), se evaluaron `PageNumber` y `PageSize` para aplicar cláusulas de paginación `.Skip((pageNumber - 1) * pageSize).Take(pageSize)` a nivel de consulta EF Core (`IQueryable`), limitando los datos extraídos de SQL Server.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -368,6 +398,8 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **3.6** | 🐛 Bug | Campos de auditoría `CreatedBy`/`LastModifiedBy` siempre "System" | ✅ SOLUCIONADO |
 | **3.7** | 🐛 Bug | `DeleteProperty` de agente no valida pertenencia del inmueble | ✅ SOLUCIONADO |
 | **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ✅ SOLUCIONADO |
+| **4.2** | ⚡ Rendimiento | `DeleteAgentCascade` ejecuta cientos de queries individuales | ✅ SOLUCIONADO |
+| **4.3** | ⚡ Rendimiento | Sin paginación en listado de propiedades | ✅ SOLUCIONADO |
 
 ---
 

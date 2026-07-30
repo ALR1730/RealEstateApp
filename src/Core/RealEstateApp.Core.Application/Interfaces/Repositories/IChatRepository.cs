@@ -15,5 +15,10 @@ namespace RealEstateApp.Core.Application.Interfaces.Repositories
         /// Obtiene todos los hilos de chat de un usuario (como cliente o agente).
         /// </summary>
         Task<List<Chat>> GetByUserIdAsync(string userId);
+
+        /// <summary>
+        /// Obtiene todos los mensajes de chat asociados a una propiedad específica.
+        /// </summary>
+        Task<List<Chat>> GetByPropertyIdAsync(int propertyId);
     }
 }

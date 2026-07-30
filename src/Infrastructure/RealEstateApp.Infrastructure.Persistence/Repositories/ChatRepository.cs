@@ -27,8 +27,15 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
         {
             return await _dbContext.Set<Chat>()
                 .Include(c => c.Property)
-                .Where(c => c.ClienteId == userId || c.AgenteId == userId)
+                .Where(c => c.ClienteId == userId || c.AgenteId == userId || c.SenderId == userId)
                 .OrderByDescending(c => c.SentAt)
+                .ToListAsync();
+        }
+
+        public async Task<List<Chat>> GetByPropertyIdAsync(int propertyId)
+        {
+            return await _dbContext.Set<Chat>()
+                .Where(c => c.PropertyId == propertyId)
                 .ToListAsync();
         }
     }

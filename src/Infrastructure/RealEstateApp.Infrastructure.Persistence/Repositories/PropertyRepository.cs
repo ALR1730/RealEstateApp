@@ -112,7 +112,16 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 query = query.Where(p => p.AgentId == filters.AgentId);
             }
 
-            return await query.OrderByDescending(p => p.Created).ToListAsync();
+            query = query.OrderByDescending(p => p.Created);
+
+            if (filters.PageNumber.HasValue && filters.PageSize.HasValue)
+            {
+                var pageNumber = filters.PageNumber.Value < 1 ? 1 : filters.PageNumber.Value;
+                var pageSize = filters.PageSize.Value < 1 ? 10 : filters.PageSize.Value;
+                query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            }
+
+            return await query.ToListAsync();
         }
 
         /// <summary>

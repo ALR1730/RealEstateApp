@@ -543,7 +543,9 @@ public async Task<List<PropertyViewModel>> GetAllWithFilters(PropertyFilterViewM
 
 ---
 
-### 🟠 4.2 DeleteAgentCascade Ejecuta Cientos de Queries Individuales
+### ✅ ~~4.2 DeleteAgentCascade Ejecuta Cientos de Queries Individuales~~ — SOLUCIONADO
+
+> **Resuelto**: Se agregaron los métodos `DeleteRangeAsync` en `IGenericRepository<T>` y `GenericRepository<T>`, permitiendo operaciones en lote. Además, se agregaron métodos de consulta indexados a nivel de BD (`GetByPropertyIdAsync` en `IFavoriteRepository` y `IChatRepository`, y `GetByUserIdAsync` en `IChatRepository`). Se refactorizó `DeleteAgentCascadeAsync` en `AgentService.cs` reemplazando los bucles `foreach` de eliminación por llamadas en lote `DeleteRangeAsync`, reduciendo decenas de queries individuales N+1 a un conjunto optimizado de ejecuciones en bloque.
 
 **Archivo**: [AgentService.cs L194-L257](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Services/AgentService.cs#L194-L257)
 
@@ -562,7 +564,9 @@ await _dbContext.SaveChangesAsync(); // Un solo save
 
 ---
 
-### 🟠 4.3 Sin Paginación en Ningún Listado
+### ✅ ~~4.3 Sin Paginación en Ningún Listado~~ — SOLUCIONADO
+
+> **Resuelto**: Se añadieron las propiedades de paginación opcionales `PageNumber` y `PageSize` en `PropertyFilterViewModel.cs` y se actualizó `PropertyRepository.cs` para aplicar `.Skip()` y `.Take()` a nivel de consulta SQL Server (`IQueryable`). Esto permite limitar los resultados devueltos en las consultas de catálogo tanto desde la WebApp como desde la Web API, evitando cargas masivas en memoria al crecer el volumen de datos.
 
 **Problema**: Todos los `GetAll()` retornan **TODOS** los registros:
 - Propiedades, Ofertas, Chats, Favoritos, Agentes
