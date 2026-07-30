@@ -315,6 +315,20 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 📝 Corrección 3.6 — Inyección de Usuario Autenticado en Campos de Auditoría del DbContext
+
+- **Severidad**: 🟡 Media (Bug Funcional / Auditoría)
+- **Componentes**: `RealEstateApp.Infrastructure.Persistence`
+- **Archivos Modificados**:
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Contexts/ApplicationDbContext.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/ServiceRegistration.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se registró `IHttpContextAccessor` en `ServiceRegistration.cs` y se inyectó de forma opcional en `ApplicationDbContext.cs`.
+  2. En `SaveChangesAsync`, se extrae el nombre o identificador del usuario autenticado actual desde `_httpContextAccessor.HttpContext.User`.
+  3. Se reemplazó el valor fijo `"System"` por el nombre de usuario dinámico en los campos `CreatedBy` y `LastModifiedBy` de las entidades auditables (`AuditableBaseEntity`), manteniendo `"System"` únicamente como fallback seguro para ejecuciones en segundo plano o seeds.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -338,6 +352,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **3.3** | 🐛 Bug | Nombres de agentes usan UserName y apellido vacío | ✅ SOLUCIONADO |
 | **3.4** | 🐛 Bug | Ruta de confirmación email apunta a API en lugar de WebApp | ✅ SOLUCIONADO |
 | **3.5** | 🐛 Bug | Posibles colisiones en autogeneración de código de propiedad | ✅ SOLUCIONADO |
+| **3.6** | 🐛 Bug | Campos de auditoría `CreatedBy`/`LastModifiedBy` siempre "System" | ✅ SOLUCIONADO |
 | **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ✅ SOLUCIONADO |
 
 ---

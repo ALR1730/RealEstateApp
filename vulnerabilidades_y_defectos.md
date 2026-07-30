@@ -446,7 +446,9 @@ private async Task<string> GenerateUniqueCodeAsync()
 
 ---
 
-### 🟡 3.6 Auditoría Siempre Registra "System" como Usuario
+### ✅ ~~3.6 Auditoría Siempre Registra "System" como Usuario~~ — SOLUCIONADO
+
+> **Resuelto**: Se inyectó `IHttpContextAccessor` en `ApplicationDbContext.cs` y se registró en el contenedor de inyección de dependencias (`ServiceRegistration.cs`). En `SaveChangesAsync`, se extrae dinámicamente el nombre o ID del usuario autenticado actual (`_httpContextAccessor?.HttpContext?.User?.Identity?.Name`), asignándolo a los campos de auditoría `CreatedBy` y `LastModifiedBy` (con fallback a `"System"` para procesos en segundo plano o seeds).
 
 **Archivo**: [ApplicationDbContext.cs L296-L300](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Contexts/ApplicationDbContext.cs#L294-L301)
 

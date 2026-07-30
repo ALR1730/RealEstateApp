@@ -1,15 +1,22 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RealEstateApp.Core.Domain.Common;
 using RealEstateApp.Core.Domain.Entities;
+using System.Security.Claims;
 
 namespace RealEstateApp.Infrastructure.Persistence.Contexts
 {
     public class ApplicationDbContext : IdentityDbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        private readonly IHttpContextAccessor? _httpContextAccessor;
+
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options,
+            IHttpContextAccessor? httpContextAccessor = null) : base(options)
         {
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public DbSet<Property> Properties { get; set; } = null!;
@@ -293,17 +300,21 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            var currentUser = _httpContextAccessor?.HttpContext?.User?.Identity?.Name
+                              ?? _httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                              ?? "System";
+
             foreach (var entry in ChangeTracker.Entries<AuditableBaseEntity>())
             {
                 switch (entry.State)
                 {
                     case EntityState.Added:
                         entry.Entity.Created = DateTime.UtcNow;
-                        entry.Entity.CreatedBy = "System"; // Se reemplazará con el usuario actual en fases posteriores
+                        entry.Entity.CreatedBy = currentUser;
                         break;
                     case EntityState.Modified:
                         entry.Entity.LastModified = DateTime.UtcNow;
-                        entry.Entity.LastModifiedBy = "System";
+                        entry.Entity.LastModifiedBy = currentUser;
                         break;
                 }
             }

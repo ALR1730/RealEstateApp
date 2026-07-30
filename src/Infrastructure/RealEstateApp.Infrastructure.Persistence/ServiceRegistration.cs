@@ -17,6 +17,8 @@ namespace RealEstateApp.Infrastructure.Persistence
         {
             #region DbContext
 
+            services.AddHttpContextAccessor();
+
             if (configuration.GetValue<bool>("UseInMemoryDatabase"))
             {
                 services.AddDbContext<ApplicationDbContext>(options =>
