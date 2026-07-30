@@ -97,7 +97,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
             return await RegisterUserAsync(request, Roles.Client.ToString());
         }
 
-        public async Task<RegisterResponse> RegisterUserAsync(RegisterRequest request, string role, string? origin = null)
+        public async Task<RegisterResponse> RegisterUserAsync(RegisterRequest request, string role, string? origin = null, string? route = null)
         {
             var response = new RegisterResponse();
 
@@ -157,8 +157,12 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
             {
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-                var route = "api/v1/account/confirm-email";
-                var verificationUri = $"{origin}/{route}?userId={user.Id}&token={encodedToken}";
+                var targetRoute = !string.IsNullOrWhiteSpace(route)
+                    ? route
+                    : (origin.Contains("api", StringComparison.OrdinalIgnoreCase)
+                        ? "api/v1/account/confirm-email"
+                        : "Account/ConfirmEmail");
+                var verificationUri = $"{origin}/{targetRoute}?userId={user.Id}&token={encodedToken}";
 
                 await _emailService.SendAsync(
                     user.Email,

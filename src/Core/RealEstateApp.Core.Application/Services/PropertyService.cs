@@ -62,8 +62,8 @@ namespace RealEstateApp.Core.Application.Services
         {
             var property = _mapper.Map<Property>(vm);
 
-            // Autogenerar código único de 6 dígitos, asignar agente responsable y establecer estado
-            property.Code = GenerateUniqueCode();
+            // Autogenerar código único de 6 dígitos con verificación de unicidad en BD
+            property.Code = await GenerateUniqueCodeAsync();
             property.Status = "Disponible";
             property.AgentId = vm.AgentId;
 
@@ -201,9 +201,16 @@ namespace RealEstateApp.Core.Application.Services
             await _propertyRepository.UpdateAsync(property);
         }
 
-        private static string GenerateUniqueCode()
+        private async Task<string> GenerateUniqueCodeAsync()
         {
-            return Guid.NewGuid().ToString("N")[..6].ToUpper();
+            string code;
+            do
+            {
+                code = Guid.NewGuid().ToString("N")[..6].ToUpper();
+            }
+            while (await _propertyRepository.GetByCodeAsync(code) != null);
+
+            return code;
         }
     }
 }

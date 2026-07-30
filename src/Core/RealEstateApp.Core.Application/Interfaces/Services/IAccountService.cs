@@ -13,7 +13,7 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
     {
         Task<AuthenticationResponse> AuthenticateAsync(AuthenticationRequest request);
         Task<RegisterResponse> RegisterBasicUserAsync(RegisterRequest request);
-        Task<RegisterResponse> RegisterUserAsync(RegisterRequest request, string role, string? origin = null);
+        Task<RegisterResponse> RegisterUserAsync(RegisterRequest request, string role, string? origin = null, string? route = null);
         Task<string> ConfirmAccountAsync(string userId, string token);
         Task ChangeUserStatusAsync(string userId, bool isActive);
         Task SignOutAsync();

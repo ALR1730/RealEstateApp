@@ -396,7 +396,9 @@ var lastName = claims.FirstOrDefault(c => c.Type == "LastName")?.Value ?? string
 
 ---
 
-### 🟠 3.4 Ruta de Confirmación de Email Apunta al Endpoint Incorrecto
+### ✅ ~~3.4 Ruta de Confirmación de Email Apunta al Endpoint Incorrecto~~ — SOLUCIONADO
+
+> **Resuelto**: Se agregó el parámetro opcional `route` en la firma de `RegisterUserAsync` de `IAccountService.cs` y `AccountService.cs`. En `AccountService.cs`, la ruta se evalúa dinámicamente según el entorno o el parámetro recibido. En `WebApp/AccountController.cs` se pasa explícitamente `"Account/ConfirmEmail"`, dirigiendo a los usuarios registrados desde la WebApp MVC a la pantalla HTML de confirmación `ConfirmEmailResult.cshtml`.
 
 **Archivo**: [AccountService.cs L160-L161](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Services/AccountService.cs#L160-L161)
 
@@ -414,7 +416,9 @@ var route = "Account/ConfirmEmail";
 
 ---
 
-### 🟠 3.5 Código Único de Propiedad Puede Colisionar
+### ✅ ~~3.5 Código Único de Propiedad Puede Colisionar~~ — SOLUCIONADO
+
+> **Resuelto**: Se refactorizó la autogeneración de códigos en `PropertyService.cs` reemplazando `GenerateUniqueCode()` por `GenerateUniqueCodeAsync()`. Se implementó un bucle `do-while` que valida la existencia del código generado contra la base de datos utilizando `_propertyRepository.GetByCodeAsync(code)`, garantizando 100% de unicidad antes de persistir y eliminando excepciones por violación de índice UNIQUE.
 
 **Archivo**: [PropertyService.cs L236-L239](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Services/PropertyService.cs#L236-L239)
 

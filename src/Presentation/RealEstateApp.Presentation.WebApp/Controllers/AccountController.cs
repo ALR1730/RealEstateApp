@@ -136,7 +136,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 Phone = vm.Phone
             };
 
-            var response = await _accountService.RegisterUserAsync(request, selectedRole, origin);
+            var response = await _accountService.RegisterUserAsync(request, selectedRole, origin, "Account/ConfirmEmail");
 
             if (response.HasError)
             {

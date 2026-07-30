@@ -287,6 +287,34 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### ✉️ Corrección 3.4 — Parametrización de Rutas de Confirmación de Correo Electrónico
+
+- **Severidad**: 🟠 Alta (Bug Funcional / Enlaces de Activación)
+- **Componentes**: `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`, `RealEstateApp.Presentation.WebApp`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Application/Interfaces/Services/IAccountService.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Services/AccountService.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AccountController.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se añadió el parámetro opcional `route` a la firma `RegisterUserAsync`.
+  2. En `AccountService.cs`, se implementó la resolución dinámica del target URI: si no se especifica ruta, se verifica si el origen proviene de Web API o de WebApp MVC.
+  3. En `WebApp/AccountController.cs`, se pasa explícitamente `"Account/ConfirmEmail"`, garantizando que al hacer clic en el correo de confirmación enviado a clientes registrados en la WebApp se abra la vista HTML `ConfirmEmailResult.cshtml`.
+
+---
+
+### 🔢 Corrección 3.5 — Validación de Unicidad en la Generación del Código de Propiedades
+
+- **Severidad**: 🟠 Alta (Bug Funcional / Integridad BD)
+- **Componentes**: `RealEstateApp.Core.Application`
+- **Archivos Modificados**:
+  - `src/Core/RealEstateApp.Core.Application/Services/PropertyService.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se reemplazó el método síncrono estático `GenerateUniqueCode()` por la función asíncrona `GenerateUniqueCodeAsync()`.
+  2. Se integró una verificación contra la base de datos `await _propertyRepository.GetByCodeAsync(code)` en un ciclo `do-while` para asegurar que cada código alfanumérico autogenerado de 6 caracteres sea único antes de asignarlo al inmueble.
+  3. Esto elimina potenciales colisiones en el índice `UNIQUE` de la columna `Code` en SQL Server.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -308,6 +336,8 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **3.1** | 🐛 Bug | Carta de Pre-aprobación bancaria subida pero no guardada | ✅ SOLUCIONADO |
 | **3.2** | 🐛 Bug | Chats de soporte usan PropertyId (0 y -1) sin validar FK | ✅ SOLUCIONADO |
 | **3.3** | 🐛 Bug | Nombres de agentes usan UserName y apellido vacío | ✅ SOLUCIONADO |
+| **3.4** | 🐛 Bug | Ruta de confirmación email apunta a API en lugar de WebApp | ✅ SOLUCIONADO |
+| **3.5** | 🐛 Bug | Posibles colisiones en autogeneración de código de propiedad | ✅ SOLUCIONADO |
 | **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ✅ SOLUCIONADO |
 
 ---
