@@ -1,6 +1,6 @@
 @model RealEstateApp.Core.Application.ViewModels.Property.SavePropertyViewModel
 @{
-    ViewData["Title"] = $"Editar Propiedad {Model.Code}";
+    ViewData["Title"] = $"Editar Inmueble {Model.Name}";
 }
 
 <div class="container py-5">
@@ -8,7 +8,8 @@
         <div class="col-lg-9">
             <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
                 <div class="card-header bg-dark text-white p-4 text-center border-0" style="background: var(--bg-gradient-hero) !important;">
-                    <h3 class="font-heading text-white fw-bold mb-1">Editar Propiedad Código: @Model.Code</h3>
+                    <h3 class="font-heading text-white fw-bold mb-1">Editar @Model.Name</h3>
+                    <div class="mb-2"><span class="badge bg-white bg-opacity-20 text-info px-3 py-1 font-heading border border-info border-opacity-25">Código: @Model.Code</span></div>
                     <p class="small text-white-50 mb-0">Modifica las características y gestiona las imágenes del inmueble</p>
                 </div>
 
@@ -25,6 +26,12 @@
                         <input type="hidden" asp-for="Code" />
 
                         <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label asp-for="Name" class="form-label fw-bold text-dark small"></label>
+                                <input asp-for="Name" class="form-control form-control-custom" placeholder="Nombre o título de la propiedad" />
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+
                             <div class="col-md-6">
                                 <label asp-for="PropertyTypeId" class="form-label fw-bold text-dark small"></label>
                                 <select asp-for="PropertyTypeId" class="form-select form-select-custom">

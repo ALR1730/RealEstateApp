@@ -25,6 +25,12 @@
 
                     <form asp-action="CreateProperty" method="post" enctype="multipart/form-data">
                         <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label asp-for="Name" class="form-label fw-bold text-dark small"></label>
+                                <input asp-for="Name" class="form-control form-control-custom" placeholder="Nombre o título del inmueble (ej. Apartamento Moderno con Balcón)" />
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+
                             <div class="col-md-6">
                                 <label asp-for="PropertyTypeId" class="form-label fw-bold text-dark small"></label>
                                 <select asp-for="PropertyTypeId" class="form-select form-select-custom">

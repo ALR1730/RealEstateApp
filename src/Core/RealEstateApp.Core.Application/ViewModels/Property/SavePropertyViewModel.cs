@@ -22,6 +22,11 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         /// </summary>
         public string AgentId { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "El nombre de la propiedad es requerido")]
+        [StringLength(150, ErrorMessage = "El nombre no puede exceder los 150 caracteres")]
+        [Display(Name = "Nombre de la Propiedad")]
+        public string Name { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "El precio es requerido")]
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio debe ser mayor a cero")]
         [DataType(DataType.Currency)]

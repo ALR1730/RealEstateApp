@@ -76,6 +76,7 @@ namespace RealEstateApp.Infrastructure.Persistence
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IPropertyRepository, PropertyRepository>();
+            services.AddScoped<IPropertyTypeRepository, PropertyTypeRepository>();
             services.AddScoped<IOfferRepository, OfferRepository>();
             services.AddScoped<IChatRepository, ChatRepository>();
             services.AddScoped<IFavoriteRepository, FavoriteRepository>();

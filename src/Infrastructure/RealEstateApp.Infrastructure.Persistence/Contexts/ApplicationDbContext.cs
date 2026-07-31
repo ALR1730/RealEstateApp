@@ -60,9 +60,13 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                 entity.ToTable("Properties");
                 entity.HasKey(p => p.Id);
 
+                entity.Property(p => p.Name)
+                    .IsRequired()
+                    .HasMaxLength(150);
+
                 entity.Property(p => p.Code)
                     .IsRequired()
-                    .HasMaxLength(6);
+                    .HasMaxLength(15);
 
                 entity.HasIndex(p => p.Code)
                     .IsUnique();

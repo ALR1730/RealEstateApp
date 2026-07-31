@@ -119,6 +119,7 @@ namespace RealEstateApp.Core.Application.Services
                     Properties = agentProperties.Select(p => new AgentPropertyDto
                     {
                         Id = p.Id,
+                        Name = p.Name,
                         Code = p.Code,
                         Price = p.Price,
                         Rooms = p.Rooms,

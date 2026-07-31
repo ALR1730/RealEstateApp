@@ -41,7 +41,7 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card-property" data-href="@Url.Action("Details", "Home", new { id = item.Id })">
                         <div class="img-container">
-                            <span class="code-badge">@item.Code</span>
+                            <span class="code-badge">Código: @item.Code</span>
                             
                             @{
                                 var displayStatus = (item.Status == "Disponible" && item.IsFinanciable) ? "Financiable" : item.Status;
@@ -53,7 +53,7 @@
 
                             @if (item.Images != null && item.Images.Count > 0)
                             {
-                                <img src="@item.Images[0]" alt="@item.Code" />
+                                <img src="@item.Images[0]" alt="@item.Name" />
                             }
                             else
                             {
@@ -71,6 +71,7 @@
                                     <span class="badge bg-light text-primary border">@item.PropertyTypeName</span>
                                     <span class="badge bg-light text-dark border">@item.SaleTypeName</span>
                                 </div>
+                                <h5 class="font-heading fw-bold text-dark mb-1 text-truncate" title="@item.Name">@item.Name</h5>
                                 <p class="text-muted small mb-3 text-truncate-2">@item.Description</p>
                             </div>
 

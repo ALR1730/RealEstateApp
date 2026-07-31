@@ -9,6 +9,7 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
     public class PropertyViewModel
     {
         public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public int Rooms { get; set; }

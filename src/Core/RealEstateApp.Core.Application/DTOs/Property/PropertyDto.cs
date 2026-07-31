@@ -11,8 +11,10 @@ namespace RealEstateApp.Core.Application.DTOs.Property
     {
         public int Id { get; set; }
 
+        public string Name { get; set; } = string.Empty;
+
         [Required]
-        [StringLength(6)]
+        [StringLength(15)]
         public string Code { get; set; } = string.Empty;
 
         public string PropertyTypeName { get; set; } = string.Empty;

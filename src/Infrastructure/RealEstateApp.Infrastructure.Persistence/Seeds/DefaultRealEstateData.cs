@@ -83,6 +83,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                 {
                     var prop1 = new Property
                     {
+                        Name = "Apartamento Moderno Bella Vista",
                         Code = "APT101",
                         Price = 195000.00m,
                         Rooms = 3,
@@ -103,6 +104,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
 
                     var prop2 = new Property
                     {
+                        Name = "Villa Frente al Mar Cap Cana",
                         Code = "VIL202",
                         Price = 450000.00m,
                         Rooms = 5,
@@ -123,6 +125,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
 
                     var prop3 = new Property
                     {
+                        Name = "Residencia Familiar Arroyo Hondo",
                         Code = "CAS303",
                         Price = 280000.00m,
                         Rooms = 4,
@@ -143,6 +146,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
 
                     var prop4 = new Property
                     {
+                        Name = "Penthouse Exclusivo Piantini",
                         Code = "PNT404",
                         Price = 520000.00m,
                         Rooms = 4,

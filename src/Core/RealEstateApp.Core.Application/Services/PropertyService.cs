@@ -20,17 +20,20 @@ namespace RealEstateApp.Core.Application.Services
     {
         private readonly IPropertyRepository _propertyRepository;
         private readonly IPropertyImageRepository _propertyImageRepository;
+        private readonly IPropertyTypeRepository _propertyTypeRepository;
         private readonly IFileStorageService _fileStorageService;
         private readonly IMapper _mapper;
 
         public PropertyService(
             IPropertyRepository propertyRepository,
             IPropertyImageRepository propertyImageRepository,
+            IPropertyTypeRepository propertyTypeRepository,
             IFileStorageService fileStorageService,
             IMapper mapper)
         {
             _propertyRepository = propertyRepository;
             _propertyImageRepository = propertyImageRepository;
+            _propertyTypeRepository = propertyTypeRepository;
             _fileStorageService = fileStorageService;
             _mapper = mapper;
         }
@@ -63,9 +66,14 @@ namespace RealEstateApp.Core.Application.Services
         public async Task<SavePropertyViewModel> Add(SavePropertyViewModel vm)
         {
             var property = _mapper.Map<Property>(vm);
+            property.Name = vm.Name;
 
-            // Autogenerar código único de 6 dígitos con verificación de unicidad en BD
-            property.Code = await GenerateUniqueCodeAsync();
+            // Obtener el tipo de propiedad para generar dinámicamente su prefijo/identificador
+            var propertyType = await _propertyTypeRepository.GetByIdAsync(vm.PropertyTypeId);
+            string prefix = GetPropertyTypePrefix(propertyType?.Name);
+
+            // Autogenerar código único con prefijo de tipo de propiedad
+            property.Code = await GenerateUniqueCodeAsync(prefix);
             property.Status = PropertyStatus.Available;
             property.AgentId = vm.AgentId;
 
@@ -105,6 +113,7 @@ namespace RealEstateApp.Core.Application.Services
             if (property == null)
                 throw new NotFoundException($"No se encontró la propiedad con ID {id}");
 
+            property.Name = vm.Name;
             property.Price = vm.Price;
             property.Rooms = vm.Rooms;
             property.Bathrooms = vm.Bathrooms;
@@ -203,16 +212,61 @@ namespace RealEstateApp.Core.Application.Services
             await _propertyRepository.UpdateAsync(property);
         }
 
-        private async Task<string> GenerateUniqueCodeAsync()
+        private async Task<string> GenerateUniqueCodeAsync(string prefix)
         {
             string code;
             do
             {
-                code = Guid.NewGuid().ToString("N")[..6].ToUpper();
+                code = $"{prefix}{Guid.NewGuid().ToString("N")[..6].ToUpper()}";
             }
             while (await _propertyRepository.GetByCodeAsync(code) != null);
 
             return code;
+        }
+
+        private string GetPropertyTypePrefix(string? typeName)
+        {
+            if (string.IsNullOrWhiteSpace(typeName)) return "PROP";
+
+            var trimmed = typeName.Trim();
+            var words = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (words.Length > 1)
+            {
+                var initials = new string(words.Select(w => char.ToUpper(w[0])).ToArray());
+                if (initials.Length >= 3)
+                    return initials[..3];
+
+                var firstWordChar = char.ToUpper(words[0][0]);
+                var secondWordClean = new string(words[1].Where(char.IsLetterOrDigit).ToArray()).ToUpper();
+                if (secondWordClean.Length >= 2)
+                    return $"{firstWordChar}{secondWordClean[..2]}";
+
+                return (firstWordChar + secondWordClean).PadRight(3, 'X');
+            }
+
+            var cleanWord = new string(trimmed.Where(char.IsLetterOrDigit).ToArray()).ToUpper();
+            if (cleanWord.Length <= 3)
+                return cleanWord.PadRight(3, 'X');
+
+            // Coincidencias conocidas comunes para alta legibilidad
+            if (cleanWord.StartsWith("APARTAM")) return "APT";
+            if (cleanWord.StartsWith("VILL")) return "VIL";
+            if (cleanWord.StartsWith("CASA")) return "CAS";
+            if (cleanWord.StartsWith("PENTH")) return "PNT";
+            if (cleanWord.StartsWith("TERRE")) return "TER";
+            if (cleanWord.StartsWith("LOCAL")) return "LOC";
+            if (cleanWord.StartsWith("EDIFI")) return "EDI";
+
+            // Algoritmo dinámico para cualquier tipo de propiedad nuevo
+            var firstChar = cleanWord[0];
+            var consonants = cleanWord.Substring(1).Where(c => !"AEIOUáéíóúÁÉÍÓÚ".Contains(c)).ToArray();
+            if (consonants.Length >= 2)
+            {
+                return $"{firstChar}{consonants[0]}{consonants[1]}";
+            }
+
+            return cleanWord[..3];
         }
     }
 }
