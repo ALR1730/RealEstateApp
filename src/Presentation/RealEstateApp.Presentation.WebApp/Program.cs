@@ -22,6 +22,14 @@ System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 builder.Services.AddControllersWithViews();
 builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 
+// Configurar HSTS con Preload y subdominios para producción
+builder.Services.AddHsts(options =>
+{
+    options.Preload = true;
+    options.IncludeSubDomains = true;
+    options.MaxAge = TimeSpan.FromDays(365);
+});
+
 // Configurar Rate Limiting para prevenir ataques de fuerza bruta y DDoS
 builder.Services.AddRateLimiter(options =>
 {

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.DTOs.Property;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Property;
+using RealEstateApp.Core.Domain.Constants;
 
 using Microsoft.AspNetCore.Authorization;
 
@@ -37,7 +38,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             var isAgentOrAdmin = User.Identity != null && User.Identity.IsAuthenticated && (User.IsInRole("Agent") || User.IsInRole("Admin") || User.IsInRole("Developer"));
             if (!isAgentOrAdmin && propertyViewModels != null)
             {
-                propertyViewModels = propertyViewModels.Where(p => p.Status != "Vendida").ToList();
+                propertyViewModels = propertyViewModels.Where(p => p.Status != PropertyStatus.Sold).ToList();
             }
 
             if (propertyViewModels == null || propertyViewModels.Count == 0)
@@ -61,7 +62,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             var propertyViewModel = await _propertyService.GetByIdViewModel(id);
 
             var isAgentOrAdmin = User.Identity != null && User.Identity.IsAuthenticated && (User.IsInRole("Agent") || User.IsInRole("Admin") || User.IsInRole("Developer"));
-            if (propertyViewModel == null || (!isAgentOrAdmin && propertyViewModel.Status == "Vendida"))
+            if (propertyViewModel == null || (!isAgentOrAdmin && propertyViewModel.Status == PropertyStatus.Sold))
             {
                 return NotFound(new { hasError = true, error = $"No se encontró ninguna propiedad con el ID {id}" });
             }
@@ -82,7 +83,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             var propertyViewModel = await _propertyService.GetByCode(code);
 
             var isAgentOrAdmin = User.Identity != null && User.Identity.IsAuthenticated && (User.IsInRole("Agent") || User.IsInRole("Admin") || User.IsInRole("Developer"));
-            if (propertyViewModel == null || (!isAgentOrAdmin && propertyViewModel.Status == "Vendida"))
+            if (propertyViewModel == null || (!isAgentOrAdmin && propertyViewModel.Status == PropertyStatus.Sold))
             {
                 return NotFound(new { hasError = true, error = $"No se encontró ninguna propiedad con el código '{code}'" });
             }

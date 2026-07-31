@@ -6,6 +6,7 @@ using AutoMapper;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Property;
+using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
 
 namespace RealEstateApp.Core.Application.Services
@@ -64,7 +65,7 @@ namespace RealEstateApp.Core.Application.Services
 
             // Autogenerar código único de 6 dígitos con verificación de unicidad en BD
             property.Code = await GenerateUniqueCodeAsync();
-            property.Status = "Disponible";
+            property.Status = PropertyStatus.Available;
             property.AgentId = vm.AgentId;
 
             // Guardar entidad de propiedad

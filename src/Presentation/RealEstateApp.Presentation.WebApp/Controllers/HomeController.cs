@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Property;
+using RealEstateApp.Core.Domain.Constants;
 
 namespace RealEstateApp.Presentation.WebApp.Controllers
 {
@@ -46,7 +47,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             var isAgentOrAdmin = User.Identity != null && User.Identity.IsAuthenticated && (User.IsInRole("Agent") || User.IsInRole("Admin") || User.IsInRole("Developer"));
             if (!isAgentOrAdmin)
             {
-                properties = properties.Where(p => p.Status != "Vendida").ToList();
+                properties = properties.Where(p => p.Status != PropertyStatus.Sold).ToList();
             }
 
             // Poblar dropdowns para el formulario de filtro
@@ -101,7 +102,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 
             ViewBag.IsBuyerWithAcceptedOffer = isBuyerWithAcceptedOffer;
 
-            if (property.Status == "Vendida" && !isAgentOrAdmin && !isBuyerWithAcceptedOffer)
+            if (property.Status == PropertyStatus.Sold && !isAgentOrAdmin && !isBuyerWithAcceptedOffer)
             {
                 return NotFound();
             }

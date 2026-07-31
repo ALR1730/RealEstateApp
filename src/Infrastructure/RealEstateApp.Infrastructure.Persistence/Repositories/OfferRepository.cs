@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
+using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
 
@@ -70,7 +71,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 var property = await _dbContext.Set<Property>().FirstOrDefaultAsync(p => p.Id == offer.PropertyId);
                 if (property != null)
                 {
-                    property.Status = "Vendida";
+                    property.Status = PropertyStatus.Sold;
                 }
 
                 // 3. Rechazar en cascada todas las demás ofertas pendientes de esa propiedad

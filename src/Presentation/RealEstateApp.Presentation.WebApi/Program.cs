@@ -19,6 +19,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+// Configurar HSTS para la API REST en entorno de producción
+builder.Services.AddHsts(options =>
+{
+    options.Preload = true;
+    options.IncludeSubDomains = true;
+    options.MaxAge = TimeSpan.FromDays(365);
+});
+
 // Configurar Rate Limiting para la API REST
 builder.Services.AddRateLimiter(options =>
 {
@@ -181,6 +189,12 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = string.Empty; // Permite abrir http://localhost:5196/ directamente en desarrollo
     });
 }
+else
+{
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
 
 app.UseRouting();
 app.UseCors("AllowSpecificOrigins");

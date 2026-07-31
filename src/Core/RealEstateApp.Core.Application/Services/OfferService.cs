@@ -6,6 +6,7 @@ using AutoMapper;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Offer;
+using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
 using RealEstateApp.Core.Domain.Enums;
 
@@ -62,7 +63,7 @@ namespace RealEstateApp.Core.Application.Services
             if (property == null)
                 throw new Exception("La propiedad no existe");
 
-            if (property.Status != "Disponible")
+            if (property.Status != PropertyStatus.Available)
                 throw new Exception("La propiedad no está disponible para ofertas");
 
             var offer = _mapper.Map<Offer>(vm);

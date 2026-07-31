@@ -8,6 +8,7 @@ using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Account;
 using RealEstateApp.Core.Application.ViewModels.Property;
+using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Enums;
 
 namespace RealEstateApp.Presentation.WebApp.Controllers
@@ -39,9 +40,9 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             var clients = await _userManager.GetUsersInRoleAsync(Roles.Client.ToString());
             var developers = await _userManager.GetUsersInRoleAsync(Roles.Developer.ToString());
 
-            ViewBag.TotalAvailableProperties = properties.Count(p => p.Status == "Disponible");
-            ViewBag.TotalReservedProperties = properties.Count(p => p.Status == "Reservada");
-            ViewBag.TotalSoldProperties = properties.Count(p => p.Status == "Vendida");
+            ViewBag.TotalAvailableProperties = properties.Count(p => p.Status == PropertyStatus.Available);
+            ViewBag.TotalReservedProperties = properties.Count(p => p.Status == PropertyStatus.Reserved);
+            ViewBag.TotalSoldProperties = properties.Count(p => p.Status == PropertyStatus.Sold);
             ViewBag.TotalActiveAgents = agents.Count(a => a.IsActive);
             ViewBag.TotalInactiveAgents = agents.Count(a => !a.IsActive);
             ViewBag.TotalClients = clients.Count;

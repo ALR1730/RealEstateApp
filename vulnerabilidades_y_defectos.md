@@ -608,43 +608,23 @@ var agentOffers = allOffers.FindAll(o => agentPropertyIds.Contains(o.PropertyId)
 
 ---
 
-### 🟡 5.2 HTTPS Redirection Sin HSTS Preload
+### ✅ ~~5.2 HTTPS Redirection Sin HSTS Preload~~ — SOLUCIONADO
 
-**Archivo**: [WebApp Program.cs L79-L80](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Program.cs#L79-L80)
-
-**Problema**: HSTS está configurado con valor por defecto (30 días) solo en no-development. No incluye `includeSubDomains` ni `preload`.
-
-**Solución**:
-```csharp
-builder.Services.AddHsts(options =>
-{
-    options.MaxAge = TimeSpan.FromDays(365);
-    options.IncludeSubDomains = true;
-    options.Preload = true;
-});
-```
+> **Resuelto**: Se configuró la directiva HSTS en los contenedores de servicios (`AddHsts`) en ambos proyectos (`WebApp` y `WebApi`) estableciendo `Preload = true`, `IncludeSubDomains = true` y `MaxAge = 365 días`. Se habilitó `app.UseHsts()` en el pipeline HTTP para entornos de producción.
 
 ---
 
-### 🟡 5.3 WebApi No Usa HTTPS Redirection
+### ✅ ~~5.3 WebApi No Usa HTTPS Redirection~~ — SOLUCIONADO
 
-**Archivo**: [WebApi Program.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApi/Program.cs)
-
-**Problema**: La Web API no llama `app.UseHttpsRedirection()` ni `app.UseHsts()`. Todo el tráfico API puede viajar sin cifrar.
+> **Resuelto**: Se incorporaron `app.UseHsts()` para producción y `app.UseHttpsRedirection()` en el pipeline HTTP de `WebApi/Program.cs`, forzando a que todo el tráfico de los clientes API se redireccione automáticamente hacia conexiones cifradas HTTPS.
 
 ---
 
 ## 🧹 6. Deuda Técnica
 
-### 🟡 6.1 Strings Mágicos para Estados de Propiedad
+### ✅ ~~6.1 Strings Mágicos para Estados de Propiedad~~ — SOLUCIONADO
 
-**Múltiples archivos**: El estado de propiedad usa strings como `"Disponible"`, `"Reservada"`, `"Vendida"` dispersos en todo el código:
-- [Property.cs L15](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Entities/Property.cs#L15)
-- [PropertyService.cs L67](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Services/PropertyService.cs#L67)
-- [OfferService.cs L59, L95](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Services/OfferService.cs#L59)
-- [AdminController.cs L42-L44](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AdminController.cs#L42-L44)
-
-**Solución**: Crear un enum `PropertyStatus` similar a `OfferStatus`.
+> **Resuelto**: Se creó la clase estática de constantes `PropertyStatus` en `RealEstateApp.Core.Domain.Constants` conteniendo `Available = "Disponible"`, `Reserved = "Reservada"`, `Sold = "Vendida"`. Se reemplazaron todas las cadenas mágicas hardcodeadas en toda la solución (`Domain`, `Application`, `Persistence`, `WebApp` y `WebApi`), previniendo errores tipográficos y mejorando la mantenibilidad.
 
 ---
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
 
@@ -97,7 +98,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         Tour360Url = "https://matterport.com/discover",
                         MontoSeparacion = 5000.00m,
                         PorcentajeInicialRequerido = 20,
-                        Status = "Disponible"
+                        Status = PropertyStatus.Available
                     };
 
                     var prop2 = new Property
@@ -117,7 +118,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         Tour360Url = "https://matterport.com/discover",
                         MontoSeparacion = 15000.00m,
                         PorcentajeInicialRequerido = 30,
-                        Status = "Disponible"
+                        Status = PropertyStatus.Available
                     };
 
                     var prop3 = new Property
@@ -137,7 +138,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         Tour360Url = "https://matterport.com/discover",
                         MontoSeparacion = 2500.00m,
                         PorcentajeInicialRequerido = 10,
-                        Status = "Disponible"
+                        Status = PropertyStatus.Available
                     };
 
                     var prop4 = new Property
@@ -157,7 +158,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         Tour360Url = "https://matterport.com/discover",
                         MontoSeparacion = 20000.00m,
                         PorcentajeInicialRequerido = 25,
-                        Status = "Vendida"
+                        Status = PropertyStatus.Sold
                     };
 
                     await dbContext.Properties.AddRangeAsync(prop1, prop2, prop3, prop4);

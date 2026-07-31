@@ -433,7 +433,89 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **4.2** | ⚡ Rendimiento | `DeleteAgentCascade` ejecuta cientos de queries individuales | ✅ SOLUCIONADO |
 | **4.3** | ⚡ Rendimiento | Sin paginación en listado de propiedades | ✅ SOLUCIONADO |
 | **4.4** | ⚡ Rendimiento | `AgentController.Offers` carga todas las ofertas del sistema | ✅ SOLUCIONADO |
+---
+
+### 🔒 Corrección 5.2 — Configuración de Encabezados HSTS con Preload y Subdominios
+
+- **Severidad**: 🟡 Media (Configuración de Seguridad / HSTS)
+- **Componentes**: `RealEstateApp.Presentation.WebApp`, `RealEstateApp.Presentation.WebApi`
+- **Archivos Modificados**:
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Program.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/Program.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se configuró `AddHsts` en el contenedor de servicios de ambos proyectos estableciendo `Preload = true`, `IncludeSubDomains = true` y `MaxAge = 365 días`.
+  2. Se invocó `app.UseHsts()` en la tubería de middleware para entornos de producción, mitigando ataques de Man-in-the-Middle y SSL Stripping.
+
+---
+
+### 🔐 Corrección 5.3 — Redirección HTTPS en Web API RESTful
+
+- **Severidad**: 🟡 Media (Configuración de Seguridad / Redirección Cifrada)
+- **Componentes**: `RealEstateApp.Presentation.WebApi`
+- **Archivos Modificados**:
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/Program.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se agregó `app.UseHttpsRedirection()` en la tubería HTTP de `WebApi/Program.cs`.
+  2. Esto garantiza que cualquier petición realizada a endpoints HTTP no cifrados sea inmediatamente redireccionada hacia el esquema seguro HTTPS.
+
+---
+
+### 🧹 Corrección 6.1 — Centralización de Estados de Propiedad (`PropertyStatus`)
+
+- **Severidad**: 🟡 Media (Deuda Técnica / Cadenas Mágicas)
+- **Componentes**: `RealEstateApp.Core.Domain`, `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`, `RealEstateApp.Presentation.WebApp`, `RealEstateApp.Presentation.WebApi`
+- **Archivos Creados/Modificados**:
+  - `src/Core/RealEstateApp.Core.Domain/Constants/PropertyStatus.cs` [NUEVO]
+  - `src/Core/RealEstateApp.Core.Domain/Entities/Property.cs`
+  - `src/Core/RealEstateApp.Core.Application/Services/PropertyService.cs`
+  - `src/Core/RealEstateApp.Core.Application/Services/OfferService.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/OfferRepository.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/FavoriteRepository.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Contexts/ApplicationDbContext.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Seeds/DefaultRealEstateData.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AdminController.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/HomeController.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/OffersController.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/Controllers/v1/PropertiesController.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se creó la clase de constantes `PropertyStatus` con los valores `Available = "Disponible"`, `Reserved = "Reservada"`, y `Sold = "Vendida"`.
+  2. Se reemplazaron todas las cadenas mágicas literales por referencias fuertemente tipadas a `PropertyStatus`, evitando fallos silenciosos por errores ortográficos y asegurando consistencia.
+
+---
+
+## 📊 Estado Actual del Plan de Correcciones
+
+| ID | Tipo | Descripción | Estado |
+|---|---|---|---|
+| **1.1** | 🔒 Seguridad | Credenciales Google OAuth en `appsettings.json` | ✅ SOLUCIONADO |
+| **1.2** | 🔒 Seguridad | Clave JWT Signing Key hardcodeada y fallback inseguro | ✅ SOLUCIONADO |
+| **1.3** | 🔒 Seguridad | Política CORS `AllowAnyOrigin()` | ✅ SOLUCIONADO |
+| **1.4** | 🔒 Seguridad | Webhook WhatsApp sin autenticación / firma Meta | ✅ SOLUCIONADO |
+| **1.5** | 🔒 Seguridad | CSRF Bypass en `GenerateJwtToken` | ✅ SOLUCIONADO |
+| **1.6** | 🔒 Seguridad | Ausencia de Rate Limiting en endpoints de autenticación | ✅ SOLUCIONADO |
+| **1.7** | 🔒 Seguridad | Sin sanitización HTML/XSS en mensajes de Chat | ✅ SOLUCIONADO |
+| **1.8** | 🔒 Seguridad | Requisito de contraseña débil (6 caracteres) | ✅ SOLUCIONADO |
+| **1.9** | 🔒 Seguridad | Guard de ambiente en seeds de usuarios de prueba | ✅ SOLUCIONADO |
+| **1.10** | 🔒 Seguridad | Restricción de Swagger UI a ambiente de desarrollo | ✅ SOLUCIONADO |
+| **2.1** | 🏗️ Arquitectura | Violación Onion Architecture: Identity en Application Layer | ✅ SOLUCIONADO |
+| **2.2** | 🏗️ Arquitectura | N+1 `SaveChangesAsync` en `GenericRepository` | ✅ SOLUCIONADO |
+| **2.3** | 🏗️ Arquitectura | Falta de transacciones explícitas en `AcceptOffer` | ✅ SOLUCIONADO |
+| **2.4** | 🏗️ Arquitectura | Archivos `Class1.cs` placeholder residuales | ✅ SOLUCIONADO |
+| **3.1** | 🐛 Bug | Carta de Pre-aprobación bancaria subida pero no guardada | ✅ SOLUCIONADO |
+| **3.2** | 🐛 Bug | Chats de soporte usan PropertyId (0 y -1) sin validar FK | ✅ SOLUCIONADO |
+| **3.3** | 🐛 Bug | Nombres de agentes usan UserName y apellido vacío | ✅ SOLUCIONADO |
+| **3.4** | 🐛 Bug | Ruta de confirmación email apunta a API en lugar de WebApp | ✅ SOLUCIONADO |
+| **3.5** | 🐛 Bug | Posibles colisiones en autogeneración de código de propiedad | ✅ SOLUCIONADO |
+| **3.6** | 🐛 Bug | Campos de auditoría `CreatedBy`/`LastModifiedBy` siempre "System" | ✅ SOLUCIONADO |
+| **3.7** | 🐛 Bug | `DeleteProperty` de agente no valida pertenencia del inmueble | ✅ SOLUCIONADO |
+| **4.1** | ⚡ Rendimiento | `GetAllWithFilters` carga todas las propiedades en RAM | ✅ SOLUCIONADO |
+| **4.2** | ⚡ Rendimiento | `DeleteAgentCascade` ejecuta cientos de queries individuales | ✅ SOLUCIONADO |
+| **4.3** | ⚡ Rendimiento | Sin paginación en listado de propiedades | ✅ SOLUCIONADO |
+| **4.4** | ⚡ Rendimiento | `AgentController.Offers` carga todas las ofertas del sistema | ✅ SOLUCIONADO |
 | **5.1** | ⚙️ Configuración | `AllowedHosts` permite cualquier host | ✅ SOLUCIONADO |
+| **5.2** | ⚙️ Configuración | HTTPS Redirection sin HSTS Preload y Subdominios | ✅ SOLUCIONADO |
+| **5.3** | ⚙️ Configuración | WebApi no usa HTTPS Redirection | ✅ SOLUCIONADO |
+| **6.1** | 🧹 Deuda Técnica | Strings mágicos para estados de propiedad | ✅ SOLUCIONADO |
 
 ---
 

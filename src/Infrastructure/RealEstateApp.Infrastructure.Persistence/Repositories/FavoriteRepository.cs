@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
+using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
 using RealEstateApp.Core.Domain.Enums;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
@@ -27,7 +28,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                     .ThenInclude(p => p!.Images)
                 .Where(f => f.ClienteId == clienteId)
                 // Excluir propiedades vendidas EXCEPTO si el cliente actual tiene una oferta aceptada en esa propiedad
-                .Where(f => f.Property != null && (f.Property.Status != "Vendida" || acceptedPropertyIds.Contains(f.PropertyId)))
+                .Where(f => f.Property != null && (f.Property.Status != PropertyStatus.Sold || acceptedPropertyIds.Contains(f.PropertyId)))
                 .OrderByDescending(f => f.Created)
                 .ToListAsync();
         }

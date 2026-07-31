@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using RealEstateApp.Core.Domain.Common;
+using RealEstateApp.Core.Domain.Constants;
 
 namespace RealEstateApp.Core.Domain.Entities
 {
@@ -12,7 +13,7 @@ namespace RealEstateApp.Core.Domain.Entities
         public decimal SizeInMeters { get; set; }
         public string Description { get; set; } = string.Empty;
         public string AgentId { get; set; } = string.Empty;
-        public string Status { get; set; } = "Disponible"; // Disponible, Reservada, Vendida
+        public string Status { get; set; } = PropertyStatus.Available;
 
         // Nuevos campos de mejoras funcionales V2
         public double Latitude { get; set; }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RealEstateApp.Core.Domain.Common;
+using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
 using System.Security.Claims;
 
@@ -80,7 +81,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
 
                 entity.Property(p => p.Status)
                     .HasMaxLength(20)
-                    .HasDefaultValue("Disponible");
+                    .HasDefaultValue(PropertyStatus.Available);
 
                 entity.Property(p => p.AgentId)
                     .IsRequired()

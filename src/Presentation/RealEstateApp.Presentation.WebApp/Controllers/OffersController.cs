@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Offer;
+using RealEstateApp.Core.Domain.Constants;
 
 namespace RealEstateApp.Presentation.WebApp.Controllers
 {
@@ -32,7 +33,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         public async Task<IActionResult> Create(int propertyId)
         {
             var property = await _propertyService.GetByIdViewModel(propertyId);
-            if (property == null || property.Status != "Disponible")
+            if (property == null || property.Status != PropertyStatus.Available)
             {
                 TempData["ErrorMessage"] = "Esta propiedad no está disponible para recibir ofertas.";
                 return RedirectToAction("Index", "Home");
@@ -53,7 +54,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         public async Task<IActionResult> Create(SaveOfferViewModel vm)
         {
             var property = await _propertyService.GetByIdViewModel(vm.PropertyId);
-            if (property == null || property.Status != "Disponible")
+            if (property == null || property.Status != PropertyStatus.Available)
             {
                 ModelState.AddModelError(string.Empty, "La propiedad no se encuentra disponible para ofertas.");
                 return View(vm);
