@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
+using RealEstateApp.Core.Domain.Exceptions;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
 
 namespace RealEstateApp.Infrastructure.Persistence.Repositories
@@ -56,12 +57,12 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 var offer = await _dbContext.Set<Offer>().FirstOrDefaultAsync(o => o.Id == offerId);
                 if (offer == null)
                 {
-                    throw new System.Exception("La oferta no existe");
+                    throw new NotFoundException("La oferta no existe");
                 }
 
                 if (offer.Status != RealEstateApp.Core.Domain.Enums.OfferStatus.Pending)
                 {
-                    throw new System.Exception("Solo se pueden aceptar ofertas pendientes");
+                    throw new ValidationException("Solo se pueden aceptar ofertas pendientes");
                 }
 
                 // 1. Aceptar la oferta elegida

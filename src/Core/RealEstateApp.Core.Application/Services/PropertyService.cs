@@ -8,6 +8,7 @@ using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Property;
 using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
+using RealEstateApp.Core.Domain.Exceptions;
 
 namespace RealEstateApp.Core.Application.Services
 {
@@ -102,7 +103,7 @@ namespace RealEstateApp.Core.Application.Services
         {
             var property = await _propertyRepository.GetByIdAsync(id);
             if (property == null)
-                throw new Exception($"No se encontró la propiedad con ID {id}");
+                throw new NotFoundException($"No se encontró la propiedad con ID {id}");
 
             property.Price = vm.Price;
             property.Rooms = vm.Rooms;
@@ -150,7 +151,7 @@ namespace RealEstateApp.Core.Application.Services
         {
             var property = await _propertyRepository.GetByIdAsync(id);
             if (property == null)
-                throw new Exception($"No se encontró la propiedad con ID {id}");
+                throw new NotFoundException($"No se encontró la propiedad con ID {id}");
 
             // Eliminar imágenes de disco e imágenes en BD
             var images = await _propertyImageRepository.GetByPropertyIdAsync(id);
@@ -196,7 +197,7 @@ namespace RealEstateApp.Core.Application.Services
         {
             var property = await _propertyRepository.GetByIdAsync(propertyId);
             if (property == null)
-                throw new Exception($"No se encontró la propiedad con ID {propertyId}");
+                throw new NotFoundException($"No se encontró la propiedad con ID {propertyId}");
 
             property.AgentId = newAgentId;
             await _propertyRepository.UpdateAsync(property);

@@ -499,6 +499,25 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🚨 Corrección 6.3 — Excepciones Tipadas de Dominio (`DomainException`, `NotFoundException`, `ValidationException`)
+
+- **Severidad**: 🟡 Media (Deuda Técnica / Manejo de Excepciones)
+- **Componentes**: `RealEstateApp.Core.Domain`, `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`
+- **Archivos Creados/Modificados**:
+  - `src/Core/RealEstateApp.Core.Domain/Exceptions/DomainException.cs` [NUEVO]
+  - `src/Core/RealEstateApp.Core.Domain/Exceptions/NotFoundException.cs` [NUEVO]
+  - `src/Core/RealEstateApp.Core.Domain/Exceptions/ValidationException.cs` [NUEVO]
+  - `src/Core/RealEstateApp.Core.Application/Services/PropertyService.cs`
+  - `src/Core/RealEstateApp.Core.Application/Services/OfferService.cs`
+  - `src/Core/RealEstateApp.Core.Application/Services/AgentService.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Services/AccountService.cs`
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/OfferRepository.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se definieron las excepciones fuertemente tipadas `DomainException`, `NotFoundException` y `ValidationException` en la capa `Core.Domain`.
+  2. Se reemplazaron todas las instancias de `throw new Exception(...)` y `throw new System.Exception(...)` por la excepción tipada adecuada (`NotFoundException` o `ValidationException`), permitiendo un manejo estructurado de errores y respuestas HTTP oportunas.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -533,6 +552,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **5.3** | ⚙️ Configuración | WebApi no usa HTTPS Redirection | ✅ SOLUCIONADO |
 | **6.1** | 🧹 Deuda Técnica | Strings mágicos para estados de propiedad | ✅ SOLUCIONADO |
 | **6.2** | 🧹 Deuda Técnica | Duplicación de lógica de verificación de estado activo | ✅ SOLUCIONADO |
+| **6.3** | 🧹 Deuda Técnica | Manejo de excepciones con `throw new Exception()` | ✅ SOLUCIONADO |
 
 ---
 

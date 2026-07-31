@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.Extensions;
 using RealEstateApp.Core.Application.Interfaces.Services;
+using RealEstateApp.Core.Domain.Exceptions;
 using RealEstateApp.Core.Application.ViewModels.Account;
 using RealEstateApp.Core.Domain.Enums;
 using RealEstateApp.Core.Domain.Settings;
@@ -204,7 +205,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                throw new Exception($"No se encontró el usuario con ID '{userId}'");
+                throw new NotFoundException($"No se encontró el usuario con ID '{userId}'");
             }
 
             if (isActive)
@@ -431,13 +432,13 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                throw new Exception($"El usuario con ID '{userId}' no existe");
+                throw new NotFoundException($"El usuario con ID '{userId}' no existe");
             }
 
             var result = await _userManager.DeleteAsync(user);
             if (!result.Succeeded)
             {
-                throw new Exception($"Error al eliminar el usuario: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                throw new ValidationException($"Error al eliminar el usuario: {string.Join(", ", result.Errors.Select(e => e.Description))}");
             }
         }
     }

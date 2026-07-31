@@ -634,15 +634,9 @@ var agentOffers = allOffers.FindAll(o => agentPropertyIds.Contains(o.PropertyId)
 
 ---
 
-### 🟡 6.3 Manejo de Excepciones con `throw new Exception()`
+### ✅ ~~6.3 Manejo de Excepciones con `throw new Exception()`~~ — SOLUCIONADO
 
-**Múltiples archivos**: Los servicios usan `throw new Exception("mensaje")` para errores de negocio en lugar de excepciones tipadas.
-
-**Solución**: Crear excepciones de dominio:
-```csharp
-public class BusinessRuleException : Exception { ... }
-public class EntityNotFoundException : Exception { ... }
-```
+> **Resuelto**: Se crearon las excepciones de dominio fuertemente tipadas `DomainException`, `NotFoundException` y `ValidationException` en `RealEstateApp.Core.Domain.Exceptions`. Se sustituyeron todas las instancias genéricas de `throw new Exception(...)` y `throw new System.Exception(...)` en `PropertyService`, `OfferService`, `AgentService`, `AccountService` y `OfferRepository`.
 
 ---
 

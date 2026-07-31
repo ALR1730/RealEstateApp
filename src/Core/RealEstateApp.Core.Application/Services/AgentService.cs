@@ -9,6 +9,7 @@ using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Agent;
 using RealEstateApp.Core.Application.ViewModels.Property;
 using RealEstateApp.Core.Domain.Enums;
+using RealEstateApp.Core.Domain.Exceptions;
 
 namespace RealEstateApp.Core.Application.Services
 {
@@ -166,12 +167,12 @@ namespace RealEstateApp.Core.Application.Services
             var user = await _accountService.GetUserByIdAsync(agentId);
             if (user == null)
             {
-                throw new Exception($"No existe un agente registrado con el ID: '{agentId}'");
+                throw new NotFoundException($"No existe un agente registrado con el ID: '{agentId}'");
             }
 
             if (!user.Roles.Contains(Roles.Agent.ToString()))
             {
-                throw new Exception($"El usuario con ID '{agentId}' no tiene el rol de Agente");
+                throw new ValidationException($"El usuario con ID '{agentId}' no tiene el rol de Agente");
             }
 
             await _accountService.ChangeUserStatusAsync(agentId, isActive);
@@ -182,7 +183,7 @@ namespace RealEstateApp.Core.Application.Services
             var agent = await _accountService.GetUserByIdAsync(agentId);
             if (agent == null)
             {
-                throw new Exception($"El agente con ID '{agentId}' no existe");
+                throw new NotFoundException($"El agente con ID '{agentId}' no existe");
             }
 
             // 1. Obtener todas las propiedades de este agente vía consulta directa en BD

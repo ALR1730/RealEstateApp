@@ -9,6 +9,7 @@ using RealEstateApp.Core.Application.ViewModels.Offer;
 using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
 using RealEstateApp.Core.Domain.Enums;
+using RealEstateApp.Core.Domain.Exceptions;
 
 namespace RealEstateApp.Core.Application.Services
 {
@@ -61,10 +62,10 @@ namespace RealEstateApp.Core.Application.Services
             // Verificar que la propiedad existe y está disponible
             var property = await _propertyRepository.GetByIdAsync(vm.PropertyId);
             if (property == null)
-                throw new Exception("La propiedad no existe");
+                throw new NotFoundException("La propiedad no existe");
 
             if (property.Status != PropertyStatus.Available)
-                throw new Exception("La propiedad no está disponible para ofertas");
+                throw new ValidationException("La propiedad no está disponible para ofertas");
 
             var offer = _mapper.Map<Offer>(vm);
             offer.ClienteId = clienteId;
@@ -91,10 +92,10 @@ namespace RealEstateApp.Core.Application.Services
         {
             var offer = await _offerRepository.GetByIdAsync(offerId);
             if (offer == null)
-                throw new Exception("La oferta no existe");
+                throw new NotFoundException("La oferta no existe");
 
             if (offer.Status != OfferStatus.Pending)
-                throw new Exception("Solo se pueden rechazar ofertas pendientes");
+                throw new ValidationException("Solo se pueden rechazar ofertas pendientes");
 
             offer.Status = OfferStatus.Rejected;
             await _offerRepository.UpdateAsync(offer);
