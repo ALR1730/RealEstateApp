@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RealEstateApp.Core.Application.DTOs.Account;
+using RealEstateApp.Core.Application.Extensions;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Account;
 using RealEstateApp.Core.Domain.Enums;
@@ -71,7 +72,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
                 return response;
             }
 
-            if (user.LockoutEnabled && user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
+            if (!user.IsActiveUser())
             {
                 response.HasError = true;
                 response.Error = $"La cuenta '{request.Email}' se encuentra inactivada o bloqueada por el administrador";
@@ -373,7 +374,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
 
             foreach (var user in users)
             {
-                var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
+                var isActive = user.IsActiveUser();
                 var roles = await _userManager.GetRolesAsync(user);
                 var claims = await _userManager.GetClaimsAsync(user);
 
@@ -403,7 +404,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return null;
 
-            var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
+            var isActive = user.IsActiveUser();
             var roles = await _userManager.GetRolesAsync(user);
             var claims = await _userManager.GetClaimsAsync(user);
 

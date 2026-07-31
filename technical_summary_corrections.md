@@ -483,6 +483,22 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🧩 Corrección 6.2 — Reutilización de Lógica de Usuario Activo (`IdentityExtensions`)
+
+- **Severidad**: 🟡 Media (Deuda Técnica / Duplicación de Código)
+- **Componentes**: `RealEstateApp.Core.Application`, `RealEstateApp.Infrastructure.Persistence`, `RealEstateApp.Presentation.WebApp`
+- **Archivos Creados/Modificados**:
+  - `src/Core/RealEstateApp.Core.Application/Extensions/IdentityExtensions.cs` [NUEVO]
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Services/AccountService.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AccountController.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AdminController.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Views/Admin/Developers.cshtml`
+- **Detalles Técnicos de la Solución**:
+  1. Se creó la clase estática `IdentityExtensions` en `RealEstateApp.Core.Application.Extensions` con el método `IsActiveUser(this IdentityUser user)`.
+  2. Se sustituyó la evaluación repetitiva de `!user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow` en servicios, controladores y vistas por la llamada limpia al método de extensión `user.IsActiveUser()`.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -516,6 +532,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **5.2** | ⚙️ Configuración | HTTPS Redirection sin HSTS Preload y Subdominios | ✅ SOLUCIONADO |
 | **5.3** | ⚙️ Configuración | WebApi no usa HTTPS Redirection | ✅ SOLUCIONADO |
 | **6.1** | 🧹 Deuda Técnica | Strings mágicos para estados de propiedad | ✅ SOLUCIONADO |
+| **6.2** | 🧹 Deuda Técnica | Duplicación de lógica de verificación de estado activo | ✅ SOLUCIONADO |
 
 ---
 

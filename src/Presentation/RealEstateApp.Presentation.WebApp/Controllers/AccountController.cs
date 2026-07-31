@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using RealEstateApp.Core.Application.DTOs.Account;
+using RealEstateApp.Core.Application.Extensions;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Account;
 using RealEstateApp.Core.Domain.Enums;
@@ -69,7 +70,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return View(vm);
             }
 
-            if (user.LockoutEnabled && user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
+            if (!user.IsActiveUser())
             {
                 return RedirectToAction(nameof(PendingActivation));
             }

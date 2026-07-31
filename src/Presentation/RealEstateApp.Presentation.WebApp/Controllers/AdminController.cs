@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.DTOs.Account;
+using RealEstateApp.Core.Application.Extensions;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Account;
 using RealEstateApp.Core.Application.ViewModels.Property;
@@ -180,7 +181,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return NotFound();
             }
 
-            var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
+            var isActive = user.IsActiveUser();
             var claims = await _userManager.GetClaimsAsync(user);
             var firstName = claims.FirstOrDefault(c => c.Type == "FirstName")?.Value ?? string.Empty;
             var lastName = claims.FirstOrDefault(c => c.Type == "LastName")?.Value ?? string.Empty;

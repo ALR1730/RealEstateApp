@@ -628,18 +628,9 @@ var agentOffers = allOffers.FindAll(o => agentPropertyIds.Contains(o.PropertyId)
 
 ---
 
-### 🟡 6.2 Duplicación de Lógica de Verificación de Estado Activo
+### ✅ ~~6.2 Duplicación de Lógica de Verificación de Estado Activo~~ — SOLUCIONADO
 
-La lógica para verificar si un usuario está activo se repite en al menos **5 archivos**:
-```csharp
-var isActive = !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
-```
-
-**Solución**: Crear un método de extensión:
-```csharp
-public static bool IsActiveUser(this IdentityUser user)
-    => !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= DateTimeOffset.UtcNow;
-```
+> **Resuelto**: Se creó la clase de extensión `IdentityExtensions` en `RealEstateApp.Core.Application.Extensions` proporcionando el método de extensión `IsActiveUser(this IdentityUser user)`. Se reemplazó la expresión repetida de verificación de `LockoutEnabled` y `LockoutEnd` en `AccountService`, `AccountController`, `AdminController` y la vista Razor `Developers.cshtml`.
 
 ---
 
