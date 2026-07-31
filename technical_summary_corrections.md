@@ -518,6 +518,19 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 🌱 Corrección 6.4 — Protección de Seeds de Datos por Entorno de Ejecución
+
+- **Severidad**: 🟢 Baja (Limpieza / Seguridad de Entorno)
+- **Componentes**: `RealEstateApp.Presentation.WebApp`, `RealEstateApp.Presentation.WebApi`
+- **Archivos Modificados**:
+  - `src/Presentation/RealEstateApp.Presentation.WebApp/Program.cs`
+  - `src/Presentation/RealEstateApp.Presentation.WebApi/Program.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se garantizó que la ejecución de los seeders de usuarios y datos de demostración (`DefaultAdminUser`, `DefaultAgentUser`, `DefaultClientUser`, `DefaultDeveloperUser`, `DefaultRealEstateData`) se encuentre protegida bajo la condición `if (app.Environment.IsDevelopment())`.
+  2. En producción únicamente se ejecutan las migraciones iniciales y la creación del listado estándar de roles (`DefaultRoles`).
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -553,6 +566,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **6.1** | 🧹 Deuda Técnica | Strings mágicos para estados de propiedad | ✅ SOLUCIONADO |
 | **6.2** | 🧹 Deuda Técnica | Duplicación de lógica de verificación de estado activo | ✅ SOLUCIONADO |
 | **6.3** | 🧹 Deuda Técnica | Manejo de excepciones con `throw new Exception()` | ✅ SOLUCIONADO |
+| **6.4** | 🧹 Deuda Técnica | Seeds de datos ejecutan en producción | ✅ SOLUCIONADO |
 
 ---
 

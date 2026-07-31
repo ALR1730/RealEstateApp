@@ -640,18 +640,9 @@ var agentOffers = allOffers.FindAll(o => agentPropertyIds.Contains(o.PropertyId)
 
 ---
 
-### 🟢 6.4 Seeds de Datos Ejecutan en Producción
+### ✅ ~~6.4 Seeds de Datos Ejecutan en Producción~~ — SOLUCIONADO
 
-**Archivos**: [WebApp Program.cs L50-L73](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Program.cs#L50-L73) y [WebApi Program.cs L121-L143](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApi/Program.cs#L121-L143)
-
-**Solución**:
-```csharp
-if (app.Environment.IsDevelopment())
-{
-    // Seeds solo en desarrollo
-    await DefaultRealEstateData.SeedAsync(dbContext, userManager);
-}
-```
+> **Resuelto**: Se verificó y aisló la ejecución de todos los seeds de usuarios de prueba y datos de demostración (`DefaultAdminUser`, `DefaultAgentUser`, `DefaultClientUser`, `DefaultDeveloperUser`, `DefaultRealEstateData`) dentro del guard `if (app.Environment.IsDevelopment())` en `WebApp/Program.cs` y `WebApi/Program.cs`. En ambientes de producción únicamente se ejecutan las migraciones iniciales de base de datos y el seeder de roles del sistema (`DefaultRoles`).
 
 ---
 
