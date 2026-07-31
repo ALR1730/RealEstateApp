@@ -646,11 +646,9 @@ var agentOffers = allOffers.FindAll(o => agentPropertyIds.Contains(o.PropertyId)
 
 ---
 
-### 🟢 6.5 SizeInMeters Usa `decimal` Pero Tiene Valores con .50
+### ✅ ~~6.5 SizeInMeters Precision en DbContext~~ — SOLUCIONADO
 
-**Archivo**: [Property.cs L12](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Entities/Property.cs#L12)
-
-**Problema menor**: `SizeInMeters` no tiene configuración de precisión en el DbContext (no se define `HasColumnType("decimal(10,2)")` como sí se hace para `Price` y `MontoSeparacion`).
+> **Resuelto**: Se verificó y aseguró la configuración explícita de precisión de columna `HasColumnType("decimal(18,2)")` para `SizeInMeters` en `ApplicationDbContext.cs`, garantizando consistencia con las propiedades `Price` y `MontoSeparacion` y evitando truncamientos o advertencias de EF Core durante la generación del modelo de datos.
 
 ---
 

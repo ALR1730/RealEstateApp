@@ -531,6 +531,18 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 
 ---
 
+### 📐 Corrección 6.5 — Configuración de Precisión de Columna `SizeInMeters`
+
+- **Severidad**: 🟢 Baja (Limpieza / Configuración de EF Core)
+- **Componentes**: `RealEstateApp.Infrastructure.Persistence`
+- **Archivos Modificados**:
+  - `src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Contexts/ApplicationDbContext.cs`
+- **Detalles Técnicos de la Solución**:
+  1. Se verificó y aseguró la configuración de columna `HasColumnType("decimal(18,2)")` para `SizeInMeters` en `ApplicationDbContext.cs`.
+  2. Esto previene avisos de truncamiento en migraciones de EF Core y asegura precisión decimal consistente al almacenar metros cuadrados de propiedades inmobiliarias.
+
+---
+
 ## 📊 Estado Actual del Plan de Correcciones
 
 | ID | Tipo | Descripción | Estado |
@@ -567,6 +579,7 @@ Este documento registra de manera acumulativa y detallada cada corrección de vu
 | **6.2** | 🧹 Deuda Técnica | Duplicación de lógica de verificación de estado activo | ✅ SOLUCIONADO |
 | **6.3** | 🧹 Deuda Técnica | Manejo de excepciones con `throw new Exception()` | ✅ SOLUCIONADO |
 | **6.4** | 🧹 Deuda Técnica | Seeds de datos ejecutan en producción | ✅ SOLUCIONADO |
+| **6.5** | 🧹 Deuda Técnica | Configuración de precisión para `SizeInMeters` | ✅ SOLUCIONADO |
 
 ---
 
