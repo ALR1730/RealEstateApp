@@ -56,6 +56,15 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         [Display(Name = "Tamaño de Página")]
         public int? PageSize { get; set; }
 
+        [Display(Name = "Latitud de Usuario")]
+        public double? UserLat { get; set; }
+
+        [Display(Name = "Longitud de Usuario")]
+        public double? UserLng { get; set; }
+
+        [Display(Name = "Radio Máximo (Km)")]
+        public double? MaxDistanceKm { get; set; }
+
         // ---- Datos auxiliares para poblar los dropdowns ----
         public List<PropertyTypeViewModel>? PropertyTypes { get; set; }
         public List<SaleTypeViewModel>? SaleTypes { get; set; }

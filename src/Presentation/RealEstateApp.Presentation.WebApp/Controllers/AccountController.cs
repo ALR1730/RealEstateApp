@@ -18,15 +18,18 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         private readonly IAccountService _accountService;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IUserActivityService _userActivityService;
 
         public AccountController(
             IAccountService accountService,
             SignInManager<IdentityUser> signInManager,
-            UserManager<IdentityUser> userManager)
+            UserManager<IdentityUser> userManager,
+            IUserActivityService userActivityService)
         {
             _accountService = accountService;
             _signInManager = signInManager;
             _userManager = userManager;
+            _userActivityService = userActivityService;
         }
 
         [HttpGet]
@@ -79,6 +82,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 
             if (result.Succeeded)
             {
+                await _userActivityService.LogActivityAsync(user.Id, "Inicio de Sesión", "Inicio de sesión exitoso en la plataforma", "bi-box-arrow-in-right text-success");
                 var isDeveloperUser = await _userManager.IsInRoleAsync(user, Roles.Developer.ToString());
                 if (isDeveloperUser)
                 {
@@ -338,6 +342,20 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 
             TempData["SuccessMessage"] = "Su perfil ha sido actualizado exitosamente.";
             return RedirectToAction(nameof(Profile));
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Activity()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var activities = await _userActivityService.GetRecentActivitiesAsync(userId, 50);
+            return View(activities);
         }
 
         private IActionResult RedirectToLocal(string? returnUrl)

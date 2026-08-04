@@ -165,6 +165,12 @@ namespace RealEstateApp.Core.Application.Mappings
                         : null));
 
             #endregion
+
+            #region UserActivity
+
+            CreateMap<UserActivity, RealEstateApp.Core.Application.ViewModels.UserActivity.UserActivityViewModel>().ReverseMap();
+
+            #endregion
         }
     }
 }

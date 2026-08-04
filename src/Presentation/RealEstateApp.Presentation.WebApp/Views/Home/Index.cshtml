@@ -42,6 +42,9 @@
             </div>
 
             <div class="row g-3">
+                <input type="hidden" name="UserLat" id="userLatInput" value="@filters.UserLat" />
+                <input type="hidden" name="UserLng" id="userLngInput" value="@filters.UserLng" />
+
                 <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted">Tipo de Propiedad</label>
                     <select name="PropertyTypeId" class="form-select form-select-custom">
@@ -90,7 +93,17 @@
                     <input type="number" name="MinBathrooms" value="@filters.MinBathrooms" class="form-control form-control-custom" placeholder="Baños" min="0" />
                 </div>
 
-                <div class="col-md-6 d-flex align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">Cerca de mí (Radio Km)</label>
+                    <div class="input-group">
+                        <input type="number" name="MaxDistanceKm" id="maxDistanceInput" value="@filters.MaxDistanceKm" class="form-control form-control-custom" placeholder="Ej. 10 km" min="1" max="500" />
+                        <button type="button" id="btnGeolocate" class="btn btn-outline-info" title="Obtener mi posición GPS">
+                            <i class="bi bi-crosshair"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary-gradient w-100 py-2">
                         <i class="bi bi-funnel-fill me-2"></i> Aplicar Filtros
                     </button>
@@ -120,7 +133,7 @@
             @foreach (var item in Model)
             {
                 <div class="col-md-6 col-lg-4">
-                    <div class="card-property" data-href="@Url.Action("Details", "Home", new { id = item.Id })">
+                    <div class="card-property">
                         <div class="img-container">
                             <span class="code-badge">Código: @item.Code</span>
                             
@@ -174,9 +187,14 @@
                                     <span class="metric-pill"><i class="bi bi-aspect-ratio-fill"></i> @item.SizeInMeters m²</span>
                                 </div>
 
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-custom w-100 py-2">
-                                    Ver Detalle <i class="bi bi-arrow-right ms-1"></i>
-                                </a>
+                                <div class="d-flex gap-2">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-custom flex-grow-1 py-2">
+                                        Ver Detalle <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-info rounded-pill px-3" onclick="PropertyComparator.add(@item.Id, '@item.Name.Replace("'", "\\'")', '@item.Price.ToString("N0")', '@(item.Images?.FirstOrDefault())')" title="Agregar a Comparador">
+                                        <i class="bi bi-arrow-left-right"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -185,3 +203,30 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#btnGeolocate').click(function () {
+                if ('geolocation' in navigator) {
+                    var $btn = $(this);
+                    $btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        $('#userLatInput').val(position.coords.latitude);
+                        $('#userLngInput').val(position.coords.longitude);
+                        if (!$('#maxDistanceInput').val()) {
+                            $('#maxDistanceInput').val(15);
+                        }
+                        $btn.html('<i class="bi bi-check-lg text-success"></i>');
+                        alert('¡Ubicación GPS obtenida! Presiona Aplicar Filtros para buscar.');
+                    }, function (err) {
+                        $btn.html('<i class="bi bi-crosshair"></i>');
+                        alert('No se pudo acceder a la ubicación. Permite el permiso en tu navegador.');
+                    });
+                } else {
+                    alert('Tu navegador no soporta geolocalización.');
+                }
+            });
+        });
+    </script>
+}

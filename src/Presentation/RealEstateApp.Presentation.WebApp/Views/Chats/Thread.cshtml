@@ -137,7 +137,10 @@
                     }
                 </div>
 
-                <!-- WhatsApp Input Form -->
+                <!-- Typing Indicator & WhatsApp Input Form -->
+                <div id="typingIndicator" class="small text-muted fst-italic px-3 pt-2 d-none">
+                    <i class="bi bi-three-dots me-1 text-success"></i> La otra persona está escribiendo...
+                </div>
                 <div class="chat-input-area whatsapp-input">
                     @if (!ViewData.ModelState.IsValid)
                     {
@@ -153,7 +156,7 @@
                             <span class="input-group-text bg-white border-0 text-success ps-3">
                                 <i class="bi bi-whatsapp fs-5"></i>
                             </span>
-                            <input asp-for="MessageContent" id="messageInput" class="form-control border-0 py-2 shadow-none" placeholder="Escribe un mensaje para enviar por WhatsApp..." autocomplete="off" required />
+                            <input asp-for="MessageContent" id="messageInput" class="form-control border-0 py-2 shadow-none" placeholder="Escribe un mensaje en tiempo real..." autocomplete="off" required />
                         </div>
                         <button type="submit" class="btn btn-success rounded-circle d-flex align-items-center justify-content-center p-0 shadow-sm" style="width: 46px; height: 46px; flex-shrink: 0; background-color: #25D366; border: none;">
                             <i class="bi bi-send-fill fs-5 text-white"></i>
@@ -200,6 +203,8 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="~/js/chat-realtime.js" asp-append-version="true"></script>
     <script>
         $(document).ready(function () {
             var chatThread = document.getElementById("chatThread");
@@ -210,46 +215,28 @@
             var propertyId = @Model.PropertyId;
             var agentId = "@ViewBag.AgentId";
             var clienteId = "@ViewBag.ClienteId";
-            var lastCount = @messages.Count;
+            var recipientId = "@Model.RecipientId";
+            var currentUserId = "@(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)";
 
-            // Auto-polling cada 3 segundos para sincronización en tiempo real
-            setInterval(function () {
-                $.ajax({
-                    url: '/Chats/GetThreadMessagesJson',
-                    type: 'GET',
-                    data: { propertyId: propertyId, agentId: agentId, clienteId: clienteId },
-                    success: function (data) {
-                        if (data && data.length !== lastCount) {
-                            lastCount = data.length;
-                            renderMessages(data);
-                        }
-                    }
+            // Inicializar comunicación SignalR en tiempo real
+            if (typeof RealEstateChat !== "undefined") {
+                RealEstateChat.init({
+                    propertyId: propertyId,
+                    recipientId: recipientId,
+                    currentUserId: currentUserId
                 });
-            }, 3000);
 
-            function renderMessages(messages) {
-                var $container = $('#chatThread');
-                $container.empty();
-
-                if (messages.length === 0) {
-                    $container.append(`
-                        <div class="text-center my-auto py-5">
-                            <i class="bi bi-whatsapp fs-1 text-success d-block mb-2 opacity-75"></i>
-                            <p class="text-muted small mb-1">No hay mensajes previos.</p>
-                        </div>
-                    `);
-                    return;
-                }
-
-                messages.forEach(function (msg) {
-                    var bubbleClass = msg.isMine ? 'whatsapp-bubble-mine' : 'whatsapp-bubble-other';
-                    var checkHtml = msg.isMine ? '<i class="bi bi-check2-all text-primary" title="Entregado por WhatsApp"></i>' : '';
+                window.onNewChatMessageReceived = function (msg) {
+                    $('#noMessagesPlaceholder').remove();
+                    var isMine = msg.senderId === currentUserId;
+                    var bubbleClass = isMine ? 'whatsapp-bubble-mine' : 'whatsapp-bubble-other';
+                    var checkHtml = isMine ? '<i class="bi bi-check2-all text-primary" title="Entregado"></i>' : '';
 
                     var html = `
-                        <div class="chat-bubble ${bubbleClass}" data-msg-id="${msg.id}">
+                        <div class="chat-bubble ${bubbleClass}">
                             <div class="d-flex align-items-center justify-content-between mb-1 gap-2">
                                 <span class="wa-badge">
-                                    <i class="bi bi-whatsapp"></i> WhatsApp Sync
+                                    <i class="bi bi-whatsapp"></i> Live Chat
                                 </span>
                             </div>
                             <div class="message-text">${escapeHtml(msg.messageContent)}</div>
@@ -259,12 +246,47 @@
                             </div>
                         </div>
                     `;
-                    $container.append(html);
+                    $('#chatThread').append(html);
+                    if (chatThread) {
+                        chatThread.scrollTop = chatThread.scrollHeight;
+                    }
+                };
+
+                window.onUserTypingStatus = function (data) {
+                    if (data.isTyping) {
+                        $('#typingIndicator').removeClass('d-none');
+                    } else {
+                        $('#typingIndicator').addClass('d-none');
+                    }
+                };
+
+                $('#sendChatForm').on('submit', function (e) {
+                    e.preventDefault();
+                    var text = $('#messageInput').val().trim();
+                    if (!text) return;
+
+                    $('#messageInput').val('');
+                    RealEstateChat.sendMessage(text).catch(function () {
+                        // Fallback AJAX POST
+                        $.ajax({
+                            url: '/Chats/Send',
+                            type: 'POST',
+                            data: $('#sendChatForm').serialize(),
+                            success: function () {
+                                location.reload();
+                            }
+                        });
+                    });
                 });
 
-                if (chatThread) {
-                    chatThread.scrollTop = chatThread.scrollHeight;
-                }
+                var typingTimeout;
+                $('#messageInput').on('input', function () {
+                    RealEstateChat.sendTyping(true);
+                    clearTimeout(typingTimeout);
+                    typingTimeout = setTimeout(function () {
+                        RealEstateChat.sendTyping(false);
+                    }, 2000);
+                });
             }
 
             function escapeHtml(text) {

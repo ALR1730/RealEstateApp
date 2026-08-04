@@ -238,4 +238,11 @@ C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Pr
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.Google.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\7f1pduwhsl-{0}-erqm7oim67-erqm7oim67.gz
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\n13pve08bb-{0}-5dvtgukl9c-5dvtgukl9c.gz
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\qhirg62he0-{0}-sz26rwlwqr-sz26rwlwqr.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\i941io02m8-{0}-ack84cqdar-ack84cqdar.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\tbkua93xij-{0}-tx8enrqmqc-tx8enrqmqc.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\6mbya35mh3-{0}-h25jyv3tzp-h25jyv3tzp.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\adpjb1wi6b-{0}-lvw4zcrbhz-lvw4zcrbhz.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\7mdcl7xgr1-{0}-cdejw37ilb-cdejw37ilb.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\csvpe2fo1w-{0}-yl0u59maum-yl0u59maum.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\q9zftia8oy-{0}-yl2r2a0eh8-yl2r2a0eh8.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\qhirg62he0-{0}-96neix6w50-96neix6w50.gz

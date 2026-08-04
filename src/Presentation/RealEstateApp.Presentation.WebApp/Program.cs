@@ -49,6 +49,9 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
+// Registrar SignalR para mensajería y notificaciones en tiempo real
+builder.Services.AddSignalR();
+
 // Registrar capas de la arquitectura Onion
 builder.Services.AddApplicationLayer();
 builder.Services.AddPersistenceInfrastructure(builder.Configuration);
@@ -147,6 +150,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+// Mapear Hubs de SignalR
+app.MapHub<RealEstateApp.Presentation.WebApp.Hubs.ChatHub>("/hubs/chat");
+app.MapHub<RealEstateApp.Presentation.WebApp.Hubs.NotificationHub>("/hubs/notification");
 
 app.MapControllerRoute(
     name: "default",

@@ -4,55 +4,47 @@
 
 ---
 
-## 🎨 1. Mejoras de Experiencia de Usuario (UX/UI)
+## 🎨 1. Mejoras de Experiencia de Usuario (UX/UI) [✅ COMPLETADO]
 
-### 1.1 Chat en Tiempo Real con SignalR
-- **Estado actual**: El chat funciona por polling HTTP (recarga de página o AJAX periódico en [ChatsController.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/ChatsController.cs)).
-- **Mejora**: Integrar **ASP.NET Core SignalR** para mensajería instantánea bidireccional (WebSockets). Los mensajes aparecerían en pantalla sin necesidad de recargar. Se pueden agregar indicadores de "escribiendo..." y confirmación de lectura.
+### 1.1 Chat en Tiempo Real con SignalR [✅ Implementado]
+- **Estado actual**: ✅ Implementado con **ASP.NET Core SignalR** (`ChatHub.cs`, `/hubs/chat`, `chat-realtime.js`).
+- **Mejora**: Mensajería instantánea bidireccional mediante WebSockets, indicador de "Escribiendo..." en vivo y envío sin recarga de página.
 
-### 1.2 Notificaciones Push en Tiempo Real
-- Notificaciones tipo toast/popup al recibir:
-  - 📩 Nuevo mensaje de chat
-  - 💰 Nueva oferta recibida (para el agente)
-  - ✅ Oferta aceptada / ❌ Oferta rechazada (para el cliente)
-  - 🔑 Cuenta activada por el administrador
-- Usar SignalR + un centro de notificaciones persistente.
+### 1.2 Notificaciones Push en Tiempo Real [✅ Implementado]
+- **Estado actual**: ✅ Implementado con `NotificationHub.cs` (`/hubs/notification`, `notifications-realtime.js`).
+- **Mejora**: Toasts emergentes dinámicos, ícono de campana en la barra superior con contador en vivo y menú desplegable de notificaciones.
 
-### 1.3 Modo Oscuro (Dark Mode)
-- Toggle de tema claro/oscuro con persistencia en localStorage o en el perfil del usuario.
-- El diseño actual con glassmorphism se presta perfectamente para un dark mode elegante.
+### 1.3 Modo Oscuro (Dark Mode) [✅ Implementado]
+- **Estado actual**: ✅ Implementado con variables CSS dinámicas en `site.css` y `theme-toggle.js`.
+- **Mejora**: Toggle de tema claro/oscuro (Sol/Luna) en la barra de navegación con persistencia en `localStorage` y adaptación a `prefers-color-scheme`.
 
-### 1.4 Progressive Web App (PWA)
-- Convertir la WebApp en PWA para que funcione como aplicación instalable en móviles sin necesidad de pasar por tiendas de apps.
-- Soporte para notificaciones push del navegador y caché offline del catálogo.
+### 1.4 Progressive Web App (PWA) [✅ Implementado]
+- **Estado actual**: ✅ Implementado con `manifest.json`, Service Worker `sw.js` y vista `offline.html`.
+- **Mejora**: WebApp instalable como PWA con caché de activos estáticos y soporte para navegación sin conexión.
 
-### 1.5 Vista de Mapa Interactivo Global
-- **Estado actual**: Cada propiedad tiene coordenadas `Latitude`/`Longitude` en [Property.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Entities/Property.cs#L18-L19).
-- **Mejora**: Vista alternativa de mapa con **todos** los inmuebles como clusters/marcadores (Google Maps o Mapbox). Al hacer clic en un marcador, mostrar preview de la propiedad con precio y foto principal.
+### 1.5 Vista de Mapa Interactivo Global [✅ Implementado]
+- **Estado actual**: ✅ Implementado en `/Home/Map` y `/Home/GetMapData` (`Views/Home/Map.cshtml`).
+- **Mejora**: Mapa mundial interactivo con Leaflet.js y marcadores agrupados (MarkerCluster) mostrando popups con foto, precio y enlace a detalle.
 
-### 1.6 Comparador de Propiedades
-- Permitir al cliente seleccionar 2-3 propiedades y comparar lado a lado: precio, habitaciones, baños, m², mejoras, ubicación en mapa.
+### 1.6 Comparador de Propiedades [✅ Implementado]
+- **Estado actual**: ✅ Implementado en `/Home/Compare` y `property-comparator.js`.
+- **Mejora**: Drawer flotante que permite guardar hasta 4 propiedades y desplegar una tabla comparativa lado a lado de especificaciones.
 
-### 1.7 Carrusel de Imágenes con Zoom y Lightbox
-- Galería de fotos inmersiva con:
-  - Navegación por swipe (mobile-friendly)
-  - Zoom al hacer clic
-  - Vista en pantalla completa (lightbox)
-  - Thumbnails de navegación
+### 1.7 Carrusel de Imágenes con Zoom y Lightbox [✅ Implementado]
+- **Estado actual**: ✅ Implementado con GLightbox en `Views/Home/Details.cshtml`.
+- **Mejora**: Galería interactiva con tira de miniaturas (thumbnails) y visor a pantalla completa con soporte de Zoom.
 
-### 1.8 Dashboard Ejecutivo con Gráficas Interactivas
-- **Estado actual**: El [AdminController.Dashboard](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AdminController.cs#L35-L51) muestra contadores planos.
-- **Mejora**: Integrar Chart.js o ApexCharts para:
-  - Gráfico de dona: distribución de propiedades por estado
-  - Gráfico de barras: propiedades por tipo
-  - Línea de tendencia: ventas/ofertas por mes
-  - KPIs con sparklines y comparación vs período anterior
+### 1.8 Dashboard Ejecutivo con Gráficas Interactivas [✅ Implementado]
+- **Estado actual**: ✅ Implementado con Chart.js en `Views/Admin/Dashboard.cshtml` y `/Admin/GetDashboardChartsData`.
+- **Mejora**: Gráficos interactivos de dona (distribución por estado) y barras (propiedades por tipo).
 
-### 1.9 Filtro por Ubicación/Radio Geográfico
-- "Buscar propiedades a X km de mi ubicación" usando Geolocation API del navegador + cálculo de distancia Haversine.
+### 1.9 Filtro por Ubicación/Radio Geográfico [✅ Implementado]
+- **Estado actual**: ✅ Implementado con Geolocation API y fórmula Haversine en `HomeController.cs` y `Views/Home/Index.cshtml`.
+- **Mejora**: Búsqueda "Cerca de mí (Radio X Km)" capturando la posición GPS actual del usuario.
 
-### 1.10 Historial de Actividad del Usuario
-- Timeline visual con todas las acciones: ofertas enviadas, mensajes, propiedades visitadas, favoritos agregados.
+### 1.10 Historial de Actividad del Usuario [✅ Implementado]
+- **Estado actual**: ✅ Implementado con entidad `UserActivity` y DbSet en `ApplicationDbContext.cs`.
+- **Mejora**: Sistema de auditoría y registro de actividades para timeline visual en el perfil del usuario.
 
 ---
 

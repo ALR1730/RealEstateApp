@@ -52,6 +52,36 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             return View();
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetDashboardChartsData()
+        {
+            var properties = await _propertyService.GetAllViewModel();
+            var agents = await _agentService.GetAllViewModelAsync();
+
+            var statusData = new
+            {
+                labels = new[] { "Disponibles", "Reservadas", "Vendidas" },
+                data = new[]
+                {
+                    properties.Count(p => p.Status == PropertyStatus.Available),
+                    properties.Count(p => p.Status == PropertyStatus.Reserved),
+                    properties.Count(p => p.Status == PropertyStatus.Sold)
+                }
+            };
+
+            var typesGroup = properties.GroupBy(p => p.PropertyTypeName)
+                .Select(g => new { label = g.Key, count = g.Count() })
+                .ToList();
+
+            var typeData = new
+            {
+                labels = typesGroup.Select(t => t.label).ToArray(),
+                data = typesGroup.Select(t => t.count).ToArray()
+            };
+
+            return Json(new { statusData, typeData });
+        }
+
         public async Task<IActionResult> Agents()
         {
             var agents = await _agentService.GetAllViewModelAsync();

@@ -16,7 +16,10 @@
                     </h2>
                     <p class="text-muted small mb-0">Gestione sus datos personales, foto de perfil y credenciales de acceso</p>
                 </div>
-                <div>
+                <div class="d-flex align-items-center gap-2">
+                    <a asp-controller="Account" asp-action="Activity" class="btn btn-outline-info rounded-pill px-3 py-2 btn-sm shadow-sm">
+                        <i class="bi bi-clock-history me-1"></i> Mi Historial de Actividades
+                    </a>
                     <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm">
                         <i class="bi bi-shield-check me-1"></i>Rol: @Model.Role
                     </span>

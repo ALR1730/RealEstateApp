@@ -10,13 +10,16 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
     public class FavoritesController : Controller
     {
         private readonly IFavoriteService _favoriteService;
+        private readonly IUserActivityService _userActivityService;
         private readonly UserManager<IdentityUser> _userManager;
 
         public FavoritesController(
             IFavoriteService favoriteService,
+            IUserActivityService userActivityService,
             UserManager<IdentityUser> userManager)
         {
             _favoriteService = favoriteService;
+            _userActivityService = userActivityService;
             _userManager = userManager;
         }
 
@@ -46,10 +49,12 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             if (isFav)
             {
                 await _favoriteService.RemoveFavorite(userId, propertyId);
+                await _userActivityService.LogActivityAsync(userId, "Removió Favorito", $"Removió la propiedad de sus favoritos", "bi-heartbreak-fill text-danger", $"/Home/Details/{propertyId}");
             }
             else
             {
                 await _favoriteService.AddFavorite(userId, propertyId);
+                await _userActivityService.LogActivityAsync(userId, "Añadió Favorito", $"Guardó una propiedad en sus favoritos", "bi-heart-fill text-danger", $"/Home/Details/{propertyId}");
             }
 
             var referer = Request.Headers["Referer"].ToString();

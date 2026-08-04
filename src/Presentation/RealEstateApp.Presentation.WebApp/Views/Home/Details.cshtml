@@ -134,14 +134,21 @@
         <div class="col-lg-8 order-1">
             @if (Model.Images != null && Model.Images.Count > 0)
             {
-                <div id="propertyGallery" class="carousel slide rounded-4 overflow-hidden shadow-lg" data-bs-ride="carousel">
+                <div id="propertyGallery" class="carousel slide rounded-4 overflow-hidden shadow-lg position-relative" data-bs-ride="carousel">
                     <div class="carousel-inner">
                         @for (int i = 0; i < Model.Images.Count; i++)
                         {
                             <div class="carousel-item @(i == 0 ? "active" : "")">
-                                <img src="@Model.Images[i]" class="d-block w-100" style="height: 480px; object-fit: cover;" alt="Imagen @(i+1)">
+                                <a href="@Model.Images[i]" class="glightbox" data-gallery="property-gallery" title="@Model.Name - Foto @(i+1)">
+                                    <img src="@Model.Images[i]" class="d-block w-100" style="height: 480px; object-fit: cover;" alt="Imagen @(i+1)">
+                                </a>
                             </div>
                         }
+                    </div>
+                    <div class="position-absolute bottom-0 end-0 m-3" style="z-index: 10;">
+                        <span class="badge bg-dark bg-opacity-75 text-white px-3 py-2 rounded-pill shadow-sm" style="pointer-events: none;">
+                            <i class="bi bi-zoom-in me-1"></i> Clic para Zoom / Pantalla Completa
+                        </span>
                     </div>
                     @if (Model.Images.Count > 1)
                     {
@@ -155,6 +162,17 @@
                         </button>
                     }
                 </div>
+
+                <!-- Tira de Miniaturas (Thumbnails) -->
+                @if (Model.Images.Count > 1)
+                {
+                    <div class="d-flex gap-2 mt-3 overflow-x-auto pb-2">
+                        @for (int i = 0; i < Model.Images.Count; i++)
+                        {
+                            <img src="@Model.Images[i]" data-bs-target="#propertyGallery" data-bs-slide-to="@i" class="rounded-3 border border-2 border-primary" style="width: 80px; height: 60px; object-fit: cover; cursor: pointer;" alt="Thumb @(i+1)" />
+                        }
+                    </div>
+                }
             }
             else
             {
@@ -456,7 +474,20 @@
 </div>
 
 @section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof GLightbox !== 'undefined') {
+                const lightbox = GLightbox({
+                    selector: '.glightbox',
+                    touchNavigation: true,
+                    loop: true,
+                    zoomable: true
+                });
+            }
+        });
+
         $(document).ready(function () {
             // Manejador del selector de años en botones pill
             $(".pill-year-btn").click(function () {
@@ -537,14 +568,6 @@
             $("#btnCalculate").click(function () {
                 calculateMortgage();
             });
-
-            // Evento para guardar / imprimir PDF profesional completo
-            $("#btnPrintPdf").click(function () {
-                if ($("#mortgageResults").hasClass("d-none")) {
-                    calculateMortgage();
-                }
-                $("#amortizationTableCollapse").addClass("show");
-                setTimeout(function () {
                     window.print();
                 }, 250);
             });

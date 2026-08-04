@@ -83,6 +83,27 @@
         </div>
     </div>
 
+    <!-- Gráficas Interactivas con Chart.js -->
+    <h4 class="font-heading fw-bold mb-3"><i class="bi bi-pie-chart-fill me-2 text-info"></i>Análisis Gráfico y Métricas</h4>
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-pie-chart me-2 text-primary"></i>Distribución de Propiedades por Estado</h6>
+                <div style="height: 260px;">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-bar-chart-line me-2 text-success"></i>Propiedades por Tipo de Inmueble</h6>
+                <div style="height: 260px;">
+                    <canvas id="typeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Enlaces Rápidos de Gestión Administrador -->
     <h4 class="font-heading fw-bold mb-3"><i class="bi bi-grid-fill me-2 text-primary"></i>Accesos Directos de Administración</h4>
     <div class="row g-3">
@@ -142,3 +163,52 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: '/Admin/GetDashboardChartsData',
+                type: 'GET',
+                success: function (res) {
+                    if (!res) return;
+
+                    // Chart 1: Status Doughnut
+                    new Chart(document.getElementById('statusChart'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: res.statusData.labels,
+                            datasets: [{
+                                data: res.statusData.data,
+                                backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+
+                    // Chart 2: Types Bar Chart
+                    new Chart(document.getElementById('typeChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: res.typeData.labels,
+                            datasets: [{
+                                label: 'Propiedades',
+                                data: res.typeData.data,
+                                backgroundColor: '#0284c7'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

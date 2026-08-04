@@ -15,17 +15,20 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         private readonly IOfferService _offerService;
         private readonly IPropertyService _propertyService;
         private readonly IFileStorageService _fileStorageService;
+        private readonly IUserActivityService _userActivityService;
         private readonly UserManager<IdentityUser> _userManager;
 
         public OffersController(
             IOfferService offerService,
             IPropertyService propertyService,
             IFileStorageService fileStorageService,
+            IUserActivityService userActivityService,
             UserManager<IdentityUser> userManager)
         {
             _offerService = offerService;
             _propertyService = propertyService;
             _fileStorageService = fileStorageService;
+            _userActivityService = userActivityService;
             _userManager = userManager;
         }
 
@@ -85,6 +88,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             try
             {
                 await _offerService.Add(vm, userId);
+                await _userActivityService.LogActivityAsync(userId, "Oferta Enviada", $"Realizó una oferta por RD$ {vm.MontoOfertado:N0} en la propiedad (Cód: {property.Code})", "bi-cash-stack text-success", $"/Home/Details/{property.Id}");
                 TempData["SuccessMessage"] = "¡Tu propuesta económica ha sido enviada exitosamente al agente!";
                 return RedirectToAction(nameof(MyOffers));
             }

@@ -30,6 +30,8 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
         public DbSet<Chat> Chats { get; set; } = null!;
         public DbSet<MortgageSimulation> MortgageSimulations { get; set; } = null!;
         public DbSet<Favorite> Favorites { get; set; } = null!;
+        public DbSet<UserActivity> UserActivities { get; set; } = null!;
+        public DbSet<Notification> Notifications { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
