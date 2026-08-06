@@ -32,6 +32,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
         public DbSet<Favorite> Favorites { get; set; } = null!;
         public DbSet<UserActivity> UserActivities { get; set; } = null!;
         public DbSet<Notification> Notifications { get; set; } = null!;
+        public DbSet<PropertyAppointment> PropertyAppointments { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -305,6 +306,35 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                 entity.HasOne(ms => ms.Property)
                     .WithMany(p => p.MortgageSimulations)
                     .HasForeignKey(ms => ms.PropertyId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            #endregion
+
+            #region PropertyAppointment
+
+            modelBuilder.Entity<PropertyAppointment>(entity =>
+            {
+                entity.ToTable("PropertyAppointments");
+                entity.HasKey(pa => pa.Id);
+
+                entity.Property(pa => pa.ClienteId)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                entity.Property(pa => pa.AgentId)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                entity.Property(pa => pa.Notes)
+                    .HasMaxLength(1000);
+
+                entity.Property(pa => pa.AgentNotes)
+                    .HasMaxLength(1000);
+
+                entity.HasOne(pa => pa.Property)
+                    .WithMany(p => p.Appointments)
+                    .HasForeignKey(pa => pa.PropertyId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 

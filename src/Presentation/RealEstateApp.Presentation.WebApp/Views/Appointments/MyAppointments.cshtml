@@ -1,0 +1,120 @@
+@model List<RealEstateApp.Core.Application.ViewModels.Appointment.AppointmentViewModel>
+@{
+    ViewData["Title"] = "Mis Citas de Visita";
+}
+
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="font-heading mb-1 text-dark">
+                <i class="bi bi-calendar-event text-info me-2"></i> Mis Citas de Visita
+            </h2>
+            <p class="text-muted mb-0 small">Gestión de tus solicitudes de visitas presenciales a inmuebles</p>
+        </div>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-custom rounded-pill px-3 btn-sm">
+            <i class="bi bi-house me-1"></i> Explorar Catálogo
+        </a>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="card border-0 shadow-sm p-5 text-center bg-white rounded-4">
+            <div class="mb-3">
+                <i class="bi bi-calendar-x text-muted" style="font-size: 3.5rem;"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">No tienes citas agendadas aún</h5>
+            <p class="text-muted small mx-auto" style="max-width: 440px;">
+                Cuando encuentres una propiedad que te interese en el catálogo, puedes usar el botón <strong>"Agendar Visita Presencial"</strong> para coordinar un encuentro con el agente.
+            </p>
+            <div class="mt-3">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary-gradient rounded-pill px-4">
+                    <i class="bi bi-search me-1"></i> Buscar Propiedades
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var appointment in Model)
+            {
+                string badgeClass = appointment.Status switch
+                {
+                    RealEstateApp.Core.Domain.Enums.AppointmentStatus.Pending => "bg-warning text-dark",
+                    RealEstateApp.Core.Domain.Enums.AppointmentStatus.Confirmed => "bg-success text-white",
+                    RealEstateApp.Core.Domain.Enums.AppointmentStatus.Cancelled => "bg-danger text-white",
+                    RealEstateApp.Core.Domain.Enums.AppointmentStatus.Completed => "bg-secondary text-white",
+                    _ => "bg-light text-dark"
+                };
+
+                <div class="col">
+                    <div class="card border-0 shadow-md rounded-4 overflow-hidden h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="position-relative" style="height: 160px;">
+                                <img src="@(string.IsNullOrEmpty(appointment.PropertyMainImage) ? "/images/default-property.jpg" : appointment.PropertyMainImage)"
+                                     class="w-100 h-100 object-fit-cover" alt="@appointment.PropertyName" />
+                                <div class="position-absolute top-0 end-0 m-3">
+                                    <span class="badge @badgeClass px-3 py-2 rounded-pill shadow-sm font-heading fw-bold" style="font-size: 0.8rem;">
+                                        @appointment.StatusFormatted
+                                    </span>
+                                </div>
+                                <div class="position-absolute bottom-0 start-0 m-3">
+                                    <span class="badge bg-dark bg-opacity-75 text-white font-monospace">
+                                        Cód: @appointment.PropertyCode
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="p-4">
+                                <h5 class="font-heading fw-bold text-dark mb-1 text-truncate">@appointment.PropertyName</h5>
+                                <div class="small text-muted mb-3">
+                                    <i class="bi bi-person-badge text-info me-1"></i> Agente: <strong>@appointment.AgentName</strong>
+                                </div>
+
+                                <div class="bg-light rounded-3 p-3 border mb-3">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <i class="bi bi-clock-fill text-primary fs-5"></i>
+                                        <div>
+                                            <div class="fw-bold font-heading text-dark" style="font-size: 0.95rem;">
+                                                @appointment.AppointmentDate.ToString("dd/MM/yyyy - hh:mm tt")
+                                            </div>
+                                            <span class="small text-muted">Fecha y Hora Propuesta</span>
+                                        </div>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(appointment.Notes))
+                                    {
+                                        <div class="small text-muted mt-2 pt-2 border-top fst-italic">
+                                            <i class="bi bi-chat-quote me-1"></i> "@appointment.Notes"
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(appointment.AgentNotes))
+                                    {
+                                        <div class="small text-info mt-2 pt-2 border-top">
+                                            <i class="bi bi-info-circle me-1"></i> <strong>Nota del Agente:</strong> "@appointment.AgentNotes"
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 pt-0 d-flex gap-2">
+                            <a asp-controller="Home" asp-action="Details" asp-route-id="@appointment.PropertyId" class="btn btn-outline-custom flex-grow-1">
+                                <i class="bi bi-eye me-1"></i> Ver Inmueble
+                            </a>
+
+                            @if (appointment.Status == RealEstateApp.Core.Domain.Enums.AppointmentStatus.Pending || appointment.Status == RealEstateApp.Core.Domain.Enums.AppointmentStatus.Confirmed)
+                            {
+                                <form asp-controller="Appointments" asp-action="Cancel" method="post" onsubmit="return confirm('¿Está seguro de que desea cancelar esta cita?');">
+                                    <input type="hidden" name="id" value="@appointment.Id" />
+                                    <button type="submit" class="btn btn-outline-danger" title="Cancelar Cita">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

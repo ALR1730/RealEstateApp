@@ -82,6 +82,7 @@ namespace RealEstateApp.Infrastructure.Persistence
             services.AddScoped<IFavoriteRepository, FavoriteRepository>();
             services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
             services.AddScoped<IUserActivityRepository, UserActivityRepository>();
+            services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 
             #endregion
         }

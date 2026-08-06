@@ -26,6 +26,7 @@ namespace RealEstateApp.Core.Application
             services.AddTransient<IFavoriteService, FavoriteService>();
             services.AddTransient<IAgentService, AgentService>();
             services.AddTransient<IUserActivityService, UserActivityService>();
+            services.AddTransient<IAppointmentService, AppointmentService>();
 
             #endregion
         }

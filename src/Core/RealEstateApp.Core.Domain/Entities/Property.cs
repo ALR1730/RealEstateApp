@@ -38,5 +38,6 @@ namespace RealEstateApp.Core.Domain.Entities
         public ICollection<Chat>? Chats { get; set; }
         public ICollection<Favorite>? Favorites { get; set; }
         public ICollection<MortgageSimulation>? MortgageSimulations { get; set; }
+        public ICollection<PropertyAppointment>? Appointments { get; set; }
     }
 }

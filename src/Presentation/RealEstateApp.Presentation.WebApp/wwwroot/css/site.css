@@ -65,6 +65,14 @@ header {
   z-index: 1060 !important;
 }
 
+.modal-backdrop {
+  z-index: 1065 !important;
+}
+
+.modal {
+  z-index: 1070 !important;
+}
+
 .navbar-custom .navbar-brand {
   font-family: var(--font-heading);
   font-weight: 800;

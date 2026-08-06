@@ -171,6 +171,21 @@ namespace RealEstateApp.Core.Application.Mappings
             CreateMap<UserActivity, RealEstateApp.Core.Application.ViewModels.UserActivity.UserActivityViewModel>().ReverseMap();
 
             #endregion
+
+            #region PropertyAppointment
+
+            CreateMap<PropertyAppointment, RealEstateApp.Core.Application.ViewModels.Appointment.AppointmentViewModel>()
+                .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : string.Empty))
+                .ForMember(dest => dest.PropertyName, opt => opt.MapFrom(src => src.Property != null ? src.Property.Name : string.Empty))
+                .ForMember(dest => dest.PropertyMainImage, opt => opt.MapFrom(src =>
+                    src.Property != null && src.Property.Images != null && src.Property.Images.Any()
+                        ? src.Property.Images.First().ImageUrl
+                        : null))
+                .ForMember(dest => dest.ClienteName, opt => opt.Ignore())
+                .ForMember(dest => dest.AgentName, opt => opt.Ignore())
+                .ForMember(dest => dest.StatusFormatted, opt => opt.Ignore());
+
+            #endregion
         }
     }
 }

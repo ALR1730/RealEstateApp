@@ -1,0 +1,244 @@
+@model List<RealEstateApp.Core.Application.ViewModels.Appointment.AppointmentViewModel>
+@{
+    ViewData["Title"] = "Calendario de Citas";
+}
+
+<!-- FullCalendar CSS CDN -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
+
+<div class="container-fluid py-4 px-md-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+        <div>
+            <h2 class="font-heading mb-1 text-dark">
+                <i class="bi bi-calendar3 text-info me-2"></i> Agenda de Citas y Visitas
+            </h2>
+            <p class="text-muted mb-0 small">Visualización interactiva y gestión de solicitudes de clientes</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill font-monospace">
+                <i class="bi bi-clock me-1"></i> @Model.Count(a => a.Status == RealEstateApp.Core.Domain.Enums.AppointmentStatus.Pending) Pendientes
+            </span>
+            <span class="badge bg-success text-white px-3 py-2 rounded-pill font-monospace">
+                <i class="bi bi-check-circle me-1"></i> @Model.Count(a => a.Status == RealEstateApp.Core.Domain.Enums.AppointmentStatus.Confirmed) Confirmadas
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Calendario Interactivo -->
+        <div class="col-lg-8 col-xl-8">
+            <div class="card border-0 shadow-lg rounded-4 p-4 bg-white h-100">
+                <div id="agentCalendar" style="min-height: 600px;"></div>
+            </div>
+        </div>
+
+        <!-- Panel Lateral de Solicitudes Recientes & Acciones Rápidas -->
+        <div class="col-lg-4 col-xl-4">
+            <div class="card border-0 shadow-lg rounded-4 p-4 bg-white h-100">
+                <h5 class="font-heading fw-bold mb-3 text-dark d-flex align-items-center justify-content-between">
+                    <span>Lista de Citas</span>
+                    <span class="badge bg-primary rounded-pill fs-6 px-3">@Model.Count</span>
+                </h5>
+
+                @if (!Model.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-calendar-x fs-1 d-block mb-2 text-secondary"></i>
+                        <p class="small mb-0">No tienes citas registradas en tu agenda.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3 overflow-auto" style="max-height: 580px; padding-right: 4px;">
+                        @foreach (var app in Model)
+                        {
+                            string statusBadge = app.Status switch
+                            {
+                                RealEstateApp.Core.Domain.Enums.AppointmentStatus.Pending => "bg-warning text-dark",
+                                RealEstateApp.Core.Domain.Enums.AppointmentStatus.Confirmed => "bg-success text-white",
+                                RealEstateApp.Core.Domain.Enums.AppointmentStatus.Cancelled => "bg-danger text-white",
+                                RealEstateApp.Core.Domain.Enums.AppointmentStatus.Completed => "bg-secondary text-white",
+                                _ => "bg-light text-dark"
+                            };
+
+                            <div class="p-3 rounded-3 border bg-light shadow-sm">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <span class="badge bg-dark text-white font-monospace mb-1" style="font-size: 0.72rem;">
+                                            Cód: @app.PropertyCode
+                                        </span>
+                                        <h6 class="font-heading fw-bold text-dark mb-0 text-truncate" style="max-width: 180px;">@app.PropertyName</h6>
+                                    </div>
+                                    <span class="badge @statusBadge rounded-pill" style="font-size: 0.75rem;">
+                                        @app.StatusFormatted
+                                    </span>
+                                </div>
+
+                                <div class="small text-muted mb-2">
+                                    <i class="bi bi-person-circle text-primary me-1"></i> Cliente: <strong>@app.ClienteName</strong>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2 mb-2 p-2 rounded bg-white border">
+                                    <i class="bi bi-clock-fill text-info"></i>
+                                    <span class="fw-bold font-heading text-dark small">
+                                        @app.AppointmentDate.ToString("dd/MM/yyyy - hh:mm tt")
+                                    </span>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(app.Notes))
+                                {
+                                    <div class="small text-muted mb-2 fst-italic">
+                                        <i class="bi bi-quote"></i> "@app.Notes"
+                                    </div>
+                                }
+
+                                <div class="d-flex gap-2 pt-2 border-top">
+                                    @if (app.Status == RealEstateApp.Core.Domain.Enums.AppointmentStatus.Pending)
+                                    {
+                                        <form asp-controller="Appointments" asp-action="Confirm" method="post" class="flex-grow-1">
+                                            <input type="hidden" name="id" value="@app.Id" />
+                                            <button type="submit" class="btn btn-sm btn-success w-100 font-heading">
+                                                <i class="bi bi-check-lg me-1"></i> Confirmar
+                                            </button>
+                                        </form>
+
+                                        <form asp-controller="Appointments" asp-action="Cancel" method="post">
+                                            <input type="hidden" name="id" value="@app.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Rechazar / Cancelar">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (app.Status == RealEstateApp.Core.Domain.Enums.AppointmentStatus.Confirmed)
+                                    {
+                                        <form asp-controller="Appointments" asp-action="Complete" method="post" class="flex-grow-1">
+                                            <input type="hidden" name="id" value="@app.Id" />
+                                            <button type="submit" class="btn btn-sm btn-primary w-100 font-heading">
+                                                <i class="bi bi-check-all me-1"></i> Completar
+                                            </button>
+                                        </form>
+
+                                        <form asp-controller="Appointments" asp-action="Cancel" method="post">
+                                            <input type="hidden" name="id" value="@app.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancelar Cita">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    <a asp-controller="Home" asp-action="Details" asp-route-id="@app.PropertyId" class="btn btn-sm btn-outline-custom" title="Ver Inmueble">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalles de Evento al hacer clic en el Calendario -->
+<div class="modal fade" id="calendarEventModal" tabindex="-1" aria-labelledby="calendarEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow border-0">
+            <div class="modal-header bg-dark text-white rounded-top-4">
+                <h5 class="modal-title font-heading fw-bold" id="calendarEventModalLabel">
+                    <i class="bi bi-calendar-event text-info me-2"></i> Detalle de la Cita
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span id="modalPropertyCode" class="badge bg-dark text-white font-monospace"></span>
+                    <span id="modalStatusBadge" class="badge rounded-pill px-3 py-1"></span>
+                </div>
+                <h5 id="modalPropertyName" class="font-heading fw-bold text-dark mb-1"></h5>
+                <p id="modalClientName" class="text-muted small mb-3"></p>
+
+                <div class="p-3 bg-light rounded-3 border mb-3">
+                    <div class="fw-bold text-primary mb-1">
+                        <i class="bi bi-clock me-1"></i> <span id="modalAppointmentDate"></span>
+                    </div>
+                    <div id="modalNotesContainer" class="small text-muted mt-2 pt-2 border-top d-none">
+                        <strong>Comentarios del Cliente:</strong>
+                        <p id="modalNotes" class="mb-0 fst-italic"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light rounded-bottom-4">
+                <a id="modalPropertyLink" href="#" class="btn btn-outline-custom rounded-pill px-3">
+                    <i class="bi bi-eye me-1"></i> Ver Inmueble
+                </a>
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- FullCalendar JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/es.global.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('agentCalendar');
+            if (!calendarEl) return;
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+                },
+                buttonText: {
+                    today: 'Hoy',
+                    month: 'Mes',
+                    week: 'Semana',
+                    day: 'Día',
+                    list: 'Agenda'
+                },
+                events: '/Appointments/GetCalendarEvents',
+                eventClick: function (info) {
+                    var event = info.event;
+                    var props = event.extendedProps;
+
+                    document.getElementById('modalPropertyCode').textContent = 'Cód: ' + (props.propertyCode || '');
+                    document.getElementById('modalPropertyName').textContent = props.propertyName || '';
+                    document.getElementById('modalClientName').textContent = 'Cliente: ' + (props.clientName || 'No especificado');
+                    document.getElementById('modalAppointmentDate').textContent = event.start ? event.start.toLocaleString('es-DO', { dateStyle: 'full', timeStyle: 'short' }) : '';
+                    document.getElementById('modalStatusBadge').textContent = props.statusFormatted || props.status;
+
+                    var badge = document.getElementById('modalStatusBadge');
+                    if (props.status === 'Confirmed') {
+                        badge.className = 'badge bg-success text-white rounded-pill px-3 py-1';
+                    } else if (props.status === 'Pending') {
+                        badge.className = 'badge bg-warning text-dark rounded-pill px-3 py-1';
+                    } else if (props.status === 'Cancelled') {
+                        badge.className = 'badge bg-danger text-white rounded-pill px-3 py-1';
+                    } else {
+                        badge.className = 'badge bg-secondary text-white rounded-pill px-3 py-1';
+                    }
+
+                    var notesContainer = document.getElementById('modalNotesContainer');
+                    if (props.notes && props.notes.trim() !== '') {
+                        document.getElementById('modalNotes').textContent = '"' + props.notes + '"';
+                        notesContainer.classList.remove('d-none');
+                    } else {
+                        notesContainer.classList.add('d-none');
+                    }
+
+                    document.getElementById('modalPropertyLink').href = '/Home/Details/' + props.propertyId;
+
+                    var modal = new bootstrap.Modal(document.getElementById('calendarEventModal'));
+                    modal.show();
+                }
+            });
+
+            calendar.render();
+        });
+    </script>
+}
