@@ -625,3 +625,63 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   background: #070b14 !important;
   border-top: 1px solid #1e293b !important;
 }
+
+/* ==========================================================================
+   📱 🖥️ Responsive Auto-Adjusting Layout System (Fluid Scaling Across Devices)
+   ========================================================================== */
+
+.container,
+.container-fluid {
+  width: 100%;
+  padding-left: clamp(1rem, 3.5vw, 3rem) !important;
+  padding-right: clamp(1rem, 3.5vw, 3rem) !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Extended Max Widths for Desktop, Widescreen and 4K Displays */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1360px !important;
+  }
+}
+
+@media (min-width: 1600px) {
+  .container {
+    max-width: 1560px !important;
+  }
+}
+
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1820px !important;
+  }
+}
+
+/* Responsive Hero Section Scaling */
+.hero-section {
+  padding: clamp(2.5rem, 6vh, 5rem) clamp(1rem, 3vw, 3rem) !important;
+}
+
+.hero-title {
+  font-size: clamp(1.85rem, 4vw, 3.2rem) !important;
+}
+
+.hero-subtitle {
+  font-size: clamp(0.95rem, 1.8vw, 1.25rem) !important;
+}
+
+/* Form Controls and Cards Scaling */
+@media (max-width: 767.98px) {
+  .search-filter-card {
+    padding: 1.25rem !important;
+  }
+  
+  .card-property img {
+    height: 200px !important;
+  }
+
+  .table-responsive {
+    border-radius: 0.75rem;
+  }
+}

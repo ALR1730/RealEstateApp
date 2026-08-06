@@ -25,10 +25,10 @@
     }
     else
     {
-        <div class="row g-4">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
             @foreach (var item in Model)
             {
-                <div class="col-md-6 col-lg-4">
+                <div class="col">
                     <div class="card-property" data-href="@Url.Action("Details", "Home", new { id = item.PropertyId })">
                         <div class="img-container">
                             <span class="code-badge">@item.PropertyCode</span>
