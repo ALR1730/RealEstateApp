@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.Interfaces.Services;
+using RealEstateApp.Core.Application.ViewModels.Offer;
 using RealEstateApp.Core.Application.ViewModels.Property;
 
 namespace RealEstateApp.Presentation.WebApp.Controllers
@@ -204,6 +205,35 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             {
                 await _offerService.RejectOffer(offerId);
                 TempData["SuccessMessage"] = "Oferta rechazada exitosamente.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Offers));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CounterOffer(CounterOfferViewModel vm)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Datos de contra-oferta inválidos. Verifique el monto ingresado.";
+                return RedirectToAction(nameof(Offers));
+            }
+
+            try
+            {
+                await _offerService.CounterOffer(vm.OfferId, vm.CounterOfferAmount, vm.CounterOfferMessage, userId);
+                TempData["SuccessMessage"] = $"Contra-oferta por RD$ {vm.CounterOfferAmount:N0} enviada exitosamente al cliente.";
             }
             catch (Exception ex)
             {

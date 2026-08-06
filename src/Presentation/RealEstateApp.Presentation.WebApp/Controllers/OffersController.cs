@@ -111,5 +111,51 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             var offers = await _offerService.GetByClienteId(userId);
             return View(offers);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AcceptCounterOffer(int offerId)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            try
+            {
+                await _offerService.AcceptCounterOffer(offerId, userId);
+                TempData["SuccessMessage"] = "¡Felicidades! Has aceptado la contra-oferta del agente. La propiedad ha sido reservada/vendida para ti.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(MyOffers));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectCounterOffer(int offerId)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            try
+            {
+                await _offerService.RejectCounterOffer(offerId, userId);
+                TempData["SuccessMessage"] = "Has rechazado la contra-oferta del agente. La propuesta ha quedado cerrada.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(MyOffers));
+        }
     }
 }

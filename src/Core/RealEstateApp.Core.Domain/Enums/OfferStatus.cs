@@ -4,6 +4,7 @@ namespace RealEstateApp.Core.Domain.Enums
     {
         Pending,
         Accepted,
-        Rejected
+        Rejected,
+        CounterOffered
     }
 }

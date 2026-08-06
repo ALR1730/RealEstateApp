@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="font-heading fw-bold text-dark mb-1"><i class="bi bi-cash-stack text-success me-2"></i> Mis Propuestas Económicas</h2>
-            <p class="text-muted small mb-0">Historial y estado de las ofertas que has enviado a los agentes inmobiliarios.</p>
+            <p class="text-muted small mb-0">Historial de ofertas y contra-ofertas negociadas con los agentes inmobiliarios.</p>
         </div>
         <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">@Model.Count Ofertas</span>
     </div>
@@ -17,6 +17,14 @@
         <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center gap-2">
             <i class="bi bi-check-circle-fill fs-5"></i>
             <div>@TempData["SuccessMessage"]</div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <div>@TempData["ErrorMessage"]</div>
         </div>
     }
 
@@ -40,7 +48,8 @@
                         <tr>
                             <th class="py-3 px-4">Inmueble</th>
                             <th class="py-3">Precio Lista</th>
-                            <th class="py-3">Monto Ofertado</th>
+                            <th class="py-3">Tu Oferta</th>
+                            <th class="py-3">Contra-Oferta Agente</th>
                             <th class="py-3">Fecha</th>
                             <th class="py-3">Estado</th>
                             <th class="py-3 px-4 text-end">Acción</th>
@@ -56,11 +65,31 @@
                                 </td>
                                 <td>@offer.PropertyPrice.ToString("C0")</td>
                                 <td><span class="fw-bold text-success fs-6 font-heading">@offer.MontoOfertado.ToString("C0")</span></td>
+                                <td>
+                                    @if (offer.CounterOfferAmount.HasValue)
+                                    {
+                                        <div class="fw-bold text-info fs-6 font-heading">
+                                            <i class="bi bi-arrow-left-right me-1"></i>@offer.CounterOfferAmount.Value.ToString("C0")
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(offer.CounterOfferMessage))
+                                        {
+                                            <div class="small text-muted fst-italic" style="max-width: 200px;">"@offer.CounterOfferMessage"</div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">-</span>
+                                    }
+                                </td>
                                 <td class="small text-muted">@offer.FechaOferta.ToString("dd/MM/yyyy hh:mm tt")</td>
                                 <td>
                                     @if (offer.Status == "Pending")
                                     {
                                         <span class="badge bg-warning text-dark px-3 py-2 rounded-pill"><i class="bi bi-hourglass-split me-1"></i> Pendiente</span>
+                                    }
+                                    else if (offer.Status == "CounterOffered")
+                                    {
+                                        <span class="badge bg-info text-dark px-3 py-2 rounded-pill"><i class="bi bi-arrow-left-right me-1"></i> Contra-Ofertada</span>
                                     }
                                     else if (offer.Status == "Accepted")
                                     {
@@ -72,9 +101,27 @@
                                     }
                                 </td>
                                 <td class="py-3 px-4 text-end">
-                                    <a asp-controller="Home" asp-action="Details" asp-route-id="@offer.PropertyId" class="btn btn-sm btn-outline-custom">
-                                        Ver Inmueble <i class="bi bi-arrow-right"></i>
-                                    </a>
+                                    @if (offer.Status == "CounterOffered")
+                                    {
+                                        <div class="d-inline-flex gap-2">
+                                            <form asp-action="AcceptCounterOffer" asp-route-offerId="@offer.Id" method="post" onsubmit="return confirm('¿Aceptar la contra-oferta de @offer.CounterOfferAmount?.ToString("C0")? La propiedad pasará a ser reservada/vendida para ti.');">
+                                                <button type="submit" class="btn btn-sm btn-success font-heading px-3 fw-bold" title="Aceptar propuesta del agente">
+                                                    <i class="bi bi-check-circle-fill me-1"></i> Aceptar Contra-Oferta
+                                                </button>
+                                            </form>
+                                            <form asp-action="RejectCounterOffer" asp-route-offerId="@offer.Id" method="post" onsubmit="return confirm('¿Rechazar la contra-oferta del agente?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger font-heading px-3" title="Rechazar y cerrar propuesta">
+                                                    <i class="bi bi-x-circle me-1"></i> Rechazar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Home" asp-action="Details" asp-route-id="@offer.PropertyId" class="btn btn-sm btn-outline-custom">
+                                            Ver Inmueble <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                    }
                                 </td>
                             </tr>
                         }

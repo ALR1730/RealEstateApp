@@ -210,6 +210,12 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                 entity.Property(o => o.MontoOfertado)
                     .HasColumnType("decimal(18,2)");
 
+                entity.Property(o => o.CounterOfferAmount)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(o => o.CounterOfferMessage)
+                    .HasMaxLength(1000);
+
                 entity.Property(o => o.ClienteId)
                     .IsRequired()
                     .HasMaxLength(450);

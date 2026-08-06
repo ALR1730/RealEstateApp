@@ -5,9 +5,9 @@ using RealEstateApp.Core.Application.ViewModels.Offer;
 namespace RealEstateApp.Core.Application.Interfaces.Services
 {
     /// <summary>
-    /// Servicio de aplicación para gestión de ofertas.
-    /// Incluye la regla de negocio atómica: al aceptar una oferta,
-    /// se marca la propiedad como Vendida y se rechazan las demás ofertas.
+    /// Servicio de aplicación para gestión de ofertas y contra-ofertas (Ítem 2.1).
+    /// Incluye la regla de negocio atómica: al aceptar una oferta o contra-oferta,
+    /// se marca la propiedad como Vendida/Reservada y se rechazan las demás ofertas.
     /// </summary>
     public interface IOfferService
     {
@@ -29,5 +29,22 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         /// Rechaza una oferta individual.
         /// </summary>
         Task RejectOffer(int offerId);
+
+        /// <summary>
+        /// Realiza una contra-oferta a la propuesta recibida (Ítem 2.1).
+        /// Cambia el estado de la oferta a CounterOffered y notifica al cliente.
+        /// </summary>
+        Task CounterOffer(int offerId, decimal counterAmount, string? counterMessage, string agentUserId);
+
+        /// <summary>
+        /// Permite al cliente aceptar la contra-oferta enviada por el agente.
+        /// Ejecuta la regla atómica de venta.
+        /// </summary>
+        Task AcceptCounterOffer(int offerId, string clientUserId);
+
+        /// <summary>
+        /// Permite al cliente rechazar la contra-oferta del agente.
+        /// </summary>
+        Task RejectCounterOffer(int offerId, string clientUserId);
     }
 }

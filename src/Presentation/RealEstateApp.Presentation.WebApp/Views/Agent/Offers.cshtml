@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="font-heading fw-bold text-dark mb-1"><i class="bi bi-cash-stack text-success me-2"></i> Ofertas Recibidas</h2>
-            <p class="text-muted small mb-0">Gestiona las propuestas económicas enviadas por los clientes a tus propiedades.</p>
+            <p class="text-muted small mb-0">Gestiona las propuestas económicas y realiza contra-ofertas a tus clientes.</p>
         </div>
         <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">@Model.Count Ofertas</span>
     </div>
@@ -45,6 +45,7 @@
                         <tr>
                             <th class="py-3 px-4">Inmueble</th>
                             <th class="py-3">Precio Lista</th>
+                            <th class="py-3">Oferta Cliente</th>
                             <th class="py-3">Carta Bancaria</th>
                             <th class="py-3">Fecha</th>
                             <th class="py-3">Estado</th>
@@ -60,7 +61,15 @@
                                     <span class="small text-muted">Propiedad #@offer.PropertyId</span>
                                 </td>
                                 <td>@offer.PropertyPrice.ToString("C0")</td>
-                                <td><span class="fw-bold text-success fs-6 font-heading">@offer.MontoOfertado.ToString("C0")</span></td>
+                                <td>
+                                    <span class="fw-bold text-success fs-6 font-heading">@offer.MontoOfertado.ToString("C0")</span>
+                                    @if (offer.CounterOfferAmount.HasValue)
+                                    {
+                                        <div class="small text-info mt-1">
+                                            <i class="bi bi-arrow-return-right me-1"></i>Contra-oferta: <strong>@offer.CounterOfferAmount.Value.ToString("C0")</strong>
+                                        </div>
+                                    }
+                                </td>
                                 <td>
                                     @if (!string.IsNullOrEmpty(offer.PreApprovalLetterUrl))
                                     {
@@ -79,6 +88,10 @@
                                     {
                                         <span class="badge bg-warning text-dark px-3 py-2 rounded-pill"><i class="bi bi-hourglass-split me-1"></i> Pendiente</span>
                                     }
+                                    else if (offer.Status == "CounterOffered")
+                                    {
+                                        <span class="badge bg-info text-dark px-3 py-2 rounded-pill"><i class="bi bi-arrow-left-right me-1"></i> Contra-Ofertada</span>
+                                    }
                                     else if (offer.Status == "Accepted")
                                     {
                                         <span class="badge bg-success px-3 py-2 rounded-pill"><i class="bi bi-check-circle-fill me-1"></i> Aceptada</span>
@@ -93,15 +106,68 @@
                                     {
                                         <div class="d-inline-flex gap-2">
                                             <form asp-action="AcceptOffer" asp-route-offerId="@offer.Id" method="post" onsubmit="return confirm('¿Aceptar esta oferta? La propiedad pasará automáticamente a VENDIDA y se rechazarán las demás ofertas pendientes.');">
-                                                <button type="submit" class="btn btn-sm btn-success font-heading px-3">
+                                                <button type="submit" class="btn btn-sm btn-success font-heading px-3" title="Aceptar oferta original">
                                                     <i class="bi bi-check-lg me-1"></i> Aceptar
                                                 </button>
                                             </form>
+
+                                            <!-- Botón Modal Contra-oferta -->
+                                            <button type="button" class="btn btn-sm btn-info text-dark font-heading px-3" data-bs-toggle="modal" data-bs-target="#counterOfferModal_@offer.Id" title="Hacer contra-oferta">
+                                                <i class="bi bi-arrow-left-right me-1"></i> Contra-Ofertar
+                                            </button>
+
                                             <form asp-action="RejectOffer" asp-route-offerId="@offer.Id" method="post" onsubmit="return confirm('¿Rechazar esta oferta?');">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger font-heading px-3">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger font-heading px-3" title="Rechazar propuesta">
                                                     <i class="bi bi-x-lg me-1"></i> Rechazar
                                                 </button>
                                             </form>
+                                        </div>
+
+                                        <!-- Modal de Contra-Oferta -->
+                                        <div class="modal fade text-start" id="counterOfferModal_@offer.Id" tabindex="-1" aria-labelledby="counterOfferLabel_@offer.Id" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content rounded-4 shadow border-0">
+                                                    <div class="modal-header bg-dark text-white rounded-top-4">
+                                                        <h5 class="modal-title font-heading fw-bold" id="counterOfferLabel_@offer.Id">
+                                                            <i class="bi bi-arrow-left-right text-info me-2"></i> Realizar Contra-Oferta (Cód: @offer.PropertyCode)
+                                                        </h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <form asp-action="CounterOffer" method="post">
+                                                        <div class="modal-body p-4">
+                                                            <input type="hidden" name="OfferId" value="@offer.Id" />
+                                                            
+                                                            <div class="mb-3 p-3 bg-light rounded-3 border">
+                                                                <div class="small text-muted">Oferta Actual del Cliente</div>
+                                                                <div class="fs-5 fw-bold text-success">@offer.MontoOfertado.ToString("C0")</div>
+                                                                <div class="small text-muted mt-1">Precio de Lista de la Propiedad: @offer.PropertyPrice.ToString("C0")</div>
+                                                            </div>
+
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-bold small text-muted">Monto de la Contra-Oferta (RD$)</label>
+                                                                <input type="number" step="0.01" min="1" name="CounterOfferAmount" class="form-control form-control-custom" required value="@offer.PropertyPrice" placeholder="Monto sugerido por el agente" />
+                                                            </div>
+
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-bold small text-muted">Mensaje o Nota para el Cliente (Opcional)</label>
+                                                                <textarea name="CounterOfferMessage" class="form-control form-control-custom" rows="3" placeholder="Ej: Mi último precio de negociación es de RD$ ... por incluir las mejoras."></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer bg-light rounded-bottom-4">
+                                                            <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                                                            <button type="submit" class="btn btn-info rounded-pill px-4 fw-bold">
+                                                                <i class="bi bi-send-fill me-1"></i> Enviar Contra-Oferta
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    else if (offer.Status == "CounterOffered")
+                                    {
+                                        <div class="small text-muted text-center">
+                                            <i class="bi bi-clock-history text-info me-1"></i> Esperando respuesta del cliente
                                         </div>
                                     }
                                     else

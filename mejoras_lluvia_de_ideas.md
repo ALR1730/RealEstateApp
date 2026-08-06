@@ -50,9 +50,9 @@
 
 ## 💼 2. Mejoras de Lógica de Negocio
 
-### 2.1 Sistema de Contra-Ofertas
-- **Estado actual**: El flujo es unidireccional: cliente oferta → agente acepta/rechaza.
-- **Mejora**: Permitir al agente hacer **contra-ofertas** con un monto diferente. El cliente puede aceptar la contra-oferta o retirar su propuesta. Agregar un campo `ContraOfertaMonto` y un estado `CounterOffered` al enum [OfferStatus](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Enums).
+### 2.1 Sistema de Contra-Ofertas [✅ Implementado]
+- **Estado actual**: ✅ Implementado con estado `CounterOffered` en `OfferStatus.cs`, propiedades de contra-oferta en `Offer.cs` y modal de negociación en `Views/Agent/Offers.cshtml` y `Views/Offers/MyOffers.cshtml`.
+- **Mejora**: Flujo bidireccional donde el agente propone un nuevo monto/términos y el cliente decide aceptar (ejecutando venta en cascada) o rechazar la propuesta.
 
 ### 2.2 Agenda de Visitas / Calendario de Citas
 - Módulo para que el cliente solicite una visita presencial a la propiedad.

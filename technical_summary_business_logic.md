@@ -6,17 +6,26 @@ Este documento detalla la arquitectura técnica, modelos de datos, flujos de tra
 
 ## 📋 Lista de Mejoras (Sección 2)
 
-### 2.1 Sistema de Contra-Ofertas
-- **Descripción**: Permite a los agentes enviar contra-propuestas de precio cuando una oferta no cumple sus expectativas. El cliente puede aceptar o retirar su oferta.
+### 2.1 Sistema de Contra-Ofertas [✅ Implementado]
+- **Estado**: ✅ Implementado y funcional al 100%.
+- **Descripción**: Permite a los agentes enviar contra-propuestas de precio y términos cuando una oferta no cumple sus expectativas. El cliente puede revisar la contra-oferta, aceptarla (ejecutando la venta y el rechazo en cascada de ofertas competidoras) o rechazarla.
 - **Cambios en Dominio**:
-  - Extender `OfferStatus` enum: `CounterOffered`.
-  - Agregar campos en `Offer.cs`: `decimal? CounterOfferAmount`, `string? CounterOfferNotes`, `DateTime? CounterOfferedAt`.
-- **Servicios e Interfaz**:
-  - `IOfferService.CounterOfferAsync(int offerId, decimal amount, string notes)`.
-  - `IOfferService.AcceptCounterOfferAsync(int offerId, string clientId)`.
-- **UI & SignalR**:
-  - Modal en la vista de Ofertas Recibidas del Agente para ingresar monto y nota de contra-oferta.
-  - Notificación Push en tiempo real vía `NotificationHub` dirigida al cliente ofertante.
+  - `OfferStatus.cs`: Añadido el valor `CounterOffered` ("Contra-Ofertada").
+  - `Offer.cs`: Propiedades `decimal? CounterOfferAmount`, `string? CounterOfferMessage`, `DateTime? CounterOfferDate`.
+- **Cambios en Persistencia**:
+  - `ApplicationDbContext.cs`: Mapeo de columna con precisión `decimal(18,2)` para `CounterOfferAmount` y `HasMaxLength(1000)` para `CounterOfferMessage`.
+- **Capa de Aplicación y Servicios**:
+  - `CounterOfferViewModel.cs`: Modelo de formulario para la emisión de contra-ofertas del agente.
+  - `OfferViewModel.cs`: Extendidos campos de contra-oferta y propiedad calculada `StatusFormatted`.
+  - `IOfferService.cs` / `OfferService.cs`:
+    - `CounterOffer(int offerId, decimal counterAmount, string? counterMessage, string agentUserId)`: Actualiza estado a `CounterOffered` y registra la actividad en `UserActivityService`.
+    - `AcceptCounterOffer(int offerId, string clientUserId)`: Aceptación por parte del cliente que invoca `AcceptOfferTransactionAsync` (marca propiedad como `Sold` y rechaza otras ofertas en cascada).
+    - `RejectCounterOffer(int offerId, string clientUserId)`: Rechazo y cierre de negociación por parte del cliente.
+- **Controladores y Vistas (UI)**:
+  - `AgentController.cs`: Endpoint `[HttpPost] CounterOffer(CounterOfferViewModel vm)`.
+  - `OffersController.cs`: Endpoints `[HttpPost] AcceptCounterOffer(int offerId)` y `[HttpPost] RejectCounterOffer(int offerId)`.
+  - `Views/Agent/Offers.cshtml`: Badge `Contra-Ofertada` y **Modal Interactivo "Contra-Ofertar"** para ingresar nuevo monto y notas.
+  - `Views/Offers/MyOffers.cshtml`: Banner de propuesta destacada con los botones *"Aceptar Contra-Oferta"* y *"Rechazar"*.
 
 ### 2.2 Agenda de Visitas / Calendario de Citas
 - **Descripción**: Módulo de agendamiento donde los clientes solicitan visitas presenciales/virtuales y los agentes aprueban o reprograman las citas.
