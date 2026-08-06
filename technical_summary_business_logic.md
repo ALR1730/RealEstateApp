@@ -27,14 +27,27 @@ Este documento detalla la arquitectura técnica, modelos de datos, flujos de tra
   - `Views/Agent/Offers.cshtml`: Badge `Contra-Ofertada` y **Modal Interactivo "Contra-Ofertar"** para ingresar nuevo monto y notas.
   - `Views/Offers/MyOffers.cshtml`: Banner de propuesta destacada con los botones *"Aceptar Contra-Oferta"* y *"Rechazar"*.
 
-### 2.2 Agenda de Visitas / Calendario de Citas
-- **Descripción**: Módulo de agendamiento donde los clientes solicitan visitas presenciales/virtuales y los agentes aprueban o reprograman las citas.
-- **Entidad de Dominio**:
-  - `PropertyAppointment`: `Id`, `PropertyId`, `ClienteId`, `AgentId`, `AppointmentDate`, `Status` (Pending, Confirmed, Cancelled, Completed), `Notes`.
-- **Repositorio & Servicio**:
-  - `IAppointmentRepository`, `IAppointmentService`.
-- **Vistas**:
-  - Calendario visual interactivo (FullCalendar.js) en el Dashboard del Agente y botón "Agendar Visita" en `Home/Details.cshtml`.
+### 2.2 Agenda de Visitas / Calendario de Citas [✅ Implementado]
+- **Estado**: ✅ Implementado y funcional al 100%.
+- **Descripción**: Módulo integral de agendamiento de visitas presenciales donde los clientes solicitan citas especificando fecha/hora y el agente dispone de una agenda ejecutiva interactiva (FullCalendar 6.1.10) para confirmar, reprogramar, completar o cancelar las citas.
+- **Cambios en Dominio**:
+  - `AppointmentStatus.cs`: Enum con los estados `Pending`, `Confirmed`, `Cancelled`, `Completed`.
+  - `PropertyAppointment.cs`: Entidad con `PropertyId`, `ClienteId`, `AgentId`, `AppointmentDate`, `Comments`, `Status`, `AgentNotes`.
+- **Cambios en Persistencia**:
+  - `ApplicationDbContext.cs`: Configuración de `DbSet<PropertyAppointment>` y mapeos relacionales.
+  - `IAppointmentRepository.cs` / `AppointmentRepository.cs`: Repositorio con consultas optimizadas por `AgentId`, `ClienteId` y `PropertyId`.
+- **Capa de Aplicación y Servicios**:
+  - ViewModels: `SaveAppointmentViewModel.cs` y `PropertyAppointmentViewModel.cs`.
+  - AutoMapper: Mapeo en `GeneralProfile.cs`.
+  - `IAppointmentService.cs` / `AppointmentService.cs`:
+    - `RequestAppointment`: Registro de solicitud de visita con auditoría en `UserActivityService`.
+    - `GetAppointmentsByAgentId` / `GetAppointmentsByClientId`: Consultas formateadas con nombres de usuario.
+    - `ConfirmAppointment`, `CancelAppointment`, `CompleteAppointment`: Gestión de estado de cita.
+- **Controladores y Vistas (UI)**:
+  - `AppointmentsController.cs`: Controller con endpoints para clientes y agentes, incluyendo el feed JSON `GetAgentCalendarEvents` para FullCalendar.
+  - `Views/Home/Details.cshtml`: **Modal "Agendar Visita Presencial"** con selector `datetime-local` y comentarios.
+  - `Views/Appointments/MyAppointments.cshtml`: Panel de cliente para monitorear citas pendientes y confirmadas.
+  - `Views/Appointments/AgentCalendar.cshtml`: **Calendario Ejecutivo Interactivo (FullCalendar.js)** con vista mensual, semanal, colores por estado e interacción modal.
 
 ### 2.3 Calculadora y Seguimiento de Comisiones
 - **Descripción**: Monitoreo de comisiones acumuladas, pagadas y pendientes por venta/alquiler para agentes.

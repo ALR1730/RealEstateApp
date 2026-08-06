@@ -287,6 +287,10 @@
                             </a>
                         }
 
+                        <button type="button" class="btn btn-outline-primary py-2 font-heading fw-bold d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#requestAppointmentModal">
+                            <i class="bi bi-calendar-event me-1"></i> Agendar Visita Presencial
+                        </button>
+
                         <a asp-controller="Chats" asp-action="Thread" asp-route-propertyId="@Model.Id" asp-route-agentId="@Model.AgentId" class="btn btn-success py-2 font-heading fw-bold d-flex align-items-center justify-content-center gap-2">
                             <i class="bi bi-whatsapp fs-5"></i> Chat Directo vía WhatsApp
                         </a>
@@ -298,6 +302,46 @@
                                 @(Model.IsFavorite ? "Eliminar de Favoritos" : "Guardar en Favoritos")
                             </button>
                         </form>
+
+                        <!-- Modal Agendar Visita Presencial -->
+                        <div class="modal fade text-start" id="requestAppointmentModal" tabindex="-1" aria-labelledby="requestAppointmentLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content rounded-4 shadow border-0">
+                                    <div class="modal-header bg-dark text-white rounded-top-4">
+                                        <h5 class="modal-title font-heading fw-bold" id="requestAppointmentLabel">
+                                            <i class="bi bi-calendar-event text-primary me-2"></i> Agendar Visita Presencial (Cód: @Model.Code)
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form asp-controller="Appointments" asp-action="RequestAppointment" method="post">
+                                        <div class="modal-body p-4">
+                                            <input type="hidden" name="PropertyId" value="@Model.Id" />
+
+                                            <div class="mb-3 p-3 bg-light rounded-3 border">
+                                                <div class="fw-bold text-dark font-heading">@Model.Name</div>
+                                                <div class="small text-muted">Asesor Inmobiliario: @Model.AgentName</div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold small text-muted">Fecha y Hora Propuesta de Visita</label>
+                                                <input type="datetime-local" name="AppointmentDate" class="form-control form-control-custom" required value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-ddTHH:mm")" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold small text-muted">Comentarios o Preferencias de Horario (Opcional)</label>
+                                                <textarea name="Comments" class="form-control form-control-custom" rows="3" placeholder="Ej: Prefiero visitar en horas de la tarde."></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer bg-light rounded-bottom-4">
+                                            <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary-gradient rounded-pill px-4 fw-bold">
+                                                <i class="bi bi-calendar-plus me-1"></i> Enviar Solicitud de Cita
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     }
                     else if (User.Identity != null && User.Identity.IsAuthenticated)
                     {

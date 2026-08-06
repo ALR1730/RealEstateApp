@@ -1,0 +1,96 @@
+@model List<RealEstateApp.Core.Application.ViewModels.Appointment.PropertyAppointmentViewModel>
+@{
+    ViewData["Title"] = "Mis Citas de Visita";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="font-heading fw-bold text-dark mb-1"><i class="bi bi-calendar-event text-primary me-2"></i> Mis Citas Agendadas</h2>
+            <p class="text-muted small mb-0">Seguimiento a tus solicitudes de visitas presenciales a inmuebles.</p>
+        </div>
+        <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">@Model.Count Citas</span>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center gap-2">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+            <div>@TempData["SuccessMessage"]</div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <div>@TempData["ErrorMessage"]</div>
+        </div>
+    }
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
+            <i class="bi bi-calendar-x fs-1 text-muted d-block mb-3"></i>
+            <h5 class="font-heading text-dark">No tienes citas agendadas</h5>
+            <p class="text-muted small">Explora las propiedades y programa una visita presencial con el agente asesor.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary-gradient rounded-pill px-4 mt-2">
+                <i class="bi bi-search me-1"></i> Explorar Catálogo
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 p-4 bg-white border-top border-4 border-primary d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <span class="badge bg-dark font-monospace mb-1">Cód: @item.PropertyCode</span>
+                                    <h5 class="font-heading fw-bold mb-0 text-truncate" style="max-width: 200px;">@item.PropertyName</h5>
+                                </div>
+                                <span class="badge @item.StatusBadgeClass px-3 py-2 rounded-pill small">@item.StatusFormatted</span>
+                            </div>
+
+                            <div class="p-3 bg-light rounded-3 border mb-3">
+                                <div class="d-flex align-items-center gap-2 text-primary fw-bold mb-2">
+                                    <i class="bi bi-clock-fill fs-5"></i>
+                                    <span>@item.AppointmentDate.ToString("dd/MM/yyyy - hh:mm tt")</span>
+                                </div>
+                                <div class="small text-muted mb-1"><i class="bi bi-person-badge me-1"></i> Agente: <strong>@item.AgentName</strong></div>
+                                @if (!string.IsNullOrEmpty(item.Comments))
+                                {
+                                    <div class="small text-secondary mt-2 fst-italic">"<i class="bi bi-quote me-1"></i>@item.Comments"</div>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(item.AgentNotes))
+                            {
+                                <div class="alert alert-info py-2 px-3 small border-0 rounded-3 mb-3">
+                                    <i class="bi bi-info-circle me-1"></i> <strong>Nota del Agente:</strong> @item.AgentNotes
+                                </div>
+                            }
+                        </div>
+
+                        <div class="pt-3 border-top d-flex align-items-center justify-content-between gap-2">
+                            <a asp-controller="Home" asp-action="Details" asp-route-id="@item.PropertyId" class="btn btn-sm btn-outline-custom rounded-pill">
+                                Ver Inmueble
+                            </a>
+                            @if (item.Status == "Pending" || item.Status == "Confirmed")
+                            {
+                                <form asp-action="CancelAppointment" asp-route-id="@item.Id" method="post" onsubmit="return confirm('¿Desea cancelar esta cita de visita?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                        <i class="bi bi-x-lg me-1"></i> Cancelar Cita
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

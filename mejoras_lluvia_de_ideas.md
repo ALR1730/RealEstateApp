@@ -54,10 +54,9 @@
 - **Estado actual**: ✅ Implementado con estado `CounterOffered` en `OfferStatus.cs`, propiedades de contra-oferta en `Offer.cs` y modal de negociación en `Views/Agent/Offers.cshtml` y `Views/Offers/MyOffers.cshtml`.
 - **Mejora**: Flujo bidireccional donde el agente propone un nuevo monto/términos y el cliente decide aceptar (ejecutando venta en cascada) o rechazar la propuesta.
 
-### 2.2 Agenda de Visitas / Calendario de Citas
-- Módulo para que el cliente solicite una visita presencial a la propiedad.
-- El agente confirma el horario y recibe recordatorio por email/notificación.
-- Integración opcional con Google Calendar.
+### 2.2 Agenda de Visitas / Calendario de Citas [✅ Implementado]
+- **Estado actual**: ✅ Implementado con la entidad `PropertyAppointment`, repositorio/servicio `IAppointmentService`, integrador de **FullCalendar.js** en `Views/Appointments/AgentCalendar.cshtml`, gestión de solicitudes en `Views/Appointments/MyAppointments.cshtml` y modal en `Views/Home/Details.cshtml`.
+- **Mejora**: Sistema completo de agendamiento de visitas presenciales con estados en tiempo real (Pendiente, Confirmada, Cancelada, Completada) y calendario interactivo ejecutivo para agentes.
 
 ### 2.3 Calculadora y Seguimiento de Comisiones
 - Cálculo automático de la comisión del agente (configurable por porcentaje).

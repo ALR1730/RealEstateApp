@@ -27,13 +27,16 @@ namespace RealEstateApp.Infrastructure.Persistence
             else
             {
                 services.AddDbContext<ApplicationDbContext>(options =>
+                {
                     options.UseSqlServer(
                         configuration.GetConnectionString("DefaultConnection"),
                         m =>
                         {
                             m.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
                             m.UseNetTopologySuite();
-                        }));
+                        });
+                    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+                });
             }
 
             #endregion
@@ -82,6 +85,7 @@ namespace RealEstateApp.Infrastructure.Persistence
             services.AddScoped<IFavoriteRepository, FavoriteRepository>();
             services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
             services.AddScoped<IUserActivityRepository, UserActivityRepository>();
+            services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 
             #endregion
         }

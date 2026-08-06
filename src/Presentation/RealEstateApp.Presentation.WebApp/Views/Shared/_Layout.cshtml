@@ -152,6 +152,11 @@
                                                 <i class="bi bi-cash-coin text-success"></i> Ofertas Recibidas
                                             </a>
                                         </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Appointments" asp-action="AgentCalendar">
+                                                <i class="bi bi-calendar3 text-info"></i> Agenda de Citas
+                                            </a>
+                                        </li>
                                     }
 
                                     @if (User.IsInRole("Client"))
@@ -166,6 +171,11 @@
                                         <li>
                                             <a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Offers" asp-action="MyOffers">
                                                 <i class="bi bi-cash-stack text-success"></i> Mis Ofertas
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Appointments" asp-action="MyAppointments">
+                                                <i class="bi bi-calendar-event text-primary"></i> Mis Citas Agendadas
                                             </a>
                                         </li>
                                     }

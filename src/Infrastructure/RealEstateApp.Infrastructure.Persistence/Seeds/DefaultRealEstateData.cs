@@ -19,6 +19,49 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
     {
         public static async Task SeedAsync(ApplicationDbContext dbContext, UserManager<IdentityUser> userManager)
         {
+            // Garantizar la presencia de las nuevas columnas de Contra-Ofertas y la tabla PropertyAppointments
+            try
+            {
+                await dbContext.Database.ExecuteSqlRawAsync(@"
+                    IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[Offers]') AND name = N'CounterOfferAmount')
+                    BEGIN
+                        ALTER TABLE [Offers] ADD [CounterOfferAmount] decimal(18,2) NULL;
+                    END
+                    IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[Offers]') AND name = N'CounterOfferDate')
+                    BEGIN
+                        ALTER TABLE [Offers] ADD [CounterOfferDate] datetime2 NULL;
+                    END
+                    IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[Offers]') AND name = N'CounterOfferMessage')
+                    BEGIN
+                        ALTER TABLE [Offers] ADD [CounterOfferMessage] nvarchar(1000) NULL;
+                    END
+
+                    IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'PropertyAppointments')
+                    BEGIN
+                        CREATE TABLE [PropertyAppointments] (
+                            [Id] int NOT NULL IDENTITY,
+                            [PropertyId] int NOT NULL,
+                            [ClienteId] nvarchar(450) NOT NULL,
+                            [AgentId] nvarchar(450) NOT NULL,
+                            [AppointmentDate] datetime2 NOT NULL,
+                            [Comments] nvarchar(1000) NULL,
+                            [Status] int NOT NULL,
+                            [AgentNotes] nvarchar(1000) NULL,
+                            [Created] datetime2 NOT NULL,
+                            [CreatedBy] nvarchar(max) NULL,
+                            [LastModified] datetime2 NULL,
+                            [LastModifiedBy] nvarchar(max) NULL,
+                            CONSTRAINT [PK_PropertyAppointments] PRIMARY KEY ([Id]),
+                            CONSTRAINT [FK_PropertyAppointments_Properties_PropertyId] FOREIGN KEY ([PropertyId]) REFERENCES [Properties] ([Id]) ON DELETE CASCADE
+                        );
+                    END
+                ");
+            }
+            catch
+            {
+                // Ignorar si la base de datos es SQLite u otro proveedor
+            }
+
             // 1. Tipos de Propiedades
             if (!await dbContext.PropertyTypes.AnyAsync())
             {

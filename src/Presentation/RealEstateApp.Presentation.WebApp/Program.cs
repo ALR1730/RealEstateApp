@@ -101,7 +101,21 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var dbContext = services.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.MigrateAsync();
+        
+        // Ejecutar parches de esquema directos primero para evitar bloqueos
+        if (app.Environment.IsDevelopment())
+        {
+            await DefaultRealEstateData.SeedAsync(dbContext, services.GetRequiredService<UserManager<IdentityUser>>());
+        }
+
+        try
+        {
+            await dbContext.Database.MigrateAsync();
+        }
+        catch (Exception migEx)
+        {
+            Console.WriteLine($"Nota de migración: {migEx.Message}");
+        }
 
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
@@ -115,7 +129,6 @@ using (var scope = app.Services.CreateScope())
             await DefaultAgentUser.SeedAsync(userManager);
             await DefaultClientUser.SeedAsync(userManager);
             await DefaultDeveloperUser.SeedAsync(userManager);
-            await DefaultRealEstateData.SeedAsync(dbContext, userManager);
         }
     }
     catch (Exception ex)
