@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Presentation\\RealEstateApp.Presentation.WebApi\\RealEstateApp.Presentation.WebApi.csproj": {}
+    "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Presentation\\RealEstateApp.Presentation.WebApi\\RealEstateApp.Presentation.WebApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj": {
+    "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj",
+        "projectUniqueName": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj",
         "projectName": "RealEstateApp.Core.Application",
-        "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj",
+        "projectPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj",
         "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\obj\\",
+        "outputPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -34,8 +34,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Domain\\RealEstateApp.Core.Domain.csproj": {
-                "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Domain\\RealEstateApp.Core.Domain.csproj"
+              "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Domain\\RealEstateApp.Core.Domain.csproj": {
+                "projectPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Domain\\RealEstateApp.Core.Domain.csproj"
               }
             }
           }
@@ -499,14 +499,14 @@
         }
       }
     },
-    "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Domain\\RealEstateApp.Core.Domain.csproj": {
+    "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Domain\\RealEstateApp.Core.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Domain\\RealEstateApp.Core.Domain.csproj",
+        "projectUniqueName": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Domain\\RealEstateApp.Core.Domain.csproj",
         "projectName": "RealEstateApp.Core.Domain",
-        "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Domain\\RealEstateApp.Core.Domain.csproj",
+        "projectPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Domain\\RealEstateApp.Core.Domain.csproj",
         "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Domain\\obj\\",
+        "outputPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -841,14 +841,14 @@
         }
       }
     },
-    "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\RealEstateApp.Infrastructure.Persistence.csproj": {
+    "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\RealEstateApp.Infrastructure.Persistence.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\RealEstateApp.Infrastructure.Persistence.csproj",
+        "projectUniqueName": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\RealEstateApp.Infrastructure.Persistence.csproj",
         "projectName": "RealEstateApp.Infrastructure.Persistence",
-        "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\RealEstateApp.Infrastructure.Persistence.csproj",
+        "projectPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\RealEstateApp.Infrastructure.Persistence.csproj",
         "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\obj\\",
+        "outputPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -871,8 +871,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj": {
-                "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj"
+              "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj": {
+                "projectPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj"
               }
             }
           }
@@ -1358,14 +1358,14 @@
         }
       }
     },
-    "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Shared\\RealEstateApp.Infrastructure.Shared.csproj": {
+    "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Shared\\RealEstateApp.Infrastructure.Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Shared\\RealEstateApp.Infrastructure.Shared.csproj",
+        "projectUniqueName": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Shared\\RealEstateApp.Infrastructure.Shared.csproj",
         "projectName": "RealEstateApp.Infrastructure.Shared",
-        "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Shared\\RealEstateApp.Infrastructure.Shared.csproj",
+        "projectPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Shared\\RealEstateApp.Infrastructure.Shared.csproj",
         "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Shared\\obj\\",
+        "outputPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Shared\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -1388,8 +1388,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj": {
-                "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj"
+              "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj": {
+                "projectPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj"
               }
             }
           }
@@ -1704,14 +1704,14 @@
         }
       }
     },
-    "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Presentation\\RealEstateApp.Presentation.WebApi\\RealEstateApp.Presentation.WebApi.csproj": {
+    "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Presentation\\RealEstateApp.Presentation.WebApi\\RealEstateApp.Presentation.WebApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Presentation\\RealEstateApp.Presentation.WebApi\\RealEstateApp.Presentation.WebApi.csproj",
+        "projectUniqueName": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Presentation\\RealEstateApp.Presentation.WebApi\\RealEstateApp.Presentation.WebApi.csproj",
         "projectName": "RealEstateApp.Presentation.WebApi",
-        "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Presentation\\RealEstateApp.Presentation.WebApi\\RealEstateApp.Presentation.WebApi.csproj",
+        "projectPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Presentation\\RealEstateApp.Presentation.WebApi\\RealEstateApp.Presentation.WebApi.csproj",
         "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Presentation\\RealEstateApp.Presentation.WebApi\\obj\\",
+        "outputPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Presentation\\RealEstateApp.Presentation.WebApi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -1734,14 +1734,14 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj": {
-                "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj"
+              "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj": {
+                "projectPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Core\\RealEstateApp.Core.Application\\RealEstateApp.Core.Application.csproj"
               },
-              "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\RealEstateApp.Infrastructure.Persistence.csproj": {
-                "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\RealEstateApp.Infrastructure.Persistence.csproj"
+              "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\RealEstateApp.Infrastructure.Persistence.csproj": {
+                "projectPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Persistence\\RealEstateApp.Infrastructure.Persistence.csproj"
               },
-              "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Shared\\RealEstateApp.Infrastructure.Shared.csproj": {
-                "projectPath": "C:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Shared\\RealEstateApp.Infrastructure.Shared.csproj"
+              "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Shared\\RealEstateApp.Infrastructure.Shared.csproj": {
+                "projectPath": "c:\\Users\\DELL\\Desktop\\New folder\\RealEstateApp\\src\\Infrastructure\\RealEstateApp.Infrastructure.Shared\\RealEstateApp.Infrastructure.Shared.csproj"
               }
             }
           }

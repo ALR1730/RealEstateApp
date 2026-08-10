@@ -15,15 +15,18 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         private readonly IChatService _chatService;
         private readonly IPropertyService _propertyService;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IWhatsAppService _whatsAppService;
 
         public ChatsController(
             IChatService chatService,
             IPropertyService propertyService,
-            UserManager<IdentityUser> userManager)
+            UserManager<IdentityUser> userManager,
+            IWhatsAppService whatsAppService)
         {
             _chatService = chatService;
             _propertyService = propertyService;
             _userManager = userManager;
+            _whatsAppService = whatsAppService;
         }
 
         public async Task<IActionResult> Index()
@@ -371,6 +374,13 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             });
 
             return Json(result);
+        }
+
+        [HttpGet]
+        public IActionResult GetWhatsAppUrl(string phone, string message)
+        {
+            var url = _whatsAppService.GenerateWhatsAppUrl(phone, message);
+            return Json(new { url });
         }
     }
 }

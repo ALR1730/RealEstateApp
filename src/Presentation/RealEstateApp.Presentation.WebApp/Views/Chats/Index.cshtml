@@ -1,6 +1,6 @@
 @model List<RealEstateApp.Core.Application.ViewModels.Chat.ChatViewModel>
 @{
-    ViewData["Title"] = "Mis Mensajes y Chats WhatsApp";
+    ViewData["Title"] = "Mis Mensajes y Conversaciones";
 }
 
 <div class="container py-5">
@@ -25,7 +25,7 @@
                 </a>
             }
             <span class="badge bg-success px-3 py-2 rounded-pill font-monospace d-none d-md-inline-flex align-items-center" style="font-size: 0.82rem;">
-                <i class="bi bi-patch-check-fill me-1"></i> WhatsApp Synced
+                <i class="bi bi-chat-dots-fill me-1"></i> Chat Activo
             </span>
         </div>
     </div>
@@ -101,8 +101,8 @@
                                 }
                                 else
                                 {
-                                    <span class="wa-badge">
-                                        <i class="bi bi-whatsapp"></i> WhatsApp
+                                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">
+                                        <i class="bi bi-chat-left-dots"></i> Chat Propiedad
                                     </span>
                                 }
                             </div>
@@ -128,8 +128,8 @@
                             }
                             else
                             {
-                                <a asp-action="Thread" asp-route-propertyId="@latestMsg.PropertyId" asp-route-agentId="@latestMsg.AgenteId" asp-route-clienteId="@latestMsg.ClienteId" class="btn btn-outline-success w-100 py-2 rounded-pill fw-bold">
-                                    Abrir WhatsApp Chat <i class="bi bi-whatsapp ms-1"></i>
+                                <a asp-action="Thread" asp-route-propertyId="@latestMsg.PropertyId" asp-route-agentId="@latestMsg.AgenteId" asp-route-clienteId="@latestMsg.ClienteId" class="btn btn-outline-primary w-100 py-2 rounded-pill fw-bold">
+                                    Abrir Chat de Propiedad <i class="bi bi-chat-dots ms-1"></i>
                                 </a>
                             }
                         </div>
