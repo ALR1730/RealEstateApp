@@ -377,15 +377,22 @@
 
             <!-- Plazo del Crédito -->
             <div class="col-md-6">
-                <label class="form-label small fw-bold text-dark">Plazo del Crédito (Años)</label>
-                <div class="d-flex gap-1 flex-wrap" id="yearsPillGroup">
-                    <input type="hidden" id="calcYears" value="15" />
-                    <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="5">5 Años</button>
-                    <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="10">10 Años</button>
-                    <button type="button" class="btn btn-sm btn-primary-gradient pill-year-btn active" data-years="15">15 Años</button>
-                    <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="20">20 Años</button>
-                    <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="25">25 Años</button>
-                    <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="30">30 Años</button>
+                <label for="calcYears" class="form-label small fw-bold text-dark">Plazo del Crédito (Escribir Años)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-calendar3 text-primary"></i></span>
+                    <input type="number" id="calcYears" class="form-control form-control-custom fw-bold text-primary" value="15" min="1" max="50" step="1" placeholder="Ingrese años (Ej: 7, 12, 18, 25)" />
+                    <span class="input-group-text bg-light border-0 fw-bold text-muted">Años</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-2">
+                    <span class="small text-muted" style="font-size: 0.78rem;"><i class="bi bi-pencil-square me-1"></i>Puedes ingresar cualquier cantidad de años o usar accesos rápidos:</span>
+                    <div class="d-flex gap-1 flex-wrap" id="yearsPillGroup">
+                        <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="5">5 Años</button>
+                        <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="10">10 Años</button>
+                        <button type="button" class="btn btn-sm btn-primary-gradient pill-year-btn active" data-years="15">15 Años</button>
+                        <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="20">20 Años</button>
+                        <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="25">25 Años</button>
+                        <button type="button" class="btn btn-sm btn-outline-custom pill-year-btn" data-years="30">30 Años</button>
+                    </div>
                 </div>
             </div>
 
@@ -536,12 +543,26 @@
         });
 
         $(document).ready(function () {
-            // Manejador del selector de años en botones pill
+            // Manejador del selector de años en botones pill y campo personalizable
             $(".pill-year-btn").click(function () {
+                var yrs = $(this).data("years");
                 $(".pill-year-btn").removeClass("btn-primary-gradient active").addClass("btn-outline-custom");
                 $(this).removeClass("btn-outline-custom").addClass("btn-primary-gradient active");
-                $("#calcYears").val($(this).data("years"));
+                $("#calcYears").val(yrs);
                 calculateMortgage();
+            });
+
+            $("#calcYears, #calcRate").on("input change", function () {
+                var yrs = parseInt($("#calcYears").val()) || 0;
+                $(".pill-year-btn").removeClass("btn-primary-gradient active").addClass("btn-outline-custom");
+                $(".pill-year-btn").each(function () {
+                    if ($(this).data("years") === yrs) {
+                        $(this).removeClass("btn-outline-custom").addClass("btn-primary-gradient active");
+                    }
+                });
+                if (yrs > 0) {
+                    calculateMortgage();
+                }
             });
 
             // Actualizar porcentaje de inicial cuando cambia el monto de inicial o precio
@@ -615,6 +636,13 @@
             $("#btnCalculate").click(function () {
                 calculateMortgage();
             });
+
+            $("#btnPrintPdf").click(function () {
+                var collapseElement = document.getElementById('amortizationTableCollapse');
+                if (collapseElement && !collapseElement.classList.contains('show')) {
+                    new bootstrap.Collapse(collapseElement).show();
+                }
+                setTimeout(function () {
                     window.print();
                 }, 250);
             });

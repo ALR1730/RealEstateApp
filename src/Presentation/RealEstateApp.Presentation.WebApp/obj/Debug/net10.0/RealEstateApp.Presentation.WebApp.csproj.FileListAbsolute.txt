@@ -11,6 +11,7 @@ C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Pr
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\bin\Debug\net10.0\Azure.Core.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\bin\Debug\net10.0\Azure.Identity.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\bin\Debug\net10.0\Humanizer.dll
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.Google.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\bin\Debug\net10.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\bin\Debug\net10.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\bin\Debug\net10.0\Microsoft.Bcl.Cryptography.dll
@@ -162,7 +163,13 @@ C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Pr
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\scopedcss\bundle\RealEstateApp.Presentation.WebApp.styles.css
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\scopedcss\projectbundle\RealEstateApp.Presentation.WebApp.bundle.scp.css
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\qhirg62he0-{0}-a44fmtwm35-a44fmtwm35.gz
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\ywkwxnzoch-{0}-61n19gt1b8-61n19gt1b8.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\i941io02m8-{0}-ack84cqdar-ack84cqdar.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\tbkua93xij-{0}-tx8enrqmqc-tx8enrqmqc.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\6mbya35mh3-{0}-h25jyv3tzp-h25jyv3tzp.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\n13pve08bb-{0}-5dvtgukl9c-5dvtgukl9c.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\q9zftia8oy-{0}-yl2r2a0eh8-yl2r2a0eh8.gz
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\sb766odvj7-{0}-bqjiyaj88i-bqjiyaj88i.gz
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\1b1n64i2kz-{0}-c2jlpeoesf-c2jlpeoesf.gz
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\1z7oo1lykb-{0}-erw9l3u2r3-erw9l3u2r3.gz
@@ -222,6 +229,10 @@ C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Pr
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\6x4alftl19-{0}-muycvpuwrr-muycvpuwrr.gz
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\o36mistevd-{0}-87fc7y1x7t-87fc7y1x7t.gz
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\35cr18f9j5-{0}-mlv21k5csn-mlv21k5csn.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\adpjb1wi6b-{0}-lvw4zcrbhz-lvw4zcrbhz.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\7mdcl7xgr1-{0}-cdejw37ilb-cdejw37ilb.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\csvpe2fo1w-{0}-yl0u59maum-yl0u59maum.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\7f1pduwhsl-{0}-erqm7oim67-erqm7oim67.gz
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\pbgj2hxi0q-{0}-ebrd38hwn5-ebrd38hwn5.gz
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\h3iiy2luyi-{0}-ebrd38hwn5-ebrd38hwn5.gz
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\staticwebassets.build.json
@@ -235,14 +246,3 @@ C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Pr
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\RealEstateApp.Presentation.WebApp.pdb
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\RealEstateApp.Presentation.WebApp.genruntimeconfig.cache
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\ref\RealEstateApp.Presentation.WebApp.dll
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.Google.dll
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\7f1pduwhsl-{0}-erqm7oim67-erqm7oim67.gz
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\n13pve08bb-{0}-5dvtgukl9c-5dvtgukl9c.gz
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\i941io02m8-{0}-ack84cqdar-ack84cqdar.gz
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\tbkua93xij-{0}-tx8enrqmqc-tx8enrqmqc.gz
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\6mbya35mh3-{0}-h25jyv3tzp-h25jyv3tzp.gz
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\adpjb1wi6b-{0}-lvw4zcrbhz-lvw4zcrbhz.gz
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\7mdcl7xgr1-{0}-cdejw37ilb-cdejw37ilb.gz
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\csvpe2fo1w-{0}-yl0u59maum-yl0u59maum.gz
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\q9zftia8oy-{0}-yl2r2a0eh8-yl2r2a0eh8.gz
-c:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\qhirg62he0-{0}-a44fmtwm35-a44fmtwm35.gz

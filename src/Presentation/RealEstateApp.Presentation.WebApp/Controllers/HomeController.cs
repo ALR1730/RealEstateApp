@@ -206,6 +206,9 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             return View(property);
         }
 
+        /// <summary>
+        /// Calcula la amortización e información hipotecaria basada en los parámetros ingresados.
+        /// </summary>
         [HttpPost]
         public IActionResult CalculateMortgage(decimal price, decimal downPayment, decimal rate, int years)
         {
