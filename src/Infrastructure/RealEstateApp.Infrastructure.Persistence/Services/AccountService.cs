@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RealEstateApp.Core.Application.DTOs.Account;
@@ -16,6 +17,7 @@ using RealEstateApp.Core.Domain.Exceptions;
 using RealEstateApp.Core.Application.ViewModels.Account;
 using RealEstateApp.Core.Domain.Enums;
 using RealEstateApp.Core.Domain.Settings;
+using RealEstateApp.Infrastructure.Persistence.Contexts;
 
 namespace RealEstateApp.Infrastructure.Persistence.Services
 {
@@ -28,6 +30,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailService _emailService;
         private readonly IFileStorageService _fileStorageService;
+        private readonly ApplicationDbContext _dbContext;
         private readonly JWTSettings _jwtSettings;
 
         public AccountService(
@@ -35,12 +38,14 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
             RoleManager<IdentityRole> roleManager,
             IEmailService emailService,
             IFileStorageService fileStorageService,
+            ApplicationDbContext dbContext,
             IOptions<JWTSettings> jwtSettings)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _emailService = emailService;
             _fileStorageService = fileStorageService;
+            _dbContext = dbContext;
             _jwtSettings = jwtSettings.Value;
         }
 
@@ -425,6 +430,52 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
                 IsActive = isActive,
                 Roles = roles.ToList()
             };
+        }
+
+        public async Task<Dictionary<string, AccountUserDto>> GetUsersByIdsAsync(IEnumerable<string> ids)
+        {
+            var distinctIds = ids.Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList();
+            var result = new Dictionary<string, AccountUserDto>();
+
+            if (!distinctIds.Any()) return result;
+
+            var users = await _userManager.Users
+                .Where(u => distinctIds.Contains(u.Id))
+                .AsNoTracking()
+                .ToListAsync();
+
+            var claims = await _dbContext.UserClaims
+                .Where(c => distinctIds.Contains(c.UserId))
+                .AsNoTracking()
+                .ToListAsync();
+
+            var claimsGrouped = claims
+                .GroupBy(c => c.UserId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (var user in users)
+            {
+                var isActive = user.IsActiveUser();
+                claimsGrouped.TryGetValue(user.Id, out var userClaims);
+
+                var firstNameClaim = userClaims?.FirstOrDefault(c => c.ClaimType == "FirstName")?.ClaimValue;
+                var lastNameClaim = userClaims?.FirstOrDefault(c => c.ClaimType == "LastName")?.ClaimValue;
+                var profilePictureClaim = userClaims?.FirstOrDefault(c => c.ClaimType == "ProfilePicture")?.ClaimValue;
+
+                result[user.Id] = new AccountUserDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName ?? string.Empty,
+                    FirstName = !string.IsNullOrWhiteSpace(firstNameClaim) ? firstNameClaim : (user.UserName ?? string.Empty),
+                    LastName = lastNameClaim ?? string.Empty,
+                    Email = user.Email ?? string.Empty,
+                    PhoneNumber = user.PhoneNumber,
+                    ProfilePictureUrl = profilePictureClaim,
+                    IsActive = isActive
+                };
+            }
+
+            return result;
         }
 
         public async Task DeleteUserAsync(string userId)

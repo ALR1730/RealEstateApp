@@ -17,6 +17,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
         public async Task<List<PropertyAppointment>> GetByPropertyIdAsync(int propertyId)
         {
             return await _dbContext.Set<PropertyAppointment>()
+                .AsNoTracking()
                 .Include(pa => pa.Property)
                     .ThenInclude(p => p!.Images)
                 .Where(pa => pa.PropertyId == propertyId)
@@ -27,6 +28,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
         public async Task<List<PropertyAppointment>> GetByClienteIdAsync(string clienteId)
         {
             return await _dbContext.Set<PropertyAppointment>()
+                .AsNoTracking()
                 .Include(pa => pa.Property)
                     .ThenInclude(p => p!.Images)
                 .Where(pa => pa.ClienteId == clienteId)
@@ -37,6 +39,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
         public async Task<List<PropertyAppointment>> GetByAgentIdAsync(string agentId)
         {
             return await _dbContext.Set<PropertyAppointment>()
+                .AsNoTracking()
                 .Include(pa => pa.Property)
                     .ThenInclude(p => p!.Images)
                 .Where(pa => pa.AgentId == agentId)

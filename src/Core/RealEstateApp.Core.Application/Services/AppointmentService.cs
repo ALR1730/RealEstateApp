@@ -48,10 +48,7 @@ namespace RealEstateApp.Core.Application.Services
         {
             var appointments = await _appointmentRepository.GetByClienteIdAsync(clienteId);
             var vms = _mapper.Map<List<AppointmentViewModel>>(appointments);
-            foreach (var vm in vms)
-            {
-                await PopulateUserNames(vm);
-            }
+            await PopulateUserNamesBatchAsync(vms);
             return vms;
         }
 
@@ -59,10 +56,7 @@ namespace RealEstateApp.Core.Application.Services
         {
             var appointments = await _appointmentRepository.GetByAgentIdAsync(agentId);
             var vms = _mapper.Map<List<AppointmentViewModel>>(appointments);
-            foreach (var vm in vms)
-            {
-                await PopulateUserNames(vm);
-            }
+            await PopulateUserNamesBatchAsync(vms);
             return vms;
         }
 
@@ -70,10 +64,7 @@ namespace RealEstateApp.Core.Application.Services
         {
             var appointments = await _appointmentRepository.GetByPropertyIdAsync(propertyId);
             var vms = _mapper.Map<List<AppointmentViewModel>>(appointments);
-            foreach (var vm in vms)
-            {
-                await PopulateUserNames(vm);
-            }
+            await PopulateUserNamesBatchAsync(vms);
             return vms;
         }
 
@@ -242,6 +233,55 @@ namespace RealEstateApp.Core.Application.Services
                 case AppointmentStatus.Completed:
                     vm.StatusFormatted = "Completada";
                     break;
+            }
+        }
+
+        private async Task PopulateUserNamesBatchAsync(List<AppointmentViewModel> vms)
+        {
+            if (vms == null || !vms.Any()) return;
+
+            var userIds = vms.Select(v => v.ClienteId)
+                             .Concat(vms.Select(v => v.AgentId))
+                             .Where(id => !string.IsNullOrWhiteSpace(id))
+                             .Distinct()!;
+
+            var userDict = await _accountService.GetUsersByIdsAsync(userIds!);
+
+            foreach (var vm in vms)
+            {
+                if (!string.IsNullOrEmpty(vm.ClienteId) && userDict.TryGetValue(vm.ClienteId, out var clientUser))
+                {
+                    vm.ClienteName = $"{clientUser.FirstName} {clientUser.LastName}".Trim();
+                }
+                else if (string.IsNullOrEmpty(vm.ClienteName))
+                {
+                    vm.ClienteName = "Cliente";
+                }
+
+                if (!string.IsNullOrEmpty(vm.AgentId) && userDict.TryGetValue(vm.AgentId, out var agentUser))
+                {
+                    vm.AgentName = $"{agentUser.FirstName} {agentUser.LastName}".Trim();
+                }
+                else if (string.IsNullOrEmpty(vm.AgentName))
+                {
+                    vm.AgentName = "Agente";
+                }
+
+                switch (vm.Status)
+                {
+                    case AppointmentStatus.Pending:
+                        vm.StatusFormatted = "Pendiente de Confirmación";
+                        break;
+                    case AppointmentStatus.Confirmed:
+                        vm.StatusFormatted = "Confirmada";
+                        break;
+                    case AppointmentStatus.Cancelled:
+                        vm.StatusFormatted = "Cancelada";
+                        break;
+                    case AppointmentStatus.Completed:
+                        vm.StatusFormatted = "Completada";
+                        break;
+                }
             }
         }
     }
