@@ -45,6 +45,42 @@
                 <input type="hidden" name="UserLat" id="userLatInput" value="@filters.UserLat" />
                 <input type="hidden" name="UserLng" id="userLngInput" value="@filters.UserLng" />
 
+                <!-- Ubicación: Provincia -->
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Provincia (RD)</label>
+                    <select name="ProvinceId" id="provinceFilterSelect" class="form-select form-select-custom">
+                        <option value="">Todas las provincias</option>
+                        @if (filters.Provinces != null)
+                        {
+                            foreach (var item in filters.Provinces)
+                            {
+                                <option value="@item.Id" selected="@(filters.ProvinceId == item.Id)">@item.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Ubicación: Municipio -->
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted"><i class="bi bi-pin-map text-primary me-1"></i>Municipio</label>
+                    <select name="MunicipalityId" id="municipalityFilterSelect" class="form-select form-select-custom">
+                        <option value="">Todos los municipios</option>
+                        @if (filters.Municipalities != null)
+                        {
+                            foreach (var item in filters.Municipalities)
+                            {
+                                <option value="@item.Id" selected="@(filters.MunicipalityId == item.Id)">@item.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Ubicación: Sector / Barrio -->
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted"><i class="bi bi-signpost-2 text-info me-1"></i>Sector / Barrio</label>
+                    <input type="text" name="Sector" value="@filters.Sector" class="form-control form-control-custom" placeholder="Ej: Piantini, Bella Vista..." />
+                </div>
+
                 <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted">Tipo de Propiedad</label>
                     <select name="PropertyTypeId" class="form-select form-select-custom">
@@ -103,6 +139,15 @@
                     </div>
                 </div>
 
+                <div class="col-md-3 d-flex align-items-center">
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input" type="checkbox" name="OnlyFeatured" id="onlyFeaturedCheck" value="true" @(filters.OnlyFeatured == true ? "checked" : "") />
+                        <label class="form-check-label fw-bold text-dark small ms-1" for="onlyFeaturedCheck">
+                            <i class="bi bi-star-fill text-warning me-1"></i> Solo Destacados
+                        </label>
+                    </div>
+                </div>
+
                 <div class="col-md-3 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary-gradient w-100 py-2">
                         <i class="bi bi-funnel-fill me-2"></i> Aplicar Filtros
@@ -136,6 +181,13 @@
                     <div class="card-property">
                         <div class="img-container">
                             <span class="code-badge">Código: @item.Code</span>
+
+                            @if (item.IsCurrentlyFeatured)
+                            {
+                                <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-3 fw-bold shadow-sm" style="z-index: 5; font-size: 0.78rem; border-radius: 8px;">
+                                    <i class="bi bi-star-fill me-1 text-dark"></i> DESTACADO
+                                </span>
+                            }
                             
                             @{
                                 var displayStatus = (item.Status == "Disponible" && item.IsFinanciable) ? "Financiable" : item.Status;
@@ -175,6 +227,12 @@
                                     <span class="badge bg-light text-primary border">@item.PropertyTypeName</span>
                                     <span class="badge bg-light text-dark border">@item.SaleTypeName</span>
                                 </div>
+                                @if (!string.IsNullOrEmpty(item.ProvinceName) || !string.IsNullOrEmpty(item.Sector))
+                                {
+                                    <div class="text-danger small mb-1 fw-semibold text-truncate">
+                                        <i class="bi bi-geo-alt-fill me-1"></i>@(string.IsNullOrEmpty(item.Sector) ? item.ProvinceName : $"{item.Sector}, {item.ProvinceName}")
+                                    </div>
+                                }
                                 <h5 class="font-heading fw-bold text-dark mb-1 text-truncate" title="@item.Name">@item.Name</h5>
                                 <p class="text-muted small mb-3 text-truncate-2">@item.Description</p>
                             </div>
@@ -207,6 +265,34 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
+            // Manejo de dropdown en cascada: Provincia -> Municipios
+            $('#provinceFilterSelect').on('change', async function () {
+                const provinceId = $(this).val();
+                const $municipalitySelect = $('#municipalityFilterSelect');
+                
+                $municipalitySelect.html('<option value="">Todos los municipios</option>');
+                
+                if (!provinceId) {
+                    return;
+                }
+
+                $municipalitySelect.html('<option value="">Cargando municipios...</option>');
+
+                try {
+                    const response = await fetch(`/Home/GetMunicipalities?provinceId=${provinceId}`);
+                    const data = await response.json();
+                    
+                    $municipalitySelect.html('<option value="">Todos los municipios</option>');
+                    data.forEach(function (m) {
+                        $municipalitySelect.append(`<option value="${m.id}">${m.name}</option>`);
+                    });
+                } catch (err) {
+                    console.error('Error al cargar municipios:', err);
+                    $municipalitySelect.html('<option value="">Error al cargar</option>');
+                }
+            });
+
+            // Geolocalización
             $('#btnGeolocate').click(function () {
                 if ('geolocation' in navigator) {
                     var $btn = $(this);

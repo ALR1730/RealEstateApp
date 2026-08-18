@@ -119,6 +119,57 @@
                                 <span asp-validation-for="Description" class="text-danger small"></span>
                             </div>
 
+                            <!-- División Territorial (República Dominicana) -->
+                            <div class="col-md-6">
+                                <label asp-for="ProvinceId" class="form-label fw-bold text-dark small">
+                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i>Provincia (RD)
+                                </label>
+                                <select asp-for="ProvinceId" id="provinceSelect" class="form-select form-select-custom">
+                                    <option value="">-- Seleccione Provincia --</option>
+                                    @if (Model.Provinces != null)
+                                    {
+                                        foreach (var prov in Model.Provinces)
+                                        {
+                                            <option value="@prov.Id">@prov.Name</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="ProvinceId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="MunicipalityId" class="form-label fw-bold text-dark small">
+                                    <i class="bi bi-pin-map text-primary me-1"></i>Municipio
+                                </label>
+                                <select asp-for="MunicipalityId" id="municipalitySelect" class="form-select form-select-custom">
+                                    <option value="">-- Seleccione Municipio --</option>
+                                    @if (Model.Municipalities != null)
+                                    {
+                                        foreach (var mun in Model.Municipalities)
+                                        {
+                                            <option value="@mun.Id">@mun.Name</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="MunicipalityId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Sector" class="form-label fw-bold text-dark small">
+                                    <i class="bi bi-signpost-2 text-info me-1"></i>Sector / Barrio
+                                </label>
+                                <input asp-for="Sector" class="form-control form-control-custom" placeholder="Ej: Piantini, Bella Vista, Naco..." />
+                                <span asp-validation-for="Sector" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="FullAddress" class="form-label fw-bold text-dark small">
+                                    <i class="bi bi-building me-1"></i>Dirección Completa
+                                </label>
+                                <input asp-for="FullAddress" class="form-control form-control-custom" placeholder="Ej: Av. Winston Churchill #105, Torre Empresarial" />
+                                <span asp-validation-for="FullAddress" class="text-danger small"></span>
+                            </div>
+
                             <!-- Selección de Ubicación por Mapa Interactivo -->
                             <div class="col-12 my-3">
                                 <div class="card bg-light border-0 shadow-sm rounded-4 p-3">
@@ -179,6 +230,17 @@
                                 <label asp-for="Tour360Url" class="form-label fw-bold text-dark small"></label>
                                 <input asp-for="Tour360Url" class="form-control form-control-custom" placeholder="URL de Tour 360" />
                                 <span asp-validation-for="Tour360Url" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="MatterportModelId" class="form-label fw-bold text-dark small">
+                                    <i class="bi bi-badge-3d text-primary me-1"></i> ID del Modelo Matterport (Tour 3D Inmersivo)
+                                </label>
+                                <input asp-for="MatterportModelId" class="form-control form-control-custom" placeholder="Ej: SxQL3iGyoDo (obtenido de my.matterport.com/show/?m=...)" />
+                                <span asp-validation-for="MatterportModelId" class="text-danger small"></span>
+                                <div class="form-text small text-muted">
+                                    Si cuenta con un tour virtual escaneado en Matterport, pegue únicamente el ID del modelo (ej: <code>SxQL3iGyoDo</code>).
+                                </div>
                             </div>
 
                             <!-- Imágenes Existentes -->
@@ -323,12 +385,35 @@
                 });
             }
 
-            $("#mapSearchBtn").click(performSearch);
-
             $("#mapSearchInput").keypress(function (e) {
                 if (e.which == 13) {
                     e.preventDefault();
                     performSearch();
+                }
+            });
+
+            // Cargar municipios dinámicamente al cambiar la provincia
+            $('#provinceSelect').on('change', async function () {
+                const provinceId = $(this).val();
+                const $municipalitySelect = $('#municipalitySelect');
+
+                $municipalitySelect.html('<option value="">-- Seleccione Municipio --</option>');
+
+                if (!provinceId) return;
+
+                $municipalitySelect.html('<option value="">Cargando municipios...</option>');
+
+                try {
+                    const response = await fetch(`/Home/GetMunicipalities?provinceId=${provinceId}`);
+                    const data = await response.json();
+
+                    $municipalitySelect.html('<option value="">-- Seleccione Municipio --</option>');
+                    data.forEach(function (m) {
+                        $municipalitySelect.append(`<option value="${m.id}">${m.name}</option>`);
+                    });
+                } catch (err) {
+                    console.error('Error al cargar municipios:', err);
+                    $municipalitySelect.html('<option value="">Error al cargar</option>');
                 }
             });
         });

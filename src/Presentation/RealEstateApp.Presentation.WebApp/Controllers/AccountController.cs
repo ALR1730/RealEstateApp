@@ -128,7 +128,9 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             }
 
             var origin = $"{Request.Scheme}://{Request.Host}";
-            var selectedRole = vm.UserType == "Agent" ? Roles.Agent.ToString() : Roles.Client.ToString();
+            var selectedRole = vm.UserType == "Agent" ? Roles.Agent.ToString() :
+                               vm.UserType == "Owner" ? Roles.Owner.ToString() : 
+                               Roles.Client.ToString();
 
             var request = new RegisterRequest
             {

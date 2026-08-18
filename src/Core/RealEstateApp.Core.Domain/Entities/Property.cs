@@ -21,9 +21,24 @@ namespace RealEstateApp.Core.Domain.Entities
         public double Longitude { get; set; }
         public string? VideoUrl { get; set; }
         public string? Tour360Url { get; set; }
+        public string? MatterportModelId { get; set; }
         public decimal MontoSeparacion { get; set; }
         public int PorcentajeInicialRequerido { get; set; }
         public bool IsFinanciable { get; set; } = false;
+
+        // Listados Destacados (Featured)
+        public bool IsFeatured { get; set; } = false;
+        public System.DateTime? FeaturedUntil { get; set; }
+
+        // Ubicación administrativa en República Dominicana
+        public int? ProvinceId { get; set; }
+        public Province? Province { get; set; }
+
+        public int? MunicipalityId { get; set; }
+        public Municipality? Municipality { get; set; }
+
+        public string? Sector { get; set; }
+        public string? FullAddress { get; set; }
 
         // Relaciones
         public int PropertyTypeId { get; set; }

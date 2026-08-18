@@ -26,6 +26,14 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         public int SaleTypeId { get; set; }
         public string SaleTypeName { get; set; } = string.Empty;
 
+        // Ubicación administrativa en RD
+        public int? ProvinceId { get; set; }
+        public string ProvinceName { get; set; } = string.Empty;
+        public int? MunicipalityId { get; set; }
+        public string MunicipalityName { get; set; } = string.Empty;
+        public string? Sector { get; set; }
+        public string? FullAddress { get; set; }
+
         // Datos del agente
         public string AgentId { get; set; } = string.Empty;
         public string AgentName { get; set; } = string.Empty;
@@ -35,11 +43,17 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         public double Longitude { get; set; }
         public string? VideoUrl { get; set; }
         public string? Tour360Url { get; set; }
+        public string? MatterportModelId { get; set; }
 
         // Campos financieros
         public decimal MontoSeparacion { get; set; }
         public int PorcentajeInicialRequerido { get; set; }
         public bool IsFinanciable { get; set; }
+
+        // Listados Destacados (Featured)
+        public bool IsFeatured { get; set; }
+        public System.DateTime? FeaturedUntil { get; set; }
+        public bool IsCurrentlyFeatured => IsFeatured && (!FeaturedUntil.HasValue || FeaturedUntil.Value > System.DateTime.UtcNow);
 
         // Listas resueltas
         public List<string> Images { get; set; } = new();

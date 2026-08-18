@@ -37,6 +37,7 @@
                         <th class="py-3">Precio</th>
                         <th class="py-3">Agente Asignado</th>
                         <th class="py-3">Estado</th>
+                        <th class="py-3">Destacado</th>
                         <th class="py-3 px-4 text-end">Acciones</th>
                     </tr>
                 </thead>
@@ -67,6 +68,24 @@
                                 {
                                     <span class="badge bg-danger px-3 py-2 rounded-pill"><i class="bi bi-tag-fill me-1"></i> Vendida</span>
                                 }
+                            </td>
+                            <td>
+                                <form asp-action="ToggleFeatured" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="propertyId" value="@property.Id" />
+                                    @if (property.IsCurrentlyFeatured)
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-warning text-dark font-heading fw-bold rounded-pill px-3 shadow-sm" title="Clic para quitar de destacados">
+                                            <i class="bi bi-star-fill me-1"></i> Destacado
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary font-heading rounded-pill px-3" title="Clic para destacar (30 días)">
+                                            <i class="bi bi-star me-1"></i> Destacar
+                                        </button>
+                                    }
+                                </form>
                             </td>
                             <td class="py-3 px-4 text-end">
                                 <div class="d-inline-flex gap-2 align-items-center">

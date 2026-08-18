@@ -48,6 +48,19 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         [Display(Name = "Agente")]
         public string? AgentId { get; set; }
 
+        [Display(Name = "Provincia")]
+        public int? ProvinceId { get; set; }
+
+        [Display(Name = "Municipio")]
+        public int? MunicipalityId { get; set; }
+
+        [StringLength(100, ErrorMessage = "El sector no puede exceder 100 caracteres")]
+        [Display(Name = "Sector / Barrio")]
+        public string? Sector { get; set; }
+
+        [Display(Name = "Solo Listados Destacados")]
+        public bool? OnlyFeatured { get; set; }
+
         [Range(1, int.MaxValue, ErrorMessage = "El número de página debe ser mayor o igual a 1")]
         [Display(Name = "Número de Página")]
         public int? PageNumber { get; set; }
@@ -68,5 +81,21 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         // ---- Datos auxiliares para poblar los dropdowns ----
         public List<PropertyTypeViewModel>? PropertyTypes { get; set; }
         public List<SaleTypeViewModel>? SaleTypes { get; set; }
+        public List<ProvinceDropdownViewModel>? Provinces { get; set; }
+        public List<MunicipalityDropdownViewModel>? Municipalities { get; set; }
+    }
+
+    public class ProvinceDropdownViewModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string IsoCode { get; set; } = string.Empty;
+    }
+
+    public class MunicipalityDropdownViewModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public int ProvinceId { get; set; }
     }
 }

@@ -136,6 +136,11 @@
                                                 <i class="bi bi-shield-lock text-warning"></i> Administradores
                                             </a>
                                         </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Admin" asp-action="Verifications">
+                                                <i class="bi bi-patch-check-fill text-primary"></i> Verificaciones de Agentes
+                                            </a>
+                                        </li>
                                     }
 
                                     @if (User.IsInRole("Agent"))
@@ -155,6 +160,32 @@
                                         <li>
                                             <a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Appointments" asp-action="AgentCalendar">
                                                 <i class="bi bi-calendar3 text-info"></i> Agenda de Citas
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Agent" asp-action="Verification">
+                                                <i class="bi bi-patch-check text-primary"></i> Verificación de Identidad
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Agent" asp-action="Subscriptions">
+                                                <i class="bi bi-gem text-warning"></i> Mi Plan de Suscripción
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @if (User.IsInRole("Owner"))
+                                    {
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header text-primary fw-bold">Panel de Propietario Directo</h6></li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Owner" asp-action="Index">
+                                                <i class="bi bi-house-door text-primary"></i> Mis Inmuebles
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Owner" asp-action="CreateProperty">
+                                                <i class="bi bi-plus-circle text-success"></i> Publicar Mi Inmueble
                                             </a>
                                         </li>
                                     }

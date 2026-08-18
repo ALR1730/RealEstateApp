@@ -23,6 +23,8 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
             return await _dbContext.Set<Property>()
                 .Include(p => p.PropertyType)
                 .Include(p => p.SaleType)
+                .Include(p => p.Province)
+                .Include(p => p.Municipality)
                 .Include(p => p.Images)
                 .Include(p => p.PropertyImprovements!)
                     .ThenInclude(pi => pi.Improvement)
@@ -39,6 +41,8 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
             return await _dbContext.Set<Property>()
                 .Include(p => p.PropertyType)
                 .Include(p => p.SaleType)
+                .Include(p => p.Province)
+                .Include(p => p.Municipality)
                 .Include(p => p.Images)
                 .Include(p => p.PropertyImprovements!)
                     .ThenInclude(pi => pi.Improvement)
@@ -56,6 +60,8 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
             var query = _dbContext.Set<Property>()
                 .Include(p => p.PropertyType)
                 .Include(p => p.SaleType)
+                .Include(p => p.Province)
+                .Include(p => p.Municipality)
                 .Include(p => p.Images)
                 .Include(p => p.PropertyImprovements!)
                     .ThenInclude(pi => pi.Improvement)
@@ -75,6 +81,21 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
             if (filters.SaleTypeId.HasValue)
             {
                 query = query.Where(p => p.SaleTypeId == filters.SaleTypeId.Value);
+            }
+
+            if (filters.ProvinceId.HasValue)
+            {
+                query = query.Where(p => p.ProvinceId == filters.ProvinceId.Value);
+            }
+
+            if (filters.MunicipalityId.HasValue)
+            {
+                query = query.Where(p => p.MunicipalityId == filters.MunicipalityId.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filters.Sector))
+            {
+                query = query.Where(p => p.Sector != null && p.Sector.Contains(filters.Sector));
             }
 
             if (filters.MinPrice.HasValue)
@@ -112,7 +133,16 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 query = query.Where(p => p.AgentId == filters.AgentId);
             }
 
-            query = query.OrderByDescending(p => p.Created);
+            if (filters.OnlyFeatured == true)
+            {
+                var now = DateTime.UtcNow;
+                query = query.Where(p => p.IsFeatured && (!p.FeaturedUntil.HasValue || p.FeaturedUntil > now));
+            }
+
+            var currentUtc = DateTime.UtcNow;
+            query = query
+                .OrderByDescending(p => p.IsFeatured && (!p.FeaturedUntil.HasValue || p.FeaturedUntil > currentUtc))
+                .ThenByDescending(p => p.Created);
 
             if (filters.PageNumber.HasValue && filters.PageSize.HasValue)
             {
@@ -132,6 +162,8 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
             return await _dbContext.Set<Property>()
                 .Include(p => p.PropertyType)
                 .Include(p => p.SaleType)
+                .Include(p => p.Province)
+                .Include(p => p.Municipality)
                 .Include(p => p.Images)
                 .Include(p => p.PropertyImprovements!)
                     .ThenInclude(pi => pi.Improvement)
@@ -149,6 +181,8 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
             return await _dbContext.Set<Property>()
                 .Include(p => p.PropertyType)
                 .Include(p => p.SaleType)
+                .Include(p => p.Province)
+                .Include(p => p.Municipality)
                 .Include(p => p.Images)
                 .Include(p => p.PropertyImprovements!)
                     .ThenInclude(pi => pi.Improvement)

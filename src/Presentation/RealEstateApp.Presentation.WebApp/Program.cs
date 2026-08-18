@@ -115,6 +115,8 @@ using (var scope = app.Services.CreateScope())
             await DefaultAgentUser.SeedAsync(userManager);
             await DefaultClientUser.SeedAsync(userManager);
             await DefaultDeveloperUser.SeedAsync(userManager);
+            await DefaultSubscriptionPlans.SeedAsync(dbContext);
+            await DefaultDominicanProvinces.SeedAsync(dbContext);
             await DefaultRealEstateData.SeedAsync(dbContext, userManager);
         }
     }

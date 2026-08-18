@@ -33,6 +33,17 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
         public DbSet<UserActivity> UserActivities { get; set; } = null!;
         public DbSet<Notification> Notifications { get; set; } = null!;
         public DbSet<PropertyAppointment> PropertyAppointments { get; set; } = null!;
+        public DbSet<Province> Provinces { get; set; } = null!;
+        public DbSet<Municipality> Municipalities { get; set; } = null!;
+        public DbSet<AgentVerification> AgentVerifications { get; set; } = null!;
+        public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; } = null!;
+        public DbSet<AgentSubscription> AgentSubscriptions { get; set; } = null!;
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -86,6 +97,9 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                 entity.Property(p => p.Description)
                     .HasMaxLength(2000);
 
+                entity.Property(p => p.MatterportModelId)
+                    .HasMaxLength(50);
+
                 entity.Property(p => p.Status)
                     .HasMaxLength(20)
                     .HasDefaultValue(PropertyStatus.Available);
@@ -93,6 +107,15 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                 entity.Property(p => p.AgentId)
                     .IsRequired()
                     .HasMaxLength(450); // Coincide con la longitud del Id de IdentityUser
+
+                entity.Property(p => p.Sector)
+                    .HasMaxLength(100);
+
+                entity.Property(p => p.FullAddress)
+                    .HasMaxLength(300);
+
+                entity.Property(p => p.IsFeatured)
+                    .HasDefaultValue(false);
 
                 // Relación uno a muchos con PropertyType
                 entity.HasOne(p => p.PropertyType)
@@ -104,6 +127,58 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                 entity.HasOne(p => p.SaleType)
                     .WithMany(st => st.Properties)
                     .HasForeignKey(p => p.SaleTypeId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Relación con Provincia
+                entity.HasOne(p => p.Province)
+                    .WithMany(prov => prov.Properties)
+                    .HasForeignKey(p => p.ProvinceId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                // Relación con Municipio
+                entity.HasOne(p => p.Municipality)
+                    .WithMany(mun => mun.Properties)
+                    .HasForeignKey(p => p.MunicipalityId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            #endregion
+
+            #region Province
+
+            modelBuilder.Entity<Province>(entity =>
+            {
+                entity.ToTable("Provinces");
+                entity.HasKey(p => p.Id);
+
+                entity.Property(p => p.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(p => p.IsoCode)
+                    .IsRequired()
+                    .HasMaxLength(10);
+
+                entity.HasIndex(p => p.IsoCode)
+                    .IsUnique();
+            });
+
+            #endregion
+
+            #region Municipality
+
+            modelBuilder.Entity<Municipality>(entity =>
+            {
+                entity.ToTable("Municipalities");
+                entity.HasKey(m => m.Id);
+
+                entity.Property(m => m.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.HasOne(m => m.Province)
+                    .WithMany(p => p.Municipalities)
+                    .HasForeignKey(m => m.ProvinceId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
@@ -336,6 +411,85 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                     .WithMany(p => p.Appointments)
                     .HasForeignKey(pa => pa.PropertyId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            #endregion
+
+            #region AgentVerification
+
+            modelBuilder.Entity<AgentVerification>(entity =>
+            {
+                entity.ToTable("AgentVerifications");
+                entity.HasKey(v => v.Id);
+
+                entity.Property(v => v.AgentId)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                entity.HasIndex(v => v.AgentId)
+                    .IsUnique();
+
+                entity.Property(v => v.Cedula)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
+                entity.Property(v => v.CedulaFrontImageUrl)
+                    .HasMaxLength(500);
+
+                entity.Property(v => v.CedulaBackImageUrl)
+                    .HasMaxLength(500);
+
+                entity.Property(v => v.Status)
+                    .IsRequired()
+                    .HasMaxLength(30)
+                    .HasDefaultValue(VerificationStatus.Pending);
+
+                entity.Property(v => v.RejectionReason)
+                    .HasMaxLength(1000);
+
+                entity.Property(v => v.ReviewedByAdminId)
+                    .HasMaxLength(450);
+            });
+
+            #endregion
+
+            #region SubscriptionPlan
+
+            modelBuilder.Entity<SubscriptionPlan>(entity =>
+            {
+                entity.ToTable("SubscriptionPlans");
+                entity.HasKey(p => p.Id);
+
+                entity.Property(p => p.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(p => p.Description)
+                    .HasMaxLength(500);
+
+                entity.Property(p => p.MonthlyPrice)
+                    .HasColumnType("decimal(18,2)");
+            });
+
+            #endregion
+
+            #region AgentSubscription
+
+            modelBuilder.Entity<AgentSubscription>(entity =>
+            {
+                entity.ToTable("AgentSubscriptions");
+                entity.HasKey(s => s.Id);
+
+                entity.Property(s => s.AgentId)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                entity.HasIndex(s => s.AgentId);
+
+                entity.HasOne(s => s.SubscriptionPlan)
+                    .WithMany(p => p.Subscriptions)
+                    .HasForeignKey(s => s.SubscriptionPlanId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             #endregion

@@ -20,17 +20,20 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         private readonly IAgentService _agentService;
         private readonly IPropertyService _propertyService;
         private readonly IAccountService _accountService;
+        private readonly IAgentVerificationService _verificationService;
         private readonly UserManager<IdentityUser> _userManager;
 
         public AdminController(
             IAgentService agentService,
             IPropertyService propertyService,
             IAccountService accountService,
+            IAgentVerificationService verificationService,
             UserManager<IdentityUser> userManager)
         {
             _agentService = agentService;
             _propertyService = propertyService;
             _accountService = accountService;
+            _verificationService = verificationService;
             _userManager = userManager;
         }
 
@@ -454,6 +457,72 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 vm.Agents = agents.Where(a => a.IsActive).ToList();
                 return View(vm);
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Verifications()
+        {
+            var list = await _verificationService.GetAllAsync();
+            return View(list);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveVerification(int id)
+        {
+            var adminId = _userManager.GetUserId(User) ?? "Admin";
+            var success = await _verificationService.ReviewVerificationAsync(id, true, null, adminId);
+            if (success)
+            {
+                TempData["SuccessMessage"] = "Verificación de agente APROBADA exitosamente. Ahora exhibirá la insignia de Agente Verificado.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "No se pudo procesar la aprobación de la verificación.";
+            }
+
+            return RedirectToAction(nameof(Verifications));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectVerification(int id, string rejectionReason)
+        {
+            if (string.IsNullOrWhiteSpace(rejectionReason))
+            {
+                TempData["ErrorMessage"] = "Debe indicar el motivo del rechazo para orientar al agente.";
+                return RedirectToAction(nameof(Verifications));
+            }
+
+            var adminId = _userManager.GetUserId(User) ?? "Admin";
+            var success = await _verificationService.ReviewVerificationAsync(id, false, rejectionReason, adminId);
+            if (success)
+            {
+                TempData["SuccessMessage"] = "La solicitud de verificación ha sido marcada como RECHAZADA.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "No se pudo procesar el rechazo de la verificación.";
+            }
+
+            return RedirectToAction(nameof(Verifications));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleFeatured(int propertyId, int durationDays = 30)
+        {
+            try
+            {
+                await _propertyService.ToggleFeaturedAsync(propertyId, durationDays);
+                TempData["SuccessMessage"] = "El estado de Listado Destacado ha sido actualizado exitosamente.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error al modificar el estado destacado: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Properties));
         }
     }
 }

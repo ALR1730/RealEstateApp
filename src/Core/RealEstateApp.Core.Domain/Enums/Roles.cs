@@ -5,6 +5,7 @@ namespace RealEstateApp.Core.Domain.Enums
         Admin,
         Agent,
         Client,
-        Developer
+        Developer,
+        Owner
     }
 }

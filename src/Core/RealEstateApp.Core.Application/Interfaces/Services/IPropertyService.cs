@@ -37,5 +37,10 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         /// Reasigna una propiedad a un nuevo agente.
         /// </summary>
         Task ReassignAgent(int propertyId, string newAgentId);
+
+        /// <summary>
+        /// Alterna el estado de propiedad destacada (Featured) por una cantidad de días.
+        /// </summary>
+        Task ToggleFeaturedAsync(int propertyId, int durationDays = 30);
     }
 }

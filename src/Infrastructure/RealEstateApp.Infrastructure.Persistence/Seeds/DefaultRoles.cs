@@ -23,6 +23,9 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
 
             if (!await roleManager.RoleExistsAsync(Roles.Developer.ToString()))
                 await roleManager.CreateAsync(new IdentityRole(Roles.Developer.ToString()));
+
+            if (!await roleManager.RoleExistsAsync(Roles.Owner.ToString()))
+                await roleManager.CreateAsync(new IdentityRole(Roles.Owner.ToString()));
         }
     }
 }

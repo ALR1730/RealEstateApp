@@ -1,0 +1,1187 @@
+# 🚀 Plan de Implementación — Fase 1: Paridad Competitiva con Corotos
+
+> **Objetivo**: Igualar las funcionalidades del competidor local más directo (Corotos) en el mercado dominicano  
+> **Estimación total**: 4-6 semanas  
+> **Referencia**: [competitive_analysis_report.md](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/competitive_analysis_report.md) — Sección 6, Fase 1
+
+---
+
+## 📋 Orden de Implementación (por dependencias)
+
+```mermaid
+graph LR
+    S3[1.3 Matterport 3D] --> S1[1.1 Filtros Provincia/Sector]
+    S1 --> S2[1.2 Verificación Identidad]
+    S2 --> S6[1.6 Listados Destacados]
+    S6 --> S5[1.5 Planes Suscripción]
+    S5 --> S4[1.4 Publicación Propietarios]
+
+    style S3 fill:#4CAF50,color:#fff
+    style S1 fill:#2196F3,color:#fff
+    style S2 fill:#FF9800,color:#fff
+    style S6 fill:#9C27B0,color:#fff
+    style S5 fill:#F44336,color:#fff
+    style S4 fill:#795548,color:#fff
+```
+
+> [!IMPORTANT]
+> Las subfases 1.5 y 1.6 están interconectadas (los listados destacados dependen de los planes de suscripción). La subfase 1.4 depende de 1.5 para aplicar límites de publicación por plan.
+
+---
+
+## 🟢 SUBFASE 1.3 — Integración Matterport 3D Tours
+
+> **Esfuerzo**: 🟢 Bajo (2-4 horas)  
+> **Dependencias**: Ninguna  
+> **Prioridad**: Empezar aquí por ser la más simple
+
+### Descripción
+Permitir que los agentes introduzcan un ID de modelo Matterport para que los compradores puedan recorrer la propiedad en 3D desde la página de detalles. Matterport provee un `<iframe>` embebible con el formato `https://my.matterport.com/show/?m={MODEL_ID}`.
+
+### Cambios por Capa
+
+---
+
+#### 🔴 Domain Layer
+
+##### [MODIFY] [Property.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Entities/Property.cs)
+**Agregar después de la línea 23** (`Tour360Url`):
+```csharp
+/// <summary>
+/// ID del modelo Matterport para tours 3D inmersivos.
+/// Ejemplo: "SxQL3iGyoDo" (se extrae de la URL https://my.matterport.com/show/?m=SxQL3iGyoDo)
+/// </summary>
+public string? MatterportModelId { get; set; }
+```
+
+---
+
+#### 🟡 Application Layer
+
+##### [MODIFY] [SavePropertyViewModel.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/ViewModels/Property/SavePropertyViewModel.cs)
+**Agregar después de la línea 85** (campo `Tour360Url`):
+```csharp
+[StringLength(50, ErrorMessage = "El ID de Matterport no puede exceder 50 caracteres")]
+[RegularExpression(@"^[a-zA-Z0-9_-]+$", ErrorMessage = "El ID de Matterport solo puede contener letras, números, guiones y guiones bajos")]
+[Display(Name = "ID del Modelo Matterport (Tour 3D)")]
+public string? MatterportModelId { get; set; }
+```
+
+##### [MODIFY] [PropertyViewModel.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/ViewModels/Property/PropertyViewModel.cs)
+**Agregar después de la línea 37** (campo `Tour360Url`):
+```csharp
+public string? MatterportModelId { get; set; }
+```
+
+##### [MODIFY] [GeneralProfile.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Mappings/GeneralProfile.cs)
+> ℹ️ **No se requieren cambios** — AutoMapper mapea automáticamente propiedades con el mismo nombre (`MatterportModelId` → `MatterportModelId`). Los mappings existentes de `Property ↔ PropertyViewModel` y `Property ↔ SavePropertyViewModel` cubren este campo.
+
+##### [MODIFY] [PropertyService.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Services/PropertyService.cs)
+**En el método `Update()` (línea ~130)**, agregar después de `property.Tour360Url = vm.Tour360Url;`:
+```csharp
+property.MatterportModelId = vm.MatterportModelId;
+```
+
+---
+
+#### 🔵 Infrastructure Layer
+
+##### [MODIFY] [ApplicationDbContext.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Contexts/ApplicationDbContext.cs)
+**En la región `#region Property`**, agregar dentro del bloque `modelBuilder.Entity<Property>()` (después de la configuración de `VideoUrl` aprox.):
+```csharp
+entity.Property(p => p.MatterportModelId)
+    .HasMaxLength(50);
+```
+
+---
+
+#### 🟣 Presentation Layer (WebApp)
+
+##### [MODIFY] Formularios del Agente
+En [Views/Agent/CreateProperty.cshtml](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Agent) y [EditProperty.cshtml](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Agent):
+
+Agregar campo de input en la sección de multimedia (después de Tour 360°):
+```html
+<div class="mb-3">
+    <label asp-for="MatterportModelId" class="form-label">
+        <i class="bi bi-badge-3d"></i> ID del Modelo Matterport (Tour 3D)
+    </label>
+    <input asp-for="MatterportModelId" class="form-control"
+           placeholder="Ej: SxQL3iGyoDo (obtenido de my.matterport.com)" />
+    <span asp-validation-for="MatterportModelId" class="text-danger"></span>
+    <small class="form-text text-muted">
+        Pegue solo el ID del modelo. Ejemplo: si la URL es 
+        <code>https://my.matterport.com/show/?m=SxQL3iGyoDo</code>, 
+        el ID es <code>SxQL3iGyoDo</code>
+    </small>
+</div>
+```
+
+##### [MODIFY] Vista de Detalles
+En [Views/Home/Details.cshtml](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Views/Home):
+
+Agregar sección de Matterport (después de la galería de imágenes o del tour 360°):
+```html
+@if (!string.IsNullOrWhiteSpace(Model.MatterportModelId))
+{
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-badge-3d"></i> Recorrido Virtual 3D (Matterport)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="ratio ratio-16x9">
+                <iframe 
+                    src="https://my.matterport.com/show/?m=@Model.MatterportModelId&play=1&qs=1"
+                    frameborder="0" 
+                    allowfullscreen 
+                    allow="xr-spatial-tracking"
+                    loading="lazy"
+                    title="Tour 3D Matterport - @Model.Name">
+                </iframe>
+            </div>
+        </div>
+    </div>
+}
+```
+
+---
+
+### ✅ Criterios de Aceptación — Subfase 1.3
+
+- [ ] El agente puede introducir un Matterport Model ID al crear/editar una propiedad
+- [ ] La vista de detalles muestra un iframe embebido con el visor 3D cuando el ID existe
+- [ ] El visor es responsive (se adapta a `ratio-16x9`)
+- [ ] Si no hay ID, no se muestra la sección (sin errores ni frames vacíos)
+- [ ] La validación regex impide inyección de caracteres especiales en el ID
+- [ ] El campo se persiste correctamente en BD y se recupera al editar
+
+### 📦 Migración
+```powershell
+dotnet ef migrations add AddMatterportModelIdToProperty --project src/Infrastructure/RealEstateApp.Infrastructure.Persistence --startup-project src/Presentation/RealEstateApp.Presentation.WebApp
+dotnet ef database update --project src/Infrastructure/RealEstateApp.Infrastructure.Persistence --startup-project src/Presentation/RealEstateApp.Presentation.WebApp
+```
+
+---
+---
+
+## 🔵 SUBFASE 1.1 — Filtros por Provincia/Sector de República Dominicana
+
+> **Esfuerzo**: 🟡 Medio (1-2 días)  
+> **Dependencias**: Ninguna  
+> **Impacto**: 🔴 ALTO — Tu competidor directo (Corotos) ya tiene filtros por región
+
+### Descripción
+Agregar un sistema de ubicación estructurado basado en la división territorial de República Dominicana: **Provincia → Municipio → Sector**. Los compradores podrán filtrar propiedades por ubicación geográfica administrativa (no solo por coordenadas GPS).
+
+### Cambios por Capa
+
+---
+
+#### 🔴 Domain Layer
+
+##### [NEW] [Province.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Entities/Province.cs)
+```csharp
+using System.Collections.Generic;
+using RealEstateApp.Core.Domain.Common;
+
+namespace RealEstateApp.Core.Domain.Entities
+{
+    /// <summary>
+    /// Provincia de República Dominicana (32 provincias + Distrito Nacional).
+    /// Código ISO 3166-2:DO para identificación estándar.
+    /// </summary>
+    public class Province : AuditableBaseEntity
+    {
+        public string Name { get; set; } = string.Empty;
+        public string IsoCode { get; set; } = string.Empty; // Ej: "DO-01" para Distrito Nacional
+        public ICollection<Municipality>? Municipalities { get; set; }
+        public ICollection<Property>? Properties { get; set; }
+    }
+}
+```
+
+##### [NEW] [Municipality.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Entities/Municipality.cs)
+```csharp
+using System.Collections.Generic;
+using RealEstateApp.Core.Domain.Common;
+
+namespace RealEstateApp.Core.Domain.Entities
+{
+    /// <summary>
+    /// Municipio perteneciente a una provincia de RD.
+    /// Tabla de lookup para filtros cascada Province → Municipality.
+    /// </summary>
+    public class Municipality : AuditableBaseEntity
+    {
+        public string Name { get; set; } = string.Empty;
+        
+        public int ProvinceId { get; set; }
+        public Province? Province { get; set; }
+        
+        public ICollection<Property>? Properties { get; set; }
+    }
+}
+```
+
+##### [MODIFY] [Property.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Entities/Property.cs)
+**Agregar después de la línea 26** (`IsFinanciable`):
+```csharp
+// Ubicación administrativa (División territorial de RD)
+public int? ProvinceId { get; set; }
+public Province? Province { get; set; }
+
+public int? MunicipalityId { get; set; }
+public Municipality? Municipality { get; set; }
+
+/// <summary>
+/// Sector o barrio dentro del municipio. Campo de texto libre.
+/// Ejemplo: "Piantini", "Bella Vista", "Los Jardines".
+/// </summary>
+public string? Sector { get; set; }
+
+/// <summary>
+/// Dirección completa del inmueble (calle, número, referencia).
+/// </summary>
+public string? FullAddress { get; set; }
+```
+
+---
+
+#### 🟡 Application Layer
+
+##### [MODIFY] [PropertyFilterViewModel.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/ViewModels/Property/PropertyFilterViewModel.cs)
+**Agregar después de la línea 49** (campo `AgentId`):
+```csharp
+[Display(Name = "Provincia")]
+public int? ProvinceId { get; set; }
+
+[Display(Name = "Municipio")]
+public int? MunicipalityId { get; set; }
+
+[StringLength(100)]
+[Display(Name = "Sector/Barrio")]
+public string? Sector { get; set; }
+
+// ---- Datos auxiliares para poblar dropdowns de ubicación ----
+public List<ProvinceDropdownViewModel>? Provinces { get; set; }
+```
+
+Y agregar la clase auxiliar al final del archivo o en archivo separado:
+```csharp
+public class ProvinceDropdownViewModel
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+}
+```
+
+##### [MODIFY] [PropertyViewModel.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/ViewModels/Property/PropertyViewModel.cs)
+**Agregar después de la línea 28** (campos del agente):
+```csharp
+// Ubicación administrativa
+public int? ProvinceId { get; set; }
+public string ProvinceName { get; set; } = string.Empty;
+public int? MunicipalityId { get; set; }
+public string MunicipalityName { get; set; } = string.Empty;
+public string? Sector { get; set; }
+public string? FullAddress { get; set; }
+```
+
+##### [MODIFY] [SavePropertyViewModel.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/ViewModels/Property/SavePropertyViewModel.cs)
+**Agregar después de la línea 65** (campo `SaleTypeId`):
+```csharp
+[Display(Name = "Provincia")]
+public int? ProvinceId { get; set; }
+
+[Display(Name = "Municipio")]
+public int? MunicipalityId { get; set; }
+
+[StringLength(100, ErrorMessage = "El sector no puede exceder 100 caracteres")]
+[Display(Name = "Sector / Barrio")]
+public string? Sector { get; set; }
+
+[StringLength(300, ErrorMessage = "La dirección no puede exceder 300 caracteres")]
+[Display(Name = "Dirección Completa")]
+public string? FullAddress { get; set; }
+```
+
+Y agregar al final las listas auxiliares para poblar los dropdowns:
+```csharp
+/// <summary>
+/// Lista de provincias para el dropdown de ubicación.
+/// </summary>
+public List<ProvinceDropdownViewModel>? Provinces { get; set; }
+
+/// <summary>
+/// Lista de municipios filtrados por la provincia seleccionada.
+/// </summary>
+public List<MunicipalityDropdownViewModel>? Municipalities { get; set; }
+```
+
+Y las clases auxiliares:
+```csharp
+public class MunicipalityDropdownViewModel
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public int ProvinceId { get; set; }
+}
+```
+
+##### [NEW] [IProvinceRepository.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Interfaces/Repositories/IProvinceRepository.cs)
+```csharp
+using RealEstateApp.Core.Domain.Entities;
+
+namespace RealEstateApp.Core.Application.Interfaces.Repositories
+{
+    public interface IProvinceRepository : IGenericRepository<Province>
+    {
+        Task<List<Province>> GetAllWithMunicipalitiesAsync();
+    }
+}
+```
+
+##### [NEW] [IMunicipalityRepository.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Interfaces/Repositories/IMunicipalityRepository.cs)
+```csharp
+using RealEstateApp.Core.Domain.Entities;
+
+namespace RealEstateApp.Core.Application.Interfaces.Repositories
+{
+    public interface IMunicipalityRepository : IGenericRepository<Municipality>
+    {
+        Task<List<Municipality>> GetByProvinceIdAsync(int provinceId);
+    }
+}
+```
+
+##### [MODIFY] [GeneralProfile.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Mappings/GeneralProfile.cs)
+**En el mapping `Property → PropertyViewModel`** (línea ~29), agregar:
+```csharp
+.ForMember(dest => dest.ProvinceName, opt => opt.MapFrom(src => src.Province != null ? src.Province.Name : string.Empty))
+.ForMember(dest => dest.MunicipalityName, opt => opt.MapFrom(src => src.Municipality != null ? src.Municipality.Name : string.Empty))
+```
+
+##### [MODIFY] [PropertyService.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Services/PropertyService.cs)
+**En el método `Update()`**, agregar después de las asignaciones existentes:
+```csharp
+property.ProvinceId = vm.ProvinceId;
+property.MunicipalityId = vm.MunicipalityId;
+property.Sector = vm.Sector;
+property.FullAddress = vm.FullAddress;
+```
+
+---
+
+#### 🔵 Infrastructure.Persistence Layer
+
+##### [MODIFY] [ApplicationDbContext.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Contexts/ApplicationDbContext.cs)
+**Agregar nuevos DbSets** (después de línea 35):
+```csharp
+public DbSet<Province> Provinces { get; set; } = null!;
+public DbSet<Municipality> Municipalities { get; set; } = null!;
+```
+
+**Agregar nuevas regiones en `OnModelCreating`** (antes de `#endregion Property` o después):
+
+```csharp
+#region Province
+
+modelBuilder.Entity<Province>(entity =>
+{
+    entity.ToTable("Provinces");
+    entity.HasKey(p => p.Id);
+    entity.Property(p => p.Name).IsRequired().HasMaxLength(100);
+    entity.Property(p => p.IsoCode).IsRequired().HasMaxLength(10);
+    entity.HasIndex(p => p.IsoCode).IsUnique();
+});
+
+#endregion
+
+#region Municipality
+
+modelBuilder.Entity<Municipality>(entity =>
+{
+    entity.ToTable("Municipalities");
+    entity.HasKey(m => m.Id);
+    entity.Property(m => m.Name).IsRequired().HasMaxLength(100);
+    
+    entity.HasOne(m => m.Province)
+        .WithMany(p => p.Municipalities)
+        .HasForeignKey(m => m.ProvinceId)
+        .OnDelete(DeleteBehavior.Restrict);
+});
+
+#endregion
+```
+
+**Dentro de la configuración de `Property`**, agregar las FK de ubicación:
+```csharp
+entity.Property(p => p.Sector).HasMaxLength(100);
+entity.Property(p => p.FullAddress).HasMaxLength(300);
+
+entity.HasOne(p => p.Province)
+    .WithMany(prov => prov.Properties)
+    .HasForeignKey(p => p.ProvinceId)
+    .OnDelete(DeleteBehavior.SetNull);
+
+entity.HasOne(p => p.Municipality)
+    .WithMany(mun => mun.Properties)
+    .HasForeignKey(p => p.MunicipalityId)
+    .OnDelete(DeleteBehavior.SetNull);
+```
+
+##### [NEW] [ProvinceRepository.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/ProvinceRepository.cs)
+```csharp
+using Microsoft.EntityFrameworkCore;
+using RealEstateApp.Core.Application.Interfaces.Repositories;
+using RealEstateApp.Core.Domain.Entities;
+using RealEstateApp.Infrastructure.Persistence.Contexts;
+
+namespace RealEstateApp.Infrastructure.Persistence.Repositories
+{
+    public class ProvinceRepository : GenericRepository<Province>, IProvinceRepository
+    {
+        public ProvinceRepository(ApplicationDbContext dbContext) : base(dbContext) { }
+
+        public async Task<List<Province>> GetAllWithMunicipalitiesAsync()
+        {
+            return await _dbContext.Set<Province>()
+                .Include(p => p.Municipalities)
+                .OrderBy(p => p.Name)
+                .ToListAsync();
+        }
+    }
+}
+```
+
+##### [NEW] [MunicipalityRepository.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/MunicipalityRepository.cs)
+```csharp
+using Microsoft.EntityFrameworkCore;
+using RealEstateApp.Core.Application.Interfaces.Repositories;
+using RealEstateApp.Core.Domain.Entities;
+using RealEstateApp.Infrastructure.Persistence.Contexts;
+
+namespace RealEstateApp.Infrastructure.Persistence.Repositories
+{
+    public class MunicipalityRepository : GenericRepository<Municipality>, IMunicipalityRepository
+    {
+        public MunicipalityRepository(ApplicationDbContext dbContext) : base(dbContext) { }
+
+        public async Task<List<Municipality>> GetByProvinceIdAsync(int provinceId)
+        {
+            return await _dbContext.Set<Municipality>()
+                .Where(m => m.ProvinceId == provinceId)
+                .OrderBy(m => m.Name)
+                .ToListAsync();
+        }
+    }
+}
+```
+
+##### [MODIFY] [PropertyRepository.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/PropertyRepository.cs)
+**En `GetWithFiltersAsync()`**, agregar `.Include` de Province y Municipality a todas las queries:
+```csharp
+.Include(p => p.Province)
+.Include(p => p.Municipality)
+```
+
+**Agregar filtros** en `GetWithFiltersAsync()` (después de la línea ~113):
+```csharp
+if (filters.ProvinceId.HasValue)
+{
+    query = query.Where(p => p.ProvinceId == filters.ProvinceId.Value);
+}
+
+if (filters.MunicipalityId.HasValue)
+{
+    query = query.Where(p => p.MunicipalityId == filters.MunicipalityId.Value);
+}
+
+if (!string.IsNullOrWhiteSpace(filters.Sector))
+{
+    query = query.Where(p => p.Sector != null && p.Sector.Contains(filters.Sector));
+}
+```
+
+> [!WARNING]
+> También agregar `.Include(p => p.Province).Include(p => p.Municipality)` a los métodos `GetAllAsync()`, `GetByIdAsync()`, `GetByAgentIdAsync()` y `GetByCodeAsync()` para que las propiedades siempre traigan la información de ubicación.
+
+##### [MODIFY] [ServiceRegistration.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/ServiceRegistration.cs)
+**Agregar en la región `#region Repositories`** (línea ~85):
+```csharp
+services.AddScoped<IProvinceRepository, ProvinceRepository>();
+services.AddScoped<IMunicipalityRepository, MunicipalityRepository>();
+```
+
+##### [NEW] [DefaultDominicanProvinces.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Seeds/DefaultDominicanProvinces.cs)
+Archivo con semilla de las **32 provincias de RD + Distrito Nacional** y sus municipios principales. Incluir al menos:
+
+| Provincia | ISO Code | Municipios principales |
+|-----------|----------|----------------------|
+| Distrito Nacional | DO-01 | Santo Domingo de Guzmán |
+| Santo Domingo | DO-32 | Santo Domingo Este, Santo Domingo Norte, Santo Domingo Oeste, Boca Chica, Los Alcarrizos |
+| Santiago | DO-25 | Santiago de los Caballeros, Villa Bisonó, Puñal, San José de las Matas |
+| La Altagracia | DO-11 | Higüey, San Rafael del Yuma, Bayahíbe |
+| Puerto Plata | DO-18 | San Felipe de Puerto Plata, Sosúa, Cabarete, Luperón |
+| La Romana | DO-12 | La Romana, Villa Hermosa, Guaymate |
+| San Cristóbal | DO-21 | San Cristóbal, Bajos de Haina, Villa Altagracia |
+| Samaná | DO-20 | Santa Bárbara de Samaná, Las Terrenas, Sánchez |
+| La Vega | DO-13 | La Vega, Jarabacoa, Constanza |
+| San Pedro de Macorís | DO-23 | San Pedro de Macorís, Consuelo, Quisqueya |
+| *(+23 provincias restantes)* | ... | ... |
+
+---
+
+#### 🟣 Presentation Layer
+
+##### [MODIFY] [HomeController.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/HomeController.cs)
+**Inyectar `IProvinceRepository`** y en el método `Index()`, poblar el dropdown de provincias:
+```csharp
+var provinces = await _provinceRepository.GetAllAsync();
+filters.Provinces = provinces.Select(p => new ProvinceDropdownViewModel { Id = p.Id, Name = p.Name }).ToList();
+```
+
+**Agregar endpoint AJAX** para cargar municipios en cascada:
+```csharp
+[HttpGet]
+public async Task<IActionResult> GetMunicipalities(int provinceId)
+{
+    var municipalities = await _municipalityRepository.GetByProvinceIdAsync(provinceId);
+    return Json(municipalities.Select(m => new { m.Id, m.Name }));
+}
+```
+
+##### [MODIFY] [AgentController.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AgentController.cs)
+**En `PopulateDropdowns()`** (línea 129), agregar carga de provincias:
+```csharp
+var provinces = await _provinceRepository.GetAllAsync();
+vm.Provinces = provinces.Select(p => new ProvinceDropdownViewModel { Id = p.Id, Name = p.Name }).ToList();
+
+if (vm.ProvinceId.HasValue)
+{
+    var municipalities = await _municipalityRepository.GetByProvinceIdAsync(vm.ProvinceId.Value);
+    vm.Municipalities = municipalities.Select(m => new MunicipalityDropdownViewModel 
+    { 
+        Id = m.Id, Name = m.Name, ProvinceId = m.ProvinceId 
+    }).ToList();
+}
+```
+
+##### [MODIFY] Views (Home/Index, Agent/CreateProperty, Agent/EditProperty)
+- Agregar dropdown de **Provincia** con `<select>` poblado desde `Provinces`
+- Agregar dropdown de **Municipio** inicialmente vacío, poblado por AJAX al seleccionar provincia
+- Agregar input de texto para **Sector/Barrio**
+- JavaScript para cascada:
+```javascript
+document.getElementById('ProvinceId').addEventListener('change', async function() {
+    const provinceId = this.value;
+    const municipalitySelect = document.getElementById('MunicipalityId');
+    municipalitySelect.innerHTML = '<option value="">Cargando...</option>';
+    
+    if (!provinceId) {
+        municipalitySelect.innerHTML = '<option value="">-- Seleccione Municipio --</option>';
+        return;
+    }
+    
+    const response = await fetch(`/Home/GetMunicipalities?provinceId=${provinceId}`);
+    const municipalities = await response.json();
+    
+    municipalitySelect.innerHTML = '<option value="">-- Seleccione Municipio --</option>';
+    municipalities.forEach(m => {
+        municipalitySelect.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+    });
+});
+```
+
+---
+
+### ✅ Criterios de Aceptación — Subfase 1.1
+
+- [ ] El usuario puede filtrar propiedades seleccionando una **Provincia** del dropdown (33 opciones)
+- [ ] Al seleccionar provincia, el dropdown de **Municipio** se carga dinámicamente por AJAX
+- [ ] El usuario puede escribir un **Sector/Barrio** como texto libre para filtro adicional
+- [ ] El agente puede asignar Provincia/Municipio/Sector al crear o editar una propiedad
+- [ ] Las tarjetas de propiedad muestran la ubicación (Provincia - Municipio - Sector)
+- [ ] La base de datos contiene las 33 provincias de RD con sus municipios principales (mínimo 150 municipios)
+- [ ] Los filtros de ubicación se aplican a nivel de base de datos (no en memoria)
+- [ ] La API REST refleja los nuevos campos en los DTOs de propiedad
+- [ ] La migración se ejecuta limpiamente sin perder datos existentes
+- [ ] Las propiedades existentes (sin provincia) siguen mostrándose correctamente (campos nullable)
+
+---
+---
+
+## 🟠 SUBFASE 1.2 — Verificación de Identidad de Agentes
+
+> **Esfuerzo**: 🟡 Medio (1-2 días)  
+> **Dependencias**: Ninguna  
+> **Impacto**: Genera confianza. Corotos tiene "Cuenta Verificada"
+
+### Descripción
+Implementar un sistema donde los agentes puedan solicitar verificación de identidad subiendo documentos (cédula dominicana). El administrador revisa y aprueba/rechaza. Los agentes verificados muestran un badge azul en su perfil y en las tarjetas de propiedades.
+
+### Cambios por Capa
+
+---
+
+#### 🔴 Domain Layer
+
+##### [NEW] [Enums/VerificationStatus.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Enums/VerificationStatus.cs)
+```csharp
+namespace RealEstateApp.Core.Domain.Enums
+{
+    public enum VerificationStatus
+    {
+        NotSubmitted,  // No ha enviado documentos
+        Pending,       // Documentos enviados, esperando revisión
+        Verified,      // Identidad verificada por admin
+        Rejected       // Documentos rechazados (puede reintentar)
+    }
+}
+```
+
+##### [NEW] [Entities/AgentVerification.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Entities/AgentVerification.cs)
+```csharp
+using System;
+using RealEstateApp.Core.Domain.Common;
+using RealEstateApp.Core.Domain.Enums;
+
+namespace RealEstateApp.Core.Domain.Entities
+{
+    /// <summary>
+    /// Registro de verificación de identidad de un agente.
+    /// Un agente tiene exactamente una verificación (1:1 con UserId).
+    /// </summary>
+    public class AgentVerification : AuditableBaseEntity
+    {
+        public string AgentId { get; set; } = string.Empty;
+        public VerificationStatus Status { get; set; } = VerificationStatus.NotSubmitted;
+        
+        // Documentos subidos
+        public string? CedulaFrontUrl { get; set; }
+        public string? CedulaBackUrl { get; set; }
+        public string? SelfieUrl { get; set; } // Foto del agente sosteniendo la cédula
+        
+        // Datos extraídos de la cédula
+        public string? CedulaNumber { get; set; }
+        public string? FullLegalName { get; set; }
+        
+        // Revisión del admin
+        public string? ReviewedByAdminId { get; set; }
+        public DateTime? ReviewedAt { get; set; }
+        public string? RejectionReason { get; set; }
+        
+        // Fecha de verificación exitosa
+        public DateTime? VerifiedAt { get; set; }
+    }
+}
+```
+
+---
+
+#### 🟡 Application Layer
+
+##### [NEW] [ViewModels/Agent/SubmitVerificationViewModel.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/ViewModels/Agent/SubmitVerificationViewModel.cs)
+```csharp
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
+
+namespace RealEstateApp.Core.Application.ViewModels.Agent
+{
+    public class SubmitVerificationViewModel
+    {
+        [Required(ErrorMessage = "El número de cédula es requerido")]
+        [StringLength(13, MinimumLength = 11, ErrorMessage = "La cédula debe tener entre 11 y 13 caracteres")]
+        [Display(Name = "Número de Cédula")]
+        public string CedulaNumber { get; set; } = string.Empty;
+        
+        [Required(ErrorMessage = "El nombre legal completo es requerido")]
+        [StringLength(200)]
+        [Display(Name = "Nombre Legal Completo (como aparece en la cédula)")]
+        public string FullLegalName { get; set; } = string.Empty;
+        
+        [Required(ErrorMessage = "La foto frontal de la cédula es requerida")]
+        [Display(Name = "Foto de la Cédula (Frente)")]
+        public IFormFile CedulaFront { get; set; } = null!;
+        
+        [Required(ErrorMessage = "La foto posterior de la cédula es requerida")]
+        [Display(Name = "Foto de la Cédula (Reverso)")]
+        public IFormFile CedulaBack { get; set; } = null!;
+        
+        [Display(Name = "Selfie sosteniendo la cédula (opcional pero recomendado)")]
+        public IFormFile? Selfie { get; set; }
+    }
+}
+```
+
+##### [NEW] [ViewModels/Agent/AgentVerificationViewModel.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/ViewModels/Agent/AgentVerificationViewModel.cs)
+```csharp
+namespace RealEstateApp.Core.Application.ViewModels.Agent
+{
+    public class AgentVerificationViewModel
+    {
+        public int Id { get; set; }
+        public string AgentId { get; set; } = string.Empty;
+        public string AgentName { get; set; } = string.Empty;
+        public string AgentEmail { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string? CedulaFrontUrl { get; set; }
+        public string? CedulaBackUrl { get; set; }
+        public string? SelfieUrl { get; set; }
+        public string? CedulaNumber { get; set; }
+        public string? FullLegalName { get; set; }
+        public string? RejectionReason { get; set; }
+        public DateTime? SubmittedAt { get; set; }
+        public DateTime? ReviewedAt { get; set; }
+        public DateTime? VerifiedAt { get; set; }
+    }
+}
+```
+
+##### [NEW] [Interfaces/Services/IAgentVerificationService.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Interfaces/Services/IAgentVerificationService.cs)
+```csharp
+namespace RealEstateApp.Core.Application.Interfaces.Services
+{
+    public interface IAgentVerificationService
+    {
+        Task<AgentVerificationViewModel?> GetByAgentIdAsync(string agentId);
+        Task SubmitVerificationAsync(string agentId, SubmitVerificationViewModel vm);
+        Task ApproveVerificationAsync(int verificationId, string adminId);
+        Task RejectVerificationAsync(int verificationId, string adminId, string reason);
+        Task<List<AgentVerificationViewModel>> GetPendingVerificationsAsync();
+        Task<bool> IsVerifiedAsync(string agentId);
+    }
+}
+```
+
+##### [NEW] [Interfaces/Repositories/IAgentVerificationRepository.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Interfaces/Repositories/IAgentVerificationRepository.cs)
+```csharp
+namespace RealEstateApp.Core.Application.Interfaces.Repositories
+{
+    public interface IAgentVerificationRepository : IGenericRepository<AgentVerification>
+    {
+        Task<AgentVerification?> GetByAgentIdAsync(string agentId);
+        Task<List<AgentVerification>> GetByStatusAsync(VerificationStatus status);
+    }
+}
+```
+
+##### [NEW] [Services/AgentVerificationService.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Application/Services/AgentVerificationService.cs)
+Implementar las operaciones de submit, approve, reject, query usando `IAgentVerificationRepository` y `IFileStorageService` para subir los documentos.
+
+---
+
+#### 🔵 Infrastructure.Persistence
+
+- [MODIFY] **ApplicationDbContext** — Agregar `DbSet<AgentVerification>` y Fluent API
+- [NEW] **AgentVerificationRepository** — Implementar `GetByAgentIdAsync` y `GetByStatusAsync`
+- [MODIFY] **ServiceRegistration** — Registrar nuevo repositorio y servicio
+
+---
+
+#### 🟣 Presentation Layer
+
+- [MODIFY] **AgentController** — Agregar acciones `Verification()` (GET) y `SubmitVerification()` (POST)
+- [MODIFY] **AdminController** — Agregar `Verifications()`, `ApproveVerification(int id)`, `RejectVerification(int id, string reason)`
+- [NEW] **Views/Agent/Verification.cshtml** — Formulario de envío de documentos + estado actual
+- [NEW] **Views/Admin/Verifications.cshtml** — Lista de solicitudes pendientes con opción de aprobar/rechazar
+- [MODIFY] **Views parciales (cards de agente/propiedad)** — Mostrar badge verificado:
+
+```html
+@if (isVerified)
+{
+    <span class="badge bg-primary" title="Identidad Verificada">
+        <i class="bi bi-patch-check-fill"></i> Verificado
+    </span>
+}
+```
+
+---
+
+### ✅ Criterios de Aceptación — Subfase 1.2
+
+- [ ] El agente puede acceder a una sección "Verificación" donde ve su estado actual
+- [ ] El agente puede subir: foto frontal de cédula, foto reversa de cédula, selfie (opcional)
+- [ ] El agente introduce su número de cédula y nombre legal
+- [ ] El admin ve un listado de verificaciones pendientes con preview de documentos
+- [ ] El admin puede aprobar (cambia estado a `Verified`, registra fecha y admin que aprobó)
+- [ ] El admin puede rechazar con motivo visible para el agente
+- [ ] Los agentes verificados muestran badge azul ✓ en su perfil y en tarjetas de propiedades
+- [ ] Los documentos se almacenan de forma segura (misma lógica de `IFileStorageService`)
+- [ ] Un agente rechazado puede re-enviar documentos corregidos
+
+---
+---
+
+## 🟣 SUBFASE 1.6 — Listados Destacados (Featured Listings)
+
+> **Esfuerzo**: 🟢 Bajo-Medio (4-8 horas)  
+> **Dependencias**: Ninguna directa (pero se integra con 1.5 cuando esté listo)  
+> **Impacto**: Base para monetización y visibilidad premium
+
+### Descripción
+Las propiedades marcadas como "destacadas" aparecen primero en los resultados de búsqueda con un badge visual premium. Inicialmente el admin puede destacar propiedades; cuando los planes de suscripción estén listos (1.5), los agentes Pro/Premium podrán hacerlo ellos mismos.
+
+### Cambios por Capa
+
+---
+
+#### 🔴 Domain Layer
+
+##### [MODIFY] [Property.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Entities/Property.cs)
+Agregar:
+```csharp
+// Listado destacado (premium)
+public bool IsFeatured { get; set; } = false;
+public DateTime? FeaturedUntil { get; set; } // null = indefinido (admin), con fecha = temporal (plan)
+```
+
+---
+
+#### 🟡 Application Layer
+
+##### [MODIFY] PropertyViewModel y SavePropertyViewModel
+Agregar `IsFeatured` y `FeaturedUntil` a ambos ViewModels.
+
+##### [MODIFY] PropertyService
+En `Update()`, persistir los nuevos campos. Agregar método:
+```csharp
+public async Task ToggleFeatured(int propertyId, bool isFeatured, DateTime? until = null);
+```
+
+---
+
+#### 🔵 Infrastructure.Persistence
+
+##### [MODIFY] [PropertyRepository.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Repositories/PropertyRepository.cs)
+**En `GetWithFiltersAsync()`**, cambiar el `OrderBy` (línea 115) a:
+```csharp
+// Propiedades destacadas activas aparecen primero
+query = query.OrderByDescending(p => p.IsFeatured && (p.FeaturedUntil == null || p.FeaturedUntil > DateTime.UtcNow))
+             .ThenByDescending(p => p.Created);
+```
+
+##### [MODIFY] ApplicationDbContext — Agregar Fluent API config para los nuevos campos.
+
+---
+
+#### 🟣 Presentation Layer
+
+##### [MODIFY] Views — Tarjetas de propiedad
+Agregar badge estrella dorada:
+```html
+@if (property.IsFeatured)
+{
+    <div class="featured-badge">
+        <i class="bi bi-star-fill text-warning"></i> Destacado
+    </div>
+}
+```
+
+##### [MODIFY] AdminController
+Agregar acción `ToggleFeatured(int id)` para que el admin pueda destacar/quitar.
+
+---
+
+### ✅ Criterios de Aceptación — Subfase 1.6
+
+- [ ] Las propiedades destacadas aparecen **primero** en todos los listados
+- [ ] Las propiedades destacadas muestran badge ⭐ "Destacado" en la tarjeta
+- [ ] El admin puede marcar/desmarcar propiedades como destacadas
+- [ ] Las propiedades con `FeaturedUntil` expirado dejan de aparecer como destacadas
+- [ ] El orden de prioridad es: Destacadas activas > No destacadas (por fecha de creación)
+
+---
+---
+
+## 🔴 SUBFASE 1.5 — Planes de Suscripción Pro/Premium
+
+> **Esfuerzo**: 🔴 Alto (2-3 días)  
+> **Dependencias**: Se integra con Subfase 1.6 (listados destacados)  
+> **Impacto**: Modelo de monetización sostenible
+
+### Descripción
+Crear un sistema de 3 niveles de suscripción para agentes que define cuántas propiedades pueden publicar, cuántas pueden destacar, y qué herramientas avanzadas tienen acceso.
+
+### Planes Propuestos
+
+| Característica | 🆓 Gratis | ⭐ Pro | 💎 Premium |
+|----------------|:---------:|:------:|:----------:|
+| Propiedades máx. | 5 | 25 | Ilimitado |
+| Listados destacados | 0 | 3 | 10 |
+| Badge Pro/Premium | ❌ | ⭐ | 💎 |
+| Analytics básicos | ❌ | ✅ | ✅ |
+| Soporte prioritario | ❌ | ❌ | ✅ |
+| Precio mensual (RD$) | RD$ 0 | RD$ 1,500 | RD$ 4,500 |
+| Precio anual (RD$) | RD$ 0 | RD$ 15,000 | RD$ 45,000 |
+
+### Cambios por Capa
+
+---
+
+#### 🔴 Domain Layer
+
+##### [NEW] [Enums/SubscriptionStatus.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Enums/SubscriptionStatus.cs)
+```csharp
+namespace RealEstateApp.Core.Domain.Enums
+{
+    public enum SubscriptionStatus
+    {
+        Active,
+        Expired,
+        Cancelled,
+        PendingPayment
+    }
+}
+```
+
+##### [NEW] [Entities/SubscriptionPlan.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Entities/SubscriptionPlan.cs)
+```csharp
+using RealEstateApp.Core.Domain.Common;
+
+namespace RealEstateApp.Core.Domain.Entities
+{
+    public class SubscriptionPlan : AuditableBaseEntity
+    {
+        public string Name { get; set; } = string.Empty;           // "Gratis", "Pro", "Premium"
+        public string Slug { get; set; } = string.Empty;           // "free", "pro", "premium"
+        public string? Description { get; set; }
+        public decimal PriceMonthly { get; set; }                  // RD$ mensual
+        public decimal PriceYearly { get; set; }                   // RD$ anual (descuento)
+        public int MaxProperties { get; set; }                     // -1 = ilimitado
+        public int MaxFeaturedListings { get; set; }
+        public bool HasAnalytics { get; set; }
+        public bool HasPrioritySupport { get; set; }
+        public string? BadgeIcon { get; set; }                     // "bi-star-fill", "bi-gem"
+        public string? BadgeColor { get; set; }                    // "warning", "info"
+        public int SortOrder { get; set; }                         // Para mostrar en orden
+        public bool IsDefault { get; set; } = false;               // Plan asignado al registro
+        
+        public ICollection<AgentSubscription>? Subscriptions { get; set; }
+    }
+}
+```
+
+##### [NEW] [Entities/AgentSubscription.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Entities/AgentSubscription.cs)
+```csharp
+using System;
+using RealEstateApp.Core.Domain.Common;
+using RealEstateApp.Core.Domain.Enums;
+
+namespace RealEstateApp.Core.Domain.Entities
+{
+    public class AgentSubscription : AuditableBaseEntity
+    {
+        public string AgentId { get; set; } = string.Empty;
+        
+        public int PlanId { get; set; }
+        public SubscriptionPlan? Plan { get; set; }
+        
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }              // null = plan gratis sin expiración
+        public SubscriptionStatus Status { get; set; } = SubscriptionStatus.Active;
+        
+        public bool IsMonthly { get; set; }                 // true = mensual, false = anual
+        public string? PaymentTransactionId { get; set; }   // Referencia de la pasarela
+    }
+}
+```
+
+---
+
+#### 🟡-🔵-🟣 (Application, Infrastructure, Presentation)
+
+Se siguen los mismos patrones del proyecto:
+- **Interfaces**: `ISubscriptionPlanRepository`, `IAgentSubscriptionRepository`, `ISubscriptionService`
+- **Repositorios**: Implementaciones en Persistence con EF Core
+- **Servicio**: `SubscriptionService` con lógica de: obtener plan actual, verificar límites, upgrade/downgrade
+- **DbContext**: Nuevas tablas + Fluent API
+- **Seeds**: `DefaultSubscriptionPlans.cs` con los 3 planes
+- **Controller**: `SubscriptionController` con vistas de planes, mi suscripción, checkout
+- **Views**: Página de precios, flujo de upgrade, badge en perfil del agente
+
+### Enforcement de Límites
+En `PropertyService.Add()`, agregar validación:
+```csharp
+// Verificar límite de propiedades del plan
+var subscription = await _subscriptionService.GetActiveSubscriptionAsync(vm.AgentId);
+var plan = subscription?.Plan;
+if (plan != null && plan.MaxProperties != -1)
+{
+    var currentCount = (await _propertyRepository.GetByAgentIdAsync(vm.AgentId)).Count;
+    if (currentCount >= plan.MaxProperties)
+    {
+        throw new BusinessException($"Su plan '{plan.Name}' permite máximo {plan.MaxProperties} propiedades. Actualice su plan para publicar más.");
+    }
+}
+```
+
+---
+
+### ✅ Criterios de Aceptación — Subfase 1.5
+
+- [ ] Existen 3 planes en la BD: Gratis, Pro, Premium
+- [ ] Todo agente nuevo se asigna automáticamente al plan Gratis
+- [ ] El agente puede ver la página de planes comparativa con precios en RD$
+- [ ] El agente puede ver su plan actual y fecha de vencimiento
+- [ ] Al intentar crear más propiedades del límite, se muestra error con invitación a upgrade
+- [ ] El flujo de upgrade integra con `PaymentService` (mock por ahora)
+- [ ] El agente Pro/Premium muestra badge correspondiente en su perfil
+- [ ] El admin puede ver/cambiar el plan de un agente manualmente
+
+---
+---
+
+## 🟤 SUBFASE 1.4 — Publicación por Propietarios
+
+> **Esfuerzo**: 🟡 Medio (1-2 días)  
+> **Dependencias**: Subfase 1.5 (para aplicar límite de 2 propiedades gratis)  
+> **Impacto**: Amplía la oferta de listados significativamente
+
+### Descripción
+Permitir que usuarios comunes (propietarios) publiquen hasta 2 propiedades de forma gratuita sin ser agentes inmobiliarios profesionales. Esto iguala la funcionalidad de Corotos y Supercasa donde cualquier persona puede listar un inmueble.
+
+### Cambios por Capa
+
+---
+
+#### 🔴 Domain Layer
+
+##### [MODIFY] [Enums/Roles.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Core/RealEstateApp.Core.Domain/Enums/Roles.cs)
+```csharp
+public enum Roles
+{
+    Admin,
+    Agent,
+    Client,
+    Developer,
+    Owner    // <-- NUEVO: Propietario que publica directamente
+}
+```
+
+---
+
+#### 🔵 Infrastructure.Persistence
+
+##### [MODIFY] [Seeds/DefaultRoles.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Seeds/DefaultRoles.cs)
+Agregar:
+```csharp
+if (!await roleManager.RoleExistsAsync(Roles.Owner.ToString()))
+    await roleManager.CreateAsync(new IdentityRole(Roles.Owner.ToString()));
+```
+
+##### [NEW] [Seeds/DefaultOwnerUser.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Infrastructure/RealEstateApp.Infrastructure.Persistence/Seeds/DefaultOwnerUser.cs)
+Usuario de prueba con rol Owner para demos.
+
+---
+
+#### 🟣 Presentation Layer
+
+##### [MODIFY] [AccountController.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/AccountController.cs)
+En `Register()`, agregar soporte para el tipo "Owner":
+```csharp
+var selectedRole = vm.UserType switch
+{
+    "Agent" => Roles.Agent.ToString(),
+    "Owner" => Roles.Owner.ToString(),
+    _ => Roles.Client.ToString()
+};
+```
+
+##### [NEW] [Controllers/OwnerController.cs](file:///c:/Users/DELL/Desktop/New%20folder/RealEstateApp/src/Presentation/RealEstateApp.Presentation.WebApp/Controllers/OwnerController.cs)
+Controller con `[Authorize(Roles = "Owner")]`:
+- `MyListings()` — muestra las propiedades del propietario
+- `CreateListing()` (GET/POST) — formulario simplificado (sin monto de separación, sin % inicial)
+- `EditListing(int id)` (GET/POST) — editar sus propiedades
+- `DeleteListing(int id)` — eliminar
+- Validación: máximo 2 propiedades sin plan de pago
+
+##### [NEW] Views/Owner/
+- `MyListings.cshtml` — lista de propiedades del propietario
+- `CreateListing.cshtml` — formulario simplificado
+- `EditListing.cshtml`
+
+##### [MODIFY] Navegación (_Layout.cshtml)
+Agregar menú para el rol Owner con acceso a "Mis Publicaciones".
+
+---
+
+### ✅ Criterios de Aceptación — Subfase 1.4
+
+- [ ] El formulario de registro incluye la opción "Propietario" además de "Cliente" y "Agente"
+- [ ] El propietario puede crear hasta **2 propiedades gratis**
+- [ ] Al intentar crear una 3ra propiedad, se muestra mensaje de error con opción de convertirse en Agente
+- [ ] El formulario del propietario es **simplificado** (menos campos requeridos que el del agente)
+- [ ] Las propiedades del propietario aparecen en el catálogo público igual que las de agentes
+- [ ] El propietario puede editar y eliminar solo sus propias publicaciones
+- [ ] El propietario no puede gestionar ofertas (las recibe pero solo puede aceptar/rechazar de forma simple)
+- [ ] El usuario de prueba `owneruser@realestate.com` / `Owner123!` funciona correctamente
+- [ ] Un desarrollador API no puede acceder a las funciones de propietario
+
+---
+---
+
+## ⚠️ Riesgos Identificados
+
+| Riesgo | Impacto | Mitigación |
+|--------|---------|------------|
+| **Migración compleja** (6+ entidades nuevas, cambios en Property) | 🔴 Alto | Ejecutar migración incremental por subfase. Hacer backup de BD antes |
+| **Datos de provincias/municipios de RD** | 🟡 Medio | Usar datos oficiales de la ONE (Oficina Nacional de Estadística) |
+| **PaymentService es mock** | 🟡 Medio | Diseñar `IPaymentService` con interfaz lista para Stripe/AZUL. El mock simula el flujo completo |
+| **Spam de propietarios** | 🟡 Medio | Límite de 2 propiedades + moderación manual del admin |
+| **Archivos de verificación grandes** | 🟢 Bajo | Limitar a 5MB por archivo. Usar `IFileStorageService` existente |
+| **Regresiones en features existentes** | 🔴 Alto | Verificar flujo completo (registro → login → crear → oferta → chat → cierre) después de cada subfase |
+
+---
+
+## 🧪 Plan de Verificación
+
+### Después de CADA subfase:
+```powershell
+# 1. Compilar solución completa
+dotnet build RealEstateApp.slnx
+
+# 2. Ejecutar migración
+dotnet ef migrations add [NombreSubfase] --project src/Infrastructure/RealEstateApp.Infrastructure.Persistence --startup-project src/Presentation/RealEstateApp.Presentation.WebApp
+dotnet ef database update --project src/Infrastructure/RealEstateApp.Infrastructure.Persistence --startup-project src/Presentation/RealEstateApp.Presentation.WebApp
+
+# 3. Ejecutar aplicación y verificar manualmente
+dotnet run --project src/Presentation/RealEstateApp.Presentation.WebApp
+```
+
+### Tests manuales requeridos por subfase:
+
+| Test | 1.3 | 1.1 | 1.2 | 1.6 | 1.5 | 1.4 |
+|------|:---:|:---:|:---:|:---:|:---:|:---:|
+| Login como Admin | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Login como Agente | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Login como Cliente | | ✅ | | | | ✅ |
+| Login como Owner | | | | | | ✅ |
+| Crear propiedad | ✅ | ✅ | | ✅ | ✅ | ✅ |
+| Editar propiedad | ✅ | ✅ | | ✅ | | ✅ |
+| Filtrar propiedades | | ✅ | | ✅ | | |
+| Ver detalles propiedad | ✅ | ✅ | ✅ | ✅ | | |
+| Enviar oferta | | | | | | |
+| Chat agente ↔ cliente | | | | | | |
+| Dashboard admin | | | ✅ | ✅ | ✅ | |
+
+---
+
+## 📊 Resumen de Archivos a Crear/Modificar
+
+| Tipo | Archivos Nuevos | Archivos Modificados |
+|------|:---:|:---:|
+| **Subfase 1.3** (Matterport) | 0 | 5 |
+| **Subfase 1.1** (Provincias) | 6 | 10 |
+| **Subfase 1.2** (Verificación) | 8 | 5 |
+| **Subfase 1.6** (Destacados) | 0 | 6 |
+| **Subfase 1.5** (Suscripciones) | 8 | 6 |
+| **Subfase 1.4** (Propietarios) | 5 | 5 |
+| **TOTAL FASE 1** | **~27 archivos nuevos** | **~25 archivos modificados** |
+
+---
+
+> [!TIP]
+> **Recomendación**: Implementar cada subfase en una rama Git separada y hacer merge a `develop` después de verificar. Esto permite rollback limpio si una subfase introduce regresiones.
+
+*Plan generado tras análisis exhaustivo del código fuente actual y comparación con las plataformas competidoras.*

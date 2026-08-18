@@ -125,9 +125,16 @@ namespace RealEstateApp.Core.Application.Services
             property.Longitude = vm.Longitude;
             property.VideoUrl = vm.VideoUrl;
             property.Tour360Url = vm.Tour360Url;
+            property.MatterportModelId = vm.MatterportModelId;
             property.MontoSeparacion = vm.MontoSeparacion;
             property.PorcentajeInicialRequerido = vm.PorcentajeInicialRequerido;
             property.IsFinanciable = vm.IsFinanciable;
+            property.ProvinceId = vm.ProvinceId;
+            property.MunicipalityId = vm.MunicipalityId;
+            property.Sector = vm.Sector;
+            property.FullAddress = vm.FullAddress;
+            property.IsFeatured = vm.IsFeatured;
+            property.FeaturedUntil = vm.FeaturedUntil;
 
             await _propertyRepository.UpdateAsync(property);
 
@@ -209,6 +216,28 @@ namespace RealEstateApp.Core.Application.Services
                 throw new NotFoundException($"No se encontró la propiedad con ID {propertyId}");
 
             property.AgentId = newAgentId;
+            await _propertyRepository.UpdateAsync(property);
+        }
+
+        public async Task ToggleFeaturedAsync(int propertyId, int durationDays = 30)
+        {
+            var property = await _propertyRepository.GetByIdAsync(propertyId);
+            if (property == null)
+                throw new NotFoundException($"No se encontró la propiedad con ID {propertyId}");
+
+            if (property.IsFeatured && (!property.FeaturedUntil.HasValue || property.FeaturedUntil > DateTime.UtcNow))
+            {
+                // Desactivar destacado
+                property.IsFeatured = false;
+                property.FeaturedUntil = null;
+            }
+            else
+            {
+                // Activar destacado
+                property.IsFeatured = true;
+                property.FeaturedUntil = DateTime.UtcNow.AddDays(durationDays);
+            }
+
             await _propertyRepository.UpdateAsync(property);
         }
 

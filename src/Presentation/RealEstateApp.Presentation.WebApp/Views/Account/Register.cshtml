@@ -28,9 +28,14 @@
                         <div class="mb-4 text-center">
                             <label class="form-label fw-bold text-dark d-block mb-3">Quiero registrarme como:</label>
                             <div class="btn-group w-100 role-selector" role="group">
-                                <input type="radio" class="btn-check" name="UserType" id="userTypeClient" value="Client" @(Model.UserType != "Agent" ? "checked" : "") autocomplete="off">
+                                <input type="radio" class="btn-check" name="UserType" id="userTypeClient" value="Client" @(Model.UserType == "Client" || string.IsNullOrEmpty(Model.UserType) ? "checked" : "") autocomplete="off">
                                 <label class="btn btn-outline-primary py-3 rounded-start-3 fw-bold" for="userTypeClient">
-                                    <i class="bi bi-person-heart fs-4 d-block mb-1"></i> Cliente (Comprador)
+                                    <i class="bi bi-person-heart fs-4 d-block mb-1"></i> Cliente
+                                </label>
+
+                                <input type="radio" class="btn-check" name="UserType" id="userTypeOwner" value="Owner" @(Model.UserType == "Owner" ? "checked" : "") autocomplete="off">
+                                <label class="btn btn-outline-primary py-3 fw-bold" for="userTypeOwner">
+                                    <i class="bi bi-house-door-fill fs-4 d-block mb-1"></i> Propietario Directo
                                 </label>
 
                                 <input type="radio" class="btn-check" name="UserType" id="userTypeAgent" value="Agent" @(Model.UserType == "Agent" ? "checked" : "") autocomplete="off">

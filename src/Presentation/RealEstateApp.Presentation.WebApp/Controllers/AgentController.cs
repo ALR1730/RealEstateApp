@@ -3,9 +3,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
+using RealEstateApp.Core.Application.ViewModels.Agent;
 using RealEstateApp.Core.Application.ViewModels.Offer;
 using RealEstateApp.Core.Application.ViewModels.Property;
+using RealEstateApp.Core.Application.ViewModels.Subscription;
 
 namespace RealEstateApp.Presentation.WebApp.Controllers
 {
@@ -17,6 +20,10 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         private readonly ISaleTypeService _saleTypeService;
         private readonly IImprovementService _improvementService;
         private readonly IOfferService _offerService;
+        private readonly IProvinceRepository _provinceRepository;
+        private readonly IMunicipalityRepository _municipalityRepository;
+        private readonly IAgentVerificationService _verificationService;
+        private readonly ISubscriptionService _subscriptionService;
         private readonly UserManager<IdentityUser> _userManager;
 
         public AgentController(
@@ -25,6 +32,10 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             ISaleTypeService saleTypeService,
             IImprovementService improvementService,
             IOfferService offerService,
+            IProvinceRepository provinceRepository,
+            IMunicipalityRepository municipalityRepository,
+            IAgentVerificationService verificationService,
+            ISubscriptionService subscriptionService,
             UserManager<IdentityUser> userManager)
         {
             _propertyService = propertyService;
@@ -32,6 +43,10 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             _saleTypeService = saleTypeService;
             _improvementService = improvementService;
             _offerService = offerService;
+            _provinceRepository = provinceRepository;
+            _municipalityRepository = municipalityRepository;
+            _verificationService = verificationService;
+            _subscriptionService = subscriptionService;
             _userManager = userManager;
         }
 
@@ -50,6 +65,19 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> CreateProperty()
         {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var canCreate = await _subscriptionService.CanAgentCreatePropertyAsync(userId);
+            if (!canCreate)
+            {
+                TempData["ErrorMessage"] = "Has alcanzado el límite máximo de propiedades permitidas por tu plan de suscripción actual. Actualiza tu plan para continuar publicando.";
+                return RedirectToAction(nameof(Subscriptions));
+            }
+
             var vm = new SavePropertyViewModel();
             await PopulateDropdowns(vm);
             return View(vm);
@@ -63,6 +91,13 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             if (string.IsNullOrEmpty(userId))
             {
                 return RedirectToAction("Login", "Account");
+            }
+
+            var canCreate = await _subscriptionService.CanAgentCreatePropertyAsync(userId);
+            if (!canCreate)
+            {
+                TempData["ErrorMessage"] = "Has alcanzado el límite máximo de propiedades permitidas por tu plan de suscripción actual. Actualiza tu plan para continuar publicando.";
+                return RedirectToAction(nameof(Subscriptions));
             }
 
             vm.AgentId = userId;
@@ -136,6 +171,15 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 
             var imps = await _improvementService.GetAllViewModel();
             vm.Improvements = imps.Select(i => new RealEstateApp.Core.Application.ViewModels.Property.ImprovementViewModel { Id = i.Id, Name = i.Name }).ToList();
+
+            var provinces = await _provinceRepository.GetAllAsync();
+            vm.Provinces = provinces.Select(p => new ProvinceDropdownViewModel { Id = p.Id, Name = p.Name, IsoCode = p.IsoCode }).ToList();
+
+            if (vm.ProvinceId.HasValue)
+            {
+                var municipalities = await _municipalityRepository.GetByProvinceIdAsync(vm.ProvinceId.Value);
+                vm.Municipalities = municipalities.Select(m => new MunicipalityDropdownViewModel { Id = m.Id, Name = m.Name, ProvinceId = m.ProvinceId }).ToList();
+            }
         }
 
         [HttpPost]
@@ -241,6 +285,119 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             }
 
             return RedirectToAction(nameof(Offers));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Verification()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var vm = await _verificationService.GetByAgentIdAsync(userId) ?? new AgentVerificationViewModel
+            {
+                AgentId = userId
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Verification(AgentVerificationViewModel vm)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            vm.AgentId = userId;
+
+            if (string.IsNullOrWhiteSpace(vm.Cedula))
+            {
+                ModelState.AddModelError("Cedula", "El número de cédula es obligatorio.");
+            }
+
+            var existing = await _verificationService.GetByAgentIdAsync(userId);
+            if (existing == null || string.IsNullOrEmpty(existing.FrontImageUrl))
+            {
+                if (vm.FrontImageFile == null || vm.FrontImageFile.Length == 0)
+                {
+                    ModelState.AddModelError("FrontImageFile", "Debe adjuntar la foto frontal de su cédula.");
+                }
+            }
+
+            if (existing == null || string.IsNullOrEmpty(existing.BackImageUrl))
+            {
+                if (vm.BackImageFile == null || vm.BackImageFile.Length == 0)
+                {
+                    ModelState.AddModelError("BackImageFile", "Debe adjuntar la foto posterior de su cédula.");
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var current = await _verificationService.GetByAgentIdAsync(userId);
+                if (current != null)
+                {
+                    vm.FrontImageUrl = current.FrontImageUrl;
+                    vm.BackImageUrl = current.BackImageUrl;
+                    vm.Status = current.Status;
+                    vm.RejectionReason = current.RejectionReason;
+                }
+                return View(vm);
+            }
+
+            try
+            {
+                await _verificationService.SubmitVerificationAsync(vm);
+                TempData["SuccessMessage"] = "Solicitud de verificación enviada exitosamente. El equipo de administración revisará sus documentos.";
+                return RedirectToAction(nameof(Verification));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Error al enviar la solicitud: {ex.Message}");
+                return View(vm);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Subscriptions()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var vm = await _subscriptionService.GetAgentDashboardViewModelAsync(userId);
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeSubscription(int planId)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var success = await _subscriptionService.SubscribeAgentAsync(userId, planId);
+            if (success)
+            {
+                TempData["SuccessMessage"] = "¡Tu plan de suscripción fue actualizado exitosamente! Ahora cuentas con nuevos beneficios.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "No se pudo actualizar el plan de suscripción seleccionado.";
+            }
+
+            return RedirectToAction(nameof(Subscriptions));
         }
     }
 }

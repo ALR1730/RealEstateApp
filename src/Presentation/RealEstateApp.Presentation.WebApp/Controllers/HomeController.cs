@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Property;
 using RealEstateApp.Core.Domain.Constants;
+using RealEstateApp.Core.Domain.Enums;
 
 namespace RealEstateApp.Presentation.WebApp.Controllers
 {
@@ -19,6 +21,9 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         private readonly IFinancingService _financingService;
         private readonly IOfferService _offerService;
         private readonly IUserActivityService _userActivityService;
+        private readonly IProvinceRepository _provinceRepository;
+        private readonly IMunicipalityRepository _municipalityRepository;
+        private readonly IAgentVerificationService _verificationService;
         private readonly UserManager<IdentityUser> _userManager;
 
         public HomeController(
@@ -29,6 +34,9 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             IFinancingService financingService,
             IOfferService offerService,
             IUserActivityService userActivityService,
+            IProvinceRepository provinceRepository,
+            IMunicipalityRepository municipalityRepository,
+            IAgentVerificationService verificationService,
             UserManager<IdentityUser> userManager)
         {
             _propertyService = propertyService;
@@ -38,6 +46,9 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             _financingService = financingService;
             _offerService = offerService;
             _userActivityService = userActivityService;
+            _provinceRepository = provinceRepository;
+            _municipalityRepository = municipalityRepository;
+            _verificationService = verificationService;
             _userManager = userManager;
         }
 
@@ -75,6 +86,15 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             var saleTypes = await _saleTypeService.GetAllViewModel();
             filters.SaleTypes = saleTypes.Select(st => new RealEstateApp.Core.Application.ViewModels.Property.SaleTypeViewModel { Id = st.Id, Name = st.Name }).ToList();
 
+            var provinces = await _provinceRepository.GetAllAsync();
+            filters.Provinces = provinces.Select(p => new ProvinceDropdownViewModel { Id = p.Id, Name = p.Name, IsoCode = p.IsoCode }).ToList();
+
+            if (filters.ProvinceId.HasValue)
+            {
+                var municipalities = await _municipalityRepository.GetByProvinceIdAsync(filters.ProvinceId.Value);
+                filters.Municipalities = municipalities.Select(m => new MunicipalityDropdownViewModel { Id = m.Id, Name = m.Name, ProvinceId = m.ProvinceId }).ToList();
+            }
+
             // Si el usuario actual está autenticado como Cliente, resolver cuáles propiedades tiene como favoritas
             if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Client"))
             {
@@ -93,6 +113,13 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 
             ViewBag.Filters = filters;
             return View(properties);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMunicipalities(int provinceId)
+        {
+            var municipalities = await _municipalityRepository.GetByProvinceIdAsync(provinceId);
+            return Json(municipalities.Select(m => new { id = m.Id, name = m.Name }));
         }
 
         public async Task<IActionResult> Map()
@@ -117,6 +144,9 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 p.Bathrooms,
                 Size = p.SizeInMeters.ToString("N0"),
                 PropertyType = p.PropertyTypeName,
+                Province = p.ProvinceName,
+                Municipality = p.MunicipalityName,
+                p.Sector,
                 p.Latitude,
                 p.Longitude,
                 ImageUrl = p.Images.FirstOrDefault() ?? "/images/default-property.jpg"
@@ -182,12 +212,16 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return NotFound();
             }
 
-            // Obtener el nombre del agente
+            // Obtener el nombre del agente/propietario y estado de verificación
             var agentUser = await _userManager.FindByIdAsync(property.AgentId);
+            bool isOwnerPublisher = false;
             if (agentUser != null)
             {
-                property.AgentName = agentUser.UserName ?? agentUser.Email ?? "Agente";
+                property.AgentName = agentUser.UserName ?? agentUser.Email ?? "Contacto";
+                isOwnerPublisher = await _userManager.IsInRoleAsync(agentUser, Roles.Owner.ToString());
             }
+            ViewBag.IsOwnerPublisher = isOwnerPublisher;
+            ViewBag.IsAgentVerified = await _verificationService.IsAgentVerifiedAsync(property.AgentId);
 
             // Resolver si es favorita para el usuario actual y registrar actividad
             if (User.Identity != null && User.Identity.IsAuthenticated)

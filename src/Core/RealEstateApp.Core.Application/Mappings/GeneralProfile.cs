@@ -29,6 +29,8 @@ namespace RealEstateApp.Core.Application.Mappings
             CreateMap<Property, PropertyViewModel>()
                 .ForMember(dest => dest.PropertyTypeName, opt => opt.MapFrom(src => src.PropertyType != null ? src.PropertyType.Name : string.Empty))
                 .ForMember(dest => dest.SaleTypeName, opt => opt.MapFrom(src => src.SaleType != null ? src.SaleType.Name : string.Empty))
+                .ForMember(dest => dest.ProvinceName, opt => opt.MapFrom(src => src.Province != null ? src.Province.Name : string.Empty))
+                .ForMember(dest => dest.MunicipalityName, opt => opt.MapFrom(src => src.Municipality != null ? src.Municipality.Name : string.Empty))
                 .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images != null ? src.Images.Select(i => i.ImageUrl).ToList() : new System.Collections.Generic.List<string>()))
                 .ForMember(dest => dest.Improvements, opt => opt.MapFrom(src => src.PropertyImprovements != null ? src.PropertyImprovements.Where(pi => pi.Improvement != null).Select(pi => pi.Improvement!.Name).ToList() : new System.Collections.Generic.List<string>()))
                 .ForMember(dest => dest.FavoritesCount, opt => opt.MapFrom(src => src.Favorites != null ? src.Favorites.Count : 0))
@@ -39,6 +41,8 @@ namespace RealEstateApp.Core.Application.Mappings
             CreateMap<Property, PropertyDto>()
                 .ForMember(dest => dest.PropertyTypeName, opt => opt.MapFrom(src => src.PropertyType != null ? src.PropertyType.Name : string.Empty))
                 .ForMember(dest => dest.SaleTypeName, opt => opt.MapFrom(src => src.SaleType != null ? src.SaleType.Name : string.Empty))
+                .ForMember(dest => dest.ProvinceName, opt => opt.MapFrom(src => src.Province != null ? src.Province.Name : string.Empty))
+                .ForMember(dest => dest.MunicipalityName, opt => opt.MapFrom(src => src.Municipality != null ? src.Municipality.Name : string.Empty))
                 .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images != null ? src.Images.Select(i => i.ImageUrl).ToList() : new System.Collections.Generic.List<string>()))
                 .ForMember(dest => dest.Improvements, opt => opt.MapFrom(src => src.PropertyImprovements != null ? src.PropertyImprovements.Where(pi => pi.Improvement != null).Select(pi => pi.Improvement!.Name).ToList() : new System.Collections.Generic.List<string>()))
                 .ForMember(dest => dest.AgentName, opt => opt.Ignore()); // Se resuelve en el servicio
@@ -49,6 +53,8 @@ namespace RealEstateApp.Core.Application.Mappings
                 .ForMember(dest => dest.PropertyImprovements, opt => opt.Ignore()) // Se maneja manualmente
                 .ForMember(dest => dest.PropertyType, opt => opt.Ignore())
                 .ForMember(dest => dest.SaleType, opt => opt.Ignore())
+                .ForMember(dest => dest.Province, opt => opt.Ignore())
+                .ForMember(dest => dest.Municipality, opt => opt.Ignore())
                 .ForMember(dest => dest.Offers, opt => opt.Ignore())
                 .ForMember(dest => dest.Chats, opt => opt.Ignore())
                 .ForMember(dest => dest.Favorites, opt => opt.Ignore())
@@ -66,7 +72,9 @@ namespace RealEstateApp.Core.Application.Mappings
                     src.Images != null ? src.Images.Select(i => i.ImageUrl).ToList() : new System.Collections.Generic.List<string>()))
                 .ForMember(dest => dest.PropertyTypes, opt => opt.Ignore())
                 .ForMember(dest => dest.SaleTypes, opt => opt.Ignore())
-                .ForMember(dest => dest.Improvements, opt => opt.Ignore());
+                .ForMember(dest => dest.Improvements, opt => opt.Ignore())
+                .ForMember(dest => dest.Provinces, opt => opt.Ignore())
+                .ForMember(dest => dest.Municipalities, opt => opt.Ignore());
 
             #endregion
 
