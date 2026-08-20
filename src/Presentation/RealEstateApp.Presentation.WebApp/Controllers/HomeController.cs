@@ -17,6 +17,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         private readonly IPropertyService _propertyService;
         private readonly IPropertyTypeService _propertyTypeService;
         private readonly ISaleTypeService _saleTypeService;
+        private readonly IImprovementService _improvementService;
         private readonly IFavoriteService _favoriteService;
         private readonly IFinancingService _financingService;
         private readonly IOfferService _offerService;
@@ -30,6 +31,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             IPropertyService propertyService,
             IPropertyTypeService propertyTypeService,
             ISaleTypeService saleTypeService,
+            IImprovementService improvementService,
             IFavoriteService favoriteService,
             IFinancingService financingService,
             IOfferService offerService,
@@ -42,6 +44,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             _propertyService = propertyService;
             _propertyTypeService = propertyTypeService;
             _saleTypeService = saleTypeService;
+            _improvementService = improvementService;
             _favoriteService = favoriteService;
             _financingService = financingService;
             _offerService = offerService;
@@ -85,6 +88,9 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 
             var saleTypes = await _saleTypeService.GetAllViewModel();
             filters.SaleTypes = saleTypes.Select(st => new RealEstateApp.Core.Application.ViewModels.Property.SaleTypeViewModel { Id = st.Id, Name = st.Name }).ToList();
+
+            var improvements = await _improvementService.GetAllViewModel();
+            filters.AvailableImprovements = improvements.Select(i => new RealEstateApp.Core.Application.ViewModels.Property.ImprovementViewModel { Id = i.Id, Name = i.Name }).ToList();
 
             var provinces = await _provinceRepository.GetAllAsync();
             filters.Provinces = provinces.Select(p => new ProvinceDropdownViewModel { Id = p.Id, Name = p.Name, IsoCode = p.IsoCode }).ToList();

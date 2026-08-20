@@ -316,6 +316,29 @@ header {
   box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
 }
 
+/* Validation feedback enhancements */
+.input-validation-error {
+  border-color: #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.04) !important;
+}
+
+.input-validation-error:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
+}
+
+.field-validation-error {
+  color: #ef4444 !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  margin-top: 0.3rem !important;
+  display: block !important;
+}
+
+.field-validation-error::before {
+  content: "⚠️ ";
+}
+
 /* Hover shadow utility */
 .hover-shadow {
   transition: box-shadow 0.25s ease, transform 0.25s ease;

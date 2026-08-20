@@ -91,6 +91,7 @@ namespace RealEstateApp.Infrastructure.Persistence
             services.AddScoped<IAgentVerificationRepository, AgentVerificationRepository>();
             services.AddScoped<ISubscriptionPlanRepository, SubscriptionPlanRepository>();
             services.AddScoped<IAgentSubscriptionRepository, AgentSubscriptionRepository>();
+            services.AddScoped<IPropertyImprovementRepository, PropertyImprovementRepository>();
 
             #endregion
         }

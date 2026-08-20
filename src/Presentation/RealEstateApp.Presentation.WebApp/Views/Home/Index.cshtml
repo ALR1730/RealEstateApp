@@ -2,6 +2,15 @@
 @{
     ViewData["Title"] = "Portal Inmobiliario";
     var filters = ViewBag.Filters as RealEstateApp.Core.Application.ViewModels.Property.PropertyFilterViewModel ?? new RealEstateApp.Core.Application.ViewModels.Property.PropertyFilterViewModel();
+    var hasActiveFilters = filters.PropertyTypeId.HasValue || filters.SaleTypeId.HasValue || 
+                           filters.MinPrice.HasValue || filters.MaxPrice.HasValue || 
+                           filters.MinRooms.HasValue || filters.MinBathrooms.HasValue || 
+                           filters.MinSizeInMeters.HasValue || filters.MaxSizeInMeters.HasValue ||
+                           !string.IsNullOrEmpty(filters.Code) || filters.ProvinceId.HasValue || 
+                           filters.MunicipalityId.HasValue || !string.IsNullOrEmpty(filters.Sector) || 
+                           filters.OnlyFeatured == true || filters.OnlyVerifiedAgents == true ||
+                           filters.OnlyFinanciable == true || filters.OnlyWithVirtualTour == true ||
+                           (filters.ImprovementIds != null && filters.ImprovementIds.Count > 0);
 }
 
 <!-- Hero Section -->
@@ -28,14 +37,21 @@
 </section>
 
 <div class="container pb-5">
-    <!-- Card de Filtros Combinados -->
-    <div class="search-filter-card mb-5">
+    <!-- Card de Filtros Combinados Avanzados -->
+    <div class="search-filter-card mb-4 shadow-sm border-0 rounded-4">
         <form asp-action="Index" method="get" id="filterForm">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="font-heading mb-0 text-dark"><i class="bi bi-sliders text-info me-2"></i> Filtros Combinados</h5>
-                @if (filters.PropertyTypeId.HasValue || filters.SaleTypeId.HasValue || filters.MinPrice.HasValue || filters.MaxPrice.HasValue || filters.MinRooms.HasValue || filters.MinBathrooms.HasValue || !string.IsNullOrEmpty(filters.Code) || filters.ProvinceId.HasValue || filters.MunicipalityId.HasValue || !string.IsNullOrEmpty(filters.Sector) || filters.OnlyFeatured == true || filters.OnlyVerifiedAgents == true)
+                <div class="d-flex align-items-center gap-2">
+                    <h5 class="font-heading mb-0 text-dark fw-bold">
+                        <i class="bi bi-sliders text-primary me-1"></i> Filtros Combinados de Búsqueda
+                    </h5>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-1 small">
+                        Búsqueda Inteligente
+                    </span>
+                </div>
+                @if (hasActiveFilters)
                 {
-                    <a asp-action="Index" class="btn btn-sm btn-link text-danger text-decoration-none fw-medium">
+                    <a asp-action="Index" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold">
                         <i class="bi bi-x-circle me-1"></i> Limpiar Filtros
                     </a>
                 }
@@ -78,9 +94,10 @@
                 <!-- Ubicación: Sector / Barrio -->
                 <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted"><i class="bi bi-signpost-2 text-info me-1"></i>Sector / Barrio</label>
-                    <input type="text" name="Sector" value="@filters.Sector" class="form-control form-control-custom" placeholder="Ej: Piantini, Bella Vista..." />
+                    <input type="text" name="Sector" value="@filters.Sector" class="form-control form-control-custom" placeholder="Ej: Piantini, Bella Vista, Naco..." />
                 </div>
 
+                <!-- Tipo de Propiedad -->
                 <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted">Tipo de Propiedad</label>
                     <select name="PropertyTypeId" class="form-select form-select-custom">
@@ -95,6 +112,7 @@
                     </select>
                 </div>
 
+                <!-- Tipo de Venta -->
                 <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted">Tipo de Venta</label>
                     <select name="SaleTypeId" class="form-select form-select-custom">
@@ -109,16 +127,18 @@
                     </select>
                 </div>
 
+                <!-- Rango de Precio -->
                 <div class="col-md-3">
-                    <label class="form-label small fw-bold text-muted">Precio Mínimo</label>
+                    <label class="form-label small fw-bold text-muted">Precio Mínimo (RD$)</label>
                     <input type="number" name="MinPrice" value="@filters.MinPrice" class="form-control form-control-custom" placeholder="Precio Mínimo" step="1000" />
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label small fw-bold text-muted">Precio Máximo</label>
+                    <label class="form-label small fw-bold text-muted">Precio Máximo (RD$)</label>
                     <input type="number" name="MaxPrice" value="@filters.MaxPrice" class="form-control form-control-custom" placeholder="Precio Máximo" step="1000" />
                 </div>
 
+                <!-- Distribución Física -->
                 <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted">Habitaciones Mínimas</label>
                     <input type="number" name="MinRooms" value="@filters.MinRooms" class="form-control form-control-custom" placeholder="Habitaciones" min="0" />
@@ -129,6 +149,18 @@
                     <input type="number" name="MinBathrooms" value="@filters.MinBathrooms" class="form-control form-control-custom" placeholder="Baños" min="0" />
                 </div>
 
+                <!-- Rango de Metros Cuadrados -->
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted"><i class="bi bi-aspect-ratio me-1"></i>Metros Mínimos (m²)</label>
+                    <input type="number" name="MinSizeInMeters" value="@filters.MinSizeInMeters" class="form-control form-control-custom" placeholder="Ej: 80 m²" min="1" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted"><i class="bi bi-aspect-ratio-fill me-1"></i>Metros Máximos (m²)</label>
+                    <input type="number" name="MaxSizeInMeters" value="@filters.MaxSizeInMeters" class="form-control form-control-custom" placeholder="Ej: 500 m²" min="1" />
+                </div>
+
+                <!-- Cerca de mí -->
                 <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted">Cerca de mí (Radio Km)</label>
                     <div class="input-group">
@@ -139,37 +171,163 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 d-flex align-items-center">
-                    <div class="form-check form-switch mt-3">
-                        <input class="form-check-input" type="checkbox" name="OnlyFeatured" id="onlyFeaturedCheck" value="true" @(filters.OnlyFeatured == true ? "checked" : "") />
-                        <label class="form-check-label fw-bold text-dark small ms-1" for="onlyFeaturedCheck">
-                            <i class="bi bi-star-fill text-warning me-1"></i> Solo Destacados
+                <!-- Switches de Filtros Rápidos -->
+                <div class="col-md-3">
+                    <div class="form-check form-switch p-2 bg-light rounded-3 border">
+                        <input class="form-check-input ms-1 me-2" type="checkbox" name="OnlyFeatured" id="onlyFeaturedCheck" value="true" @(filters.OnlyFeatured == true ? "checked" : "") />
+                        <label class="form-check-label fw-bold text-dark small" for="onlyFeaturedCheck">
+                            <i class="bi bi-star-fill text-warning me-1"></i> Solo Destacados ⭐
                         </label>
                     </div>
                 </div>
 
-                <div class="col-md-3 d-flex align-items-center">
-                    <div class="form-check form-switch mt-3">
-                        <input class="form-check-input" type="checkbox" name="OnlyVerifiedAgents" id="onlyVerifiedAgentsCheck" value="true" @(filters.OnlyVerifiedAgents == true ? "checked" : "") />
-                        <label class="form-check-label fw-bold text-dark small ms-1" for="onlyVerifiedAgentsCheck">
-                            <i class="bi bi-patch-check-fill text-primary me-1"></i> Solo Agentes Verificados
+                <div class="col-md-3">
+                    <div class="form-check form-switch p-2 bg-light rounded-3 border">
+                        <input class="form-check-input ms-1 me-2" type="checkbox" name="OnlyVerifiedAgents" id="onlyVerifiedAgentsCheck" value="true" @(filters.OnlyVerifiedAgents == true ? "checked" : "") />
+                        <label class="form-check-label fw-bold text-dark small" for="onlyVerifiedAgentsCheck">
+                            <i class="bi bi-patch-check-fill text-primary me-1"></i> Agente Verificado ✅
                         </label>
                     </div>
                 </div>
 
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary-gradient w-100 py-2">
-                        <i class="bi bi-funnel-fill me-2"></i> Aplicar Filtros
+                <div class="col-md-3">
+                    <div class="form-check form-switch p-2 bg-light rounded-3 border">
+                        <input class="form-check-input ms-1 me-2" type="checkbox" name="OnlyFinanciable" id="onlyFinanciableCheck" value="true" @(filters.OnlyFinanciable == true ? "checked" : "") />
+                        <label class="form-check-label fw-bold text-dark small" for="onlyFinanciableCheck">
+                            <i class="bi bi-cash-coin text-success me-1"></i> Con Financiamiento 💳
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-check form-switch p-2 bg-light rounded-3 border">
+                        <input class="form-check-input ms-1 me-2" type="checkbox" name="OnlyWithVirtualTour" id="onlyWithVirtualTourCheck" value="true" @(filters.OnlyWithVirtualTour == true ? "checked" : "") />
+                        <label class="form-check-label fw-bold text-dark small" for="onlyWithVirtualTourCheck">
+                            <i class="bi bi-badge-3d text-info me-1"></i> Tour 3D / Virtual 🕶️
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Sección de Filtro por Mejoras / Amenidades -->
+                @if (filters.AvailableImprovements != null && filters.AvailableImprovements.Count > 0)
+                {
+                    <div class="col-12 mt-3">
+                        <div class="p-3 bg-light rounded-4 border">
+                            <label class="form-label small fw-bold text-dark d-block mb-2">
+                                <i class="bi bi-check-all text-primary me-1"></i> Filtrar por Mejoras e Instalaciones Deseadas:
+                            </label>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var imp in filters.AvailableImprovements)
+                                {
+                                    var isChecked = filters.ImprovementIds != null && filters.ImprovementIds.Contains(imp.Id);
+                                    <div class="form-check form-check-inline m-0">
+                                        <input class="btn-check" type="checkbox" name="ImprovementIds" value="@imp.Id" id="filter_imp_@imp.Id" @(isChecked ? "checked" : "") autocomplete="off">
+                                        <label class="btn btn-sm @(isChecked ? "btn-primary font-heading fw-bold" : "btn-outline-secondary") rounded-pill px-3 py-1" for="filter_imp_@imp.Id">
+                                            <i class="bi bi-check2 me-1"></i> @imp.Name
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="col-12 text-end mt-3">
+                    <button type="submit" class="btn btn-primary-gradient px-5 py-2 font-heading fw-bold rounded-pill shadow-sm">
+                        <i class="bi bi-funnel-fill me-2"></i> Aplicar Filtros Avanzados
                     </button>
                 </div>
             </div>
         </form>
     </div>
 
+    <!-- Barra de Filtros Activos (Tags) -->
+    @if (hasActiveFilters)
+    {
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-4 p-3 bg-white rounded-4 shadow-sm border">
+            <span class="text-muted small fw-bold"><i class="bi bi-tags-fill text-primary me-1"></i> Filtros Activos:</span>
+            
+            @if (!string.IsNullOrEmpty(filters.Code))
+            {
+                <span class="badge bg-light text-dark border p-2 rounded-pill font-heading">
+                    Código: @filters.Code
+                </span>
+            }
+            @if (filters.ProvinceId.HasValue && filters.Provinces != null)
+            {
+                var provName = filters.Provinces.FirstOrDefault(p => p.Id == filters.ProvinceId)?.Name;
+                <span class="badge bg-light text-dark border p-2 rounded-pill font-heading">
+                    Provincia: @provName
+                </span>
+            }
+            @if (filters.MunicipalityId.HasValue && filters.Municipalities != null)
+            {
+                var munName = filters.Municipalities.FirstOrDefault(m => m.Id == filters.MunicipalityId)?.Name;
+                <span class="badge bg-light text-dark border p-2 rounded-pill font-heading">
+                    Municipio: @munName
+                </span>
+            }
+            @if (!string.IsNullOrEmpty(filters.Sector))
+            {
+                <span class="badge bg-light text-dark border p-2 rounded-pill font-heading">
+                    Sector: @filters.Sector
+                </span>
+            }
+            @if (filters.MinPrice.HasValue || filters.MaxPrice.HasValue)
+            {
+                <span class="badge bg-light text-dark border p-2 rounded-pill font-heading">
+                    Precio: @(filters.MinPrice?.ToString("C0") ?? "0") - @(filters.MaxPrice?.ToString("C0") ?? "Max")
+                </span>
+            }
+            @if (filters.MinSizeInMeters.HasValue || filters.MaxSizeInMeters.HasValue)
+            {
+                <span class="badge bg-light text-dark border p-2 rounded-pill font-heading">
+                    Tamaño: @(filters.MinSizeInMeters?.ToString() ?? "0") - @(filters.MaxSizeInMeters?.ToString() ?? "Max") m²
+                </span>
+            }
+            @if (filters.MinRooms.HasValue)
+            {
+                <span class="badge bg-light text-dark border p-2 rounded-pill font-heading">
+                    Min. @filters.MinRooms Habs
+                </span>
+            }
+            @if (filters.MinBathrooms.HasValue)
+            {
+                <span class="badge bg-light text-dark border p-2 rounded-pill font-heading">
+                    Min. @filters.MinBathrooms Baños
+                </span>
+            }
+            @if (filters.OnlyFeatured == true)
+            {
+                <span class="badge bg-warning text-dark border border-warning p-2 rounded-pill font-heading fw-bold">
+                    ⭐ Solo Destacados
+                </span>
+            }
+            @if (filters.OnlyVerifiedAgents == true)
+            {
+                <span class="badge bg-success bg-opacity-25 text-success border border-success p-2 rounded-pill font-heading fw-bold">
+                    🛡️ Agentes Verificados
+                </span>
+            }
+            @if (filters.OnlyFinanciable == true)
+            {
+                <span class="badge bg-info bg-opacity-25 text-info border border-info p-2 rounded-pill font-heading fw-bold">
+                    💳 Financiables
+                </span>
+            }
+            @if (filters.OnlyWithVirtualTour == true)
+            {
+                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary p-2 rounded-pill font-heading fw-bold">
+                    🕶️ Tour 3D / Virtual
+                </span>
+            }
+        </div>
+    }
+
     <!-- Grilla de Resultados de Propiedades -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="font-heading mb-0">Propiedades Disponibles (@Model.Count)</h4>
-        <span class="text-muted small">Ordenadas por lo más reciente</span>
+        <h4 class="font-heading mb-0">Propiedades Encontradas (@Model.Count)</h4>
+        <span class="text-muted small">Mostrando resultados coincidentes</span>
     </div>
 
     @if (Model == null || Model.Count == 0)

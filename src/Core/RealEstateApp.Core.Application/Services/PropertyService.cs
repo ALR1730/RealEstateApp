@@ -21,6 +21,7 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IPropertyRepository _propertyRepository;
         private readonly IPropertyImageRepository _propertyImageRepository;
         private readonly IPropertyTypeRepository _propertyTypeRepository;
+        private readonly IPropertyImprovementRepository _propertyImprovementRepository;
         private readonly IFileStorageService _fileStorageService;
         private readonly IMapper _mapper;
 
@@ -28,12 +29,14 @@ namespace RealEstateApp.Core.Application.Services
             IPropertyRepository propertyRepository,
             IPropertyImageRepository propertyImageRepository,
             IPropertyTypeRepository propertyTypeRepository,
+            IPropertyImprovementRepository propertyImprovementRepository,
             IFileStorageService fileStorageService,
             IMapper mapper)
         {
             _propertyRepository = propertyRepository;
             _propertyImageRepository = propertyImageRepository;
             _propertyTypeRepository = propertyTypeRepository;
+            _propertyImprovementRepository = propertyImprovementRepository;
             _fileStorageService = fileStorageService;
             _mapper = mapper;
         }
@@ -60,6 +63,9 @@ namespace RealEstateApp.Core.Application.Services
             var images = await _propertyImageRepository.GetByPropertyIdAsync(id);
             vm.ExistingImages = images.Select(i => i.ImageUrl).ToList();
 
+            var improvements = await _propertyImprovementRepository.GetByPropertyIdAsync(id);
+            vm.ImprovementIds = improvements.Select(pi => pi.ImprovementId).ToList();
+
             return vm;
         }
 
@@ -79,6 +85,12 @@ namespace RealEstateApp.Core.Application.Services
 
             // Guardar entidad de propiedad
             property = await _propertyRepository.AddAsync(property);
+
+            // Guardar mejoras seleccionadas
+            if (vm.ImprovementIds != null && vm.ImprovementIds.Count > 0)
+            {
+                await _propertyImprovementRepository.UpdatePropertyImprovementsAsync(property.Id, vm.ImprovementIds);
+            }
 
             // Guardar imágenes si fueron subidas en lote
             if (vm.Files != null && vm.Files.Count > 0)
@@ -137,6 +149,12 @@ namespace RealEstateApp.Core.Application.Services
             property.FeaturedUntil = vm.FeaturedUntil;
 
             await _propertyRepository.UpdateAsync(property);
+
+            // Actualizar mejoras asociadas
+            if (vm.ImprovementIds != null)
+            {
+                await _propertyImprovementRepository.UpdatePropertyImprovementsAsync(id, vm.ImprovementIds);
+            }
 
             // Si se subieron nuevas imágenes
             if (vm.Files != null && vm.Files.Count > 0)

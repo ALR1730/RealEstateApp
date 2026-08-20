@@ -134,6 +134,36 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 query = query.Where(p => p.Bathrooms <= filters.MaxBathrooms.Value);
             }
 
+            if (filters.MinSizeInMeters.HasValue)
+            {
+                query = query.Where(p => p.SizeInMeters >= filters.MinSizeInMeters.Value);
+            }
+
+            if (filters.MaxSizeInMeters.HasValue)
+            {
+                query = query.Where(p => p.SizeInMeters <= filters.MaxSizeInMeters.Value);
+            }
+
+            if (filters.OnlyFinanciable == true)
+            {
+                query = query.Where(p => p.IsFinanciable);
+            }
+
+            if (filters.OnlyWithVirtualTour == true)
+            {
+                query = query.Where(p => 
+                    (p.MatterportModelId != null && p.MatterportModelId != "") ||
+                    (p.Tour360Url != null && p.Tour360Url != "") ||
+                    (p.VideoUrl != null && p.VideoUrl != "")
+                );
+            }
+
+            if (filters.ImprovementIds != null && filters.ImprovementIds.Count > 0)
+            {
+                query = query.Where(p => p.PropertyImprovements != null && 
+                    p.PropertyImprovements.Any(pi => filters.ImprovementIds.Contains(pi.ImprovementId)));
+            }
+
             if (!string.IsNullOrWhiteSpace(filters.AgentId))
             {
                 query = query.Where(p => p.AgentId == filters.AgentId);
@@ -167,7 +197,29 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
             }
 
-            return await query.ToListAsync();
+            var results = await query.ToListAsync();
+
+            if (filters.UserLat.HasValue && filters.UserLng.HasValue && filters.MaxDistanceKm.HasValue && filters.MaxDistanceKm.Value > 0)
+            {
+                var uLat = filters.UserLat.Value;
+                var uLng = filters.UserLng.Value;
+                var maxDist = filters.MaxDistanceKm.Value;
+                results = results.Where(p => p.Latitude != 0 && p.Longitude != 0 && CalculateDistanceKm(uLat, uLng, p.Latitude, p.Longitude) <= maxDist).ToList();
+            }
+
+            return results;
+        }
+
+        private static double CalculateDistanceKm(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double r = 6371.0; // Radio de la Tierra en km
+            var dLat = (lat2 - lat1) * Math.PI / 180.0;
+            var dLon = (lon2 - lon1) * Math.PI / 180.0;
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(lat1 * Math.PI / 180.0) * Math.Cos(lat2 * Math.PI / 180.0) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            return r * c;
         }
 
         /// <summary>

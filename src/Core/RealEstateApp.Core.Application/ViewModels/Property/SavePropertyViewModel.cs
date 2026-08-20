@@ -64,16 +64,20 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         [Display(Name = "Tipo de Venta")]
         public int SaleTypeId { get; set; }
 
+        [Required(ErrorMessage = "La provincia es requerida")]
         [Display(Name = "Provincia")]
         public int? ProvinceId { get; set; }
 
+        [Required(ErrorMessage = "El municipio es requerido")]
         [Display(Name = "Municipio")]
         public int? MunicipalityId { get; set; }
 
+        [Required(ErrorMessage = "El sector o barrio es requerido")]
         [StringLength(100, ErrorMessage = "El sector no puede exceder 100 caracteres")]
         [Display(Name = "Sector / Barrio")]
         public string? Sector { get; set; }
 
+        [Required(ErrorMessage = "La dirección completa es requerida")]
         [StringLength(300, ErrorMessage = "La dirección no puede exceder 300 caracteres")]
         [Display(Name = "Dirección Completa")]
         public string? FullAddress { get; set; }

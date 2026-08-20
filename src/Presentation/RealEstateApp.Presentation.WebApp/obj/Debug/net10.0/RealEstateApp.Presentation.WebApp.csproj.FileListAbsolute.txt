@@ -245,4 +245,4 @@ C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Pr
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\RealEstateApp.Presentation.WebApp.pdb
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\RealEstateApp.Presentation.WebApp.genruntimeconfig.cache
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\ref\RealEstateApp.Presentation.WebApp.dll
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\qhirg62he0-{0}-kyjl26v0nk-kyjl26v0nk.gz
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\qhirg62he0-{0}-y0injvlcfs-y0injvlcfs.gz
