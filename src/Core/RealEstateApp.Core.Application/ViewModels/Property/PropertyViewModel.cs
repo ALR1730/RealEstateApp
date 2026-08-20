@@ -37,6 +37,7 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         // Datos del agente
         public string AgentId { get; set; } = string.Empty;
         public string AgentName { get; set; } = string.Empty;
+        public bool IsAgentVerified { get; set; }
 
         // Campos multimedia y geolocalización
         public double Latitude { get; set; }

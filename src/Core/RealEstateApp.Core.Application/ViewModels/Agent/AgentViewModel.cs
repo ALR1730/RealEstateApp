@@ -14,6 +14,7 @@ namespace RealEstateApp.Core.Application.ViewModels.Agent
         public string Email { get; set; } = string.Empty;
         public string? Phone { get; set; }
         public bool IsActive { get; set; }
+        public bool IsVerified { get; set; }
 
         /// <summary>
         /// Cantidad de propiedades gestionadas por el agente.

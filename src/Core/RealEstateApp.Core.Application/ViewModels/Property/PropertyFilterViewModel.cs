@@ -61,6 +61,9 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         [Display(Name = "Solo Listados Destacados")]
         public bool? OnlyFeatured { get; set; }
 
+        [Display(Name = "Solo Agentes Verificados")]
+        public bool? OnlyVerifiedAgents { get; set; }
+
         [Range(1, int.MaxValue, ErrorMessage = "El número de página debe ser mayor o igual a 1")]
         [Display(Name = "Número de Página")]
         public int? PageNumber { get; set; }

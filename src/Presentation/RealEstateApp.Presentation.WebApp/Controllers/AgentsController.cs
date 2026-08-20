@@ -13,11 +13,16 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             _agentService = agentService;
         }
 
-        public async Task<IActionResult> Index(string? search = null, string? sort = null)
+        public async Task<IActionResult> Index(string? search = null, string? sort = null, bool? verified = null)
         {
             var agents = await _agentService.GetAllViewModelAsync();
             // Filtrar solo agentes activos para el directorio público
             var activeAgents = agents.FindAll(a => a.IsActive);
+
+            if (verified == true)
+            {
+                activeAgents = activeAgents.FindAll(a => a.IsVerified);
+            }
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -41,6 +46,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
 
             ViewBag.SearchTerm = search;
             ViewBag.SortOrder = sort;
+            ViewBag.OnlyVerified = verified;
             ViewBag.TotalCount = agents.Count(a => a.IsActive);
 
             return View(activeAgents);

@@ -310,6 +310,22 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                             await dbContext.Chats.AddRangeAsync(chats);
                         }
 
+                        // 5.4 Verificación de Identidad de Agentes
+                        if (!await dbContext.AgentVerifications.AnyAsync(v => v.AgentId == agent1.Id))
+                        {
+                            var adminUser = await userManager.FindByEmailAsync("admin@realestate.com");
+                            await dbContext.AgentVerifications.AddAsync(new AgentVerification
+                            {
+                                AgentId = agent1.Id,
+                                Cedula = "001-1234567-8",
+                                CedulaFrontImageUrl = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
+                                CedulaBackImageUrl = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
+                                Status = RealEstateApp.Core.Domain.Constants.VerificationStatus.Approved,
+                                ReviewedByAdminId = adminUser?.Id,
+                                ReviewedAt = DateTime.UtcNow.AddDays(-15)
+                            });
+                        }
+
                         await dbContext.SaveChangesAsync();
                     }
                 }

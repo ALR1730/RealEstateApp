@@ -111,6 +111,18 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 }
             }
 
+            // Resolver estado de verificación de identidad de los agentes
+            var verifications = await _verificationService.GetAllAsync();
+            var verifiedAgentIds = verifications
+                .Where(v => v.Status == "Approved" || v.Status == RealEstateApp.Core.Domain.Constants.VerificationStatus.Approved)
+                .Select(v => v.AgentId)
+                .ToHashSet();
+
+            foreach (var prop in properties)
+            {
+                prop.IsAgentVerified = verifiedAgentIds.Contains(prop.AgentId);
+            }
+
             ViewBag.Filters = filters;
             return View(properties);
         }

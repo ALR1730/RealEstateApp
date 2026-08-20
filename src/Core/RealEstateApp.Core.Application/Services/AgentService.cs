@@ -8,6 +8,7 @@ using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Agent;
 using RealEstateApp.Core.Application.ViewModels.Property;
+using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Enums;
 using RealEstateApp.Core.Domain.Exceptions;
 
@@ -26,6 +27,7 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IFavoriteRepository _favoriteRepository;
         private readonly IPropertyImageRepository _propertyImageRepository;
         private readonly IFileStorageService _fileStorageService;
+        private readonly IAgentVerificationRepository _agentVerificationRepository;
         private readonly IMapper _mapper;
 
         public AgentService(
@@ -36,6 +38,7 @@ namespace RealEstateApp.Core.Application.Services
             IFavoriteRepository favoriteRepository,
             IPropertyImageRepository propertyImageRepository,
             IFileStorageService fileStorageService,
+            IAgentVerificationRepository agentVerificationRepository,
             IMapper mapper)
         {
             _propertyRepository = propertyRepository;
@@ -45,6 +48,7 @@ namespace RealEstateApp.Core.Application.Services
             _favoriteRepository = favoriteRepository;
             _propertyImageRepository = propertyImageRepository;
             _fileStorageService = fileStorageService;
+            _agentVerificationRepository = agentVerificationRepository;
             _mapper = mapper;
         }
 
@@ -52,6 +56,11 @@ namespace RealEstateApp.Core.Application.Services
         {
             var agentUsers = await _accountService.GetUsersInRoleAsync(Roles.Agent.ToString());
             var allProperties = await _propertyRepository.GetAllAsync();
+            var verifications = await _agentVerificationRepository.GetAllAsync();
+            var verifiedAgentIds = verifications
+                .Where(v => v.Status == VerificationStatus.Approved)
+                .Select(v => v.AgentId)
+                .ToHashSet();
 
             var agentVms = new List<AgentViewModel>();
 
@@ -67,6 +76,7 @@ namespace RealEstateApp.Core.Application.Services
                     Email = user.Email,
                     Phone = user.PhoneNumber,
                     IsActive = user.IsActive,
+                    IsVerified = verifiedAgentIds.Contains(user.Id),
                     PropertiesCount = agentProperties.Count,
                     Properties = _mapper.Map<List<PropertyViewModel>>(agentProperties)
                 });
@@ -82,6 +92,8 @@ namespace RealEstateApp.Core.Application.Services
 
             var allProperties = await _propertyRepository.GetAllAsync();
             var agentProperties = allProperties.Where(p => p.AgentId == user.Id).ToList();
+            var verification = await _agentVerificationRepository.GetByAgentIdAsync(id);
+            bool isVerified = verification != null && verification.Status == VerificationStatus.Approved;
 
             return new AgentViewModel
             {
@@ -91,6 +103,7 @@ namespace RealEstateApp.Core.Application.Services
                 Email = user.Email,
                 Phone = user.PhoneNumber,
                 IsActive = user.IsActive,
+                IsVerified = isVerified,
                 PropertiesCount = agentProperties.Count,
                 Properties = _mapper.Map<List<PropertyViewModel>>(agentProperties)
             };
@@ -100,6 +113,11 @@ namespace RealEstateApp.Core.Application.Services
         {
             var agentUsers = await _accountService.GetUsersInRoleAsync(Roles.Agent.ToString());
             var allProperties = await _propertyRepository.GetAllAsync();
+            var verifications = await _agentVerificationRepository.GetAllAsync();
+            var verifiedAgentIds = verifications
+                .Where(v => v.Status == VerificationStatus.Approved)
+                .Select(v => v.AgentId)
+                .ToHashSet();
 
             var agentDtos = new List<AgentDto>();
 
@@ -115,6 +133,7 @@ namespace RealEstateApp.Core.Application.Services
                     Email = user.Email,
                     Phone = user.PhoneNumber,
                     IsActive = user.IsActive,
+                    IsVerified = verifiedAgentIds.Contains(user.Id),
                     PropertiesCount = agentProperties.Count,
                     Properties = agentProperties.Select(p => new AgentPropertyDto
                     {
@@ -140,6 +159,8 @@ namespace RealEstateApp.Core.Application.Services
 
             var allProperties = await _propertyRepository.GetAllAsync();
             var agentProperties = allProperties.Where(p => p.AgentId == user.Id).ToList();
+            var verification = await _agentVerificationRepository.GetByAgentIdAsync(id);
+            bool isVerified = verification != null && verification.Status == VerificationStatus.Approved;
 
             return new AgentDto
             {
@@ -149,6 +170,7 @@ namespace RealEstateApp.Core.Application.Services
                 Email = user.Email,
                 Phone = user.PhoneNumber,
                 IsActive = user.IsActive,
+                IsVerified = isVerified,
                 PropertiesCount = agentProperties.Count,
                 Properties = agentProperties.Select(p => new AgentPropertyDto
                 {

@@ -33,7 +33,7 @@
         <form asp-action="Index" method="get" id="filterForm">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="font-heading mb-0 text-dark"><i class="bi bi-sliders text-info me-2"></i> Filtros Combinados</h5>
-                @if (filters.PropertyTypeId.HasValue || filters.SaleTypeId.HasValue || filters.MinPrice.HasValue || filters.MaxPrice.HasValue || filters.MinRooms.HasValue || filters.MinBathrooms.HasValue || !string.IsNullOrEmpty(filters.Code))
+                @if (filters.PropertyTypeId.HasValue || filters.SaleTypeId.HasValue || filters.MinPrice.HasValue || filters.MaxPrice.HasValue || filters.MinRooms.HasValue || filters.MinBathrooms.HasValue || !string.IsNullOrEmpty(filters.Code) || filters.ProvinceId.HasValue || filters.MunicipalityId.HasValue || !string.IsNullOrEmpty(filters.Sector) || filters.OnlyFeatured == true || filters.OnlyVerifiedAgents == true)
                 {
                     <a asp-action="Index" class="btn btn-sm btn-link text-danger text-decoration-none fw-medium">
                         <i class="bi bi-x-circle me-1"></i> Limpiar Filtros
@@ -148,6 +148,15 @@
                     </div>
                 </div>
 
+                <div class="col-md-3 d-flex align-items-center">
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input" type="checkbox" name="OnlyVerifiedAgents" id="onlyVerifiedAgentsCheck" value="true" @(filters.OnlyVerifiedAgents == true ? "checked" : "") />
+                        <label class="form-check-label fw-bold text-dark small ms-1" for="onlyVerifiedAgentsCheck">
+                            <i class="bi bi-patch-check-fill text-primary me-1"></i> Solo Agentes Verificados
+                        </label>
+                    </div>
+                </div>
+
                 <div class="col-md-3 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary-gradient w-100 py-2">
                         <i class="bi bi-funnel-fill me-2"></i> Aplicar Filtros
@@ -224,8 +233,16 @@
                         <div class="card-body p-4 d-flex flex-column justify-content-between">
                             <div>
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge bg-light text-primary border">@item.PropertyTypeName</span>
-                                    <span class="badge bg-light text-dark border">@item.SaleTypeName</span>
+                                    <div class="d-flex gap-1">
+                                        <span class="badge bg-light text-primary border">@item.PropertyTypeName</span>
+                                        <span class="badge bg-light text-dark border">@item.SaleTypeName</span>
+                                    </div>
+                                    @if (item.IsAgentVerified)
+                                    {
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" title="Publicado por Agente Verificado">
+                                            <i class="bi bi-patch-check-fill text-primary me-1"></i> Verificado
+                                        </span>
+                                    }
                                 </div>
                                 @if (!string.IsNullOrEmpty(item.ProvinceName) || !string.IsNullOrEmpty(item.Sector))
                                 {

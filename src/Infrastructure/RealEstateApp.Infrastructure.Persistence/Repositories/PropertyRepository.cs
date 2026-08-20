@@ -21,6 +21,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
         public override async Task<List<Property>> GetAllAsync()
         {
             return await _dbContext.Set<Property>()
+                .AsNoTracking()
                 .Include(p => p.PropertyType)
                 .Include(p => p.SaleType)
                 .Include(p => p.Province)
@@ -29,6 +30,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .Include(p => p.PropertyImprovements!)
                     .ThenInclude(pi => pi.Improvement)
                 .Include(p => p.Favorites)
+                .AsSplitQuery()
                 .OrderByDescending(p => p.Created)
                 .ToListAsync();
         }
@@ -39,6 +41,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
         public override async Task<Property?> GetByIdAsync(int id)
         {
             return await _dbContext.Set<Property>()
+                .AsNoTracking()
                 .Include(p => p.PropertyType)
                 .Include(p => p.SaleType)
                 .Include(p => p.Province)
@@ -49,6 +52,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .Include(p => p.Favorites)
                 .Include(p => p.Offers)
                 .Include(p => p.Chats)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
@@ -58,6 +62,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
         public async Task<List<Property>> GetWithFiltersAsync(RealEstateApp.Core.Application.ViewModels.Property.PropertyFilterViewModel filters)
         {
             var query = _dbContext.Set<Property>()
+                .AsNoTracking()
                 .Include(p => p.PropertyType)
                 .Include(p => p.SaleType)
                 .Include(p => p.Province)
@@ -66,6 +71,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .Include(p => p.PropertyImprovements!)
                     .ThenInclude(pi => pi.Improvement)
                 .Include(p => p.Favorites)
+                .AsSplitQuery()
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(filters.Code))
@@ -139,6 +145,16 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 query = query.Where(p => p.IsFeatured && (!p.FeaturedUntil.HasValue || p.FeaturedUntil > now));
             }
 
+            if (filters.OnlyVerifiedAgents == true)
+            {
+                var verifiedAgentIds = await _dbContext.AgentVerifications
+                    .Where(v => v.Status == RealEstateApp.Core.Domain.Constants.VerificationStatus.Approved)
+                    .Select(v => v.AgentId)
+                    .ToListAsync();
+
+                query = query.Where(p => verifiedAgentIds.Contains(p.AgentId));
+            }
+
             var currentUtc = DateTime.UtcNow;
             query = query
                 .OrderByDescending(p => p.IsFeatured && (!p.FeaturedUntil.HasValue || p.FeaturedUntil > currentUtc))
@@ -160,6 +176,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
         public async Task<List<Property>> GetByAgentIdAsync(string agentId)
         {
             return await _dbContext.Set<Property>()
+                .AsNoTracking()
                 .Include(p => p.PropertyType)
                 .Include(p => p.SaleType)
                 .Include(p => p.Province)
@@ -168,6 +185,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .Include(p => p.PropertyImprovements!)
                     .ThenInclude(pi => pi.Improvement)
                 .Include(p => p.Favorites)
+                .AsSplitQuery()
                 .Where(p => p.AgentId == agentId)
                 .OrderByDescending(p => p.Created)
                 .ToListAsync();
@@ -179,6 +197,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
         public async Task<Property?> GetByCodeAsync(string code)
         {
             return await _dbContext.Set<Property>()
+                .AsNoTracking()
                 .Include(p => p.PropertyType)
                 .Include(p => p.SaleType)
                 .Include(p => p.Province)
@@ -187,6 +206,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .Include(p => p.PropertyImprovements!)
                     .ThenInclude(pi => pi.Improvement)
                 .Include(p => p.Favorites)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(p => p.Code == code);
         }
     }

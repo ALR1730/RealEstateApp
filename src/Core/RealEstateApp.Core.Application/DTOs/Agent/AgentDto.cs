@@ -35,6 +35,11 @@ namespace RealEstateApp.Core.Application.DTOs.Agent
         public bool IsActive { get; set; }
 
         /// <summary>
+        /// Indica si el agente tiene su identidad formalmente verificada.
+        /// </summary>
+        public bool IsVerified { get; set; }
+
+        /// <summary>
         /// Resumen de propiedades del agente (para endpoint de detalle).
         /// </summary>
         public List<AgentPropertyDto>? Properties { get; set; }

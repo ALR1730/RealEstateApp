@@ -3,7 +3,8 @@
     ViewData["Title"] = "Directorio de Agentes";
     var searchTerm = ViewBag.SearchTerm as string ?? "";
     var sortOrder = ViewBag.SortOrder as string ?? "";
-    var hasActiveFilters = !string.IsNullOrWhiteSpace(searchTerm) || !string.IsNullOrWhiteSpace(sortOrder);
+    var onlyVerified = ViewBag.OnlyVerified as bool? ?? false;
+    var hasActiveFilters = !string.IsNullOrWhiteSpace(searchTerm) || !string.IsNullOrWhiteSpace(sortOrder) || onlyVerified;
 }
 
 <div class="container py-5">
@@ -21,7 +22,7 @@
         <form asp-action="Index" method="get" id="agentFilterForm">
             <div class="row g-3 align-items-center">
                 <!-- Buscador de texto -->
-                <div class="col-12 col-md-6 col-lg-7">
+                <div class="col-12 col-md-5 col-lg-5">
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0 text-muted ps-3">
                             <i class="bi bi-search"></i>
@@ -31,7 +32,7 @@
                                id="agentSearchInput" 
                                value="@searchTerm" 
                                class="form-control form-control-custom border-start-0 ps-2" 
-                               placeholder="Filtrar por nombre, apellido, correo o teléfono..." 
+                               placeholder="Filtrar por nombre, correo o teléfono..." 
                                autocomplete="off" />
                         @if (!string.IsNullOrEmpty(searchTerm))
                         {
@@ -43,7 +44,7 @@
                 </div>
 
                 <!-- Ordenamiento -->
-                <div class="col-12 col-sm-7 col-md-4 col-lg-3">
+                <div class="col-12 col-sm-6 col-md-3 col-lg-3">
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0 text-muted">
                             <i class="bi bi-sort-down"></i>
@@ -57,8 +58,18 @@
                     </div>
                 </div>
 
+                <!-- Filtro Solo Verificados -->
+                <div class="col-12 col-sm-6 col-md-2 col-lg-2 d-flex align-items-center">
+                    <div class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" name="verified" id="onlyVerifiedAgentsCheck" value="true" @(onlyVerified ? "checked" : "") />
+                        <label class="form-check-label fw-bold text-dark small ms-1" for="onlyVerifiedAgentsCheck" style="cursor: pointer;">
+                            <i class="bi bi-patch-check-fill text-primary me-1"></i> Solo Verificados
+                        </label>
+                    </div>
+                </div>
+
                 <!-- Botón Buscar & Limpiar -->
-                <div class="col-12 col-sm-5 col-md-2 col-lg-2 d-flex gap-2">
+                <div class="col-12 col-md-2 col-lg-2 d-flex gap-2">
                     <button type="submit" class="btn btn-primary-gradient w-100 py-2">
                         <i class="bi bi-funnel-fill me-1"></i> Filtrar
                     </button>
@@ -81,11 +92,11 @@
                 </span>
                 @if (hasActiveFilters)
                 {
-                    <span class="ms-2 badge bg-light text-secondary border">Filtros aplicados</span>
+                    <span class="ms-2 badge bg-light text-secondary border">Filtros activos</span>
                 }
             </div>
             <div class="text-end">
-                <span class="text-muted"><i class="bi bi-info-circle me-1"></i> Búsqueda en tiempo real habilitada</span>
+                <span class="text-muted"><i class="bi bi-patch-check text-primary me-1"></i> Insignia oficial de verificación de identidad</span>
             </div>
         </div>
     </div>
@@ -115,7 +126,7 @@
         <div id="noLiveResults" class="text-center py-5 bg-white rounded-4 shadow-sm border d-none">
             <i class="bi bi-search fs-1 text-muted d-block mb-3"></i>
             <h5 class="font-heading text-dark">No se encontraron agentes con ese criterio</h5>
-            <p class="text-muted small">Prueba escribiendo otro término o restablece el buscador.</p>
+            <p class="text-muted small">Prueba cambiando los filtros o restableciendo la búsqueda.</p>
             <button type="button" id="btnClearLiveSearch" class="btn btn-outline-custom rounded-pill mt-2">
                 <i class="bi bi-arrow-counterclockwise me-1"></i> Borrar Búsqueda
             </button>
@@ -129,17 +140,36 @@
                      data-name="@(agent.FullName?.ToLower() ?? "")" 
                      data-email="@(agent.Email?.ToLower() ?? "")" 
                      data-phone="@(agent.Phone?.ToLower() ?? "")"
-                     data-properties="@agent.PropertiesCount">
+                     data-properties="@agent.PropertiesCount"
+                     data-verified="@agent.IsVerified.ToString().ToLower()">
                     <div class="agent-card h-100 d-flex flex-column justify-content-between">
                         <div>
-                            <div class="bg-primary text-white agent-avatar d-flex align-items-center justify-content-center fw-bold fs-2 shadow-sm">
-                                @(string.IsNullOrEmpty(agent.FullName?.Trim()) ? agent.Email.Substring(0, 1).ToUpper() : agent.FullName.Substring(0, 1).ToUpper())
+                            <div class="position-relative d-inline-block mx-auto">
+                                <div class="bg-primary text-white agent-avatar d-flex align-items-center justify-content-center fw-bold fs-2 shadow-sm">
+                                    @(string.IsNullOrWhiteSpace(agent.FullName) ? (string.IsNullOrEmpty(agent.Email) ? "A" : agent.Email.Substring(0, 1).ToUpper()) : agent.FullName.Substring(0, 1).ToUpper())
+                                </div>
+                                @if (agent.IsVerified)
+                                {
+                                    <span class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-1 shadow border border-2 border-white d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; transform: translate(5px, -5px);" title="Agente Verificado Oficialmente">
+                                        <i class="bi bi-patch-check-fill text-warning fs-6"></i>
+                                    </span>
+                                }
                             </div>
 
                             <h5 class="font-heading text-dark fw-bold mb-1 agent-name-text">@agent.FullName</h5>
-                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1 rounded-pill mb-3">
-                                <i class="bi bi-shield-check me-1"></i> Agente Activo
-                            </span>
+                            
+                            @if (agent.IsVerified)
+                            {
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1 rounded-pill mb-3">
+                                    <i class="bi bi-patch-check-fill text-primary me-1"></i> Agente Verificado ✅
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-1 rounded-pill mb-3">
+                                    <i class="bi bi-person-check me-1"></i> Agente Activo
+                                </span>
+                            }
 
                             <div class="text-start bg-light p-3 rounded-3 border mb-3">
                                 <p class="small text-muted mb-1 text-truncate" title="@agent.Email">
@@ -172,15 +202,17 @@
     <script>
         $(document).ready(function () {
             const $searchInput = $('#agentSearchInput');
+            const $verifiedCheck = $('#onlyVerifiedAgentsCheck');
             const $agentCards = $('.agent-item-col');
             const $countDisplay = $('#agentDisplayCount');
             const $noLiveResults = $('#noLiveResults');
             const $agentsGrid = $('#agentsGrid');
             const $sortSelect = $('#agentSortSelect');
 
-            // Filtrado interactivo en tiempo real al escribir
+            // Filtrado interactivo en tiempo real al escribir o alternar el switch
             function filterAgentsLive() {
                 const query = $searchInput.val().toLowerCase().trim();
+                const onlyVerified = $verifiedCheck.is(':checked');
                 let visibleCount = 0;
 
                 $agentCards.each(function () {
@@ -188,13 +220,16 @@
                     const name = $card.data('name') || '';
                     const email = $card.data('email') || '';
                     const phone = $card.data('phone') || '';
+                    const isVerified = $card.data('verified') === true || $card.data('verified') === 'true';
 
-                    const matches = !query || 
+                    const matchesQuery = !query || 
                         name.indexOf(query) !== -1 || 
                         email.indexOf(query) !== -1 || 
                         phone.indexOf(query) !== -1;
 
-                    if (matches) {
+                    const matchesVerified = !onlyVerified || isVerified;
+
+                    if (matchesQuery && matchesVerified) {
                         $card.removeClass('d-none');
                         visibleCount++;
                     } else {
@@ -213,14 +248,20 @@
                 }
             }
 
-            // Evento input en tiempo real con debouncing sutil
+            // Evento input en tiempo real
             $searchInput.on('input', function () {
+                filterAgentsLive();
+            });
+
+            // Evento cambio de switch verificado en tiempo real
+            $verifiedCheck.on('change', function () {
                 filterAgentsLive();
             });
 
             // Botón para borrar búsqueda en tiempo real
             $('#btnClearLiveSearch').on('click', function () {
                 $searchInput.val('');
+                $verifiedCheck.prop('checked', false);
                 filterAgentsLive();
                 $searchInput.focus();
             });
