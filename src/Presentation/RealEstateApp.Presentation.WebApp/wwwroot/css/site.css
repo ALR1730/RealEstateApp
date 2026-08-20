@@ -373,6 +373,14 @@ header {
   box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
 }
 
+/* Agent Search Card */
+.agent-search-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 1px solid #e2e8f0;
+  box-shadow: var(--shadow-md);
+}
+
 /* Agent Card */
 .agent-card {
   background: #ffffff;
@@ -607,7 +615,8 @@ header {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
 }
 
-[data-theme="dark"] .search-filter-card {
+[data-theme="dark"] .search-filter-card,
+[data-theme="dark"] .agent-search-card {
   background: rgba(30, 41, 59, 0.95) !important;
   border: 1px solid #334155 !important;
 }

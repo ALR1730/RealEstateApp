@@ -1,41 +1,153 @@
 @model List<RealEstateApp.Core.Application.ViewModels.Agent.AgentViewModel>
 @{
     ViewData["Title"] = "Directorio de Agentes";
+    var searchTerm = ViewBag.SearchTerm as string ?? "";
+    var sortOrder = ViewBag.SortOrder as string ?? "";
+    var hasActiveFilters = !string.IsNullOrWhiteSpace(searchTerm) || !string.IsNullOrWhiteSpace(sortOrder);
 }
 
 <div class="container py-5">
-    <div class="text-center max-w-2xl mx-auto mb-5">
+    <!-- Header Title Section -->
+    <div class="text-center max-w-2xl mx-auto mb-4">
+        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 rounded-pill mb-2">
+            <i class="bi bi-people-fill me-1"></i> Asesores Inmobiliarios
+        </span>
         <h2 class="font-heading fw-bold text-dark mb-2">Directorio de Agentes Autorizados</h2>
         <p class="text-muted lead fs-6">Conoce a nuestros asesores inmobiliarios expertos listos para brindarte acompañamiento profesional en la compra o alquiler de inmuebles.</p>
     </div>
 
+    <!-- Barra de Navegación y Filtros para Agentes -->
+    <div class="agent-search-card rounded-4 p-3 p-md-4 mb-5">
+        <form asp-action="Index" method="get" id="agentFilterForm">
+            <div class="row g-3 align-items-center">
+                <!-- Buscador de texto -->
+                <div class="col-12 col-md-6 col-lg-7">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted ps-3">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" 
+                               name="search" 
+                               id="agentSearchInput" 
+                               value="@searchTerm" 
+                               class="form-control form-control-custom border-start-0 ps-2" 
+                               placeholder="Filtrar por nombre, apellido, correo o teléfono..." 
+                               autocomplete="off" />
+                        @if (!string.IsNullOrEmpty(searchTerm))
+                        {
+                            <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center" title="Borrar búsqueda">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                <!-- Ordenamiento -->
+                <div class="col-12 col-sm-7 col-md-4 col-lg-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted">
+                            <i class="bi bi-sort-down"></i>
+                        </span>
+                        <select name="sort" id="agentSortSelect" class="form-select form-select-custom border-start-0">
+                            <option value="" selected="@(string.IsNullOrEmpty(sortOrder))">Nombre: A - Z</option>
+                            <option value="name_desc" selected="@(sortOrder == "name_desc")">Nombre: Z - A</option>
+                            <option value="properties_desc" selected="@(sortOrder == "properties_desc")">Más propiedades</option>
+                            <option value="properties_asc" selected="@(sortOrder == "properties_asc")">Menos propiedades</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botón Buscar & Limpiar -->
+                <div class="col-12 col-sm-5 col-md-2 col-lg-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary-gradient w-100 py-2">
+                        <i class="bi bi-funnel-fill me-1"></i> Filtrar
+                    </button>
+                    @if (hasActiveFilters)
+                    {
+                        <a asp-action="Index" class="btn btn-outline-danger py-2" title="Restablecer filtros">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+        </form>
+
+        <!-- Indicador de Resultados y Filtros Rápidos -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 pt-3 border-top text-muted small">
+            <div>
+                <span class="fw-semibold text-dark">
+                    <i class="bi bi-person-check me-1 text-primary"></i> 
+                    Mostrando <span id="agentDisplayCount">@(Model?.Count ?? 0)</span> agentes
+                </span>
+                @if (hasActiveFilters)
+                {
+                    <span class="ms-2 badge bg-light text-secondary border">Filtros aplicados</span>
+                }
+            </div>
+            <div class="text-end">
+                <span class="text-muted"><i class="bi bi-info-circle me-1"></i> Búsqueda en tiempo real habilitada</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensaje cuando no hay agentes en el servidor -->
     @if (Model == null || Model.Count == 0)
     {
         <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
             <i class="bi bi-person-x fs-1 text-muted d-block mb-3"></i>
-            <h5 class="font-heading text-dark">No hay agentes disponibles en este momento</h5>
+            <h5 class="font-heading text-dark">No se encontraron agentes registrados</h5>
+            @if (hasActiveFilters)
+            {
+                <p class="text-muted small">No hubo coincidencias con los criterios de búsqueda actuales.</p>
+                <a asp-action="Index" class="btn btn-outline-custom rounded-pill mt-2">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Restablecer Filtros
+                </a>
+            }
+            else
+            {
+                <p class="text-muted small">No hay agentes activos registrados en el sistema en este momento.</p>
+            }
         </div>
     }
     else
     {
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        <!-- Mensaje cuando el filtro en vivo de JavaScript no encuentra resultados -->
+        <div id="noLiveResults" class="text-center py-5 bg-white rounded-4 shadow-sm border d-none">
+            <i class="bi bi-search fs-1 text-muted d-block mb-3"></i>
+            <h5 class="font-heading text-dark">No se encontraron agentes con ese criterio</h5>
+            <p class="text-muted small">Prueba escribiendo otro término o restablece el buscador.</p>
+            <button type="button" id="btnClearLiveSearch" class="btn btn-outline-custom rounded-pill mt-2">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Borrar Búsqueda
+            </button>
+        </div>
+
+        <!-- Grid de Agentes -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" id="agentsGrid">
             @foreach (var agent in Model)
             {
-                <div class="col">
+                <div class="col agent-item-col" 
+                     data-name="@(agent.FullName?.ToLower() ?? "")" 
+                     data-email="@(agent.Email?.ToLower() ?? "")" 
+                     data-phone="@(agent.Phone?.ToLower() ?? "")"
+                     data-properties="@agent.PropertiesCount">
                     <div class="agent-card h-100 d-flex flex-column justify-content-between">
                         <div>
                             <div class="bg-primary text-white agent-avatar d-flex align-items-center justify-content-center fw-bold fs-2 shadow-sm">
                                 @(string.IsNullOrEmpty(agent.FullName?.Trim()) ? agent.Email.Substring(0, 1).ToUpper() : agent.FullName.Substring(0, 1).ToUpper())
                             </div>
 
-                            <h5 class="font-heading text-dark fw-bold mb-1">@agent.FullName</h5>
+                            <h5 class="font-heading text-dark fw-bold mb-1 agent-name-text">@agent.FullName</h5>
                             <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1 rounded-pill mb-3">
                                 <i class="bi bi-shield-check me-1"></i> Agente Activo
                             </span>
 
                             <div class="text-start bg-light p-3 rounded-3 border mb-3">
-                                <p class="small text-muted mb-1"><i class="bi bi-envelope-fill me-2 text-primary"></i> @agent.Email</p>
-                                <p class="small text-muted mb-0"><i class="bi bi-telephone-fill me-2 text-primary"></i> @(string.IsNullOrEmpty(agent.Phone) ? "No especificado" : agent.Phone)</p>
+                                <p class="small text-muted mb-1 text-truncate" title="@agent.Email">
+                                    <i class="bi bi-envelope-fill me-2 text-primary"></i> @agent.Email
+                                </p>
+                                <p class="small text-muted mb-0">
+                                    <i class="bi bi-telephone-fill me-2 text-primary"></i> @(string.IsNullOrEmpty(agent.Phone) ? "No especificado" : agent.Phone)
+                                </p>
                             </div>
                         </div>
 
@@ -55,3 +167,68 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            const $searchInput = $('#agentSearchInput');
+            const $agentCards = $('.agent-item-col');
+            const $countDisplay = $('#agentDisplayCount');
+            const $noLiveResults = $('#noLiveResults');
+            const $agentsGrid = $('#agentsGrid');
+            const $sortSelect = $('#agentSortSelect');
+
+            // Filtrado interactivo en tiempo real al escribir
+            function filterAgentsLive() {
+                const query = $searchInput.val().toLowerCase().trim();
+                let visibleCount = 0;
+
+                $agentCards.each(function () {
+                    const $card = $(this);
+                    const name = $card.data('name') || '';
+                    const email = $card.data('email') || '';
+                    const phone = $card.data('phone') || '';
+
+                    const matches = !query || 
+                        name.indexOf(query) !== -1 || 
+                        email.indexOf(query) !== -1 || 
+                        phone.indexOf(query) !== -1;
+
+                    if (matches) {
+                        $card.removeClass('d-none');
+                        visibleCount++;
+                    } else {
+                        $card.addClass('d-none');
+                    }
+                });
+
+                $countDisplay.text(visibleCount);
+
+                if (visibleCount === 0 && $agentCards.length > 0) {
+                    $noLiveResults.removeClass('d-none');
+                    $agentsGrid.addClass('d-none');
+                } else {
+                    $noLiveResults.addClass('d-none');
+                    $agentsGrid.removeClass('d-none');
+                }
+            }
+
+            // Evento input en tiempo real con debouncing sutil
+            $searchInput.on('input', function () {
+                filterAgentsLive();
+            });
+
+            // Botón para borrar búsqueda en tiempo real
+            $('#btnClearLiveSearch').on('click', function () {
+                $searchInput.val('');
+                filterAgentsLive();
+                $searchInput.focus();
+            });
+
+            // Enviar formulario cuando se cambie el selector de orden
+            $sortSelect.on('change', function () {
+                $('#agentFilterForm').submit();
+            });
+        });
+    </script>
+}
