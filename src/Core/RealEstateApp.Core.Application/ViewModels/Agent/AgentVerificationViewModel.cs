@@ -8,14 +8,13 @@ namespace RealEstateApp.Core.Application.ViewModels.Agent
     public class AgentVerificationViewModel
     {
         public int Id { get; set; }
-        public string AgentId { get; set; } = string.Empty;
-        public string AgentName { get; set; } = string.Empty;
-        public string AgentEmail { get; set; } = string.Empty;
-        public string AgentPhone { get; set; } = string.Empty;
+        public string? AgentId { get; set; }
+        public string? AgentName { get; set; }
+        public string? AgentEmail { get; set; }
+        public string? AgentPhone { get; set; }
 
-        [Required(ErrorMessage = "La cédula es requerida")]
-        [StringLength(15, MinimumLength = 11, ErrorMessage = "El formato de cédula debe tener 11 dígitos")]
-        [Display(Name = "Cédula de Identidad (ej. 001-1234567-8)")]
+        [Required(ErrorMessage = "El número de cédula es obligatorio.")]
+        [Display(Name = "Cédula de Identidad")]
         public string Cedula { get; set; } = string.Empty;
 
         [Display(Name = "Foto Frontal de la Cédula")]

@@ -50,7 +50,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Properties()
+        public async Task<IActionResult> Properties(AgentPropertyFilterViewModel filter)
         {
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
@@ -58,8 +58,59 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var properties = await _propertyService.GetByAgentId(userId);
-            return View(properties);
+            var allProperties = await _propertyService.GetByAgentId(userId);
+
+            // Calcular estadísticas
+            filter.TotalPropertiesCount = allProperties.Count;
+            filter.AvailableCount = allProperties.Count(p => p.Status == RealEstateApp.Core.Domain.Constants.PropertyStatus.Available);
+            filter.ReservedCount = allProperties.Count(p => p.Status == RealEstateApp.Core.Domain.Constants.PropertyStatus.Reserved);
+            filter.SoldCount = allProperties.Count(p => p.Status == RealEstateApp.Core.Domain.Constants.PropertyStatus.Sold);
+            filter.FeaturedCount = allProperties.Count(p => p.IsCurrentlyFeatured);
+
+            // Aplicar filtros
+            var filtered = allProperties.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
+            {
+                var term = filter.SearchTerm.Trim().ToLower();
+                filtered = filtered.Where(p => 
+                    (p.Name != null && p.Name.ToLower().Contains(term)) ||
+                    (p.Code != null && p.Code.ToLower().Contains(term)) ||
+                    (p.Sector != null && p.Sector.ToLower().Contains(term)) ||
+                    (p.FullAddress != null && p.FullAddress.ToLower().Contains(term))
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Status))
+            {
+                filtered = filtered.Where(p => string.Equals(p.Status, filter.Status, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (filter.PropertyTypeId.HasValue && filter.PropertyTypeId.Value > 0)
+            {
+                filtered = filtered.Where(p => p.PropertyTypeId == filter.PropertyTypeId.Value);
+            }
+
+            if (filter.SaleTypeId.HasValue && filter.SaleTypeId.Value > 0)
+            {
+                filtered = filtered.Where(p => p.SaleTypeId == filter.SaleTypeId.Value);
+            }
+
+            if (filter.OnlyFeatured)
+            {
+                filtered = filtered.Where(p => p.IsCurrentlyFeatured);
+            }
+
+            filter.Properties = filtered.ToList();
+
+            // Cargar dropdowns
+            var propTypes = await _propertyTypeService.GetAllViewModel();
+            filter.PropertyTypes = propTypes.Select(pt => new RealEstateApp.Core.Application.ViewModels.Property.PropertyTypeViewModel { Id = pt.Id, Name = pt.Name }).ToList();
+
+            var saleTypes = await _saleTypeService.GetAllViewModel();
+            filter.SaleTypes = saleTypes.Select(st => new RealEstateApp.Core.Application.ViewModels.Property.SaleTypeViewModel { Id = st.Id, Name = st.Name }).ToList();
+
+            return View(filter);
         }
 
         [HttpGet]
@@ -315,10 +366,21 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             }
 
             vm.AgentId = userId;
+            ModelState.Remove("AgentId");
+            ModelState.Remove("AgentName");
+            ModelState.Remove("AgentEmail");
+            ModelState.Remove("AgentPhone");
+            ModelState.Remove("Status");
+            ModelState.Remove("FrontImageUrl");
+            ModelState.Remove("BackImageUrl");
 
             if (string.IsNullOrWhiteSpace(vm.Cedula))
             {
                 ModelState.AddModelError("Cedula", "El número de cédula es obligatorio.");
+            }
+            else
+            {
+                vm.Cedula = vm.Cedula.Trim();
             }
 
             var existing = await _verificationService.GetByAgentIdAsync(userId);

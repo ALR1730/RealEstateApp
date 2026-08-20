@@ -69,7 +69,8 @@ namespace RealEstateApp.Core.Application.Services
 
         public async Task<bool> SubmitVerificationAsync(AgentVerificationViewModel vm)
         {
-            var existing = await _verificationRepository.GetByAgentIdAsync(vm.AgentId);
+            var agentId = vm.AgentId ?? string.Empty;
+            var existing = await _verificationRepository.GetByAgentIdAsync(agentId);
 
             string? frontUrl = existing?.CedulaFrontImageUrl;
             string? backUrl = existing?.CedulaBackImageUrl;
@@ -102,7 +103,7 @@ namespace RealEstateApp.Core.Application.Services
             {
                 var newEntity = new AgentVerification
                 {
-                    AgentId = vm.AgentId,
+                    AgentId = agentId,
                     Cedula = vm.Cedula,
                     CedulaFrontImageUrl = frontUrl ?? string.Empty,
                     CedulaBackImageUrl = backUrl ?? string.Empty,
@@ -157,7 +158,12 @@ namespace RealEstateApp.Core.Application.Services
             var agent = await _userManager.FindByIdAsync(agentId);
             if (agent != null)
             {
-                vm.AgentName = agent.UserName ?? "Agente";
+                var claims = await _userManager.GetClaimsAsync(agent);
+                var firstName = claims.FirstOrDefault(c => c.Type == "FirstName")?.Value;
+                var lastName = claims.FirstOrDefault(c => c.Type == "LastName")?.Value;
+                var fullName = $"{firstName} {lastName}".Trim();
+
+                vm.AgentName = !string.IsNullOrEmpty(fullName) ? fullName : (agent.UserName ?? "Agente");
                 vm.AgentEmail = agent.Email ?? string.Empty;
                 vm.AgentPhone = agent.PhoneNumber ?? string.Empty;
             }
@@ -167,7 +173,12 @@ namespace RealEstateApp.Core.Application.Services
                 var admin = await _userManager.FindByIdAsync(adminId);
                 if (admin != null)
                 {
-                    vm.ReviewedByAdminName = admin.UserName ?? "Administrador";
+                    var adminClaims = await _userManager.GetClaimsAsync(admin);
+                    var adminFirst = adminClaims.FirstOrDefault(c => c.Type == "FirstName")?.Value;
+                    var adminLast = adminClaims.FirstOrDefault(c => c.Type == "LastName")?.Value;
+                    var adminFull = $"{adminFirst} {adminLast}".Trim();
+
+                    vm.ReviewedByAdminName = !string.IsNullOrEmpty(adminFull) ? adminFull : (admin.UserName ?? "Administrador");
                 }
             }
         }

@@ -163,7 +163,6 @@ C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Pr
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\scopedcss\bundle\RealEstateApp.Presentation.WebApp.styles.css
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\scopedcss\projectbundle\RealEstateApp.Presentation.WebApp.bundle.scp.css
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\qhirg62he0-{0}-a44fmtwm35-a44fmtwm35.gz
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\ywkwxnzoch-{0}-61n19gt1b8-61n19gt1b8.gz
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\i941io02m8-{0}-ack84cqdar-ack84cqdar.gz
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\tbkua93xij-{0}-tx8enrqmqc-tx8enrqmqc.gz
@@ -246,3 +245,4 @@ C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Pr
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\RealEstateApp.Presentation.WebApp.pdb
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\RealEstateApp.Presentation.WebApp.genruntimeconfig.cache
 C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\ref\RealEstateApp.Presentation.WebApp.dll
+C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\obj\Debug\net10.0\compressed\qhirg62he0-{0}-jmww8u4n5f-jmww8u4n5f.gz

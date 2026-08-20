@@ -65,6 +65,24 @@ header {
   z-index: 1060 !important;
 }
 
+/* User Menu Dropdown - scrollable para que no se corte en páginas cortas */
+.navbar-custom .dropdown-menu {
+  max-height: 80vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100,100,100,0.3) transparent;
+}
+.navbar-custom .dropdown-menu::-webkit-scrollbar {
+  width: 5px;
+}
+.navbar-custom .dropdown-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+.navbar-custom .dropdown-menu::-webkit-scrollbar-thumb {
+  background-color: rgba(100,100,100,0.3);
+  border-radius: 10px;
+}
+
 .modal-backdrop {
   z-index: 1065 !important;
 }
@@ -281,6 +299,30 @@ header {
   position: relative;
   z-index: 10;
   border: 1px solid #e2e8f0;
+}
+
+/* Custom Form Controls */
+.form-control-custom,
+.form-select-custom {
+  border-radius: var(--radius-md);
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.92rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.form-control-custom:focus,
+.form-select-custom:focus {
+  border-color: var(--color-accent-blue);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+/* Hover shadow utility */
+.hover-shadow {
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.hover-shadow:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
 }
 
 /* Custom Buttons */
