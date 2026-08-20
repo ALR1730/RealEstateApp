@@ -75,7 +75,16 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card-property" data-href="@Url.Action("Details", "Home", new { id = item.Id })">
                         <div class="img-container">
-                            <span class="code-badge">Código: @item.Code</span>
+                            @if (item.IsCurrentlyFeatured)
+                            {
+                                <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-3 fw-bold shadow-sm" style="z-index: 5; font-size: 0.78rem; border-radius: 8px;">
+                                    <i class="bi bi-star-fill me-1 text-dark"></i> DESTACADO
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="code-badge">Código: @item.Code</span>
+                            }
                             
                             @{
                                 var displayStatus = (item.Status == "Disponible" && item.IsFinanciable) ? "Financiable" : item.Status;
@@ -101,9 +110,13 @@
 
                         <div class="card-body p-4 d-flex flex-column justify-content-between">
                             <div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex flex-wrap align-items-center gap-1 mb-2">
                                     <span class="badge bg-light text-primary border">@item.PropertyTypeName</span>
                                     <span class="badge bg-light text-dark border">@item.SaleTypeName</span>
+                                    @if (item.IsCurrentlyFeatured)
+                                    {
+                                        <span class="badge bg-light text-muted border">Cód: @item.Code</span>
+                                    }
                                 </div>
                                 <h5 class="font-heading fw-bold text-dark mb-1 text-truncate" title="@item.Name">@item.Name</h5>
                                 <p class="text-muted small mb-3 text-truncate-2">@item.Description</p>

@@ -11,5 +11,6 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         Task<AgentSubscriptionDashboardViewModel> GetAgentDashboardViewModelAsync(string agentId);
         Task<bool> SubscribeAgentAsync(string agentId, int planId);
         Task<bool> CanAgentCreatePropertyAsync(string agentId);
+        Task<(bool Allowed, string Message)> CanAgentFeaturePropertyAsync(string agentId, int propertyId = 0);
     }
 }

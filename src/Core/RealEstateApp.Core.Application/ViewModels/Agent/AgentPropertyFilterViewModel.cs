@@ -22,5 +22,7 @@ namespace RealEstateApp.Core.Application.ViewModels.Agent
         public int ReservedCount { get; set; }
         public int SoldCount { get; set; }
         public int FeaturedCount { get; set; }
+        public int MaxFeaturedAllowed { get; set; }
+        public string PlanName { get; set; } = string.Empty;
     }
 }

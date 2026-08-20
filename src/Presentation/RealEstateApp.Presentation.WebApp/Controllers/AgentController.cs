@@ -59,6 +59,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             }
 
             var allProperties = await _propertyService.GetByAgentId(userId);
+            var currentSub = await _subscriptionService.GetCurrentSubscriptionByAgentIdAsync(userId);
 
             // Calcular estadísticas
             filter.TotalPropertiesCount = allProperties.Count;
@@ -66,6 +67,8 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             filter.ReservedCount = allProperties.Count(p => p.Status == RealEstateApp.Core.Domain.Constants.PropertyStatus.Reserved);
             filter.SoldCount = allProperties.Count(p => p.Status == RealEstateApp.Core.Domain.Constants.PropertyStatus.Sold);
             filter.FeaturedCount = allProperties.Count(p => p.IsCurrentlyFeatured);
+            filter.MaxFeaturedAllowed = currentSub?.MaxFeaturedProperties ?? 0;
+            filter.PlanName = currentSub?.PlanName ?? "Gratuito";
 
             // Aplicar filtros
             var filtered = allProperties.AsEnumerable();
@@ -113,6 +116,44 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             return View(filter);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleFeatured(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var property = await _propertyService.GetByIdSaveViewModel(id);
+            if (property == null || property.AgentId != userId)
+            {
+                TempData["ErrorMessage"] = "No tienes permisos para modificar esta propiedad.";
+                return RedirectToAction(nameof(Properties));
+            }
+
+            if (property.IsFeatured)
+            {
+                await _propertyService.ToggleFeaturedAsync(id, 30);
+                TempData["SuccessMessage"] = $"El inmueble '{property.Name}' ha sido retirado de la sección de Destacados.";
+            }
+            else
+            {
+                var validation = await _subscriptionService.CanAgentFeaturePropertyAsync(userId, id);
+                if (!validation.Allowed)
+                {
+                    TempData["ErrorMessage"] = validation.Message;
+                    return RedirectToAction(nameof(Properties));
+                }
+
+                await _propertyService.ToggleFeaturedAsync(id, 30);
+                TempData["SuccessMessage"] = $"¡El inmueble '{property.Name}' ahora está DESTACADO en el catálogo principal! ⭐";
+            }
+
+            return RedirectToAction(nameof(Properties));
+        }
+
         [HttpGet]
         public async Task<IActionResult> CreateProperty()
         {
@@ -128,6 +169,13 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 TempData["ErrorMessage"] = "Has alcanzado el límite máximo de propiedades permitidas por tu plan de suscripción actual. Actualiza tu plan para continuar publicando.";
                 return RedirectToAction(nameof(Subscriptions));
             }
+
+            var canFeature = await _subscriptionService.CanAgentFeaturePropertyAsync(userId, 0);
+            var currentSub = await _subscriptionService.GetCurrentSubscriptionByAgentIdAsync(userId);
+            ViewBag.CanFeature = canFeature.Allowed;
+            ViewBag.MaxFeatured = currentSub?.MaxFeaturedProperties ?? 0;
+            ViewBag.PlanName = currentSub?.PlanName ?? "Gratuito";
+            ViewBag.FeatureMessage = canFeature.Message;
 
             var vm = new SavePropertyViewModel();
             await PopulateDropdowns(vm);
@@ -151,16 +199,33 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return RedirectToAction(nameof(Subscriptions));
             }
 
+            if (vm.IsFeatured)
+            {
+                var featureCheck = await _subscriptionService.CanAgentFeaturePropertyAsync(userId, 0);
+                if (!featureCheck.Allowed)
+                {
+                    ModelState.AddModelError("IsFeatured", featureCheck.Message);
+                    vm.IsFeatured = false;
+                }
+            }
+
             vm.AgentId = userId;
 
             if (!ModelState.IsValid)
             {
+                var canFeature = await _subscriptionService.CanAgentFeaturePropertyAsync(userId, 0);
+                var currentSub = await _subscriptionService.GetCurrentSubscriptionByAgentIdAsync(userId);
+                ViewBag.CanFeature = canFeature.Allowed;
+                ViewBag.MaxFeatured = currentSub?.MaxFeaturedProperties ?? 0;
+                ViewBag.PlanName = currentSub?.PlanName ?? "Gratuito";
+                ViewBag.FeatureMessage = canFeature.Message;
+
                 await PopulateDropdowns(vm);
                 return View(vm);
             }
 
             await _propertyService.Add(vm);
-            TempData["SuccessMessage"] = "Propiedad creada exitosamente.";
+            TempData["SuccessMessage"] = vm.IsFeatured ? "Propiedad creada y DESTACADA exitosamente ⭐." : "Propiedad creada exitosamente.";
             return RedirectToAction(nameof(Properties));
         }
 
@@ -178,6 +243,13 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             {
                 return RedirectToAction(nameof(Properties));
             }
+
+            var canFeature = await _subscriptionService.CanAgentFeaturePropertyAsync(userId, id);
+            var currentSub = await _subscriptionService.GetCurrentSubscriptionByAgentIdAsync(userId);
+            ViewBag.CanFeature = canFeature.Allowed || vm.IsFeatured;
+            ViewBag.MaxFeatured = currentSub?.MaxFeaturedProperties ?? 0;
+            ViewBag.PlanName = currentSub?.PlanName ?? "Gratuito";
+            ViewBag.FeatureMessage = canFeature.Message;
 
             await PopulateDropdowns(vm);
             return View(vm);
@@ -199,10 +271,27 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 return RedirectToAction(nameof(Properties));
             }
 
+            if (vm.IsFeatured && !existing.IsFeatured)
+            {
+                var featureCheck = await _subscriptionService.CanAgentFeaturePropertyAsync(userId, vm.Id);
+                if (!featureCheck.Allowed)
+                {
+                    ModelState.AddModelError("IsFeatured", featureCheck.Message);
+                    vm.IsFeatured = false;
+                }
+            }
+
             vm.AgentId = userId;
 
             if (!ModelState.IsValid)
             {
+                var canFeature = await _subscriptionService.CanAgentFeaturePropertyAsync(userId, vm.Id);
+                var currentSub = await _subscriptionService.GetCurrentSubscriptionByAgentIdAsync(userId);
+                ViewBag.CanFeature = canFeature.Allowed || existing.IsFeatured;
+                ViewBag.MaxFeatured = currentSub?.MaxFeaturedProperties ?? 0;
+                ViewBag.PlanName = currentSub?.PlanName ?? "Gratuito";
+                ViewBag.FeatureMessage = canFeature.Message;
+
                 await PopulateDropdowns(vm);
                 return View(vm);
             }

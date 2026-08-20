@@ -142,5 +142,26 @@ namespace RealEstateApp.Core.Application.Services
             var agentProperties = await _propertyRepository.GetByAgentIdAsync(agentId);
             return agentProperties.Count < maxAllowed;
         }
+
+        public async Task<(bool Allowed, string Message)> CanAgentFeaturePropertyAsync(string agentId, int propertyId = 0)
+        {
+            var currentSub = await GetCurrentSubscriptionByAgentIdAsync(agentId);
+            var maxAllowed = currentSub?.MaxFeaturedProperties ?? 0;
+
+            if (maxAllowed <= 0)
+            {
+                return (false, "Tu plan de suscripción actual no incluye propiedades destacadas. Actualiza a un plan Profesional o Inmobiliaria para poder destacar tus inmuebles.");
+            }
+
+            var agentProperties = await _propertyRepository.GetByAgentIdAsync(agentId);
+            var currentFeaturedCount = agentProperties.Count(p => p.Id != propertyId && p.IsFeatured && (!p.FeaturedUntil.HasValue || p.FeaturedUntil > DateTime.UtcNow));
+
+            if (currentFeaturedCount >= maxAllowed)
+            {
+                return (false, $"Has alcanzado el límite de {maxAllowed} propiedad(es) destacada(s) permitidas por tu plan '{currentSub?.PlanName}'. Desactiva otra propiedad o amplía tu suscripción.");
+            }
+
+            return (true, "Permitido");
+        }
     }
 }

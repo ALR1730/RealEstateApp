@@ -94,6 +94,39 @@
                                 </div>
                             </div>
 
+                            <!-- Interruptor de Listado Destacado (Según Plan de Suscripción) -->
+                            <div class="col-12 my-2">
+                                <div class="card bg-light border rounded-4 p-3">
+                                    <div class="form-check form-switch m-0">
+                                        @if (ViewBag.CanFeature == true)
+                                        {
+                                            <input asp-for="IsFeatured" class="form-check-input" type="checkbox" id="isFeaturedSwitch">
+                                            <label class="form-check-label fw-bold text-dark font-heading ms-2" for="isFeaturedSwitch">
+                                                <i class="bi bi-star-fill text-warning me-1"></i> Listado Destacado (Máxima Exposición en Catálogo) ⭐
+                                            </label>
+                                        }
+                                        else
+                                        {
+                                            <input class="form-check-input" type="checkbox" id="isFeaturedSwitchDisabled" disabled>
+                                            <label class="form-check-label fw-bold text-muted font-heading ms-2" for="isFeaturedSwitchDisabled">
+                                                <i class="bi bi-star me-1 text-muted"></i> Listado Destacado (Requiere Plan Profesional o Inmobiliaria)
+                                            </label>
+                                        }
+                                    </div>
+                                    <span class="text-muted small d-block ms-4 ps-2 mt-1">
+                                        @if (ViewBag.CanFeature == true)
+                                        {
+                                            <span>Tu plan <strong>@(ViewBag.PlanName ?? "Activo")</strong> te permite destacar hasta <strong>@(ViewBag.MaxFeatured ?? 0)</strong> propiedades simultáneamente.</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">@(ViewBag.FeatureMessage ?? "Tu plan no incluye publicaciones destacadas.") <a asp-action="Subscriptions" class="fw-bold text-decoration-none">Mejorar Plan aquí</a>.</span>
+                                        }
+                                    </span>
+                                    <span asp-validation-for="IsFeatured" class="text-danger small ms-4 ps-2"></span>
+                                </div>
+                            </div>
+
                             <div class="col-md-4">
                                 <label asp-for="Rooms" class="form-label fw-bold text-dark small"></label>
                                 <input asp-for="Rooms" class="form-control form-control-custom" placeholder="Habitaciones" min="0" />
