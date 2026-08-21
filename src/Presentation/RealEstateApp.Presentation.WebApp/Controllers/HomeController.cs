@@ -101,6 +101,25 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
                 filters.Municipalities = municipalities.Select(m => new MunicipalityDropdownViewModel { Id = m.Id, Name = m.Name, ProvinceId = m.ProvinceId }).ToList();
             }
 
+            // Sectores dinámicos cargados desde la base de datos
+            filters.AvailableSectors = await _propertyService.GetDistinctSectorsAsync(filters.ProvinceId, filters.MunicipalityId);
+
+            // Agentes registrados dinámicamente desde la base de datos
+            var agents = await _userManager.GetUsersInRoleAsync(RealEstateApp.Core.Domain.Enums.Roles.Agent.ToString());
+            filters.AvailableAgents = new List<AgentDropdownViewModel>();
+            foreach (var ag in agents)
+            {
+                var claims = await _userManager.GetClaimsAsync(ag);
+                var first = claims.FirstOrDefault(c => c.Type == "FirstName")?.Value;
+                var last = claims.FirstOrDefault(c => c.Type == "LastName")?.Value;
+                var name = $"{first} {last}".Trim();
+                filters.AvailableAgents.Add(new AgentDropdownViewModel
+                {
+                    Id = ag.Id,
+                    Name = !string.IsNullOrEmpty(name) ? name : (ag.UserName ?? "Agente")
+                });
+            }
+
             // Si el usuario actual está autenticado como Cliente, resolver cuáles propiedades tiene como favoritas
             if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Client"))
             {
@@ -138,6 +157,13 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         {
             var municipalities = await _municipalityRepository.GetByProvinceIdAsync(provinceId);
             return Json(municipalities.Select(m => new { id = m.Id, name = m.Name }));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetSectors(int? provinceId, int? municipalityId)
+        {
+            var sectors = await _propertyService.GetDistinctSectorsAsync(provinceId, municipalityId);
+            return Json(sectors);
         }
 
         public async Task<IActionResult> Map()

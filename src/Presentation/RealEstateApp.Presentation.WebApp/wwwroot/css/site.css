@@ -316,6 +316,69 @@ header {
   box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
 }
 
+/* Toggle Pills para Mejoras y Amenidades */
+.improvement-pill-toggle {
+  display: inline-block;
+}
+.improvement-pill-toggle input[type="checkbox"] {
+  position: absolute;
+  clip: rect(0,0,0,0);
+  pointer-events: none;
+}
+.improvement-pill-toggle label {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #475569;
+  border-radius: 50rem;
+  padding: 0.4rem 0.95rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.improvement-pill-toggle label:hover {
+  border-color: var(--color-accent-blue);
+  background-color: #f0f9ff;
+  color: var(--color-accent-blue);
+  transform: translateY(-1px);
+}
+.improvement-pill-toggle input[type="checkbox"]:checked + label {
+  background: var(--bg-gradient-accent) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 3px 10px rgba(2, 132, 199, 0.35);
+  font-weight: 600;
+}
+
+/* Quick switches uniform height & responsive styling */
+.search-filter-card .form-check.form-switch {
+  min-height: 46px;
+  padding: 0.6rem 0.85rem;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-md);
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  transition: all 0.2s ease;
+}
+.search-filter-card .form-check.form-switch:hover {
+  border-color: var(--color-accent-blue);
+  background-color: #f0f9ff;
+}
+.search-filter-card .form-check.form-switch .form-check-input {
+  cursor: pointer;
+  width: 2.2rem;
+  height: 1.2rem;
+  margin-top: 0;
+}
+.search-filter-card .form-check.form-switch label {
+  cursor: pointer;
+}
+
 /* Validation feedback enhancements */
 .input-validation-error {
   border-color: #ef4444 !important;
@@ -737,6 +800,31 @@ header {
   background-color: #334155 !important;
   color: #f8fafc !important;
   border-color: #475569 !important;
+}
+
+/* Improvement Pills & Quick Switches in Dark Mode */
+[data-theme="dark"] .improvement-pill-toggle label {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .improvement-pill-toggle label:hover {
+  background-color: #1e293b !important;
+  border-color: #0284c7 !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .improvement-pill-toggle input[type="checkbox"]:checked + label {
+  background: var(--bg-gradient-accent) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45) !important;
+}
+
+[data-theme="dark"] .form-check.form-switch.bg-light {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
 }
 
 /* Alerts & Analysis Boxes */

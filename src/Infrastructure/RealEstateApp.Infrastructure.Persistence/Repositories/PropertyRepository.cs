@@ -261,5 +261,32 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(p => p.Code == code);
         }
+
+        /// <summary>
+        /// Obtiene todos los sectores únicos registrados en las propiedades de la base de datos,
+        /// opcionalmente filtrados por provincia y/o municipio.
+        /// </summary>
+        public async Task<List<string>> GetDistinctSectorsAsync(int? provinceId = null, int? municipalityId = null)
+        {
+            var query = _dbContext.Set<Property>()
+                .AsNoTracking()
+                .Where(p => !string.IsNullOrEmpty(p.Sector));
+
+            if (provinceId.HasValue && provinceId.Value > 0)
+            {
+                query = query.Where(p => p.ProvinceId == provinceId.Value);
+            }
+
+            if (municipalityId.HasValue && municipalityId.Value > 0)
+            {
+                query = query.Where(p => p.MunicipalityId == municipalityId.Value);
+            }
+
+            return await query
+                .Select(p => p.Sector!.Trim())
+                .Distinct()
+                .OrderBy(s => s)
+                .ToListAsync();
+        }
     }
 }

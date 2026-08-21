@@ -259,6 +259,11 @@ namespace RealEstateApp.Core.Application.Services
             await _propertyRepository.UpdateAsync(property);
         }
 
+        public async Task<List<string>> GetDistinctSectorsAsync(int? provinceId = null, int? municipalityId = null)
+        {
+            return await _propertyRepository.GetDistinctSectorsAsync(provinceId, municipalityId);
+        }
+
         private async Task<string> GenerateUniqueCodeAsync(string prefix)
         {
             string code;

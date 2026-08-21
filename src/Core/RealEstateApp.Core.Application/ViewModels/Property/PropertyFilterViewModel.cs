@@ -103,6 +103,8 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         public List<SaleTypeViewModel>? SaleTypes { get; set; }
         public List<ProvinceDropdownViewModel>? Provinces { get; set; }
         public List<MunicipalityDropdownViewModel>? Municipalities { get; set; }
+        public List<string>? AvailableSectors { get; set; }
+        public List<AgentDropdownViewModel>? AvailableAgents { get; set; }
         public List<ImprovementViewModel>? AvailableImprovements { get; set; }
     }
 
@@ -118,5 +120,11 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public int ProvinceId { get; set; }
+    }
+
+    public class AgentDropdownViewModel
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
     }
 }
