@@ -33,6 +33,10 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         [Display(Name = "Precio")]
         public decimal Price { get; set; }
 
+        [Required(ErrorMessage = "La moneda es requerida")]
+        [Display(Name = "Moneda")]
+        public string Currency { get; set; } = "DOP";
+
         [Required(ErrorMessage = "La cantidad de habitaciones es requerida")]
         [Range(0, 50, ErrorMessage = "Las habitaciones deben estar entre 0 y 50")]
         [Display(Name = "Habitaciones")]

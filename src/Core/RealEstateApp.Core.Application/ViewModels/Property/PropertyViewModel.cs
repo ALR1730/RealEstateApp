@@ -12,6 +12,11 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         public string Name { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty;
         public decimal Price { get; set; }
+        public string Currency { get; set; } = "DOP";
+        public decimal PriceInDOP { get; set; }
+        public decimal PriceInUSD { get; set; }
+        public string DisplayPrice { get; set; } = string.Empty;
+        public string DisplaySecondaryPrice { get; set; } = string.Empty;
         public int Rooms { get; set; }
         public int Bathrooms { get; set; }
         public decimal SizeInMeters { get; set; }

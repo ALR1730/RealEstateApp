@@ -194,6 +194,29 @@ namespace RealEstateApp.Core.Application.Mappings
                 .ForMember(dest => dest.StatusFormatted, opt => opt.Ignore());
 
             #endregion
+
+            #region SavedSearch
+
+            CreateMap<SavedSearch, RealEstateApp.Core.Application.ViewModels.SavedSearch.SavedSearchViewModel>()
+                .ForMember(dest => dest.PropertyTypeName, opt => opt.MapFrom(src => src.PropertyType != null ? src.PropertyType.Name : null))
+                .ForMember(dest => dest.SaleTypeName, opt => opt.MapFrom(src => src.SaleType != null ? src.SaleType.Name : null))
+                .ForMember(dest => dest.ProvinceName, opt => opt.MapFrom(src => src.Province != null ? src.Province.Name : null))
+                .ForMember(dest => dest.MunicipalityName, opt => opt.MapFrom(src => src.Municipality != null ? src.Municipality.Name : null))
+                .ForMember(dest => dest.SummaryCriteria, opt => opt.Ignore())
+                .ForMember(dest => dest.CurrentMatchingCount, opt => opt.Ignore());
+
+            CreateMap<RealEstateApp.Core.Application.ViewModels.SavedSearch.SaveSavedSearchViewModel, SavedSearch>()
+                .ForMember(dest => dest.PropertyType, opt => opt.Ignore())
+                .ForMember(dest => dest.SaleType, opt => opt.Ignore())
+                .ForMember(dest => dest.Province, opt => opt.Ignore())
+                .ForMember(dest => dest.Municipality, opt => opt.Ignore())
+                .ForMember(dest => dest.LastAlertSent, opt => opt.Ignore())
+                .ForMember(dest => dest.Created, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
+                .ForMember(dest => dest.LastModified, opt => opt.Ignore())
+                .ForMember(dest => dest.LastModifiedBy, opt => opt.Ignore());
+
+            #endregion
         }
     }
 }

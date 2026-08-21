@@ -20,6 +20,14 @@ System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient();
+builder.Services.AddMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromDays(7);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 
 // Configurar HSTS con Preload y subdominios para producción
@@ -146,6 +154,7 @@ app.UseRequestLocalization(new RequestLocalizationOptions
 });
 
 app.UseRouting();
+app.UseSession();
 app.UseRateLimiter();
 
 app.UseAuthentication();

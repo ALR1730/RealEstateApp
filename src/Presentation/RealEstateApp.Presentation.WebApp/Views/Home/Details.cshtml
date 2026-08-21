@@ -143,9 +143,20 @@
             }
         </div>
 
+        @{
+            var userCurrency = Context.Request.Cookies["_selectedCurrency"] ?? "DOP";
+            var isUserUSD = string.Equals(userCurrency, "USD", System.StringComparison.OrdinalIgnoreCase);
+            var mainPrice = isUserUSD ? (Model.Currency == "USD" ? Model.Price : Model.PriceInUSD) : (Model.Currency == "DOP" ? Model.Price : Model.PriceInDOP);
+            var secPrice = isUserUSD ? (Model.Currency == "DOP" ? Model.Price : Model.PriceInDOP) : (Model.Currency == "USD" ? Model.Price : Model.PriceInUSD);
+            var mainPrefix = isUserUSD ? "US$ " : "RD$ ";
+            var secPrefix = isUserUSD ? "RD$ " : "US$ ";
+        }
         <div class="text-md-end">
-            <span class="text-muted small d-block">Precio de Venta</span>
-            <h2 class="font-heading text-primary fw-bold mb-0">@Model.Price.ToString("C0")</h2>
+            <span class="text-muted small d-block fw-medium">Precio de Venta</span>
+            <h2 class="font-heading text-primary fw-bold mb-0">@mainPrefix@mainPrice.ToString("N0")</h2>
+            <span class="badge bg-light text-secondary border mt-1 font-heading">
+                Aprox. ~@secPrefix@secPrice.ToString("N0")
+            </span>
         </div>
     </div>
 
@@ -420,22 +431,22 @@
         <form id="mortgageForm" class="row g-4 mb-4">
             <!-- Precio del Inmueble -->
             <div class="col-md-6">
-                <label class="form-label small fw-bold text-dark">Precio del Inmueble (RD$)</label>
+                <label class="form-label small fw-bold text-dark">Precio del Inmueble (@(isUserUSD ? "US$" : "RD$"))</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-light border-0 fw-bold text-primary">RD$</span>
-                    <input type="number" id="calcPrice" class="form-control form-control-custom fw-bold" value="@Model.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)" step="1000" />
+                    <span class="input-group-text bg-light border-0 fw-bold text-primary">@(isUserUSD ? "US$" : "RD$")</span>
+                    <input type="number" id="calcPrice" class="form-control form-control-custom fw-bold" value="@mainPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)" step="1000" />
                 </div>
             </div>
 
             <!-- Inicial / Enganche -->
             <div class="col-md-6">
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label class="form-label small fw-bold text-dark mb-0">Enganche / Inicial (RD$)</label>
+                    <label class="form-label small fw-bold text-dark mb-0">Enganche / Inicial (@(isUserUSD ? "US$" : "RD$"))</label>
                     <span id="downPaymentPercentBadge" class="badge bg-primary-soft text-primary small">@Model.PorcentajeInicialRequerido.ToString("N0")%</span>
                 </div>
                 <div class="input-group">
-                    <span class="input-group-text bg-light border-0 fw-bold text-success">RD$</span>
-                    <input type="number" id="calcDownPayment" class="form-control form-control-custom fw-bold" value="@((Model.Price * (Model.PorcentajeInicialRequerido / 100m)).ToString(System.Globalization.CultureInfo.InvariantCulture))" min="0" step="1000" />
+                    <span class="input-group-text bg-light border-0 fw-bold text-success">@(isUserUSD ? "US$" : "RD$")</span>
+                    <input type="number" id="calcDownPayment" class="form-control form-control-custom fw-bold" value="@((mainPrice * (Model.PorcentajeInicialRequerido / 100m)).ToString(System.Globalization.CultureInfo.InvariantCulture))" min="0" step="1000" />
                 </div>
             </div>
 

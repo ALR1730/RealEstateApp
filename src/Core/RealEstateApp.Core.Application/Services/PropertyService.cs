@@ -23,6 +23,8 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IPropertyTypeRepository _propertyTypeRepository;
         private readonly IPropertyImprovementRepository _propertyImprovementRepository;
         private readonly IFileStorageService _fileStorageService;
+        private readonly ICurrencyService _currencyService;
+        private readonly ISavedSearchService _savedSearchService;
         private readonly IMapper _mapper;
 
         public PropertyService(
@@ -31,6 +33,8 @@ namespace RealEstateApp.Core.Application.Services
             IPropertyTypeRepository propertyTypeRepository,
             IPropertyImprovementRepository propertyImprovementRepository,
             IFileStorageService fileStorageService,
+            ICurrencyService currencyService,
+            ISavedSearchService savedSearchService,
             IMapper mapper)
         {
             _propertyRepository = propertyRepository;
@@ -38,20 +42,26 @@ namespace RealEstateApp.Core.Application.Services
             _propertyTypeRepository = propertyTypeRepository;
             _propertyImprovementRepository = propertyImprovementRepository;
             _fileStorageService = fileStorageService;
+            _currencyService = currencyService;
+            _savedSearchService = savedSearchService;
             _mapper = mapper;
         }
 
         public async Task<List<PropertyViewModel>> GetAllViewModel()
         {
             var properties = await _propertyRepository.GetAllAsync();
-            return _mapper.Map<List<PropertyViewModel>>(properties);
+            var list = _mapper.Map<List<PropertyViewModel>>(properties);
+            await EnrichPropertiesWithCurrencyAsync(list);
+            return list;
         }
 
         public async Task<PropertyViewModel?> GetByIdViewModel(int id)
         {
             var property = await _propertyRepository.GetByIdAsync(id);
             if (property == null) return null;
-            return _mapper.Map<PropertyViewModel>(property);
+            var vm = _mapper.Map<PropertyViewModel>(property);
+            await EnrichPropertiesWithCurrencyAsync(new List<PropertyViewModel> { vm });
+            return vm;
         }
 
         public async Task<SavePropertyViewModel?> GetByIdSaveViewModel(int id)
@@ -115,6 +125,16 @@ namespace RealEstateApp.Core.Application.Services
                 }
             }
 
+            // Disparar alertas automáticas a clientes con búsquedas guardadas coincidentes
+            try
+            {
+                await _savedSearchService.CheckAndNotifyMatchesAsync(property);
+            }
+            catch
+            {
+                // Silenciar excepciones en notificaciones secundarias para no interrumpir el flujo principal de creación
+            }
+
             var result = _mapper.Map<SavePropertyViewModel>(property);
             return result;
         }
@@ -127,6 +147,7 @@ namespace RealEstateApp.Core.Application.Services
 
             property.Name = vm.Name;
             property.Price = vm.Price;
+            property.Currency = !string.IsNullOrEmpty(vm.Currency) ? vm.Currency : CurrencyConstants.DOP;
             property.Rooms = vm.Rooms;
             property.Bathrooms = vm.Bathrooms;
             property.SizeInMeters = vm.SizeInMeters;
@@ -211,20 +232,54 @@ namespace RealEstateApp.Core.Application.Services
         public async Task<List<PropertyViewModel>> GetAllWithFilters(PropertyFilterViewModel filters)
         {
             var properties = await _propertyRepository.GetWithFiltersAsync(filters);
-            return _mapper.Map<List<PropertyViewModel>>(properties);
+            var list = _mapper.Map<List<PropertyViewModel>>(properties);
+            await EnrichPropertiesWithCurrencyAsync(list);
+            return list;
         }
 
         public async Task<List<PropertyViewModel>> GetByAgentId(string agentId)
         {
             var properties = await _propertyRepository.GetByAgentIdAsync(agentId);
-            return _mapper.Map<List<PropertyViewModel>>(properties);
+            var list = _mapper.Map<List<PropertyViewModel>>(properties);
+            await EnrichPropertiesWithCurrencyAsync(list);
+            return list;
         }
 
         public async Task<PropertyViewModel?> GetByCode(string code)
         {
             var property = await _propertyRepository.GetByCodeAsync(code);
             if (property == null) return null;
-            return _mapper.Map<PropertyViewModel>(property);
+            var vm = _mapper.Map<PropertyViewModel>(property);
+            await EnrichPropertiesWithCurrencyAsync(new List<PropertyViewModel> { vm });
+            return vm;
+        }
+
+        private async Task EnrichPropertiesWithCurrencyAsync(List<PropertyViewModel> viewModels)
+        {
+            if (viewModels == null || viewModels.Count == 0) return;
+            var exchangeRate = await _currencyService.GetExchangeRateAsync();
+
+            foreach (var vm in viewModels)
+            {
+                if (string.IsNullOrEmpty(vm.Currency))
+                {
+                    vm.Currency = CurrencyConstants.DOP;
+                }
+
+                if (string.Equals(vm.Currency, CurrencyConstants.USD, StringComparison.OrdinalIgnoreCase))
+                {
+                    vm.PriceInUSD = vm.Price;
+                    vm.PriceInDOP = vm.Price * exchangeRate;
+                }
+                else
+                {
+                    vm.PriceInDOP = vm.Price;
+                    vm.PriceInUSD = exchangeRate > 0 ? Math.Round(vm.Price / exchangeRate, 2) : vm.Price;
+                }
+
+                vm.DisplayPrice = _currencyService.FormatPrice(vm.Price, vm.Currency);
+                vm.DisplaySecondaryPrice = _currencyService.FormatSecondaryPrice(vm.Price, vm.Currency, vm.Currency, exchangeRate);
+            }
         }
 
         public async Task ReassignAgent(int propertyId, string newAgentId)

@@ -106,12 +106,12 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
 
             if (filters.MinPrice.HasValue)
             {
-                query = query.Where(p => p.Price >= filters.MinPrice.Value);
+                query = query.Where(p => p.PriceInDOP >= filters.MinPrice.Value);
             }
 
             if (filters.MaxPrice.HasValue)
             {
-                query = query.Where(p => p.Price <= filters.MaxPrice.Value);
+                query = query.Where(p => p.PriceInDOP <= filters.MaxPrice.Value);
             }
 
             if (filters.MinRooms.HasValue)
@@ -287,6 +287,35 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .Distinct()
                 .OrderBy(s => s)
                 .ToListAsync();
+        }
+
+        public override async Task<Property> AddAsync(Property entity)
+        {
+            SyncPriceInDOP(entity);
+            return await base.AddAsync(entity);
+        }
+
+        public override async Task UpdateAsync(Property entity)
+        {
+            SyncPriceInDOP(entity);
+            await base.UpdateAsync(entity);
+        }
+
+        private void SyncPriceInDOP(Property entity)
+        {
+            if (string.IsNullOrEmpty(entity.Currency))
+            {
+                entity.Currency = RealEstateApp.Core.Domain.Constants.CurrencyConstants.DOP;
+            }
+
+            if (string.Equals(entity.Currency, RealEstateApp.Core.Domain.Constants.CurrencyConstants.USD, System.StringComparison.OrdinalIgnoreCase))
+            {
+                entity.PriceInDOP = entity.Price * RealEstateApp.Core.Domain.Constants.CurrencyConstants.DefaultUsdToDopRate;
+            }
+            else
+            {
+                entity.PriceInDOP = entity.Price;
+            }
         }
     }
 }

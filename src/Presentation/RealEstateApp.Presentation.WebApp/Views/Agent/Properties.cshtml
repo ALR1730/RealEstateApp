@@ -236,7 +236,7 @@
                             }
 
                             <div class="price-tag">
-                                @item.Price.ToString("C0")
+                                @(item.Currency == "USD" ? "US$ " : "RD$ ")@item.Price.ToString("N0")
                             </div>
                         </div>
 

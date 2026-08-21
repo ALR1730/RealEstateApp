@@ -25,6 +25,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
         private readonly IProvinceRepository _provinceRepository;
         private readonly IMunicipalityRepository _municipalityRepository;
         private readonly IAgentVerificationService _verificationService;
+        private readonly ICurrencyService _currencyService;
         private readonly UserManager<IdentityUser> _userManager;
 
         public HomeController(
@@ -39,6 +40,7 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             IProvinceRepository provinceRepository,
             IMunicipalityRepository municipalityRepository,
             IAgentVerificationService verificationService,
+            ICurrencyService currencyService,
             UserManager<IdentityUser> userManager)
         {
             _propertyService = propertyService;
@@ -52,13 +54,51 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             _provinceRepository = provinceRepository;
             _municipalityRepository = municipalityRepository;
             _verificationService = verificationService;
+            _currencyService = currencyService;
             _userManager = userManager;
         }
 
         public async Task<IActionResult> Index(PropertyFilterViewModel filters)
         {
+            var userCurrency = Request.Cookies["_selectedCurrency"] ?? "DOP";
+            var isUserUSD = string.Equals(userCurrency, "USD", StringComparison.OrdinalIgnoreCase);
+
+            var dbFilter = new PropertyFilterViewModel
+            {
+                Code = filters.Code,
+                PropertyTypeId = filters.PropertyTypeId,
+                SaleTypeId = filters.SaleTypeId,
+                ProvinceId = filters.ProvinceId,
+                MunicipalityId = filters.MunicipalityId,
+                Sector = filters.Sector,
+                MinRooms = filters.MinRooms,
+                MaxRooms = filters.MaxRooms,
+                MinBathrooms = filters.MinBathrooms,
+                MaxBathrooms = filters.MaxBathrooms,
+                MinSizeInMeters = filters.MinSizeInMeters,
+                MaxSizeInMeters = filters.MaxSizeInMeters,
+                OnlyFeatured = filters.OnlyFeatured,
+                OnlyVerifiedAgents = filters.OnlyVerifiedAgents,
+                OnlyFinanciable = filters.OnlyFinanciable,
+                OnlyWithVirtualTour = filters.OnlyWithVirtualTour,
+                ImprovementIds = filters.ImprovementIds,
+                AgentId = filters.AgentId,
+                UserLat = filters.UserLat,
+                UserLng = filters.UserLng,
+                MaxDistanceKm = filters.MaxDistanceKm,
+                MinPrice = filters.MinPrice,
+                MaxPrice = filters.MaxPrice
+            };
+
+            if (isUserUSD)
+            {
+                var exchangeRate = await _currencyService.GetExchangeRateAsync();
+                if (dbFilter.MinPrice.HasValue) dbFilter.MinPrice = dbFilter.MinPrice.Value * exchangeRate;
+                if (dbFilter.MaxPrice.HasValue) dbFilter.MaxPrice = dbFilter.MaxPrice.Value * exchangeRate;
+            }
+
             // Cargar propiedades filtradas
-            var properties = await _propertyService.GetAllWithFilters(filters);
+            var properties = await _propertyService.GetAllWithFilters(dbFilter);
 
             // Filtrar por radio geográfico Haversine si se proveen coordenadas y distancia máxima
             if (filters.UserLat.HasValue && filters.UserLng.HasValue && filters.MaxDistanceKm.HasValue && filters.MaxDistanceKm.Value > 0)
@@ -177,23 +217,31 @@ namespace RealEstateApp.Presentation.WebApp.Controllers
             var properties = await _propertyService.GetAllWithFilters(new PropertyFilterViewModel());
             properties = properties.Where(p => p.Status != PropertyStatus.Sold).ToList();
 
-            var result = properties.Select(p => new
-            {
-                p.Id,
-                p.Name,
-                p.Code,
-                p.Price,
-                PriceFormatted = p.Price.ToString("N0"),
-                p.Rooms,
-                p.Bathrooms,
-                Size = p.SizeInMeters.ToString("N0"),
-                PropertyType = p.PropertyTypeName,
-                Province = p.ProvinceName,
-                Municipality = p.MunicipalityName,
-                p.Sector,
-                p.Latitude,
-                p.Longitude,
-                ImageUrl = p.Images.FirstOrDefault() ?? "/images/default-property.jpg"
+            var userCurrency = Request.Cookies["_selectedCurrency"] ?? "DOP";
+            var isUserUSD = string.Equals(userCurrency, "USD", StringComparison.OrdinalIgnoreCase);
+
+            var result = properties.Select(p => {
+                var mainPrice = isUserUSD ? (p.Currency == "USD" ? p.Price : p.PriceInUSD) : (p.Currency == "DOP" ? p.Price : p.PriceInDOP);
+                var mainSymbol = isUserUSD ? "US$ " : "RD$ ";
+                return new
+                {
+                    p.Id,
+                    p.Name,
+                    p.Code,
+                    Price = mainPrice,
+                    Currency = userCurrency,
+                    PriceFormatted = $"{mainSymbol}{mainPrice:N0}",
+                    p.Rooms,
+                    p.Bathrooms,
+                    Size = p.SizeInMeters.ToString("N0"),
+                    PropertyType = p.PropertyTypeName,
+                    Province = p.ProvinceName,
+                    Municipality = p.MunicipalityName,
+                    p.Sector,
+                    p.Latitude,
+                    p.Longitude,
+                    ImageUrl = p.Images.FirstOrDefault() ?? "/images/default-property.jpg"
+                };
             });
 
             return Json(result);

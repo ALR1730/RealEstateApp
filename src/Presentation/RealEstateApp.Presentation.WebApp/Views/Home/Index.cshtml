@@ -11,6 +11,10 @@
                            filters.OnlyFeatured == true || filters.OnlyVerifiedAgents == true ||
                            filters.OnlyFinanciable == true || filters.OnlyWithVirtualTour == true ||
                            (filters.ImprovementIds != null && filters.ImprovementIds.Count > 0);
+
+    var userCurrency = Context.Request.Cookies["_selectedCurrency"] ?? "DOP";
+    var isUserUSD = string.Equals(userCurrency, "USD", System.StringComparison.OrdinalIgnoreCase);
+    var curSymbol = isUserUSD ? "US$" : "RD$";
 }
 
 <!-- Hero Section -->
@@ -200,14 +204,14 @@
                 <!-- ================= BLOQUE 3: PRECIOS Y TAMAÑO EN M² (4 Columnas) ================= -->
                 <!-- 9. Precio Mínimo -->
                 <div class="col-lg-3 col-md-6">
-                    <label class="form-label small fw-bold text-muted"><i class="bi bi-cash me-1 text-success"></i>Precio Mínimo (RD$)</label>
-                    <input type="number" name="MinPrice" value="@filters.MinPrice" class="form-control form-control-custom" placeholder="Min RD$" step="1000" />
+                    <label class="form-label small fw-bold text-muted"><i class="bi bi-cash me-1 text-success"></i>Precio Mínimo (@curSymbol)</label>
+                    <input type="number" name="MinPrice" value="@filters.MinPrice" class="form-control form-control-custom" placeholder="Min @curSymbol" step="1000" />
                 </div>
 
                 <!-- 10. Precio Máximo -->
                 <div class="col-lg-3 col-md-6">
-                    <label class="form-label small fw-bold text-muted"><i class="bi bi-cash-stack me-1 text-success"></i>Precio Máximo (RD$)</label>
-                    <input type="number" name="MaxPrice" value="@filters.MaxPrice" class="form-control form-control-custom" placeholder="Max RD$" step="1000" />
+                    <label class="form-label small fw-bold text-muted"><i class="bi bi-cash-stack me-1 text-success"></i>Precio Máximo (@curSymbol)</label>
+                    <input type="number" name="MaxPrice" value="@filters.MaxPrice" class="form-control form-control-custom" placeholder="Max @curSymbol" step="1000" />
                 </div>
 
                 <!-- 11. Metros Mínimos -->
@@ -284,10 +288,26 @@
                 }
 
                 <!-- ================= BOTÓN DE ACCIÓN ================= -->
-                <div class="col-12 text-end mt-2">
-                    <button type="submit" class="btn btn-primary-gradient px-5 py-2 font-heading fw-bold rounded-pill shadow-sm">
-                        <i class="bi bi-funnel-fill me-2"></i> Aplicar Filtros Avanzados
-                    </button>
+                <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
+                    <div>
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <button type="button" class="btn btn-outline-warning rounded-pill px-4 py-2 font-heading fw-bold" data-bs-toggle="modal" data-bs-target="#saveSearchModal">
+                                <i class="bi bi-bookmark-plus me-1"></i> Guardar Criterios & Alertas
+                            </button>
+                        }
+                    </div>
+                    <div class="d-flex gap-2">
+                        @if (hasActiveFilters)
+                        {
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2 font-heading rounded-pill">
+                                <i class="bi bi-x-circle me-1"></i> Limpiar Filtros
+                            </a>
+                        }
+                        <button type="submit" class="btn btn-primary-gradient px-5 py-2 font-heading fw-bold rounded-pill shadow-sm">
+                            <i class="bi bi-funnel-fill me-2"></i> Aplicar Filtros Avanzados
+                        </button>
+                    </div>
                 </div>
             </div>
         </form>
@@ -373,6 +393,13 @@
                     🕶️ Tour 3D / Virtual
                 </span>
             }
+
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <button type="button" class="btn btn-warning btn-sm rounded-pill ms-auto fw-bold font-heading px-3" data-bs-toggle="modal" data-bs-target="#saveSearchModal">
+                    <i class="bi bi-bookmark-plus-fill me-1"></i> Guardar esta Búsqueda
+                </button>
+            }
         </div>
     }
 
@@ -427,8 +454,15 @@
                                 <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80" alt="Placeholder" />
                             }
 
-                            <div class="price-tag">
-                                @item.Price.ToString("C0")
+                            @{
+                                var cardMainPrice = isUserUSD ? (item.Currency == "USD" ? item.Price : item.PriceInUSD) : (item.Currency == "DOP" ? item.Price : item.PriceInDOP);
+                                var cardSecPrice = isUserUSD ? (item.Currency == "DOP" ? item.Price : item.PriceInDOP) : (item.Currency == "USD" ? item.Price : item.PriceInUSD);
+                                var cardMainSymbol = isUserUSD ? "US$ " : "RD$ ";
+                                var cardSecSymbol = isUserUSD ? "RD$ " : "US$ ";
+                            }
+                            <div class="price-tag d-flex flex-column align-items-end justify-content-center py-1 px-3" style="line-height: 1.15;">
+                                <span class="fw-bold fs-6">@cardMainSymbol@cardMainPrice.ToString("N0")</span>
+                                <span style="font-size: 0.70rem; opacity: 0.88; font-weight: 500;">~@cardSecSymbol@cardSecPrice.ToString("N0")</span>
                             </div>
 
                             @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Client"))
@@ -591,6 +625,107 @@
                     alert('Tu navegador no soporta geolocalización.');
                 }
             });
+
+            // Guardar Búsqueda AJAX
+            $('#btnSubmitSaveSearch').on('click', function () {
+                const searchName = $('#savedSearchNameInput').val().trim();
+                if (!searchName) {
+                    alert('Por favor ingresa un nombre para identificar tu búsqueda.');
+                    $('#savedSearchNameInput').focus();
+                    return;
+                }
+
+                const emailAlerts = $('#saveSearchEmailAlerts').is(':checked');
+
+                const payload = {
+                    name: searchName,
+                    propertyTypeId: $('select[name="PropertyTypeId"]').val() ? parseInt($('select[name="PropertyTypeId"]').val()) : null,
+                    saleTypeId: $('select[name="SaleTypeId"]').val() ? parseInt($('select[name="SaleTypeId"]').val()) : null,
+                    provinceId: $('#provinceFilterSelect').val() ? parseInt($('#provinceFilterSelect').val()) : null,
+                    municipalityId: $('#municipalityFilterSelect').val() ? parseInt($('#municipalityFilterSelect').val()) : null,
+                    sector: $('#sectorFilterInput').val() || null,
+                    minPrice: $('input[name="MinPrice"]').val() ? parseFloat($('input[name="MinPrice"]').val()) : null,
+                    maxPrice: $('input[name="MaxPrice"]').val() ? parseFloat($('input[name="MaxPrice"]').val()) : null,
+                    minRooms: $('input[name="MinRooms"]').val() ? parseInt($('input[name="MinRooms"]').val()) : null,
+                    minBathrooms: $('input[name="MinBathrooms"]').val() ? parseInt($('input[name="MinBathrooms"]').val()) : null,
+                    minSizeInMeters: $('input[name="MinSizeInMeters"]').val() ? parseFloat($('input[name="MinSizeInMeters"]').val()) : null,
+                    maxSizeInMeters: $('input[name="MaxSizeInMeters"]').val() ? parseFloat($('input[name="MaxSizeInMeters"]').val()) : null,
+                    onlyFinanciable: $('input[name="OnlyFinanciable"]').is(':checked') ? true : null,
+                    onlyWithVirtualTour: $('input[name="OnlyWithVirtualTour"]').is(':checked') ? true : null,
+                    emailAlertsEnabled: emailAlerts,
+                    inAppAlertsEnabled: true
+                };
+
+                const token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: '/SavedSearches/Save',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(payload),
+                    headers: {
+                        'RequestVerificationToken': token
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            var modal = bootstrap.Modal.getInstance(document.getElementById('saveSearchModal'));
+                            if (modal) modal.hide();
+                            alert(res.message);
+                        } else {
+                            alert(res.message || 'Error al guardar la búsqueda.');
+                        }
+                    },
+                    error: function () {
+                        alert('Ocurrió un error al guardar la búsqueda.');
+                    }
+                });
+            });
         });
     </script>
+}
+
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    @Html.AntiForgeryToken()
+    <!-- Modal Guardar Búsqueda y Alertas -->
+    <div class="modal fade text-start" id="saveSearchModal" tabindex="-1" aria-labelledby="saveSearchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 shadow border-0">
+                <div class="modal-header bg-dark text-white rounded-top-4">
+                    <h5 class="modal-title font-heading fw-bold" id="saveSearchModalLabel">
+                        <i class="bi bi-bookmark-heart text-warning me-2"></i> Guardar Búsqueda & Alertas
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-3">
+                        Guarda tus criterios actuales de búsqueda para ejecutarlos con un solo clic en cualquier momento y recibir alertas automáticas cuando un agente publique un nuevo inmueble que coincida.
+                    </p>
+
+                    <div class="mb-3">
+                        <label for="savedSearchNameInput" class="form-label small fw-bold text-dark">Nombre de la Búsqueda *</label>
+                        <input type="text" class="form-control form-control-custom font-heading" id="savedSearchNameInput" placeholder="Ej: Apartamentos en Bella Vista < 8M" maxlength="150" required />
+                    </div>
+
+                    <div class="p-3 bg-primary bg-opacity-10 rounded-3 mb-3 border border-primary border-opacity-25">
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input cursor-pointer" type="checkbox" id="saveSearchEmailAlerts" checked />
+                            <label class="form-check-label small fw-bold text-dark cursor-pointer ms-2" for="saveSearchEmailAlerts">
+                                <i class="bi bi-envelope-check-fill text-primary me-1"></i> Recibir alertas por correo electrónico
+                            </label>
+                        </div>
+                        <span class="small text-muted d-block mt-1 ps-4" style="font-size: 0.78rem;">
+                            Te enviaremos un correo con la foto y detalles del nuevo inmueble publicado.
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light rounded-bottom-4 border-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary-gradient rounded-pill px-4 fw-bold" id="btnSubmitSaveSearch">
+                        <i class="bi bi-check-lg me-1"></i> Guardar Búsqueda
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 }

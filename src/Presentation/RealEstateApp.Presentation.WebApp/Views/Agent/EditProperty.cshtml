@@ -77,7 +77,13 @@
 
                             <div class="col-md-4">
                                 <label asp-for="Price" class="form-label fw-bold text-dark small"></label>
-                                <input asp-for="Price" class="form-control form-control-custom" placeholder="Precio" step="1000" />
+                                <div class="input-group">
+                                    <select asp-for="Currency" class="form-select form-select-custom fw-bold text-primary" style="max-width: 95px;">
+                                        <option value="DOP">RD$</option>
+                                        <option value="USD">US$</option>
+                                    </select>
+                                    <input asp-for="Price" class="form-control form-control-custom" placeholder="0.00" step="1000" />
+                                </div>
                                 <span asp-validation-for="Price" class="text-danger small"></span>
                             </div>
 

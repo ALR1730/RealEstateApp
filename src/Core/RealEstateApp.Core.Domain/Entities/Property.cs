@@ -9,6 +9,8 @@ namespace RealEstateApp.Core.Domain.Entities
         public string Name { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty;
         public decimal Price { get; set; }
+        public string Currency { get; set; } = CurrencyConstants.DOP;
+        public decimal PriceInDOP { get; set; }
         public int Rooms { get; set; }
         public int Bathrooms { get; set; }
         public decimal SizeInMeters { get; set; }

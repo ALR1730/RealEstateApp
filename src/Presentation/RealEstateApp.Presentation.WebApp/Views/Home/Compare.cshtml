@@ -50,18 +50,31 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @{
+                        var userCurrency = Context.Request.Cookies["_selectedCurrency"] ?? "DOP";
+                        var isUserUSD = string.Equals(userCurrency, "USD", System.StringComparison.OrdinalIgnoreCase);
+                    }
                     <tr>
                         <th class="text-start ps-4 bg-light fw-bold text-dark"><i class="bi bi-tag text-success me-2"></i>Precio de Venta</th>
                         @foreach (var item in Model)
                         {
-                            <td class="fs-5 fw-bold text-success">@item.Price.ToString("C0")</td>
+                            var cardMainPrice = isUserUSD ? (item.Currency == "USD" ? item.Price : item.PriceInUSD) : (item.Currency == "DOP" ? item.Price : item.PriceInDOP);
+                            var cardSecPrice = isUserUSD ? (item.Currency == "DOP" ? item.Price : item.PriceInDOP) : (item.Currency == "USD" ? item.Price : item.PriceInUSD);
+                            var cardMainSymbol = isUserUSD ? "US$ " : "RD$ ";
+                            var cardSecSymbol = isUserUSD ? "RD$ " : "US$ ";
+                            <td>
+                                <div class="fs-5 fw-bold text-success">@cardMainSymbol@cardMainPrice.ToString("N0")</div>
+                                <div class="small text-muted" style="font-size: 0.75rem;">~@cardSecSymbol@cardSecPrice.ToString("N0")</div>
+                            </td>
                         }
                     </tr>
                     <tr>
                         <th class="text-start ps-4 bg-light fw-bold text-dark"><i class="bi bi-cash text-primary me-2"></i>Monto Separación</th>
                         @foreach (var item in Model)
                         {
-                            <td class="fw-semibold">@item.MontoSeparacion.ToString("C0")</td>
+                            var sepPrice = isUserUSD ? (item.Currency == "USD" ? item.MontoSeparacion : item.MontoSeparacion / 60.50m) : (item.Currency == "DOP" ? item.MontoSeparacion : item.MontoSeparacion * 60.50m);
+                            var sepSymbol = isUserUSD ? "US$ " : "RD$ ";
+                            <td class="fw-semibold">@sepSymbol@sepPrice.ToString("N0")</td>
                         }
                     </tr>
                     <tr>

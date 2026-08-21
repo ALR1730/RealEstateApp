@@ -1,3 +1,4 @@
+@inject RealEstateApp.Core.Application.Interfaces.Services.ICurrencyService CurrencyService
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -63,6 +64,53 @@
                     </ul>
 
                     <div class="d-flex align-items-center gap-2">
+                        <!-- Selector Global de Moneda (DOP / USD) -->
+                        @{
+                            var activeCurrency = Context.Request.Cookies["_selectedCurrency"] ?? "DOP";
+                            var isUSD = string.Equals(activeCurrency, "USD", System.StringComparison.OrdinalIgnoreCase);
+                            var currentReturnUrl = Context.Request.Path + Context.Request.QueryString;
+                            var liveRateInfo = await CurrencyService.GetExchangeRateInfoAsync();
+                        }
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light rounded-pill px-3 py-1 dropdown-toggle font-heading small fw-bold d-flex align-items-center gap-1 shadow-none" 
+                                    type="button" id="currencyDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Moneda de visualización (1 USD = RD$ @liveRateInfo.Rate.ToString("N2"))">
+                                <i class="bi bi-cash-coin text-warning"></i>
+                                <span>@(isUSD ? "US$ (USD)" : "RD$ (DOP)")</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 p-2" aria-labelledby="currencyDropdown" style="min-width: 220px;">
+                                <li><h6 class="dropdown-header text-primary px-2"><i class="bi bi-currency-exchange me-1"></i> Moneda Activa</h6></li>
+                                <li>
+                                    <a class="dropdown-item rounded d-flex align-items-center justify-content-between @(!isUSD ? "active fw-bold" : "")" 
+                                       asp-controller="Currency" asp-action="SetCurrency" asp-route-currency="DOP" asp-route-returnUrl="@currentReturnUrl">
+                                        <span>🇩🇴 Peso (RD$)</span>
+                                        <span class="badge @(!isUSD ? "bg-light text-dark" : "bg-secondary")">DOP</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item rounded d-flex align-items-center justify-content-between @(isUSD ? "active fw-bold" : "")" 
+                                       asp-controller="Currency" asp-action="SetCurrency" asp-route-currency="USD" asp-route-returnUrl="@currentReturnUrl">
+                                        <span>🇺🇸 Dólar (US$)</span>
+                                        <span class="badge @(isUSD ? "bg-light text-dark" : "bg-secondary")">USD</span>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider my-2"></li>
+                                <li class="px-2 py-1 bg-light rounded text-dark">
+                                    <div class="d-flex align-items-center justify-content-between small">
+                                        <span class="text-muted" style="font-size: 0.72rem;">
+                                            <i class="bi bi-circle-fill @(liveRateInfo.IsLive ? "text-success" : "text-warning") me-1" style="font-size: 0.5rem;"></i>Tasa en vivo:
+                                        </span>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold" style="font-size: 0.75rem;">
+                                            RD$ @liveRateInfo.Rate.ToString("N2")
+                                        </span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-1 text-muted" style="font-size: 0.65rem;">
+                                        <span>1 USD = RD$ @liveRateInfo.Rate.ToString("N2")</span>
+                                        <span title="@liveRateInfo.Provider">@(liveRateInfo.IsLive ? "En línea" : "Offline")</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
                         <!-- Dark Mode Theme Toggle Button -->
                         <button class="btn btn-outline-light rounded-circle p-2 theme-toggle-btn" style="width: 40px; height: 40px;" type="button" title="Modo Oscuro">
                             <i class="bi bi-moon-stars-fill text-info"></i>
@@ -104,6 +152,11 @@
                                     <li>
                                         <a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Account" asp-action="Activity">
                                             <i class="bi bi-clock-history text-info"></i> Historial de Actividades
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center gap-2" asp-controller="SavedSearches" asp-action="Index">
+                                            <i class="bi bi-bookmark-heart text-warning"></i> Mis Búsquedas Guardadas
                                         </a>
                                     </li>
 

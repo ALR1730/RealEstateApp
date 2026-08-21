@@ -29,6 +29,8 @@ namespace RealEstateApp.Core.Application
             services.AddTransient<IAppointmentService, AppointmentService>();
             services.AddTransient<IAgentVerificationService, AgentVerificationService>();
             services.AddTransient<ISubscriptionService, SubscriptionService>();
+            services.AddTransient<ICurrencyService, CurrencyService>();
+            services.AddTransient<ISavedSearchService, SavedSearchService>();
 
             #endregion
         }

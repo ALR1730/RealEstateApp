@@ -54,7 +54,7 @@
 
             const thumbnailsHtml = ids.map(item => `
                 <div class="position-relative d-inline-block">
-                    <img src="${item.img || '/images/default-property.jpg'}" class="rounded-circle border border-2 border-info" style="width: 42px; height: 42px; object-fit: cover;" title="${escapeHtml(item.title)} - RD$ ${item.price}" />
+                    <img src="${item.img || '/images/default-property.jpg'}" class="rounded-circle border border-2 border-info" style="width: 42px; height: 42px; object-fit: cover;" title="${escapeHtml(item.title)} - ${item.price}" />
                     <button onclick="PropertyComparator.remove(${item.id})" class="btn btn-danger btn-sm p-0 rounded-circle position-absolute top-0 start-100 translate-middle" style="width: 18px; height: 18px; line-height: 14px; font-size: 10px;">&times;</button>
                 </div>
             `).join("");

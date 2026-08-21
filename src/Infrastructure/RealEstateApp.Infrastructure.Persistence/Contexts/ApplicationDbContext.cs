@@ -38,6 +38,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
         public DbSet<AgentVerification> AgentVerifications { get; set; } = null!;
         public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; } = null!;
         public DbSet<AgentSubscription> AgentSubscriptions { get; set; } = null!;
+        public DbSet<SavedSearch> SavedSearches { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -86,6 +87,14 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                     .IsUnique();
 
                 entity.Property(p => p.Price)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(p => p.Currency)
+                    .IsRequired()
+                    .HasMaxLength(3)
+                    .HasDefaultValue(CurrencyConstants.DOP);
+
+                entity.Property(p => p.PriceInDOP)
                     .HasColumnType("decimal(18,2)");
 
                 entity.Property(p => p.SizeInMeters)
@@ -490,6 +499,41 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                     .WithMany(p => p.Subscriptions)
                     .HasForeignKey(s => s.SubscriptionPlanId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            #endregion
+
+            #region SavedSearch
+
+            modelBuilder.Entity<SavedSearch>(entity =>
+            {
+                entity.ToTable("SavedSearches");
+                entity.HasKey(s => s.Id);
+
+                entity.Property(s => s.UserId)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                entity.Property(s => s.Name)
+                    .IsRequired()
+                    .HasMaxLength(150);
+
+                entity.Property(s => s.Sector)
+                    .HasMaxLength(100);
+
+                entity.Property(s => s.MinPrice)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(s => s.MaxPrice)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(s => s.MinSizeInMeters)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(s => s.MaxSizeInMeters)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.HasIndex(s => s.UserId);
             });
 
             #endregion
