@@ -33,7 +33,8 @@ export const LoginPage: React.FC = () => {
       else navigate('/client');
     } catch (err: any) {
       console.error("Login error:", err);
-      setError(err.response?.data?.error || 'Error al conectar con el servidor.');
+      const serverMessage = err.response?.data?.error || err.response?.data?.message || (typeof err.response?.data === 'string' ? err.response.data : null);
+      setError(serverMessage || 'Error al conectar con el servidor.');
     } finally {
       setIsLoading(false);
     }
@@ -77,49 +78,49 @@ export const LoginPage: React.FC = () => {
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => handleQuickLogin('adminuser@realestate.com', 'Admin123!')}
+              onClick={() => handleQuickLogin('admin@realestate.com', 'Admin123!')}
               className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-left transition-all border border-white/10 text-xs flex items-center gap-2"
             >
               <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <div className="truncate">
                 <p className="font-bold text-[11px] text-white">Administrador</p>
-                <p className="text-[9px] text-slate-300 font-mono">adminuser</p>
+                <p className="text-[9px] text-slate-300 font-mono">admin@realestate.com</p>
               </div>
             </button>
 
             <button
               type="button"
-              onClick={() => handleQuickLogin('agentuser@realestate.com', 'Agent123!')}
+              onClick={() => handleQuickLogin('agent@realestate.com', 'Agent123!')}
               className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-left transition-all border border-white/10 text-xs flex items-center gap-2"
             >
               <Building2 className="w-4 h-4 text-sky-400 shrink-0" />
               <div className="truncate">
                 <p className="font-bold text-[11px] text-white">Agente</p>
-                <p className="text-[9px] text-slate-300 font-mono">agentuser</p>
+                <p className="text-[9px] text-slate-300 font-mono">agent@realestate.com</p>
               </div>
             </button>
 
             <button
               type="button"
-              onClick={() => handleQuickLogin('clientuser@realestate.com', 'Client123!')}
+              onClick={() => handleQuickLogin('client@realestate.com', 'Client123!')}
               className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-left transition-all border border-white/10 text-xs flex items-center gap-2"
             >
               <User className="w-4 h-4 text-amber-400 shrink-0" />
               <div className="truncate">
                 <p className="font-bold text-[11px] text-white">Cliente Comprador</p>
-                <p className="text-[9px] text-slate-300 font-mono">clientuser</p>
+                <p className="text-[9px] text-slate-300 font-mono">client@realestate.com</p>
               </div>
             </button>
 
             <button
               type="button"
-              onClick={() => handleQuickLogin('developeruser@realestate.com', 'Developer123!')}
+              onClick={() => handleQuickLogin('developer@realestate.com', 'Developer123!')}
               className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-left transition-all border border-white/10 text-xs flex items-center gap-2"
             >
               <Code className="w-4 h-4 text-purple-400 shrink-0" />
               <div className="truncate">
                 <p className="font-bold text-[11px] text-white">Desarrollador</p>
-                <p className="text-[9px] text-slate-300 font-mono">developeruser</p>
+                <p className="text-[9px] text-slate-300 font-mono">developer@realestate.com</p>
               </div>
             </button>
           </div>

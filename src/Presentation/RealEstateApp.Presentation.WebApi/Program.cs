@@ -183,7 +183,14 @@ try
         try
         {
             var dbContext = services.GetRequiredService<ApplicationDbContext>();
-            await dbContext.Database.MigrateAsync();
+            if (dbContext.Database.IsRelational())
+            {
+                await dbContext.Database.MigrateAsync();
+            }
+            else
+            {
+                await dbContext.Database.EnsureCreatedAsync();
+            }
 
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
