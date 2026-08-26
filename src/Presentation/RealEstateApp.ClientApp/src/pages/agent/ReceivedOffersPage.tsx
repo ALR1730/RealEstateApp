@@ -1,0 +1,236 @@
+import React, { useState, useEffect } from 'react';
+import { offersService } from '../../api/services';
+import { Offer } from '../../types';
+import { formatCurrencyRD, formatDate } from '../../utils/formatters';
+import { Badge } from '../../components/common/Badge';
+import { Loader } from '../../components/common/Loader';
+import { Tag, Check, X, ShieldAlert, AlertTriangle, ExternalLink, ArrowLeftRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CounterOfferModal } from '../../components/offers/CounterOfferModal';
+
+export const ReceivedOffersPage: React.FC = () => {
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedOfferToAccept, setSelectedOfferToAccept] = useState<Offer | null>(null);
+  const [selectedOfferToCounter, setSelectedOfferToCounter] = useState<Offer | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const loadOffers = async () => {
+    try {
+      setIsLoading(true);
+      const data = await offersService.getReceivedOffers();
+      setOffers(data || []);
+    } catch (err) {
+      console.error("Error loading agent offers:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOffers();
+  }, []);
+
+  const handleAcceptConfirm = async () => {
+    if (!selectedOfferToAccept) return;
+    try {
+      setIsProcessing(true);
+      await offersService.acceptOffer(selectedOfferToAccept.id);
+      setSelectedOfferToAccept(null);
+      await loadOffers();
+      alert("¡Oferta aceptada exitosamente! La propiedad ha sido marcada como VENDIDA y las demás ofertas competidoras fueron rechazadas automáticamente.");
+    } catch (err: any) {
+      console.error("Error accepting offer:", err);
+      alert(err.response?.data?.error || "Error al aceptar la oferta.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleReject = async (offerId: number) => {
+    if (!window.confirm("¿Seguro que deseas rechazar esta oferta?")) return;
+    try {
+      await offersService.rejectOffer(offerId);
+      loadOffers();
+    } catch (err) {
+      console.error("Error rejecting offer:", err);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      
+      <div className="flex justify-between items-center pb-4 border-b border-slate-200">
+        <div>
+          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+            <Tag className="w-6 h-6 text-emerald-600" />
+            Ofertas Recibidas en tus Inmuebles
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Bandeja de propuestas económicas formales enviadas por compradores interesados.
+          </p>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <Loader text="Consultando ofertas recibidas..." />
+      ) : offers.length === 0 ? (
+        <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-4">
+          <Tag className="w-12 h-12 text-slate-300 mx-auto" />
+          <h3 className="text-base font-bold text-slate-800">No hay ofertas recibidas</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            Las ofertas enviadas por clientes compradores en tus propiedades aparecerán aquí para tu aprobación.
+          </p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-50 text-slate-700 font-extrabold uppercase tracking-wider border-b border-slate-200">
+                  <th className="py-3.5 px-4">Propiedad</th>
+                  <th className="py-3.5 px-4">Comprador</th>
+                  <th className="py-3.5 px-4">Oferta (RD$)</th>
+                  <th className="py-3.5 px-4">Fecha</th>
+                  <th className="py-3.5 px-4">Estado</th>
+                  <th className="py-3.5 px-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {offers.map((offer) => (
+                  <tr key={offer.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4">
+                      <span className="font-bold text-slate-900 font-mono">#{offer.propertyCode || offer.propertyId}</span>
+                      <p className="text-[11px] text-slate-500 truncate max-w-xs">{offer.propertyDescription}</p>
+                    </td>
+                    <td className="py-3 px-4 text-slate-700 font-semibold">
+                      {offer.clientName || 'Cliente'} <br />
+                      <span className="text-[10px] text-slate-500 font-normal">{offer.clientEmail || offer.clientPhone}</span>
+                    </td>
+                    <td className="py-3 px-4 font-mono font-bold text-sm text-emerald-600">
+                      {formatCurrencyRD(offer.amount)}
+                    </td>
+                    <td className="py-3 px-4 text-slate-600">
+                      {formatDate(offer.created)}
+                    </td>
+                    <td className="py-3 px-4">
+                      <Badge status={offer.status} />
+                    </td>
+                    <td className="py-3 px-4 text-right space-x-2">
+                      {offer.status === 'Pending' ? (
+                        <>
+                          <button
+                            onClick={() => setSelectedOfferToAccept(offer)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all"
+                            title="Aceptar Oferta y Cerrar Venta"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Aceptar</span>
+                          </button>
+                          <button
+                            onClick={() => setSelectedOfferToCounter(offer)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl font-bold text-xs border border-amber-200 transition-all"
+                            title="Enviar Contraoferta"
+                          >
+                            <ArrowLeftRight className="w-3.5 h-3.5" />
+                            <span>Contraoferta</span>
+                          </button>
+                          <button
+                            onClick={() => handleReject(offer.id)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl font-bold text-xs border border-rose-200 transition-all"
+                            title="Rechazar Oferta"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                            <span>Rechazar</span>
+                          </button>
+                        </>
+                      ) : offer.status === 'CounterOffered' ? (
+                        <div className="text-right space-y-1.5">
+                          <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-200/60">
+                            <p className="text-[10px] text-amber-600 uppercase font-bold mb-0.5">Contraoferta Enviada</p>
+                            <p className="font-mono font-bold text-sm text-amber-700">{formatCurrencyRD(offer.counterOfferAmount || 0)}</p>
+                            {offer.counterOfferMessage && (
+                              <p className="text-[11px] text-amber-800 mt-1 leading-relaxed">{offer.counterOfferMessage}</p>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-[11px] text-slate-400 font-semibold italic">Resuelta</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Atomic Acceptance Confirmation Modal */}
+      {selectedOfferToAccept && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100 space-y-5 animate-in zoom-in-95">
+            
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+
+            <div className="text-center space-y-2">
+              <h3 className="font-extrabold text-lg text-slate-900">
+                ¿Confirmar Aceptación de Oferta?
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Estás a punto de aceptar la oferta de <strong className="font-mono text-emerald-600">{formatCurrencyRD(selectedOfferToAccept.amount)}</strong> para la propiedad <strong>#{selectedOfferToAccept.propertyCode}</strong>.
+              </p>
+            </div>
+
+            <div className="p-3.5 bg-amber-50 rounded-2xl border border-amber-200/60 text-[11px] text-amber-900 space-y-1">
+              <p className="font-bold flex items-center gap-1.5">
+                <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
+                Ejecución de Regla Atómica de Venta:
+              </p>
+              <ul className="list-disc pl-5 space-y-0.5 text-amber-800">
+                <li>El inmueble se marcará permanentemente como <strong>"Vendida"</strong>.</li>
+                <li>Todas las demás ofertas pendientes de este inmueble se <strong>rechazarán en cascada</strong>.</li>
+                <li>Se bloquearán nuevas ofertas y solicitudes de visitas.</li>
+              </ul>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setSelectedOfferToAccept(null)}
+                disabled={isProcessing}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleAcceptConfirm}
+                disabled={isProcessing}
+                className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl shadow-lg shadow-emerald-600/20"
+              >
+                {isProcessing ? 'Procesando Cierre...' : 'Sí, Aceptar Oferta'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Counter Offer Modal */}
+      {selectedOfferToCounter && (
+        <CounterOfferModal
+          isOpen={true}
+          onClose={() => setSelectedOfferToCounter(null)}
+          offerId={selectedOfferToCounter.id}
+          originalAmount={selectedOfferToCounter.amount}
+          onSubmit={() => {
+            setSelectedOfferToCounter(null);
+            loadOffers();
+          }}
+        />
+      )}
+    </div>
+  );
+};

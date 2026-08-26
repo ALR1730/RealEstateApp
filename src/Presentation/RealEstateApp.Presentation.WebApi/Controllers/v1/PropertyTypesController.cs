@@ -33,7 +33,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 
             if (list == null || list.Count == 0)
             {
-                return NoContent();
+                return Ok(new List<PropertyTypeDto>());
             }
 
             var dtos = _mapper.Map<List<PropertyTypeDto>>(list);

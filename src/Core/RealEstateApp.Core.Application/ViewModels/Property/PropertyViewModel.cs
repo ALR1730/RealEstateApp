@@ -65,6 +65,13 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         public List<string> Images { get; set; } = new();
         public List<string> Improvements { get; set; } = new();
 
+        // Historial de precios y análisis de tendencias
+        public bool HasPriceDrop { get; set; }
+        public decimal PriceDropPercentage { get; set; }
+        public decimal PriceDropAmount { get; set; }
+        public decimal OriginalPrice { get; set; }
+        public List<PriceHistoryViewModel> PriceHistories { get; set; } = new();
+
         // Cantidad de favoritos (para estadísticas)
         public int FavoritesCount { get; set; }
 

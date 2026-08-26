@@ -39,6 +39,10 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
         public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; } = null!;
         public DbSet<AgentSubscription> AgentSubscriptions { get; set; } = null!;
         public DbSet<SavedSearch> SavedSearches { get; set; } = null!;
+        public DbSet<PropertyPriceHistory> PropertyPriceHistories { get; set; } = null!;
+        public DbSet<PropertyValuation> PropertyValuations { get; set; } = null!;
+        public DbSet<LeadPipeline> LeadPipelines { get; set; } = null!;
+        public DbSet<BuyAbilityEvaluation> BuyAbilityEvaluations { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -534,6 +538,197 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                     .HasColumnType("decimal(18,2)");
 
                 entity.HasIndex(s => s.UserId);
+            });
+
+            #endregion
+
+            #region PropertyPriceHistory
+
+            modelBuilder.Entity<PropertyPriceHistory>(entity =>
+            {
+                entity.ToTable("PropertyPriceHistories");
+                entity.HasKey(ph => ph.Id);
+
+                entity.Property(ph => ph.OldPrice)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(ph => ph.NewPrice)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(ph => ph.PercentageChange)
+                    .HasColumnType("decimal(8,2)");
+
+                entity.Property(ph => ph.Currency)
+                    .IsRequired()
+                    .HasMaxLength(10);
+
+                entity.Property(ph => ph.ChangeReason)
+                    .HasMaxLength(250);
+
+                entity.Property(ph => ph.ChangedByUserId)
+                    .HasMaxLength(450);
+
+                entity.HasOne(ph => ph.Property)
+                    .WithMany(p => p.PriceHistories)
+                    .HasForeignKey(ph => ph.PropertyId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(ph => ph.PropertyId);
+                entity.HasIndex(ph => ph.ChangeDate);
+            });
+
+            #endregion
+
+            #region PropertyValuation
+
+            modelBuilder.Entity<PropertyValuation>(entity =>
+            {
+                entity.ToTable("PropertyValuations");
+                entity.HasKey(pv => pv.Id);
+
+                entity.Property(pv => pv.EstimatedPricePerSqm)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(pv => pv.EstimatedTotalPrice)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(pv => pv.MinPricePerSqm)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(pv => pv.MaxPricePerSqm)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(pv => pv.StandardDeviation)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(pv => pv.SearchRadiusKm)
+                    .HasColumnType("decimal(8,2)");
+
+                entity.Property(pv => pv.Currency)
+                    .IsRequired()
+                    .HasMaxLength(3);
+
+                entity.Property(pv => pv.Notes)
+                    .HasMaxLength(1000);
+
+                entity.HasOne(pv => pv.Property)
+                    .WithMany()
+                    .HasForeignKey(pv => pv.PropertyId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(pv => pv.PropertyId);
+            });
+
+            #endregion
+
+            #region LeadPipeline
+
+            modelBuilder.Entity<LeadPipeline>(entity =>
+            {
+                entity.ToTable("LeadPipelines");
+                entity.HasKey(lp => lp.Id);
+
+                entity.Property(lp => lp.LeadName)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(lp => lp.LeadEmail)
+                    .HasMaxLength(200);
+
+                entity.Property(lp => lp.LeadPhone)
+                    .HasMaxLength(30);
+
+                entity.Property(lp => lp.Notes)
+                    .HasMaxLength(2000);
+
+                entity.Property(lp => lp.AgentId)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                entity.Property(lp => lp.Stage)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasDefaultValue(PipelineStage.NewLead);
+
+                entity.Property(lp => lp.Priority)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasDefaultValue("Normal");
+
+                entity.Property(lp => lp.Source)
+                    .HasMaxLength(100);
+
+                entity.Property(lp => lp.EstimatedBudget)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(lp => lp.BudgetCurrency)
+                    .HasMaxLength(3);
+
+                entity.HasOne(lp => lp.Property)
+                    .WithMany()
+                    .HasForeignKey(lp => lp.PropertyId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(lp => lp.AgentId);
+                entity.HasIndex(lp => lp.Stage);
+            });
+
+            #endregion
+
+            #region BuyAbilityEvaluation
+
+            modelBuilder.Entity<BuyAbilityEvaluation>(entity =>
+            {
+                entity.ToTable("BuyAbilityEvaluations");
+                entity.HasKey(ba => ba.Id);
+
+                entity.Property(ba => ba.ClientId)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                entity.Property(ba => ba.MonthlyGrossIncome)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(ba => ba.MonthlyNetIncome)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(ba => ba.MonthlyDebtPayments)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(ba => ba.AvailableDownPayment)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(ba => ba.MaxMortgageAmount)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(ba => ba.MaxPropertyPrice)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(ba => ba.MaxMonthlyPayment)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(ba => ba.DebtToIncomeRatio)
+                    .HasColumnType("decimal(8,2)");
+
+                entity.Property(ba => ba.EstimatedAnnualRate)
+                    .HasColumnType("decimal(8,2)");
+
+                entity.Property(ba => ba.Currency)
+                    .IsRequired()
+                    .HasMaxLength(3);
+
+                entity.Property(ba => ba.CreditScoreRating)
+                    .IsRequired()
+                    .HasMaxLength(30);
+
+                entity.Property(ba => ba.EvaluationResult)
+                    .IsRequired()
+                    .HasMaxLength(30);
+
+                entity.Property(ba => ba.Observations)
+                    .HasMaxLength(2000);
+
+                entity.HasIndex(ba => ba.ClientId);
             });
 
             #endregion

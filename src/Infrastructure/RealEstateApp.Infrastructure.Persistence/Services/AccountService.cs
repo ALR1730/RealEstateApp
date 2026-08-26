@@ -492,5 +492,108 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
                 throw new ValidationException($"Error al eliminar el usuario: {string.Join(", ", result.Errors.Select(e => e.Description))}");
             }
         }
+
+        public async Task<string> ForgotPasswordAsync(ForgotPasswordRequest request, string? origin = null)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return $"Si el correo {request.Email} está registrado, recibirá un enlace para restablecer su contraseña.";
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var resetUrl = !string.IsNullOrWhiteSpace(origin)
+                ? $"{origin}/Account/ResetPassword?email={Uri.EscapeDataString(user.Email ?? string.Empty)}&token={encodedToken}"
+                : $"token={encodedToken}";
+
+            await _emailService.SendAsync(
+                user.Email!,
+                "Restablecer Contraseña - RealEstateApp",
+                $"Para restablecer su contraseña, haga clic en el siguiente enlace: <a href='{resetUrl}'>Restablecer Contraseña</a>. Si no solicitó este cambio, ignore este mensaje."
+            );
+
+            return $"Se ha enviado un correo a {request.Email} con las instrucciones para restablecer su contraseña.";
+        }
+
+        public async Task<string> ResetPasswordAsync(ResetPasswordRequest request)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return "No existe ningún usuario registrado con el correo proporcionado.";
+            }
+
+            if (request.NewPassword != request.ConfirmPassword)
+            {
+                return "Las contraseñas no coinciden.";
+            }
+
+            try
+            {
+                var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Token));
+                var result = await _userManager.ResetPasswordAsync(user, decodedToken, request.NewPassword);
+                if (result.Succeeded)
+                {
+                    return "Contraseña restablecida exitosamente. Ya puede iniciar sesión con su nueva contraseña.";
+                }
+
+                return string.Join(", ", result.Errors.Select(e => e.Description));
+            }
+            catch (Exception)
+            {
+                return "El token de restablecimiento es inválido o ha expirado.";
+            }
+        }
+
+        public async Task<ChangePasswordViewModel> ChangePasswordAsync(ChangePasswordViewModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.Id))
+            {
+                model.HasError = true;
+                model.ErrorMessage = "El ID del usuario es requerido.";
+                return model;
+            }
+
+            var user = await _userManager.FindByIdAsync(model.Id);
+            if (user == null)
+            {
+                model.HasError = true;
+                model.ErrorMessage = "El usuario especificado no existe.";
+                return model;
+            }
+
+            if (string.IsNullOrWhiteSpace(model.CurrentPassword))
+            {
+                model.HasError = true;
+                model.ErrorMessage = "Debe ingresar su contraseña actual.";
+                return model;
+            }
+
+            if (string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                model.HasError = true;
+                model.ErrorMessage = "Debe ingresar la nueva contraseña.";
+                return model;
+            }
+
+            if (model.NewPassword != model.ConfirmPassword)
+            {
+                model.HasError = true;
+                model.ErrorMessage = "La confirmación de la contraseña no coincide.";
+                return model;
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (!result.Succeeded)
+            {
+                model.HasError = true;
+                model.ErrorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+                return model;
+            }
+
+            model.HasError = false;
+            return model;
+        }
     }
 }

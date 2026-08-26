@@ -14,7 +14,7 @@ namespace RealEstateApp.Core.Application.Services
 {
     /// <summary>
     /// Servicio de aplicación para propiedades.
-    /// CRUD, gestión de imágenes, filtros combinados, búsqueda por código y gestión por agente.
+    /// CRUD, gestión de imágenes, filtros combinados, búsqueda por código, historial de precios y gestión por agente.
     /// </summary>
     public class PropertyService : IPropertyService
     {
@@ -22,28 +22,36 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IPropertyImageRepository _propertyImageRepository;
         private readonly IPropertyTypeRepository _propertyTypeRepository;
         private readonly IPropertyImprovementRepository _propertyImprovementRepository;
+        private readonly IPropertyPriceHistoryRepository _priceHistoryRepository;
         private readonly IFileStorageService _fileStorageService;
         private readonly ICurrencyService _currencyService;
         private readonly ISavedSearchService _savedSearchService;
+        private readonly ISubscriptionService _subscriptionService;
         private readonly IMapper _mapper;
+
+        private const int MaxOwnerProperties = 2;
 
         public PropertyService(
             IPropertyRepository propertyRepository,
             IPropertyImageRepository propertyImageRepository,
             IPropertyTypeRepository propertyTypeRepository,
             IPropertyImprovementRepository propertyImprovementRepository,
+            IPropertyPriceHistoryRepository priceHistoryRepository,
             IFileStorageService fileStorageService,
             ICurrencyService currencyService,
             ISavedSearchService savedSearchService,
+            ISubscriptionService subscriptionService,
             IMapper mapper)
         {
             _propertyRepository = propertyRepository;
             _propertyImageRepository = propertyImageRepository;
             _propertyTypeRepository = propertyTypeRepository;
             _propertyImprovementRepository = propertyImprovementRepository;
+            _priceHistoryRepository = priceHistoryRepository;
             _fileStorageService = fileStorageService;
             _currencyService = currencyService;
             _savedSearchService = savedSearchService;
+            _subscriptionService = subscriptionService;
             _mapper = mapper;
         }
 
@@ -60,6 +68,40 @@ namespace RealEstateApp.Core.Application.Services
             var property = await _propertyRepository.GetByIdAsync(id);
             if (property == null) return null;
             var vm = _mapper.Map<PropertyViewModel>(property);
+
+            // Obtener el historial completo de precios
+            var histories = await _priceHistoryRepository.GetByPropertyIdAsync(id);
+            if (histories != null && histories.Count > 0)
+            {
+                vm.PriceHistories = histories.Select(h => new PriceHistoryViewModel
+                {
+                    Id = h.Id,
+                    PropertyId = h.PropertyId,
+                    OldPrice = h.OldPrice,
+                    NewPrice = h.NewPrice,
+                    Currency = h.Currency,
+                    PercentageChange = h.PercentageChange,
+                    ChangeDate = h.ChangeDate,
+                    ChangedByUserId = h.ChangedByUserId,
+                    ChangeReason = h.ChangeReason
+                }).ToList();
+
+                var initialHistory = histories.FirstOrDefault(h => h.OldPrice == 0);
+                if (initialHistory != null)
+                {
+                    vm.OriginalPrice = initialHistory.NewPrice;
+                }
+
+                // Evaluar si el último cambio fue una rebaja
+                var latestChange = histories.OrderByDescending(h => h.ChangeDate).FirstOrDefault(h => h.OldPrice > 0);
+                if (latestChange != null && latestChange.NewPrice < latestChange.OldPrice)
+                {
+                    vm.HasPriceDrop = true;
+                    vm.PriceDropPercentage = Math.Abs(latestChange.PercentageChange);
+                    vm.PriceDropAmount = latestChange.OldPrice - latestChange.NewPrice;
+                }
+            }
+
             await EnrichPropertiesWithCurrencyAsync(new List<PropertyViewModel> { vm });
             return vm;
         }
@@ -81,6 +123,37 @@ namespace RealEstateApp.Core.Application.Services
 
         public async Task<SavePropertyViewModel> Add(SavePropertyViewModel vm)
         {
+            // Validar límite de propiedades según el rol del usuario
+            if (!string.IsNullOrEmpty(vm.AgentId))
+            {
+                var existingProperties = await _propertyRepository.GetByAgentIdAsync(vm.AgentId);
+                var existingCount = existingProperties.Count;
+
+                // Verificar si el usuario tiene rol Owner (límite máximo de 2 propiedades)
+                var ownerSubscription = await _subscriptionService.GetCurrentSubscriptionByAgentIdAsync(vm.AgentId);
+                if (ownerSubscription != null && ownerSubscription.PlanName == "Owner")
+                {
+                    if (existingCount >= MaxOwnerProperties)
+                    {
+                        throw new ValidationException(
+                            $"Como propietario directo puedes publicar un máximo de {MaxOwnerProperties} inmuebles simultáneos. " +
+                            $"Actualmente tienes {existingCount} propiedad(es) activa(s).");
+                    }
+                }
+                else
+                {
+                    // Para Agentes: validar según plan de suscripción
+                    var canCreate = await _subscriptionService.CanAgentCreatePropertyAsync(vm.AgentId);
+                    if (!canCreate)
+                    {
+                        var maxAllowed = ownerSubscription?.MaxActiveProperties ?? 3;
+                        throw new ValidationException(
+                            $"Has alcanzado el límite de {maxAllowed} propiedad(es) permitida(s) por tu plan de suscripción. " +
+                            $"Actualmente tienes {existingCount} propiedad(es) activa(s). Actualiza tu plan para publicar más inmuebles.");
+                    }
+                }
+            }
+
             var property = _mapper.Map<Property>(vm);
             property.Name = vm.Name;
 
@@ -95,6 +168,26 @@ namespace RealEstateApp.Core.Application.Services
 
             // Guardar entidad de propiedad
             property = await _propertyRepository.AddAsync(property);
+
+            // Registrar hito inicial en el Historial de Precios
+            try
+            {
+                await _priceHistoryRepository.AddAsync(new PropertyPriceHistory
+                {
+                    PropertyId = property.Id,
+                    OldPrice = 0,
+                    NewPrice = property.Price,
+                    Currency = !string.IsNullOrEmpty(property.Currency) ? property.Currency : CurrencyConstants.DOP,
+                    PercentageChange = 0,
+                    ChangeDate = DateTime.UtcNow,
+                    ChangedByUserId = vm.AgentId,
+                    ChangeReason = "Precio inicial de publicación"
+                });
+            }
+            catch
+            {
+                // Silenciar error en auditoría secundaria para no abortar creación
+            }
 
             // Guardar mejoras seleccionadas
             if (vm.ImprovementIds != null && vm.ImprovementIds.Count > 0)
@@ -132,7 +225,7 @@ namespace RealEstateApp.Core.Application.Services
             }
             catch
             {
-                // Silenciar excepciones en notificaciones secundarias para no interrumpir el flujo principal de creación
+                // Silenciar excepciones en notificaciones secundarias
             }
 
             var result = _mapper.Map<SavePropertyViewModel>(property);
@@ -145,9 +238,14 @@ namespace RealEstateApp.Core.Application.Services
             if (property == null)
                 throw new NotFoundException($"No se encontró la propiedad con ID {id}");
 
+            var oldPrice = property.Price;
+            var oldCurrency = property.Currency;
+            var newCurrency = !string.IsNullOrEmpty(vm.Currency) ? vm.Currency : CurrencyConstants.DOP;
+            var priceChanged = oldPrice != vm.Price || !string.Equals(oldCurrency, newCurrency, StringComparison.OrdinalIgnoreCase);
+
             property.Name = vm.Name;
             property.Price = vm.Price;
-            property.Currency = !string.IsNullOrEmpty(vm.Currency) ? vm.Currency : CurrencyConstants.DOP;
+            property.Currency = newCurrency;
             property.Rooms = vm.Rooms;
             property.Bathrooms = vm.Bathrooms;
             property.SizeInMeters = vm.SizeInMeters;
@@ -171,6 +269,39 @@ namespace RealEstateApp.Core.Application.Services
 
             await _propertyRepository.UpdateAsync(property);
 
+            // Si el precio cambió, registrarlo en el Historial de Precios
+            if (priceChanged && oldPrice > 0)
+            {
+                try
+                {
+                    decimal percentageChange = 0;
+                    if (oldPrice > 0)
+                    {
+                        percentageChange = Math.Round(((vm.Price - oldPrice) / oldPrice) * 100, 2);
+                    }
+
+                    var reason = vm.Price < oldPrice 
+                        ? $"Rebaja de precio ({Math.Abs(percentageChange):0.0}%)" 
+                        : (vm.Price > oldPrice ? $"Aumento de precio (+{percentageChange:0.0}%)" : "Ajuste de moneda");
+
+                    await _priceHistoryRepository.AddAsync(new PropertyPriceHistory
+                    {
+                        PropertyId = id,
+                        OldPrice = oldPrice,
+                        NewPrice = vm.Price,
+                        Currency = newCurrency,
+                        PercentageChange = percentageChange,
+                        ChangeDate = DateTime.UtcNow,
+                        ChangedByUserId = vm.AgentId,
+                        ChangeReason = reason
+                    });
+                }
+                catch
+                {
+                    // Silenciar excepción en auditoría para asegurar continuidad
+                }
+            }
+
             // Actualizar mejoras asociadas
             if (vm.ImprovementIds != null)
             {
@@ -181,23 +312,25 @@ namespace RealEstateApp.Core.Application.Services
             if (vm.Files != null && vm.Files.Count > 0)
             {
                 var existingImages = await _propertyImageRepository.GetByPropertyIdAsync(id);
-                var currentCount = existingImages.Count;
+                int remainingSlots = Math.Max(0, 15 - existingImages.Count);
 
-                foreach (var file in vm.Files)
+                var imageEntities = new List<PropertyImage>();
+                foreach (var file in vm.Files.Take(remainingSlots))
                 {
-                    if (currentCount >= 15) break;
-
                     if (file.Length > 0)
                     {
                         using var stream = file.OpenReadStream();
                         var imageUrl = await _fileStorageService.UploadFileAsync(stream, file.FileName, "properties");
-                        await _propertyImageRepository.AddAsync(new PropertyImage
+                        imageEntities.Add(new PropertyImage
                         {
                             PropertyId = id,
                             ImageUrl = imageUrl
                         });
-                        currentCount++;
                     }
+                }
+                if (imageEntities.Any())
+                {
+                    await _propertyImageRepository.AddRangeAsync(imageEntities);
                 }
             }
         }
@@ -208,12 +341,11 @@ namespace RealEstateApp.Core.Application.Services
             if (property == null)
                 throw new NotFoundException($"No se encontró la propiedad con ID {id}");
 
-            // Eliminar imágenes de disco e imágenes en BD
+            // Eliminar archivos físicos de imágenes
             var images = await _propertyImageRepository.GetByPropertyIdAsync(id);
             foreach (var img in images)
             {
                 await _fileStorageService.DeleteFileAsync(img.ImageUrl, "properties");
-                await _propertyImageRepository.DeleteAsync(img);
             }
 
             await _propertyRepository.DeleteAsync(property);
@@ -221,11 +353,11 @@ namespace RealEstateApp.Core.Application.Services
 
         public async Task DeleteImage(int imageId)
         {
-            var img = await _propertyImageRepository.GetByIdAsync(imageId);
-            if (img != null)
+            var image = await _propertyImageRepository.GetByIdAsync(imageId);
+            if (image != null)
             {
-                await _fileStorageService.DeleteFileAsync(img.ImageUrl, "properties");
-                await _propertyImageRepository.DeleteAsync(img);
+                await _fileStorageService.DeleteFileAsync(image.ImageUrl, "properties");
+                await _propertyImageRepository.DeleteAsync(image);
             }
         }
 
@@ -254,6 +386,23 @@ namespace RealEstateApp.Core.Application.Services
             return vm;
         }
 
+        public async Task<List<PriceHistoryViewModel>> GetPriceHistoryAsync(int propertyId)
+        {
+            var histories = await _priceHistoryRepository.GetByPropertyIdAsync(propertyId);
+            return histories.Select(h => new PriceHistoryViewModel
+            {
+                Id = h.Id,
+                PropertyId = h.PropertyId,
+                OldPrice = h.OldPrice,
+                NewPrice = h.NewPrice,
+                Currency = h.Currency,
+                PercentageChange = h.PercentageChange,
+                ChangeDate = h.ChangeDate,
+                ChangedByUserId = h.ChangedByUserId,
+                ChangeReason = h.ChangeReason
+            }).ToList();
+        }
+
         private async Task EnrichPropertiesWithCurrencyAsync(List<PropertyViewModel> viewModels)
         {
             if (viewModels == null || viewModels.Count == 0) return;
@@ -279,6 +428,25 @@ namespace RealEstateApp.Core.Application.Services
 
                 vm.DisplayPrice = _currencyService.FormatPrice(vm.Price, vm.Currency);
                 vm.DisplaySecondaryPrice = _currencyService.FormatSecondaryPrice(vm.Price, vm.Currency, vm.Currency, exchangeRate);
+
+                // Detectar si hubo rebaja de precio
+                if (!vm.HasPriceDrop)
+                {
+                    try
+                    {
+                        var latestHistory = await _priceHistoryRepository.GetLatestByPropertyIdAsync(vm.Id);
+                        if (latestHistory != null && latestHistory.OldPrice > 0 && latestHistory.NewPrice < latestHistory.OldPrice)
+                        {
+                            vm.HasPriceDrop = true;
+                            vm.PriceDropPercentage = Math.Abs(latestHistory.PercentageChange);
+                            vm.PriceDropAmount = latestHistory.OldPrice - latestHistory.NewPrice;
+                        }
+                    }
+                    catch
+                    {
+                        // Silenciar error secundario
+                    }
+                }
             }
         }
 

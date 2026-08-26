@@ -12,4 +12,7 @@
     <Project Path="src/Presentation/RealEstateApp.Presentation.WebApi/RealEstateApp.Presentation.WebApi.csproj" />
     <Project Path="src/Presentation/RealEstateApp.Presentation.WebApp/RealEstateApp.Presentation.WebApp.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RealEstateApp.UnitTests/RealEstateApp.UnitTests.csproj" />
+  </Folder>
 </Solution>

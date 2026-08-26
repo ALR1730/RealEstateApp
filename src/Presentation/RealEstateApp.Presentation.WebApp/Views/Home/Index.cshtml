@@ -481,6 +481,12 @@
                                 <div class="d-flex flex-wrap align-items-center gap-1 mb-2">
                                     <span class="badge bg-light text-primary border">@item.PropertyTypeName</span>
                                     <span class="badge bg-light text-dark border">@item.SaleTypeName</span>
+                                    @if (item.HasPriceDrop)
+                                    {
+                                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 fw-bold" title="Rebaja de precio reciente">
+                                            <i class="bi bi-graph-down-arrow me-1"></i> -@item.PriceDropPercentage.ToString("0.0")%
+                                        </span>
+                                    }
                                     @if (item.IsCurrentlyFeatured)
                                     {
                                         <span class="badge bg-light text-muted border">Cód: @item.Code</span>

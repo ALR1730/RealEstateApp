@@ -157,6 +157,14 @@
             <span class="badge bg-light text-secondary border mt-1 font-heading">
                 Aprox. ~@secPrefix@secPrice.ToString("N0")
             </span>
+            @if (Model.HasPriceDrop)
+            {
+                <div class="mt-2">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 shadow-sm font-heading fw-bold">
+                        <i class="bi bi-graph-down-arrow me-1"></i> ¡Bajó @Model.PriceDropPercentage.ToString("0.0")%! Ahorras @mainPrefix@Model.PriceDropAmount.ToString("N0")
+                    </span>
+                </div>
+            }
         </div>
     </div>
 
@@ -312,6 +320,92 @@
                         </div>
                     </div>
                 }
+
+                <!-- Historial y Evolución de Precios -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="font-heading fw-bold mb-1 d-flex align-items-center gap-2">
+                                <i class="bi bi-clock-history text-primary"></i> Historial y Evolución de Precios
+                            </h5>
+                            <p class="text-muted small mb-0">Auditoría transparente de variaciones y rebajas registradas para esta propiedad.</p>
+                        </div>
+                        @if (Model.HasPriceDrop)
+                        {
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fw-bold">
+                                <i class="bi bi-arrow-down-circle-fill me-1"></i> -@Model.PriceDropPercentage.ToString("0.0")% Rebaja
+                            </span>
+                        }
+                    </div>
+
+                    @if (Model.PriceHistories != null && Model.PriceHistories.Count > 1)
+                    {
+                        <!-- Gráfica de Tendencia de Precio -->
+                        <div class="mb-4 p-3 bg-light rounded-3 border">
+                            <h6 class="small fw-bold text-dark mb-2"><i class="bi bi-graph-up me-1"></i> Tendencia de Variación en el Tiempo</h6>
+                            <div style="height: 180px; position: relative;">
+                                <canvas id="priceHistoryChart"></canvas>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Tabla de Hitos de Precios -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Evento</th>
+                                    <th>Precio Anterior</th>
+                                    <th>Nuevo Precio</th>
+                                    <th>Variación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.PriceHistories != null && Model.PriceHistories.Any())
+                                {
+                                    @foreach (var history in Model.PriceHistories.OrderByDescending(h => h.ChangeDate))
+                                    {
+                                        <tr>
+                                            <td class="text-muted"><i class="bi bi-calendar3 me-1"></i>@history.FormattedDate</td>
+                                            <td><span class="fw-medium text-dark">@(history.ChangeReason ?? "Actualización de precio")</span></td>
+                                            <td>@(history.IsInitialPrice ? "—" : history.FormattedOldPrice)</td>
+                                            <td class="fw-bold text-primary">@history.FormattedNewPrice</td>
+                                            <td>
+                                                @if (history.IsInitialPrice)
+                                                {
+                                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Precio Inicial</span>
+                                                }
+                                                else if (history.IsPriceDrop)
+                                                {
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold">
+                                                        <i class="bi bi-arrow-down-right me-1"></i>@history.FormattedPercentage
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle fw-bold">
+                                                        <i class="bi bi-arrow-up-right me-1"></i>@history.FormattedPercentage
+                                                    </span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td class="text-muted"><i class="bi bi-calendar3 me-1"></i>@DateTime.Now.ToString("dd/MM/yyyy")</td>
+                                        <td><span class="fw-medium text-dark">Precio inicial de publicación</span></td>
+                                        <td>—</td>
+                                        <td class="fw-bold text-primary">@Model.DisplayPrice</td>
+                                        <td><span class="badge bg-primary-subtle text-primary border border-primary-subtle">Precio Inicial</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -614,6 +708,7 @@
 @section Scripts {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             if (typeof GLightbox !== 'undefined') {
@@ -622,6 +717,67 @@
                     touchNavigation: true,
                     loop: true,
                     zoomable: true
+                });
+            }
+
+            // Inicializar gráfica de Historial de Precios si existe el canvas
+            var priceChartCanvas = document.getElementById('priceHistoryChart');
+            if (priceChartCanvas) {
+                @{
+                    var historyItems = (Model.PriceHistories ?? new List<RealEstateApp.Core.Application.ViewModels.Property.PriceHistoryViewModel>()).OrderBy(h => h.ChangeDate).ToList();
+                    var chartLabels = historyItems.Select(h => h.ChangeDate.ToString("dd/MM/yyyy")).ToList();
+                    var chartPrices = historyItems.Select(h => isUserUSD ? (h.Currency == "USD" ? h.NewPrice : Math.Round(h.NewPrice / (Model.PriceInUSD > 0 ? (Model.PriceInDOP / Model.PriceInUSD) : 58.5m), 0)) : (h.Currency == "DOP" ? h.NewPrice : Math.Round(h.NewPrice * (Model.PriceInDOP > 0 && Model.PriceInUSD > 0 ? (Model.PriceInDOP / Model.PriceInUSD) : 58.5m), 0))).ToList();
+                }
+
+                var labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(chartLabels));
+                var data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(chartPrices));
+                var currencySymbol = "@(isUserUSD ? "US$" : "RD$")";
+
+                new Chart(priceChartCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Precio (' + currencySymbol + ')',
+                            data: data,
+                            borderColor: '#0d6efd',
+                            backgroundColor: 'rgba(13, 110, 253, 0.08)',
+                            fill: true,
+                            tension: 0.25,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: '#0d6efd',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (ctx) {
+                                        return currencySymbol + ' ' + ctx.raw.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    callback: function (val) {
+                                        return currencySymbol + ' ' + (val >= 1000000 ? (val / 1000000).toFixed(1) + 'M' : (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val));
+                                    }
+                                },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
                 });
             }
         });

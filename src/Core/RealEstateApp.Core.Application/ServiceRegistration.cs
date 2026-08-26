@@ -31,6 +31,10 @@ namespace RealEstateApp.Core.Application
             services.AddTransient<ISubscriptionService, SubscriptionService>();
             services.AddTransient<ICurrencyService, CurrencyService>();
             services.AddTransient<ISavedSearchService, SavedSearchService>();
+            services.AddTransient<IProvinceService, ProvinceService>();
+            services.AddTransient<IPropertyValuationService, PropertyValuationService>();
+            services.AddTransient<ILeadPipelineService, LeadPipelineService>();
+            services.AddTransient<IBuyAbilityService, BuyAbilityService>();
 
             #endregion
         }

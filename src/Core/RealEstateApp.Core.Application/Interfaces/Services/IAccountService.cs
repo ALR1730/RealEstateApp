@@ -23,5 +23,8 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         Task<AccountUserDto?> GetUserByIdAsync(string id);
         Task<Dictionary<string, AccountUserDto>> GetUsersByIdsAsync(IEnumerable<string> ids);
         Task DeleteUserAsync(string userId);
+        Task<string> ForgotPasswordAsync(ForgotPasswordRequest request, string? origin = null);
+        Task<string> ResetPasswordAsync(ResetPasswordRequest request);
+        Task<ChangePasswordViewModel> ChangePasswordAsync(ChangePasswordViewModel model);
     }
 }

@@ -47,5 +47,10 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         /// Obtiene la lista de sectores únicos registrados en las propiedades de la base de datos.
         /// </summary>
         Task<List<string>> GetDistinctSectorsAsync(int? provinceId = null, int? municipalityId = null);
+
+        /// <summary>
+        /// Obtiene el historial de precios y análisis de tendencias de una propiedad.
+        /// </summary>
+        Task<List<PriceHistoryViewModel>> GetPriceHistoryAsync(int propertyId);
     }
 }

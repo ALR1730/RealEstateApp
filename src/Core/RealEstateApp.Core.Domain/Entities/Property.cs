@@ -56,5 +56,6 @@ namespace RealEstateApp.Core.Domain.Entities
         public ICollection<Favorite>? Favorites { get; set; }
         public ICollection<MortgageSimulation>? MortgageSimulations { get; set; }
         public ICollection<PropertyAppointment>? Appointments { get; set; }
+        public ICollection<PropertyPriceHistory>? PriceHistories { get; set; }
     }
 }

@@ -30,7 +30,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 
             if (agents == null || agents.Count == 0)
             {
-                return NoContent();
+                return Ok(new List<AgentDto>());
             }
 
             return Ok(agents);
