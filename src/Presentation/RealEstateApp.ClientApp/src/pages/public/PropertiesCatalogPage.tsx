@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Property, PropertyType, SaleType, FilterState } from '../../types';
 import { propertiesService, catalogsService, favoritesService, savedSearchesService } from '../../api/services';
@@ -13,7 +13,7 @@ const FILTER_URL_KEYS: (keyof FilterState)[] = [
   'minRooms', 'minBathrooms', 'minSizeInMeters', 'maxSizeInMeters',
   'provinceId', 'municipalityId', 'sector', 'agentId',
   'onlyFeatured', 'onlyVerifiedAgents', 'onlyFinanciable', 'onlyWithVirtualTour',
-  'maxDistanceKm',
+  'maxDistanceKm', 'improvementIds',
 ];
 
 const FILTER_LABELS: Record<string, string> = {
@@ -63,6 +63,8 @@ function readFiltersFromURL(sp: URLSearchParams): FilterState {
   f.maxDistanceKm = num(sp.get('maxDistanceKm'));
   f.userLat = num(sp.get('userLat'));
   f.userLng = num(sp.get('userLng'));
+  const imps = sp.getAll('improvementIds').map(Number).filter((n) => !Number.isNaN(n));
+  if (imps.length > 0) f.improvementIds = imps;
   return f;
 }
 
@@ -70,9 +72,12 @@ function writeFiltersToURL(filters: FilterState): URLSearchParams {
   const params = new URLSearchParams();
   FILTER_URL_KEYS.forEach((k) => {
     const v = filters[k];
-    if (v !== undefined && v !== '' && v !== null) {
-      params.set(k, String(v));
+    if (v === undefined || v === '' || v === null) return;
+    if (Array.isArray(v)) {
+      v.forEach((item) => params.append('improvementIds', String(item)));
+      return;
     }
+    params.set(k, String(v));
   });
   if (filters.userLat) params.set('userLat', String(filters.userLat));
   if (filters.userLng) params.set('userLng', String(filters.userLng));
@@ -94,14 +99,25 @@ export const PropertiesCatalogPage: React.FC = () => {
   const [saveAlerts, setSaveAlerts] = useState(false);
 
   const [filters, setFilters] = useState<FilterState>(() => readFiltersFromURL(searchParams));
+  const lastAppliedUrl = useRef(searchParams.toString());
+
+  useEffect(() => {
+    const url = searchParams.toString();
+    if (url === lastAppliedUrl.current) return;
+    lastAppliedUrl.current = url;
+    setFilters(readFiltersFromURL(searchParams));
+  }, [searchParams]);
 
   const loadData = async () => {
     try {
       const cleanParams: Record<string, any> = {};
       Object.entries(filters).forEach(([k, v]) => {
-        if (v !== undefined && v !== '' && v !== null) {
-          cleanParams[k] = v;
+        if (v === undefined || v === '' || v === null) return;
+        if (Array.isArray(v)) {
+          cleanParams.ImprovementIds = v.map(String);
+          return;
         }
+        cleanParams[k] = v;
       });
       const [props, types, sales] = await Promise.all([
         propertiesService.getAll(cleanParams),
