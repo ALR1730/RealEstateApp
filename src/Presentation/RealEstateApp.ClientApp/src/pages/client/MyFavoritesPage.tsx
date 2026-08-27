@@ -12,7 +12,6 @@ export const MyFavoritesPage: React.FC = () => {
 
   const loadFavorites = async () => {
     try {
-      setIsLoading(true);
       const favList = await favoritesService.getAll();
       
       // Load detailed properties
@@ -33,7 +32,7 @@ export const MyFavoritesPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadFavorites();
+    Promise.resolve().then(() => loadFavorites()).catch(console.error);
   }, []);
 
   const handleFavoriteToggle = (propId: number, isFav: boolean) => {

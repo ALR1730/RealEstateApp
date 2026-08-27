@@ -13,7 +13,6 @@ export const MyAppointmentsPage: React.FC = () => {
 
   const loadAppointments = async () => {
     try {
-      setIsLoading(true);
       const data = await appointmentsService.getMyAppointments();
       setAppointments(data || []);
     } catch (err) {
@@ -24,7 +23,7 @@ export const MyAppointmentsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadAppointments();
+    Promise.resolve().then(() => loadAppointments()).catch(console.error);
   }, []);
 
   const handleCancel = async (id: number) => {
@@ -90,7 +89,7 @@ export const MyAppointmentsPage: React.FC = () => {
                 </div>
                 {appt.clientNotes && (
                   <p className="text-[11px] text-slate-500 pt-1 border-t border-slate-200/60">
-                    Notas: "{appt.clientNotes}"
+                    Notas: &quot;{appt.clientNotes}&quot;
                   </p>
                 )}
               </div>

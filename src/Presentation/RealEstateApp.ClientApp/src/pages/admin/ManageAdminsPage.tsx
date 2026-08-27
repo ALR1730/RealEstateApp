@@ -19,7 +19,6 @@ export const ManageAdminsPage: React.FC = () => {
 
   const loadAdmins = async () => {
     try {
-      setIsLoading(true);
       const data = await adminService.getAdmins();
       setAdmins(data || []);
     } catch (err) {
@@ -30,7 +29,7 @@ export const ManageAdminsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadAdmins();
+    Promise.resolve().then(() => loadAdmins()).catch(console.error);
   }, []);
 
   const handleToggleStatus = async (userId: string, currentStatus: boolean) => {

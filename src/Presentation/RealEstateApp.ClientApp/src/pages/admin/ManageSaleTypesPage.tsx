@@ -17,7 +17,6 @@ export const ManageSaleTypesPage: React.FC = () => {
 
   const loadTypes = async () => {
     try {
-      setIsLoading(true);
       const data = await catalogsService.getSaleTypes();
       setTypes(data || []);
     } catch (err) {
@@ -28,7 +27,7 @@ export const ManageSaleTypesPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadTypes();
+    Promise.resolve().then(() => loadTypes()).catch(console.error);
   }, []);
 
   const handleOpenCreate = () => {

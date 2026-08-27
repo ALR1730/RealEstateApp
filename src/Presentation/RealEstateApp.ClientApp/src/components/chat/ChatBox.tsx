@@ -29,7 +29,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   const loadMessages = async () => {
     if (!user) return;
     try {
-      setIsLoading(true);
       const isClientRole = user.roles?.includes('Client');
       const clientId = isClientRole ? user.id : recipientId;
       const agentId = isClientRole ? recipientId : user.id;
@@ -44,7 +43,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   };
 
   useEffect(() => {
-    loadMessages();
+    Promise.resolve().then(() => loadMessages()).catch(console.error);
   }, [propertyId, recipientId]);
 
   useEffect(() => {

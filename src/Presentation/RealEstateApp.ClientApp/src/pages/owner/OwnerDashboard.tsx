@@ -15,7 +15,6 @@ export const OwnerDashboard: React.FC = () => {
 
   const loadData = async () => {
     try {
-      setIsLoading(true);
       const data = await ownersService.getMyProperties();
       setProperties(data.properties || []);
       setCanCreate(data.canCreate);
@@ -28,7 +27,7 @@ export const OwnerDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
+    Promise.resolve().then(() => loadData()).catch(console.error);
   }, []);
 
   const handleDelete = async (id: number) => {

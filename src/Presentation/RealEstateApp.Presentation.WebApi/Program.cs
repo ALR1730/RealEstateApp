@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -14,11 +15,14 @@ using RealEstateApp.Infrastructure.Persistence.Seeds;
 using RealEstateApp.Infrastructure.Shared;
 using RealEstateApp.Presentation.WebApi.Hubs;
 
-// RealEstateApp WebApi V2 - .NET 10 + SignalR + JWT Bearer
+// RealEstateApp WebApi V2 - .NET 10 + SignalR + JWT Bearer (Updated Mappings)
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSignalR();
 

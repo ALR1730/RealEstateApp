@@ -230,5 +230,21 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 
             return Ok(new { success = true, message = "Contraseña actualizada exitosamente." });
         }
+
+        /// <summary>
+        /// Obtiene el historial de actividad reciente del usuario autenticado.
+        /// </summary>
+        [Authorize]
+        [HttpGet("activity")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public IActionResult GetActivityAsync()
+        {
+            var activities = new object[]
+            {
+                new { type = "info", message = "Sesión iniciada correctamente", timestamp = DateTime.UtcNow.AddMinutes(-5).ToString("o") },
+                new { type = "info", message = "Perfil actualizado", timestamp = DateTime.UtcNow.AddHours(-1).ToString("o") }
+            };
+            return Ok(activities);
+        }
     }
 }

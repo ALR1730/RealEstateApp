@@ -1,4 +1,28 @@
-export type UserRole = 'Admin' | 'Agent' | 'Client' | 'Developer';
+export type UserRole = 'Admin' | 'Agent' | 'Client' | 'Developer' | 'Owner';
+
+export interface FilterState {
+  code?: string;
+  propertyTypeId?: number;
+  saleTypeId?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  minRooms?: number;
+  minBathrooms?: number;
+  minSizeInMeters?: number;
+  maxSizeInMeters?: number;
+  provinceId?: number;
+  municipalityId?: number;
+  sector?: string;
+  agentId?: string;
+  onlyFeatured?: boolean;
+  onlyVerifiedAgents?: boolean;
+  onlyFinanciable?: boolean;
+  onlyWithVirtualTour?: boolean;
+  improvementIds?: number[];
+  userLat?: number;
+  userLng?: number;
+  maxDistanceKm?: number;
+}
 
 export interface User {
   id: string;
@@ -143,8 +167,17 @@ export interface SavedSearch {
   saleTypeId?: number;
   minPrice?: number;
   maxPrice?: number;
-  bedrooms?: number;
-  bathrooms?: number;
+  minRooms?: number;
+  maxRooms?: number;
+  minBathrooms?: number;
+  maxBathrooms?: number;
+  minSizeInMeters?: number;
+  maxSizeInMeters?: number;
+  provinceId?: number;
+  municipalityId?: number;
+  sector?: string;
+  onlyFinanciable?: boolean;
+  onlyWithVirtualTour?: boolean;
   emailAlertsEnabled: boolean;
   created: string;
 }

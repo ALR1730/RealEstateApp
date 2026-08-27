@@ -47,6 +47,9 @@ namespace RealEstateApp.Core.Application.Mappings
                 .ForMember(dest => dest.Improvements, opt => opt.MapFrom(src => src.PropertyImprovements != null ? src.PropertyImprovements.Where(pi => pi.Improvement != null).Select(pi => pi.Improvement!.Name).ToList() : new System.Collections.Generic.List<string>()))
                 .ForMember(dest => dest.AgentName, opt => opt.Ignore()); // Se resuelve en el servicio
 
+            // PropertyViewModel <-> PropertyDto (conversión entre DTO de API y ViewModel de servicio)
+            CreateMap<PropertyViewModel, PropertyDto>().ReverseMap();
+
             // SavePropertyViewModel → Property (escritura desde formulario)
             CreateMap<SavePropertyViewModel, Property>()
                 .ForMember(dest => dest.Images, opt => opt.Ignore()) // Se maneja manualmente (IFormFile)
@@ -86,6 +89,9 @@ namespace RealEstateApp.Core.Application.Mappings
             CreateMap<Domain.Entities.PropertyType, PropertyTypeDto>()
                 .ForMember(dest => dest.PropertiesCount, opt => opt.MapFrom(src => src.Properties != null ? src.Properties.Count : 0));
 
+            CreateMap<VmPropertyType.PropertyTypeViewModel, PropertyTypeDto>().ReverseMap();
+            CreateMap<VmPropertyType.SavePropertyTypeViewModel, PropertyTypeDto>().ReverseMap();
+
             CreateMap<VmPropertyType.SavePropertyTypeViewModel, Domain.Entities.PropertyType>()
                 .ForMember(dest => dest.Properties, opt => opt.Ignore());
 
@@ -101,6 +107,9 @@ namespace RealEstateApp.Core.Application.Mappings
             CreateMap<Domain.Entities.SaleType, SaleTypeDto>()
                 .ForMember(dest => dest.PropertiesCount, opt => opt.MapFrom(src => src.Properties != null ? src.Properties.Count : 0));
 
+            CreateMap<VmSaleType.SaleTypeViewModel, SaleTypeDto>().ReverseMap();
+            CreateMap<VmSaleType.SaveSaleTypeViewModel, SaleTypeDto>().ReverseMap();
+
             CreateMap<VmSaleType.SaveSaleTypeViewModel, Domain.Entities.SaleType>()
                 .ForMember(dest => dest.Properties, opt => opt.Ignore());
 
@@ -113,6 +122,9 @@ namespace RealEstateApp.Core.Application.Mappings
             CreateMap<Domain.Entities.Improvement, VmImprovement.ImprovementViewModel>();
 
             CreateMap<Domain.Entities.Improvement, ImprovementDto>();
+
+            CreateMap<VmImprovement.ImprovementViewModel, ImprovementDto>().ReverseMap();
+            CreateMap<VmImprovement.SaveImprovementViewModel, ImprovementDto>().ReverseMap();
 
             CreateMap<VmImprovement.SaveImprovementViewModel, Domain.Entities.Improvement>()
                 .ForMember(dest => dest.PropertyImprovements, opt => opt.Ignore());

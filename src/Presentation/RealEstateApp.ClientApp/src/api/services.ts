@@ -150,7 +150,7 @@ export const offersService = {
   },
 
   counterOffer: async (offerId: number, data: { amount: number; message?: string }): Promise<any> => {
-    const res = await apiClient.post(`/offers/${offerId}/counter`, data);
+    const res = await apiClient.post(`/offers/${offerId}/counter-offer`, data);
     return res.data;
   },
 
@@ -178,14 +178,14 @@ export const appointmentsService = {
   },
 
   confirmAppointment: async (id: number, notes?: string): Promise<any> => {
-    const res = await apiClient.patch(`/appointments/${id}/confirm`, notes ? `"${notes}"` : '""', {
+    const res = await apiClient.patch(`/appointments/${id}/confirm`, notes || null, {
       headers: { 'Content-Type': 'application/json' }
     });
     return res.data;
   },
 
   cancelAppointment: async (id: number, reason?: string): Promise<any> => {
-    const res = await apiClient.patch(`/appointments/${id}/cancel`, reason ? `"${reason}"` : '""', {
+    const res = await apiClient.patch(`/appointments/${id}/cancel`, reason || null, {
       headers: { 'Content-Type': 'application/json' }
     });
     return res.data;

@@ -27,7 +27,6 @@ export const ManageAgentsPage: React.FC = () => {
 
   const loadAgents = async () => {
     try {
-      setIsLoading(true);
       const data = await adminService.getAgents();
       setAgents(data || []);
     } catch (err) {
@@ -38,7 +37,7 @@ export const ManageAgentsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadAgents();
+    Promise.resolve().then(() => loadAgents()).catch(console.error);
   }, []);
 
   const handleToggleStatus = async (agentId: string, currentStatus: boolean) => {

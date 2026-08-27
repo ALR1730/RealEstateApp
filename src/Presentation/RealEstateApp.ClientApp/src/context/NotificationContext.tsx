@@ -15,6 +15,7 @@ interface NotificationContextType {
   unreadCount: number;
   clearNotifications: () => void;
   removeNotification: (id: string) => void;
+  notificationHubConnection: signalR.HubConnection | null;
   chatHubConnection: signalR.HubConnection | null;
 }
 
@@ -23,26 +24,53 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, isAuthenticated } = useAuth();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [notificationHubConnection, setNotificationHubConnection] = useState<signalR.HubConnection | null>(null);
   const [chatHubConnection, setChatHubConnection] = useState<signalR.HubConnection | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated || !token) {
-      if (chatHubConnection) {
-        chatHubConnection.stop();
-        setChatHubConnection(null);
-      }
+      const stopConnections = async () => {
+        if (notificationHubConnection) {
+          await notificationHubConnection.stop();
+          setNotificationHubConnection(null);
+        }
+        if (chatHubConnection) {
+          await chatHubConnection.stop();
+          setChatHubConnection(null);
+        }
+      };
+      stopConnections();
       return;
     }
 
-    const hubUrl = import.meta.env.VITE_HUB_URL || 'http://localhost:5196/hubs/chat';
-    const connection = new signalR.HubConnectionBuilder()
-      .withUrl(hubUrl, {
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:5196';
+
+    const notificationConn = new signalR.HubConnectionBuilder()
+      .withUrl(`${baseUrl}/hubs/notifications`, {
         accessTokenFactory: () => token,
       })
       .withAutomaticReconnect()
       .build();
 
-    connection.on('NewChatMessageNotification', (data: any) => {
+    notificationConn.on('ReceiveNotification', (data: any) => {
+      const newItem: NotificationItem = {
+        id: Math.random().toString(),
+        title: data.title || 'Notificación',
+        message: data.message || '',
+        type: data.type || 'info',
+        timestamp: data.timestamp || new Date().toLocaleTimeString(),
+      };
+      setNotifications((prev) => [newItem, ...prev]);
+    });
+
+    const chatConn = new signalR.HubConnectionBuilder()
+      .withUrl(`${baseUrl}/hubs/chat`, {
+        accessTokenFactory: () => token,
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    chatConn.on('NewChatMessageNotification', (data: any) => {
       const newItem: NotificationItem = {
         id: Math.random().toString(),
         title: 'Nuevo Mensaje en Chat',
@@ -53,16 +81,19 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setNotifications((prev) => [newItem, ...prev]);
     });
 
-    connection.start()
-      .then(() => {
-        setChatHubConnection(connection);
-      })
-      .catch((err) => {
-        console.warn("SignalR ChatHub connection warning:", err.message);
-      });
+    Promise.all([
+      notificationConn.start(),
+      chatConn.start(),
+    ]).then(() => {
+      setNotificationHubConnection(notificationConn);
+      setChatHubConnection(chatConn);
+    }).catch((err) => {
+      console.warn("SignalR connection warning:", err.message);
+    });
 
     return () => {
-      connection.stop();
+      notificationConn.stop();
+      chatConn.stop();
     };
   }, [isAuthenticated, token]);
 
@@ -78,6 +109,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         unreadCount: notifications.length,
         clearNotifications,
         removeNotification,
+        notificationHubConnection,
         chatHubConnection,
       }}
     >

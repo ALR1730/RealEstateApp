@@ -18,7 +18,6 @@ export const AgentVerificationPage: React.FC = () => {
 
   const loadStatus = async () => {
     try {
-      setIsLoading(true);
       const data = await verificationsService.getMyStatus();
       setVerification(data);
       if (data) {
@@ -32,7 +31,7 @@ export const AgentVerificationPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadStatus();
+    Promise.resolve().then(() => loadStatus()).catch(console.error);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

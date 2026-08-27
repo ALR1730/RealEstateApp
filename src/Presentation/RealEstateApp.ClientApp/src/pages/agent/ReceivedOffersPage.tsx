@@ -17,7 +17,6 @@ export const ReceivedOffersPage: React.FC = () => {
 
   const loadOffers = async () => {
     try {
-      setIsLoading(true);
       const data = await offersService.getReceivedOffers();
       setOffers(data || []);
     } catch (err) {
@@ -28,7 +27,7 @@ export const ReceivedOffersPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadOffers();
+    Promise.resolve().then(() => loadOffers()).catch(console.error);
   }, []);
 
   const handleAcceptConfirm = async () => {
@@ -190,7 +189,7 @@ export const ReceivedOffersPage: React.FC = () => {
                 Ejecución de Regla Atómica de Venta:
               </p>
               <ul className="list-disc pl-5 space-y-0.5 text-amber-800">
-                <li>El inmueble se marcará permanentemente como <strong>"Vendida"</strong>.</li>
+                <li>El inmueble se marcará permanentemente como <strong>&quot;Vendida&quot;</strong>.</li>
                 <li>Todas las demás ofertas pendientes de este inmueble se <strong>rechazarán en cascada</strong>.</li>
                 <li>Se bloquearán nuevas ofertas y solicitudes de visitas.</li>
               </ul>

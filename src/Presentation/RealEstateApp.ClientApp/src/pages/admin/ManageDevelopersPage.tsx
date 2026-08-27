@@ -20,7 +20,6 @@ export const ManageDevelopersPage: React.FC = () => {
 
   const loadDevelopers = async () => {
     try {
-      setIsLoading(true);
       const data = await adminService.getDevelopers();
       setDevelopers(data || []);
     } catch (err) {
@@ -31,7 +30,7 @@ export const ManageDevelopersPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadDevelopers();
+    Promise.resolve().then(() => loadDevelopers()).catch(console.error);
   }, []);
 
   const handleToggleStatus = async (userId: string, currentStatus: boolean) => {

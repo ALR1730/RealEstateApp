@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -6,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.DTOs.Property;
+using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Property;
 using RealEstateApp.Core.Domain.Constants;
@@ -241,6 +244,24 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         public class ReassignRequest
         {
             public string NewAgentId { get; set; } = string.Empty;
+        }
+
+        /// <summary>
+        /// Obtiene el historial de cambios de precio de una propiedad.
+        /// </summary>
+        [HttpGet("{id:int}/price-history")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetPriceHistoryAsync(int id)
+        {
+            var property = await _propertyService.GetByIdViewModel(id);
+            if (property == null)
+            {
+                return NotFound(new { hasError = true, error = $"No se encontró ninguna propiedad con el ID {id}" });
+            }
+
+            var history = await _propertyService.GetPriceHistoryAsync(id);
+            return Ok(history);
         }
     }
 }

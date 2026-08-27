@@ -14,7 +14,6 @@ export const MyOffersPage: React.FC = () => {
 
   const loadOffers = async () => {
     try {
-      setIsLoading(true);
       const data = await offersService.getMyOffers();
       setOffers(data || []);
     } catch (err) {
@@ -25,7 +24,7 @@ export const MyOffersPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadOffers();
+    Promise.resolve().then(() => loadOffers()).catch(console.error);
   }, []);
 
   const handleAcceptCounterOffer = async (offerId: number) => {

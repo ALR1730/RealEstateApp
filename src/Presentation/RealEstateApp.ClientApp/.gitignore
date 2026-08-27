@@ -5,3 +5,4 @@ dist
 .env.*.local
 *.local
 coverage
+vite.config.ts.timestamp-*.mjs

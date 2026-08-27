@@ -11,7 +11,6 @@ export const AgentAppointmentsPage: React.FC = () => {
 
   const loadAppointments = async () => {
     try {
-      setIsLoading(true);
       const data = await appointmentsService.getMyAppointments();
       setAppointments(data || []);
     } catch (err) {
@@ -22,7 +21,7 @@ export const AgentAppointmentsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadAppointments();
+    Promise.resolve().then(() => loadAppointments()).catch(console.error);
   }, []);
 
   const handleConfirm = async (id: number) => {

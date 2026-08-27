@@ -135,6 +135,7 @@ export const App: React.FC = () => {
             <Route element={<PublicLayout />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/catalog" element={<PropertiesCatalogPage />} />
+              <Route path="/properties" element={<Navigate to="/catalog" replace />} />
               <Route path="/property/:id" element={<PropertyDetailPage />} />
               <Route path="/agents" element={<AgentsPage />} />
               <Route path="/agent-details/:id" element={<AgentDetailPage />} />

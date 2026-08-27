@@ -119,7 +119,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           <div className="p-3 bg-amber-50 rounded-xl border border-amber-200/60 flex items-start gap-2.5 text-[11px] text-amber-800">
             <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
             <span>
-              <strong>Regla Atómica de Negocio:</strong> Al ser aceptada tu oferta, la propiedad cambiará instantáneamente a "Vendida" y se bloquearán las demás propuestas.
+              <strong>Regla Atómica de Negocio:</strong> Al ser aceptada tu oferta, la propiedad cambiará instantáneamente a &quot;Vendida&quot; y se bloquearán las demás propuestas.
             </span>
           </div>
 

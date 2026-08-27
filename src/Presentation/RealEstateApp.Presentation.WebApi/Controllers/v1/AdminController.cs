@@ -213,5 +213,70 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return BadRequest(new { hasError = true, error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Crea un nuevo usuario Desarrollador.
+        /// </summary>
+        [HttpPost("developers")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegisterResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateDeveloperAsync([FromBody] RegisterRequest request)
+        {
+            var origin = $"{Request.Scheme}://{Request.Host}";
+            var response = await _accountService.RegisterUserAsync(request, Roles.Developer.ToString(), origin);
+
+            if (response.HasError)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Actualiza un usuario Desarrollador existente.
+        /// </summary>
+        [HttpPut("developers/{userId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateDeveloperAsync(string userId, [FromBody] RegisterRequest request)
+        {
+            var existing = await _userManager.FindByIdAsync(userId);
+            if (existing == null)
+            {
+                return NotFound(new { hasError = true, error = $"No se encontró el desarrollador con ID {userId}" });
+            }
+
+            existing.UserName = request.Email;
+            existing.Email = request.Email;
+            var result = await _userManager.UpdateAsync(existing);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(new { hasError = true, error = string.Join(", ", result.Errors.Select(e => e.Description)) });
+            }
+
+            return Ok(new { success = true, message = "Desarrollador actualizado exitosamente." });
+        }
+
+        /// <summary>
+        /// Crea un nuevo usuario Administrador.
+        /// </summary>
+        [HttpPost("admins")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegisterResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateAdminAsync([FromBody] RegisterRequest request)
+        {
+            var origin = $"{Request.Scheme}://{Request.Host}";
+            var response = await _accountService.RegisterUserAsync(request, Roles.Admin.ToString(), origin);
+
+            if (response.HasError)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }

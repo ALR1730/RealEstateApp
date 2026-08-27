@@ -16,7 +16,6 @@ export const AgentSubscriptionPage: React.FC = () => {
 
   const loadData = async () => {
     try {
-      setIsLoading(true);
       const [plansData, subData] = await Promise.all([
         subscriptionsService.getPlans(),
         subscriptionsService.getMySubscription(),
@@ -31,7 +30,7 @@ export const AgentSubscriptionPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
+    Promise.resolve().then(() => loadData()).catch(console.error);
   }, []);
 
   const handleSelectPlan = (planId: number) => {

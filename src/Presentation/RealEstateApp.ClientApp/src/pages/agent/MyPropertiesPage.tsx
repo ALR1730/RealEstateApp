@@ -13,7 +13,6 @@ export const MyPropertiesPage: React.FC = () => {
 
   const loadProperties = async () => {
     try {
-      setIsLoading(true);
       const data = await propertiesService.getMyProperties();
       setProperties(data || []);
     } catch (err) {
@@ -24,7 +23,7 @@ export const MyPropertiesPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadProperties();
+    Promise.resolve().then(() => loadProperties()).catch(console.error);
   }, []);
 
   const handleDelete = async (id: number) => {

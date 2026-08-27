@@ -16,7 +16,6 @@ export const ManageVerificationsPage: React.FC = () => {
 
   const loadData = async () => {
     try {
-      setIsLoading(true);
       const data = await verificationsService.getAll();
       setVerifications(data || []);
     } catch (err) {
@@ -27,7 +26,7 @@ export const ManageVerificationsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
+    Promise.resolve().then(() => loadData()).catch(console.error);
   }, []);
 
   const handleApprove = async (id: number) => {

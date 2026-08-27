@@ -19,7 +19,6 @@ export const ManageAllPropertiesPage: React.FC = () => {
 
   const loadData = async () => {
     try {
-      setIsLoading(true);
       const [propsData, agentsData] = await Promise.all([
         propertiesService.getAll(),
         adminService.getAgents(),
@@ -34,7 +33,7 @@ export const ManageAllPropertiesPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
+    Promise.resolve().then(() => loadData()).catch(console.error);
   }, []);
 
   const handleToggleFeatured = async (id: number) => {

@@ -6,13 +6,30 @@ import { Loader } from '../../components/common/Loader';
 import { BookmarkCheck, Bell, BellOff, Trash2, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+function buildCatalogUrl(s: SavedSearch): string {
+  const params = new URLSearchParams();
+  if (s.propertyTypeId) params.set('propertyTypeId', String(s.propertyTypeId));
+  if (s.saleTypeId) params.set('saleTypeId', String(s.saleTypeId));
+  if (s.minPrice) params.set('minPrice', String(s.minPrice));
+  if (s.maxPrice) params.set('maxPrice', String(s.maxPrice));
+  if (s.minRooms) params.set('minRooms', String(s.minRooms));
+  if (s.minBathrooms) params.set('minBathrooms', String(s.minBathrooms));
+  if (s.minSizeInMeters) params.set('minSizeInMeters', String(s.minSizeInMeters));
+  if (s.maxSizeInMeters) params.set('maxSizeInMeters', String(s.maxSizeInMeters));
+  if (s.provinceId) params.set('provinceId', String(s.provinceId));
+  if (s.municipalityId) params.set('municipalityId', String(s.municipalityId));
+  if (s.sector) params.set('sector', s.sector);
+  if (s.onlyFinanciable) params.set('onlyFinanciable', 'true');
+  if (s.onlyWithVirtualTour) params.set('onlyWithVirtualTour', 'true');
+  return `/catalog?${params.toString()}`;
+}
+
 export const SavedSearchesPage: React.FC = () => {
   const [searches, setSearches] = useState<SavedSearch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadSearches = async () => {
     try {
-      setIsLoading(true);
       const data = await savedSearchesService.getAll();
       setSearches(data || []);
     } catch (err) {
@@ -23,7 +40,7 @@ export const SavedSearchesPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadSearches();
+    Promise.resolve().then(() => loadSearches()).catch(console.error);
   }, []);
 
   const handleToggleAlerts = async (id: number) => {
@@ -43,6 +60,21 @@ export const SavedSearchesPage: React.FC = () => {
     } catch (err) {
       console.error("Error deleting search:", err);
     }
+  };
+
+  const buildSummary = (s: SavedSearch): string => {
+    const parts: string[] = [];
+    if (s.minRooms) parts.push(`${s.minRooms}+ hab`);
+    if (s.minBathrooms) parts.push(`${s.minBathrooms}+ baños`);
+    if (s.minSizeInMeters || s.maxSizeInMeters) {
+      parts.push(`${s.minSizeInMeters || '?'}-${s.maxSizeInMeters || '?'} m²`);
+    }
+    if (s.sector) parts.push(s.sector);
+    if (s.maxPrice) parts.push(`Hasta ${formatCurrencyRD(s.maxPrice)}`);
+    else parts.push('Cualquier precio');
+    if (s.onlyFinanciable) parts.push('Financiable');
+    if (s.onlyWithVirtualTour) parts.push('Tour Virtual');
+    return parts.join(' • ');
   };
 
   return (
@@ -82,11 +114,7 @@ export const SavedSearchesPage: React.FC = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <h4 className="font-bold text-sm text-slate-900">{search.name || 'Búsqueda Personalizada'}</h4>
-                  <p className="text-xs text-slate-500">
-                    {search.bedrooms ? `${search.bedrooms} hab min • ` : ''}
-                    {search.bathrooms ? `${search.bathrooms} baños min • ` : ''}
-                    {search.maxPrice ? `Hasta ${formatCurrencyRD(search.maxPrice)}` : 'Cualquier precio'}
-                  </p>
+                  <p className="text-xs text-slate-500">{buildSummary(search)}</p>
                 </div>
 
                 <button
@@ -104,7 +132,7 @@ export const SavedSearchesPage: React.FC = () => {
 
               <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                 <Link
-                  to={`/catalog?propertyTypeId=${search.propertyTypeId || ''}&maxPrice=${search.maxPrice || ''}`}
+                  to={buildCatalogUrl(search)}
                   className="inline-flex items-center gap-1 text-xs font-bold text-brand-600 hover:text-brand-700"
                 >
                   <Search className="w-3.5 h-3.5" />

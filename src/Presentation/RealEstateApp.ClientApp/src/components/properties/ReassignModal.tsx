@@ -20,13 +20,12 @@ export const ReassignModal: React.FC<ReassignModalProps> = ({
 }) => {
   const [agents, setAgents] = useState<any[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
-      setIsLoading(true);
       adminService.getAgents().then((data) => {
         setAgents(data.filter((a: any) => a.isActive !== false));
         setIsLoading(false);

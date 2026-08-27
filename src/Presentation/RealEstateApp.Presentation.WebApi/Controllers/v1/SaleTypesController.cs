@@ -36,7 +36,14 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return Ok(new List<SaleTypeDto>());
             }
 
-            var dtos = _mapper.Map<List<SaleTypeDto>>(list);
+            var dtos = list.Select(x => new SaleTypeDto
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Description = x.Description,
+                PropertiesCount = x.PropertiesCount
+            }).ToList();
+
             return Ok(dtos);
         }
 
@@ -55,7 +62,12 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return NotFound(new { hasError = true, error = $"No se encontró ningún tipo de venta con el ID {id}" });
             }
 
-            var dto = _mapper.Map<SaleTypeDto>(saveVm);
+            var dto = new SaleTypeDto
+            {
+                Id = saveVm.Id,
+                Name = saveVm.Name,
+                Description = saveVm.Description
+            };
             return Ok(dto);
         }
 
@@ -76,7 +88,12 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             }
 
             var createdVm = await _saleTypeService.Add(vm);
-            var dto = _mapper.Map<SaleTypeDto>(createdVm);
+            var dto = new SaleTypeDto
+            {
+                Id = createdVm.Id,
+                Name = createdVm.Name,
+                Description = createdVm.Description
+            };
             return CreatedAtAction(nameof(GetByIdAsync), new { id = dto.Id }, dto);
         }
 
@@ -106,7 +123,12 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             vm.Id = id;
             await _saleTypeService.Update(vm, id);
             var updatedVm = await _saleTypeService.GetByIdSaveViewModel(id);
-            var dto = _mapper.Map<SaleTypeDto>(updatedVm);
+            var dto = new SaleTypeDto
+            {
+                Id = updatedVm?.Id ?? id,
+                Name = updatedVm?.Name ?? vm.Name,
+                Description = updatedVm?.Description ?? vm.Description
+            };
 
             return Ok(dto);
         }

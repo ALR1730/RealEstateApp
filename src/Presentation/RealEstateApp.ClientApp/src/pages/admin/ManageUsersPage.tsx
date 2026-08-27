@@ -28,7 +28,6 @@ export const ManageUsersPage: React.FC = () => {
 
   const loadUsers = async () => {
     try {
-      setIsLoading(true);
       const [adm, dev] = await Promise.all([
         adminService.getAdmins(),
         adminService.getDevelopers(),
@@ -43,7 +42,7 @@ export const ManageUsersPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadUsers();
+    Promise.resolve().then(() => loadUsers()).catch(console.error);
   }, []);
 
   const handleToggleAdmin = async (userId: string, current: boolean) => {

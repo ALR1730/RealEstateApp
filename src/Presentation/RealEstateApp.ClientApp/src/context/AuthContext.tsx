@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { User, AuthResponse } from '../types';
 import { authService } from '../api/services';
 
@@ -14,30 +14,38 @@ interface AuthContextType {
   isAgent: boolean;
   isClient: boolean;
   isDeveloper: boolean;
+  isOwner: boolean;
   refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const rawUser = localStorage.getItem('realestate_user');
+      return rawUser ? (JSON.parse(rawUser) as User) : null;
+    } catch {
+      localStorage.removeItem('realestate_user');
+      localStorage.removeItem('realestate_jwt_token');
+      return null;
+    }
+  });
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('realestate_jwt_token'));
+  const [isLoading] = useState<boolean>(false);
+
+  const logout = useCallback(() => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem('realestate_jwt_token');
+    localStorage.removeItem('realestate_user');
+  }, []);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('realestate_jwt_token');
-    const savedUser = localStorage.getItem('realestate_user');
-    if (savedToken && savedUser) {
-      try {
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        localStorage.removeItem('realestate_jwt_token');
-        localStorage.removeItem('realestate_user');
-      }
-    }
-    setIsLoading(false);
-  }, []);
+    const handleLogout = () => logout();
+    window.addEventListener('auth:logout', handleLogout);
+    return () => window.removeEventListener('auth:logout', handleLogout);
+  }, [logout]);
 
   const login = async (email: string, pass: string): Promise<AuthResponse> => {
     const response = await authService.login(email, pass);
@@ -56,13 +64,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('realestate_user', JSON.stringify(userData));
     }
     return response;
-  };
-
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('realestate_jwt_token');
-    localStorage.removeItem('realestate_user');
   };
 
   const refreshProfile = async () => {
@@ -93,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAgent = hasRole('Agent');
   const isClient = hasRole('Client');
   const isDeveloper = hasRole('Developer');
+  const isOwner = hasRole('Owner');
 
   return (
     <AuthContext.Provider
@@ -108,6 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAgent,
         isClient,
         isDeveloper,
+        isOwner,
         refreshProfile,
       }}
     >

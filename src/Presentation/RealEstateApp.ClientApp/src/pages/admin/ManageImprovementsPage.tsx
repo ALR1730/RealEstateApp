@@ -17,7 +17,6 @@ export const ManageImprovementsPage: React.FC = () => {
 
   const loadImprovements = async () => {
     try {
-      setIsLoading(true);
       const data = await catalogsService.getImprovements();
       setImprovements(data || []);
     } catch (err) {
@@ -28,7 +27,7 @@ export const ManageImprovementsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadImprovements();
+    Promise.resolve().then(() => loadImprovements()).catch(console.error);
   }, []);
 
   const handleOpenCreate = () => {

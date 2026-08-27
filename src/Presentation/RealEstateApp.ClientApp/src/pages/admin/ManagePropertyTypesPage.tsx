@@ -15,9 +15,12 @@ export const ManagePropertyTypesPage: React.FC = () => {
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [deleteConfirmType, setDeleteConfirmType] = useState<PropertyType | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const loadTypes = async () => {
     try {
-      setIsLoading(true);
       const data = await catalogsService.getPropertyTypes();
       setTypes(data || []);
     } catch (err) {
@@ -28,7 +31,7 @@ export const ManagePropertyTypesPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadTypes();
+    Promise.resolve().then(() => loadTypes()).catch(console.error);
   }, []);
 
   const handleOpenCreate = () => {
@@ -45,14 +48,24 @@ export const ManagePropertyTypesPage: React.FC = () => {
     setModalOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("¿Seguro que deseas eliminar este tipo de propiedad?")) return;
+  const handleOpenDelete = (pt: PropertyType) => {
+    setDeleteConfirmType(pt);
+    setDeleteError(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmType) return;
     try {
-      await catalogsService.deletePropertyType(id);
+      setIsDeleting(true);
+      setDeleteError(null);
+      await catalogsService.deletePropertyType(deleteConfirmType.id);
+      setDeleteConfirmType(null);
       loadTypes();
     } catch (err: any) {
       console.error("Error deleting property type:", err);
-      alert(err.response?.data?.error || "No se puede eliminar: tiene propiedades asociadas.");
+      setDeleteError(err.response?.data?.error || "No se puede eliminar este tipo de propiedad porque tiene inmuebles asociados.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -131,7 +144,7 @@ export const ManagePropertyTypesPage: React.FC = () => {
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => handleDelete(t.id)}
+                      onClick={() => handleOpenDelete(t)}
                       className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
                       title="Eliminar"
                     >
@@ -192,6 +205,44 @@ export const ManagePropertyTypesPage: React.FC = () => {
               </button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {deleteConfirmType && (
+        <Modal
+          isOpen={!!deleteConfirmType}
+          onClose={() => { setDeleteConfirmType(null); setDeleteError(null); }}
+          title="Confirmar Eliminación"
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">
+              ¿Estás seguro de que deseas eliminar el tipo de propiedad <strong className="text-slate-900 font-bold">{deleteConfirmType.name}</strong>? Esta acción no se puede deshacer.
+            </p>
+
+            {deleteError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="pt-3 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => { setDeleteConfirmType(null); setDeleteError(null); }}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleConfirmDelete}
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md"
+              >
+                {isDeleting ? 'Eliminando...' : 'Eliminar Definitivamente'}
+              </button>
+            </div>
+          </div>
         </Modal>
       )}
     </div>

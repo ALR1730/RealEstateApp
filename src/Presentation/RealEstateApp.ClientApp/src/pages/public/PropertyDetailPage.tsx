@@ -53,7 +53,6 @@ export const PropertyDetailPage: React.FC = () => {
   const loadProperty = async () => {
     if (!id) return;
     try {
-      setIsLoading(true);
       const data = await propertiesService.getById(Number(id));
       setProperty(data);
 
@@ -80,7 +79,7 @@ export const PropertyDetailPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadProperty();
+    Promise.resolve().then(() => loadProperty()).catch(console.error);
   }, [id]);
 
   const handleToggleFavorite = async () => {
