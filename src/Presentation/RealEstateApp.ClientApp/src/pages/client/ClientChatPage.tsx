@@ -3,9 +3,12 @@ import { chatsService } from '../../api/services';
 import { ChatMessage } from '../../types';
 import { ChatBox } from '../../components/chat/ChatBox';
 import { Loader } from '../../components/common/Loader';
+import { useAuth } from '../../context/AuthContext';
+import { mapConversations } from '../../utils/chat';
 import { MessageSquare, User, Building } from 'lucide-react';
 
 export const ClientChatPage: React.FC = () => {
+  const { user } = useAuth();
   const [conversations, setConversations] = useState<ChatMessage[]>([]);
   const [selectedChat, setSelectedChat] = useState<ChatMessage | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -15,9 +18,10 @@ export const ClientChatPage: React.FC = () => {
       try {
         setIsLoading(true);
         const data = await chatsService.getConversations();
-        setConversations(data || []);
-        if (data && data.length > 0) {
-          setSelectedChat(data[0]);
+        const mapped = mapConversations(data, user);
+        setConversations(mapped);
+        if (mapped.length > 0) {
+          setSelectedChat(mapped[0]);
         }
       } catch (err) {
         console.error("Error loading client chats:", err);
@@ -26,7 +30,7 @@ export const ClientChatPage: React.FC = () => {
       }
     };
     fetchChats();
-  }, []);
+  }, [user]);
 
   return (
     <div className="space-y-6">

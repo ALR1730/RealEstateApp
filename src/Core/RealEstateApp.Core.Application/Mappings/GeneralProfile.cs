@@ -8,6 +8,7 @@ using RealEstateApp.Core.Application.ViewModels.Property;
 using RealEstateApp.Core.Application.ViewModels.Offer;
 using RealEstateApp.Core.Application.ViewModels.Chat;
 using RealEstateApp.Core.Application.ViewModels.Favorite;
+using RealEstateApp.Core.Application.ViewModels.LeadPipeline;
 using System.Linq;
 using VmPropertyType = RealEstateApp.Core.Application.ViewModels.PropertyType;
 using VmSaleType = RealEstateApp.Core.Application.ViewModels.SaleType;
@@ -256,6 +257,13 @@ namespace RealEstateApp.Core.Application.Mappings
                 .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : string.Empty))
                 .ForMember(dest => dest.PropertyName, opt => opt.MapFrom(src => src.Property != null ? src.Property.Name : string.Empty))
                 .ForMember(dest => dest.UploadedByName, opt => opt.Ignore());
+
+            #endregion
+
+            #region LeadPipeline
+
+            CreateMap<LeadPipeline, LeadPipelineDto>()
+                .ForMember(dest => dest.PropertyName, opt => opt.MapFrom(src => src.Property != null ? src.Property.Name : null));
 
             #endregion
         }

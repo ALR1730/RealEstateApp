@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Property, PropertyType, SaleType } from '../../types';
-import { propertiesService, catalogsService, adminService } from '../../api/services';
+import { propertiesService, catalogsService, agentsService } from '../../api/services';
 import { PropertyCard } from '../../components/properties/PropertyCard';
 import { MortgageCalculator } from '../../components/simulator/MortgageCalculator';
 import { Loader } from '../../components/common/Loader';
@@ -41,7 +41,7 @@ export const HomePage: React.FC = () => {
           propertiesService.getAll(),
           catalogsService.getPropertyTypes(),
           catalogsService.getSaleTypes(),
-          adminService.getAgents().catch(() => []),
+          agentsService.getPublicAgents().catch(() => []),
         ]);
 
         setFeaturedProperties(propsData.slice(0, 6));

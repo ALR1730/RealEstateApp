@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 using RealEstateApp.Core.Domain.Enums;
 
 namespace RealEstateApp.Core.Application.ViewModels.Appointment
@@ -18,6 +19,7 @@ namespace RealEstateApp.Core.Application.ViewModels.Appointment
         public string AgentName { get; set; } = string.Empty;
 
         public DateTime AppointmentDate { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public AppointmentStatus Status { get; set; }
         public string StatusFormatted { get; set; } = string.Empty;
 

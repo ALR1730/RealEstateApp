@@ -436,6 +436,19 @@ export const currencyService = {
   }
 };
 
+// ==================== AGENTS SERVICE (public directory) ====================
+export const agentsService = {
+  getPublicAgents: async (): Promise<any[]> => {
+    const res = await apiClient.get<any[]>('/agents');
+    return res.data || [];
+  },
+
+  getPublicAgentById: async (id: string): Promise<any> => {
+    const res = await apiClient.get<any>(`/agents/${id}`);
+    return res.data;
+  },
+};
+
 // ==================== ADMIN SERVICE ====================
 export const adminService = {
   getDashboardKPIs: async (): Promise<DashboardKPIs> => {

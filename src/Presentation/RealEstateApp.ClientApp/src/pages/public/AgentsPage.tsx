@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { adminService } from '../../api/services';
+import { agentsService } from '../../api/services';
 import { Loader } from '../../components/common/Loader';
 import { Users, Phone, Mail, Home, Search, ShieldCheck } from 'lucide-react';
 
@@ -12,7 +12,7 @@ export const AgentsPage: React.FC = () => {
     const fetchAgents = async () => {
       try {
         setIsLoading(true);
-        const data = await adminService.getAgents();
+        const data = await agentsService.getPublicAgents();
         setAgents(data || []);
       } catch (err) {
         console.error("Error loading agents:", err);

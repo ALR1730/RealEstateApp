@@ -43,7 +43,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       return;
     }
 
-    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:5196';
+    const baseUrl = import.meta.env.VITE_API_URL
+      ? import.meta.env.VITE_API_URL.replace('/api/v1', '').replace(/\/+$/, '')
+      : '';
 
     const notificationConn = new signalR.HubConnectionBuilder()
       .withUrl(`${baseUrl}/hubs/notifications`, {

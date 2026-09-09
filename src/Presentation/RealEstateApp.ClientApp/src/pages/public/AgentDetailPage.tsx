@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { propertiesService, adminService, reviewsService } from '../../api/services';
+import { propertiesService, agentsService, reviewsService } from '../../api/services';
 import { Property, Review, ReviewSummary } from '../../types';
 import { PropertyCard } from '../../components/properties/PropertyCard';
 import { Loader } from '../../components/common/Loader';
@@ -20,15 +20,19 @@ export const AgentDetailPage: React.FC = () => {
       if (!id) return;
       try {
         setIsLoading(true);
-        const [agents, allProps, agentReviews, summary] = await Promise.all([
-          adminService.getAgents(),
+        const [currentAgent, allProps, agentReviews, summary] = await Promise.all([
+          agentsService.getPublicAgentById(id),
           propertiesService.getAll({ agentId: id }),
           reviewsService.getByAgent(id),
           reviewsService.getSummary(id),
         ]);
 
-        const currentAgent = agents.find((a: any) => a.id === id);
-        setAgent(currentAgent || { id, fullName: 'Agente Inmobiliario', email: '', phone: '' });
+        setAgent(currentAgent ? {
+          ...currentAgent,
+          phone: currentAgent.phone || '',
+          email: currentAgent.email || '',
+          fullName: `${currentAgent.firstName || ''} ${currentAgent.lastName || ''}`.trim(),
+        } : { id, fullName: 'Agente Inmobiliario', email: '', phone: '' });
 
         const agentProps = allProps.filter((p) => p.agentId === id);
         setProperties(agentProps);

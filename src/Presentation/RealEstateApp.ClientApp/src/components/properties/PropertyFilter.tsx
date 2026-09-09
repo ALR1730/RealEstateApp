@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PropertyType, SaleType, Improvement, Province, FilterState } from '../../types';
-import { catalogsService, provincesService, adminService } from '../../api/services';
+import { catalogsService, provincesService, agentsService } from '../../api/services';
 import { Search, Filter, RotateCcw, Building2, Tag, DollarSign, Bed, Bath, MapPin, Maximize2, ShieldCheck, Banknote, Eye, Wrench, Navigation } from 'lucide-react';
 
 interface PropertyFilterProps {
@@ -28,7 +28,7 @@ export const PropertyFilter: React.FC<PropertyFilterProps> = ({
     Promise.all([
       provincesService.getAll().catch(() => []),
       catalogsService.getImprovements().catch(() => []),
-      adminService.getAgents().catch(() => []),
+      agentsService.getPublicAgents().catch(() => []),
     ]).then(([provs, imps, ags]) => {
       setProvinces(provs);
       setImprovements(imps);
