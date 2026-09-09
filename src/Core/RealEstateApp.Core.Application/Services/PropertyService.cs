@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Property;
@@ -27,6 +28,7 @@ namespace RealEstateApp.Core.Application.Services
         private readonly ICurrencyService _currencyService;
         private readonly ISavedSearchService _savedSearchService;
         private readonly ISubscriptionService _subscriptionService;
+        private readonly IAccountService _accountService;
         private readonly IMapper _mapper;
 
         private const int MaxOwnerProperties = 2;
@@ -41,6 +43,7 @@ namespace RealEstateApp.Core.Application.Services
             ICurrencyService currencyService,
             ISavedSearchService savedSearchService,
             ISubscriptionService subscriptionService,
+            IAccountService accountService,
             IMapper mapper)
         {
             _propertyRepository = propertyRepository;
@@ -52,6 +55,7 @@ namespace RealEstateApp.Core.Application.Services
             _currencyService = currencyService;
             _savedSearchService = savedSearchService;
             _subscriptionService = subscriptionService;
+            _accountService = accountService;
             _mapper = mapper;
         }
 
@@ -366,6 +370,7 @@ namespace RealEstateApp.Core.Application.Services
             var properties = await _propertyRepository.GetWithFiltersAsync(filters);
             var list = _mapper.Map<List<PropertyViewModel>>(properties);
             await EnrichPropertiesWithCurrencyAsync(list);
+            await EnrichAgentNamesAsync(list);
             return list;
         }
 
@@ -374,6 +379,7 @@ namespace RealEstateApp.Core.Application.Services
             var properties = await _propertyRepository.GetByAgentIdAsync(agentId);
             var list = _mapper.Map<List<PropertyViewModel>>(properties);
             await EnrichPropertiesWithCurrencyAsync(list);
+            await EnrichAgentNamesAsync(list);
             return list;
         }
 
@@ -383,6 +389,7 @@ namespace RealEstateApp.Core.Application.Services
             if (property == null) return null;
             var vm = _mapper.Map<PropertyViewModel>(property);
             await EnrichPropertiesWithCurrencyAsync(new List<PropertyViewModel> { vm });
+            await EnrichAgentNamesAsync(new List<PropertyViewModel> { vm });
             return vm;
         }
 
@@ -446,6 +453,40 @@ namespace RealEstateApp.Core.Application.Services
                     {
                         // Silenciar error secundario
                     }
+                }
+            }
+        }
+
+        private async Task EnrichAgentNamesAsync(List<PropertyViewModel> viewModels)
+        {
+            if (viewModels == null || viewModels.Count == 0) return;
+
+            var agentIds = viewModels
+                .Where(v => !string.IsNullOrWhiteSpace(v.AgentId))
+                .Select(v => v.AgentId)
+                .Distinct()
+                .ToList();
+
+            if (agentIds.Count == 0) return;
+
+            Dictionary<string, AccountUserDto>? userDict = null;
+            try
+            {
+                userDict = await _accountService.GetUsersByIdsAsync(agentIds);
+            }
+            catch
+            {
+                return;
+            }
+
+            if (userDict == null || userDict.Count == 0) return;
+
+            foreach (var vm in viewModels)
+            {
+                if (!string.IsNullOrWhiteSpace(vm.AgentId) &&
+                    userDict.TryGetValue(vm.AgentId, out var agent))
+                {
+                    vm.AgentName = $"{agent.FirstName} {agent.LastName}".Trim();
                 }
             }
         }

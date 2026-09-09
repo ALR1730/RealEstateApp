@@ -21,6 +21,8 @@ export const Badge: React.FC<BadgeProps> = ({ status, children, variant, size = 
       case 'confirmada':
       case 'active':
       case 'activo':
+      case 'paid':
+      case 'pagada':
         v = 'success';
         text = text || (status === 'Available' ? 'Disponible' : status);
         break;

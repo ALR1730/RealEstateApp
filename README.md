@@ -73,10 +73,11 @@ La plataforma cuenta con una arquitectura moderna desacoplada compuesta por un *
 
 | Rol de Usuario | Correo Electrónico | Contraseña | Objetivo de la Demostración |
 | :--- | :--- | :--- | :--- |
-| **🏢 Administrador** | `adminuser@realestate.com` | `Admin123!` | Ver Dashboard de KPIs, reasignar propiedades y gestionar catálogos. |
-| **👔 Agente Inmobiliario** | `agentuser@realestate.com` | `Agent123!` | Publicar inmuebles con fotos, aceptar ofertas (regla atómica) y chatear. |
-| **🛒 Cliente Comprador** | `clientuser@realestate.com` | `Client123!` | Enviar ofertas, simular hipoteca en RD$, agendar citas y chatear. |
-| **💻 Desarrollador API** | `developeruser@realestate.com` | `Developer123!` | Consumir los servicios REST expuestos mediante JWT Bearer Token. |
+| **🏢 Administrador** | `admin@realestate.com` | `Admin123!` | Ver Dashboard de KPIs, reasignar propiedades y gestionar catálogos. |
+| **👔 Agente Inmobiliario** | `agent@realestate.com` | `Agent123!` | Publicar inmuebles con fotos, aceptar ofertas (regla atómica) y chatear. |
+| **🛒 Cliente Comprador** | `client@realestate.com` | `Client123!` | Enviar ofertas, simular hipoteca en RD$, agendar citas y chatear. |
+| **💻 Desarrollador API** | `developer@realestate.com` | `Developer123!` | Consumir los servicios REST expuestos mediante JWT Bearer Token. |
+| **🏠 Propietario** | `owner@realestate.com` | `Owner123!` | Publicar inmuebles propios (máx. 2) y gestionar su estado. |
 
 ---
 

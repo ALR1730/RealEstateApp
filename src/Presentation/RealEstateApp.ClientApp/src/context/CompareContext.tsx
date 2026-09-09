@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Property } from '../types';
+import { propertiesService } from '../api/services';
 
 interface CompareContextType {
   compareIds: number[];
@@ -30,6 +31,28 @@ export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(compareIds));
   }, [compareIds]);
+
+  useEffect(() => {
+    let active = true;
+    const rehydrate = async () => {
+      if (compareIds.length === 0) {
+        setCompareProperties([]);
+        return;
+      }
+      try {
+        const all = await propertiesService.getAll();
+        if (!active) return;
+        const found = all.filter((p) => compareIds.includes(p.id));
+        setCompareProperties(found);
+      } catch {
+        if (active) setCompareProperties([]);
+      }
+    };
+    rehydrate();
+    return () => {
+      active = false;
+    };
+  }, [compareIds.length]);
 
   const addToCompare = useCallback((property: Property) => {
     setCompareIds((prev) => {

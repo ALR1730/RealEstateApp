@@ -21,17 +21,20 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IOfferRepository _offerRepository;
         private readonly IPropertyRepository _propertyRepository;
         private readonly IUserActivityService _userActivityService;
+        private readonly ICommissionService _commissionService;
         private readonly IMapper _mapper;
 
         public OfferService(
             IOfferRepository offerRepository,
             IPropertyRepository propertyRepository,
             IUserActivityService userActivityService,
+            ICommissionService commissionService,
             IMapper mapper)
         {
             _offerRepository = offerRepository;
             _propertyRepository = propertyRepository;
             _userActivityService = userActivityService;
+            _commissionService = commissionService;
             _mapper = mapper;
         }
 
@@ -76,12 +79,15 @@ namespace RealEstateApp.Core.Application.Services
 
             await _offerRepository.AddAsync(offer);
 
+            vm.Id = offer.Id;
             return vm;
         }
 
         public async Task AcceptOffer(int offerId)
         {
             await _offerRepository.AcceptOfferTransactionAsync(offerId);
+
+            await _commissionService.CreateForAcceptedOfferAsync(offerId);
         }
 
         public async Task RejectOffer(int offerId)
@@ -139,6 +145,8 @@ namespace RealEstateApp.Core.Application.Services
 
             // Aceptar la propuesta ejecutando la transacción atómica
             await _offerRepository.AcceptOfferTransactionAsync(offerId);
+
+            await _commissionService.CreateForAcceptedOfferAsync(offerId);
 
             await _userActivityService.LogActivityAsync(
                 clientUserId,

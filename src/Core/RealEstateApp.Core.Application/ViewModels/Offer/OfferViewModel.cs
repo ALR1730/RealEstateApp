@@ -14,6 +14,7 @@ namespace RealEstateApp.Core.Application.ViewModels.Offer
         public string ClienteName { get; set; } = string.Empty;
         public DateTime FechaOferta { get; set; }
         public string? PreApprovalLetterUrl { get; set; }
+        public string? Notes { get; set; }
 
         // Campos de Contra-Oferta (Ítem 2.1)
         public decimal? CounterOfferAmount { get; set; }
@@ -24,6 +25,7 @@ namespace RealEstateApp.Core.Application.ViewModels.Offer
         public int PropertyId { get; set; }
         public string PropertyCode { get; set; } = string.Empty;
         public decimal PropertyPrice { get; set; }
+        public string AgentId { get; set; } = string.Empty;
 
         public string StatusFormatted => Status switch
         {

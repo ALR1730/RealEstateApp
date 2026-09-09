@@ -78,6 +78,10 @@ export interface SaleType {
 export interface Property {
   id: number;
   code: string;
+  name?: string;
+  fullAddress?: string;
+  montoSeparacion?: number;
+  porcentajeInicialRequerido?: number;
   propertyTypeId: number;
   propertyTypeName?: string;
   saleTypeId: number;
@@ -118,6 +122,7 @@ export interface Offer {
   clientName?: string;
   clientEmail?: string;
   clientPhone?: string;
+  agentId?: string;
   amount: number;
   status: 'Pending' | 'Accepted' | 'Rejected' | 'CounterOffered';
   created?: string;
@@ -249,10 +254,24 @@ export interface SubscriptionPlan {
   name: string;
   description?: string;
   monthlyPrice: number;
+  maxActiveProperties?: number;
   maxFeaturedProperties: number;
-  hasPrioritySupport?: boolean;
-  hasDirectChat?: boolean;
-  hasAnalyticsAccess?: boolean;
+  allows3DTours?: boolean;
+  allowsVideo?: boolean;
+  commissionPercentage?: number;
+  isActive?: boolean;
+}
+
+export interface SubscriptionPlanInput {
+  name: string;
+  description?: string;
+  monthlyPrice: number;
+  maxActiveProperties: number;
+  maxFeaturedProperties: number;
+  allows3DTours: boolean;
+  allowsVideo: boolean;
+  commissionPercentage?: number;
+  isActive: boolean;
 }
 
 export interface AgentSubscription {
@@ -264,7 +283,9 @@ export interface AgentSubscription {
   startDate: string;
   endDate: string;
   isActive: boolean;
+  maxActiveProperties?: number;
   maxFeaturedProperties?: number;
+  commissionPercentage?: number;
 }
 
 export interface Municipality {
@@ -285,3 +306,209 @@ export interface OwnerPropertySummary {
   canCreate: boolean;
   properties: Property[];
 }
+
+// ============ AVM (Valuación Automatizada - F-01) ============
+export interface ComparableProperty {
+  propertyId: number;
+  name: string;
+  code: string;
+  price: number;
+  currency: string;
+  sizeInMeters: number;
+  pricePerSqm: number;
+  sector?: string;
+  municipalityName?: string;
+  rooms: number;
+  bathrooms: number;
+  status: string;
+  distanceKm: number;
+}
+
+export interface ValuationResult {
+  propertyId: number;
+  propertyName: string;
+  propertyCode: string;
+  currentPrice: number;
+  currentCurrency: string;
+  estimatedPricePerSqm: number;
+  estimatedTotalPrice: number;
+  propertySizeSqm: number;
+  comparableCount: number;
+  minPricePerSqm: number;
+  maxPricePerSqm: number;
+  averagePricePerSqm: number;
+  standardDeviation: number;
+  priceDifference: number;
+  priceDifferencePercentage: number;
+  valuationRating: string; // Sobrevalorada | Justa | Subvalorada
+  confidenceScore: number;
+  searchRadiusKm: number;
+  comparables: ComparableProperty[];
+  calculatedAt: string;
+}
+
+// ============ Lead Pipeline / Kanban (F-04) ============
+export interface Lead {
+  id: number;
+  leadName: string;
+  leadEmail?: string;
+  leadPhone?: string;
+  notes?: string;
+  agentId: string;
+  stage: string; // 'Nuevo Lead' | 'Contactado' | 'Visita' | 'Oferta' | 'Cierre' | 'Ganado' | 'Perdido'
+  priority: string; // Baja | Normal | Alta | Urgente
+  source?: string;
+  estimatedBudget?: number;
+  budgetCurrency?: string;
+  propertyId?: number;
+  propertyName?: string;
+  lastContactDate?: string;
+  nextFollowUpDate?: string;
+  sortOrder: number;
+  created: string;
+}
+
+export interface CreateLeadPayload {
+  leadName: string;
+  leadEmail?: string;
+  leadPhone?: string;
+  notes?: string;
+  priority?: string;
+  source?: string;
+  estimatedBudget?: number;
+  budgetCurrency?: string;
+  propertyId?: number;
+}
+
+export interface UpdateLeadPayload {
+  leadName?: string;
+  leadEmail?: string;
+  leadPhone?: string;
+  notes?: string;
+  priority?: string;
+  source?: string;
+  estimatedBudget?: number;
+  budgetCurrency?: string;
+  propertyId?: number;
+  nextFollowUpDate?: string;
+}
+
+export interface LeadPipelineStats {
+  totalLeads: number;
+  newLeadCount: number;
+  contactedCount: number;
+  visitCount: number;
+  offerCount: number;
+  closingCount: number;
+  wonCount: number;
+  lostCount: number;
+  conversionRate: number;
+  totalPipelineValue: number;
+  leadsNeedingFollowUp: Lead[];
+}
+
+// ============ Buy Ability (Capacidad de Compra - F-09) ============
+export interface BuyAbilityRequest {
+  monthlyGrossIncome: number;
+  monthlyNetIncome: number;
+  monthlyDebtPayments: number;
+  availableDownPayment: number;
+  currency?: string;
+}
+
+export interface BuyAbilityResult {
+  evaluationId?: number;
+  clientId: string;
+  monthlyGrossIncome: number;
+  monthlyNetIncome: number;
+  monthlyDebtPayments: number;
+  availableDownPayment: number;
+  maxMonthlyPayment: number;
+  maxMortgageAmount: number;
+  maxPropertyPrice: number;
+  debtToIncomeRatio: number;
+  creditScoreRating: string;
+  estimatedAnnualRate: number;
+  recommendedTermYears: number;
+  evaluationResult: string; // Aprobado | Pre-Aprobado | No Aprobado
+  currency: string;
+  observations?: string;
+  evaluationDate: string;
+}
+
+// ============ Agent Reviews / Reseñas (Ítem 2.9) ============
+export interface Review {
+  id: number;
+  agentId: string;
+  clientId: string;
+  clientName?: string;
+  clientEmail?: string;
+  propertyId: number;
+  propertyCode?: string;
+  propertyName?: string;
+  rating: number; // 1-5
+  comment?: string;
+  created?: string;
+}
+
+export interface ReviewSummary {
+  reviewCount: number;
+  averageRating: number;
+  fiveStars: number;
+  fourStars: number;
+  threeStars: number;
+  twoStars: number;
+  oneStar: number;
+}
+
+// ============ Commissions / Comisiones (Ítem 2.3) ============
+export interface Commission {
+  id: number;
+  agentId: string;
+  agentName?: string;
+  propertyId: number;
+  propertyCode?: string;
+  propertyName?: string;
+  offerId: number;
+  salePrice: number;
+  rate: number; // porcentaje, ej: 5.00
+  amount: number;
+  status: 'Pendiente' | 'Pagada';
+  created?: string;
+}
+
+export interface CommissionSummary {
+  totalCount: number;
+  totalAmount: number;
+  pendingCount: number;
+  pendingAmount: number;
+  paidCount: number;
+  paidAmount: number;
+  averageRate: number;
+}
+
+// ============ Property Documents / Documentos (Ítem 2.6) ============
+export interface PropertyDocument {
+  id: number;
+  propertyId: number;
+  propertyCode?: string;
+  propertyName?: string;
+  documentType: string;
+  fileUrl: string;
+  originalFileName: string;
+  contentType: string;
+  sizeBytes: number;
+  uploadedBy: string;
+  uploadedByName?: string;
+  uploadedAt?: string;
+  isImage: boolean;
+}
+
+export const DOCUMENT_TYPES = [
+  'Título de propiedad',
+  'Contrato de compra-venta',
+  'Contrato de alquiler',
+  'Carta de pre-aprobación',
+  'Certificación de registro',
+  'Otro',
+] as const;

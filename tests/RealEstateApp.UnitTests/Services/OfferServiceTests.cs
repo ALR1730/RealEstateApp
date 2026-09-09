@@ -21,6 +21,7 @@ namespace RealEstateApp.UnitTests.Services
         private readonly Mock<IOfferRepository> _offerRepositoryMock;
         private readonly Mock<IPropertyRepository> _propertyRepositoryMock;
         private readonly Mock<IUserActivityService> _userActivityServiceMock;
+        private readonly Mock<ICommissionService> _commissionServiceMock;
         private readonly IMapper _mapper;
         private readonly OfferService _sut;
 
@@ -29,12 +30,14 @@ namespace RealEstateApp.UnitTests.Services
             _offerRepositoryMock = new Mock<IOfferRepository>();
             _propertyRepositoryMock = new Mock<IPropertyRepository>();
             _userActivityServiceMock = new Mock<IUserActivityService>();
+            _commissionServiceMock = new Mock<ICommissionService>();
             _mapper = AutoMapperTestFactory.CreateMapper();
 
             _sut = new OfferService(
                 _offerRepositoryMock.Object,
                 _propertyRepositoryMock.Object,
                 _userActivityServiceMock.Object,
+                _commissionServiceMock.Object,
                 _mapper
             );
         }

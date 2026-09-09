@@ -139,6 +139,7 @@ namespace RealEstateApp.Core.Application.Mappings
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
                 .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : string.Empty))
                 .ForMember(dest => dest.PropertyPrice, opt => opt.MapFrom(src => src.Property != null ? src.Property.Price : 0))
+                .ForMember(dest => dest.AgentId, opt => opt.MapFrom(src => src.Property != null ? src.Property.AgentId : string.Empty))
                 .ForMember(dest => dest.ClienteName, opt => opt.Ignore()); // Se resuelve en el servicio
 
             CreateMap<SaveOfferViewModel, Offer>()
@@ -227,6 +228,34 @@ namespace RealEstateApp.Core.Application.Mappings
                 .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
                 .ForMember(dest => dest.LastModified, opt => opt.Ignore())
                 .ForMember(dest => dest.LastModifiedBy, opt => opt.Ignore());
+
+            #endregion
+
+            #region AgentReview
+
+            CreateMap<AgentReview, RealEstateApp.Core.Application.ViewModels.Review.AgentReviewViewModel>()
+                .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : string.Empty))
+                .ForMember(dest => dest.PropertyName, opt => opt.MapFrom(src => src.Property != null ? src.Property.Name : string.Empty))
+                .ForMember(dest => dest.ClienteName, opt => opt.Ignore())
+                .ForMember(dest => dest.ClienteEmail, opt => opt.Ignore());
+
+            #endregion
+
+            #region Commission
+
+            CreateMap<Commission, RealEstateApp.Core.Application.ViewModels.Commission.CommissionViewModel>()
+                .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : string.Empty))
+                .ForMember(dest => dest.PropertyName, opt => opt.MapFrom(src => src.Property != null ? src.Property.Name : string.Empty))
+                .ForMember(dest => dest.AgentName, opt => opt.Ignore());
+
+            #endregion
+
+            #region PropertyDocument
+
+            CreateMap<PropertyDocument, RealEstateApp.Core.Application.ViewModels.Document.PropertyDocumentViewModel>()
+                .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : string.Empty))
+                .ForMember(dest => dest.PropertyName, opt => opt.MapFrom(src => src.Property != null ? src.Property.Name : string.Empty))
+                .ForMember(dest => dest.UploadedByName, opt => opt.Ignore());
 
             #endregion
         }

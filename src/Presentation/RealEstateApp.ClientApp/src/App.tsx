@@ -39,6 +39,7 @@ import { SavedSearchesPage } from './pages/client/SavedSearchesPage';
 import { ClientChatPage } from './pages/client/ClientChatPage';
 import { ClientProfilePage } from './pages/client/ClientProfilePage';
 import { ActivityPage } from './pages/client/ActivityPage';
+import { BuyAbilityPage } from './pages/client/BuyAbilityPage';
 
 // Agent Pages
 import { AgentDashboard } from './pages/agent/AgentDashboard';
@@ -50,6 +51,10 @@ import { AgentChatPage } from './pages/agent/AgentChatPage';
 import { AgentProfilePage } from './pages/agent/AgentProfilePage';
 import { AgentVerificationPage } from './pages/agent/AgentVerificationPage';
 import { AgentSubscriptionPage } from './pages/agent/AgentSubscriptionPage';
+import { AvmValuationPage } from './pages/agent/AvmValuationPage';
+import { LeadPipelinePage } from './pages/agent/LeadPipelinePage';
+import { AgentCommissionsPage } from './pages/agent/AgentCommissionsPage';
+import { AgentDocumentsPage } from './pages/agent/AgentDocumentsPage';
 
 // Owner Pages
 import { OwnerDashboard } from './pages/owner/OwnerDashboard';
@@ -69,6 +74,9 @@ import { ManageImprovementsPage } from './pages/admin/ManageImprovementsPage';
 import { ManageVerificationsPage } from './pages/admin/ManageVerificationsPage';
 import { ManageSubscriptionsPage } from './pages/admin/ManageSubscriptionsPage';
 import { ManageAllPropertiesPage } from './pages/admin/ManageAllPropertiesPage';
+import { AdminReviewsPage } from './pages/admin/AdminReviewsPage';
+import { AdminCommissionsPage } from './pages/admin/AdminCommissionsPage';
+import { AdminDocumentsPage } from './pages/admin/AdminDocumentsPage';
 
 // Public Layout
 const PublicLayout: React.FC = () => {
@@ -162,6 +170,7 @@ export const App: React.FC = () => {
                 <Route path="/client/chats" element={<ClientChatPage />} />
                 <Route path="/client/profile" element={<ClientProfilePage />} />
                 <Route path="/client/activity" element={<ActivityPage />} />
+                <Route path="/client/buy-ability" element={<BuyAbilityPage />} />
               </Route>
             </Route>
 
@@ -178,6 +187,10 @@ export const App: React.FC = () => {
                 <Route path="/agent/profile" element={<AgentProfilePage />} />
                 <Route path="/agent/verification" element={<AgentVerificationPage />} />
                 <Route path="/agent/subscription" element={<AgentSubscriptionPage />} />
+                <Route path="/agent/avm" element={<AvmValuationPage />} />
+                <Route path="/agent/leads" element={<LeadPipelinePage />} />
+                <Route path="/agent/commissions" element={<AgentCommissionsPage />} />
+                <Route path="/agent/documents/:propertyId" element={<AgentDocumentsPage />} />
               </Route>
             </Route>
 
@@ -186,6 +199,8 @@ export const App: React.FC = () => {
               <Route element={<DashboardLayout />}>
                 <Route path="/owner" element={<OwnerDashboard />} />
                 <Route path="/owner/properties/create" element={<CreateOwnerPropertyPage />} />
+                <Route path="/owner/properties/edit/:id" element={<CreateOwnerPropertyPage />} />
+                <Route path="/owner/offers" element={<ReceivedOffersPage />} />
                 <Route path="/owner/profile" element={<ClientProfilePage />} />
               </Route>
             </Route>
@@ -203,6 +218,9 @@ export const App: React.FC = () => {
                 <Route path="/admin/all-properties" element={<ManageAllPropertiesPage />} />
                 <Route path="/admin/verifications" element={<ManageVerificationsPage />} />
                 <Route path="/admin/subscriptions" element={<ManageSubscriptionsPage />} />
+                <Route path="/admin/reviews" element={<AdminReviewsPage />} />
+                <Route path="/admin/commissions" element={<AdminCommissionsPage />} />
+                <Route path="/admin/documents" element={<AdminDocumentsPage />} />
                 <Route path="/admin/users" element={<ManageUsersPage />} />
                 <Route path="/admin/property-types" element={<ManagePropertyTypesPage />} />
                 <Route path="/admin/sale-types" element={<ManageSaleTypesPage />} />

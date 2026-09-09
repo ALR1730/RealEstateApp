@@ -5,7 +5,7 @@ import { Property } from '../../types';
 import { formatCurrencyRD } from '../../utils/formatters';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
-import { Home, PlusCircle, Edit3, Trash2, Eye, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { Home, PlusCircle, Edit3, Trash2, Eye, ExternalLink, Image as ImageIcon, FileText } from 'lucide-react';
 
 export const MyPropertiesPage: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -130,6 +130,13 @@ export const MyPropertiesPage: React.FC = () => {
                         title="Ver en Catálogo"
                       >
                         <ExternalLink className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        to={`/agent/documents/${prop.id}`}
+                        className="inline-block p-2 text-slate-600 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition-colors"
+                        title="Documentos Legales"
+                      >
+                        <FileText className="w-4 h-4" />
                       </Link>
                       <button
                         onClick={() => handleDelete(prop.id)}

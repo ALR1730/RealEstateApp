@@ -6,6 +6,7 @@ import { useCurrency } from '../../context/CurrencyContext';
 import { useTheme } from '../../context/ThemeContext';
 import { CurrencySwitcher } from './CurrencySwitcher';
 import { ThemeToggle } from './ThemeToggle';
+import { InstallAppButton } from './InstallAppButton';
 import {
   Building2,
   Search,
@@ -118,6 +119,11 @@ export const Navbar: React.FC = () => {
                 Mi Panel
               </Link>
             )}
+
+            {/* Install App (Desktop) */}
+            <div className="ml-1">
+              <InstallAppButton />
+            </div>
           </nav>
 
           {/* Right Action Icons & User Menu */}
@@ -302,6 +308,10 @@ export const Navbar: React.FC = () => {
               Mi Panel de Control
             </Link>
           )}
+
+          <div className="pt-2 border-t border-slate-100">
+            <InstallAppButton />
+          </div>
         </div>
       )}
     </header>

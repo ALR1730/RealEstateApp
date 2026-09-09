@@ -109,10 +109,10 @@ Para probar todas las experiencias de usuario, puede iniciar sesión de forma ma
 
 | Rol | Correo Electrónico | Contraseña | Funcionalidad Clave |
 | :--- | :--- | :--- | :--- |
-| **🏢 Administrador** | `adminuser@realestate.com` | `Admin123!` | Dashboard de KPIs, reasignación de agentes, CRUD de tipos y amenidades. |
-| **👔 Agente Inmobiliario** | `agentuser@realestate.com` | `Agent123!` | Publicar inmuebles con fotos, aceptar ofertas con regla atómica, chat en vivo. |
-| **🛒 Cliente Comprador** | `clientuser@realestate.com` | `Client123!` | Guardar favoritos, simular cuotas en RD$, enviar ofertas y agendar visitas. |
-| **💻 Desarrollador API** | `developeruser@realestate.com` | `Developer123!` | Acceso completo a los endpoints REST mediante JWT Bearer Token. |
+| **🏢 Administrador** | `admin@realestate.com` | `Admin123!` | Dashboard de KPIs, reasignación de agentes, CRUD de tipos y amenidades. |
+| **👔 Agente Inmobiliario** | `agent@realestate.com` | `Agent123!` | Publicar inmuebles con fotos, aceptar ofertas con regla atómica, chat en vivo. |
+| **🛒 Cliente Comprador** | `client@realestate.com` | `Client123!` | Guardar favoritos, simular cuotas en RD$, enviar ofertas y agendar visitas. |
+| **💻 Desarrollador API** | `developer@realestate.com` | `Developer123!` | Acceso completo a los endpoints REST mediante JWT Bearer Token. |
 
 ---
 

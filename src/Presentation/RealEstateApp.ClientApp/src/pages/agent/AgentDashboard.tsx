@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { propertiesService, offersService, appointmentsService } from '../../api/services';
-import { Property, Offer, Appointment } from '../../types';
+import { propertiesService, offersService, appointmentsService, commissionsService } from '../../api/services';
+import { Property, Offer, Appointment, CommissionSummary } from '../../types';
 import { formatCurrencyRD, formatDate } from '../../utils/formatters';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
-import { 
+import { ChartCard } from '../../components/common/ChartCard';
+import {
   Home, 
   Tag, 
   Calendar, 
@@ -15,28 +16,45 @@ import {
   TrendingUp, 
   ShieldCheck, 
   CheckCircle,
-  Building2
+  Building2,
+  Wallet
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from 'recharts';
 
 export const AgentDashboard: React.FC = () => {
   const { user } = useAuth();
   const [properties, setProperties] = useState<Property[]>([]);
   const [receivedOffers, setReceivedOffers] = useState<Offer[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [commissionSummary, setCommissionSummary] = useState<CommissionSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadDashboard = async () => {
       try {
         setIsLoading(true);
-        const [props, offers, appts] = await Promise.all([
+        const [props, offers, appts, commissions] = await Promise.all([
           propertiesService.getMyProperties().catch(() => []),
           offersService.getReceivedOffers().catch(() => []),
           appointmentsService.getMyAppointments().catch(() => []),
+          commissionsService.getMySummary().catch(() => null),
         ]);
         setProperties(props);
         setReceivedOffers(offers);
         setAppointments(appts);
+        setCommissionSummary(commissions);
       } catch (err) {
         console.error("Error loading agent dashboard:", err);
       } finally {
@@ -120,6 +138,90 @@ export const AgentDashboard: React.FC = () => {
             <span className="text-xs text-slate-500 font-semibold uppercase">Citas Agendadas</span>
             <p className="text-2xl font-extrabold text-royal-600 font-mono mt-0.5">{appointments.length}</p>
           </div>
+        </div>
+      </div>
+
+      {/* Interactive Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-1">
+          <ChartCard
+            title="Mis Comisiones"
+            subtitle={commissionSummary ? formatCurrencyRD(commissionSummary.totalAmount) : '—'}
+            icon={<Wallet className="w-5 h-5 text-emerald-600" />}
+          >
+            {(commissionSummary?.totalAmount ?? 0) > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Pendientes', value: commissionSummary?.pendingAmount || 0 },
+                      { name: 'Pagadas', value: commissionSummary?.paidAmount || 0 },
+                    ]}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={85}
+                    paddingAngle={2}
+                  >
+                    <Cell fill="#f59e0b" />
+                    <Cell fill="#10b981" />
+                  </Pie>
+                  <Tooltip formatter={(value: number) => formatCurrencyRD(value)} />
+                  <Legend wrapperStyle={{ fontSize: 12, fontWeight: 600 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-xs text-slate-400 py-10 text-center">
+                Aún no se han generado comisiones por ventas cerradas.
+              </p>
+            )}
+          </ChartCard>
+        </div>
+
+        <div className="lg:col-span-2">
+          <ChartCard
+            title="Citas por Estado"
+            subtitle={`${appointments.length} visitas`}
+            icon={<Calendar className="w-5 h-5 text-royal-600" />}
+          >
+            {appointments.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart
+                  data={[
+                    {
+                      name: 'Pendiente',
+                      Cantidad: appointments.filter((a) => a.status === 'Pending').length,
+                    },
+                    {
+                      name: 'Confirmada',
+                      Cantidad: appointments.filter((a) => a.status === 'Confirmed').length,
+                    },
+                    {
+                      name: 'Completada',
+                      Cantidad: appointments.filter((a) => a.status === 'Completed').length,
+                    },
+                    {
+                      name: 'Cancelada',
+                      Cantidad: appointments.filter((a) => a.status === 'Cancelled').length,
+                    },
+                  ]}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12, fontWeight: 700 }} />
+                  <YAxis allowDecimals={false} width={32} tick={{ fontSize: 11 }} />
+                  <Tooltip formatter={(value: number) => [`${value}`, 'Citas']} />
+                  <Legend wrapperStyle={{ fontSize: 12, fontWeight: 600 }} />
+                  <Bar dataKey="Cantidad" fill="#6366f1" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-xs text-slate-400 py-10 text-center">
+                No tienes citas agendadas todavía.
+              </p>
+            )}
+          </ChartCard>
         </div>
       </div>
 

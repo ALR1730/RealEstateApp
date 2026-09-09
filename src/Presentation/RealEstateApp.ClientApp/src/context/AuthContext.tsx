@@ -32,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('realestate_jwt_token'));
-  const [isLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(() => Boolean(localStorage.getItem('realestate_jwt_token')));
 
   const logout = useCallback(() => {
     setToken(null);
@@ -46,6 +46,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.addEventListener('auth:logout', handleLogout);
     return () => window.removeEventListener('auth:logout', handleLogout);
   }, [logout]);
+
+  useEffect(() => {
+    let active = true;
+    const validateToken = async () => {
+      const storedToken = localStorage.getItem('realestate_jwt_token');
+      if (!storedToken) {
+        if (active) setIsLoading(false);
+        return;
+      }
+      try {
+        const profile = await authService.getProfile();
+        if (!active) return;
+        setUser((current) => {
+          if (!current) return current;
+          return {
+            ...current,
+            firstName: profile?.firstName,
+            lastName: profile?.lastName,
+            phone: profile?.phone,
+            photoUrl: profile?.profilePictureUrl,
+          };
+        });
+      } catch {
+        if (!active) return;
+        setToken(null);
+        setUser(null);
+        localStorage.removeItem('realestate_jwt_token');
+        localStorage.removeItem('realestate_user');
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    };
+    validateToken();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const login = async (email: string, pass: string): Promise<AuthResponse> => {
     const response = await authService.login(email, pass);
@@ -75,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           firstName: profile.firstName,
           lastName: profile.lastName,
           phone: profile.phone,
-          photoUrl: profile.photoUrl,
+          photoUrl: profile.profilePictureUrl,
         };
         setUser(updatedUser);
         localStorage.setItem('realestate_user', JSON.stringify(updatedUser));

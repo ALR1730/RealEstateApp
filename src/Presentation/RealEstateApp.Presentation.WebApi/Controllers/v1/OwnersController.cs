@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using RealEstateApp.Core.Application.DTOs.Property;
+using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Property;
 
@@ -18,13 +21,16 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 
         private readonly IPropertyService _propertyService;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IMapper _mapper;
 
         public OwnersController(
             IPropertyService propertyService,
-            UserManager<IdentityUser> userManager)
+            UserManager<IdentityUser> userManager,
+            IMapper mapper)
         {
             _propertyService = propertyService;
             _userManager = userManager;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -93,6 +99,56 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 
             await _propertyService.Delete(id);
             return NoContent();
+        }
+
+        /// <summary>
+        /// Obtiene un inmueble publicado por el propietario para su edición.
+        /// </summary>
+        [HttpGet("properties/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetProperty(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var property = await _propertyService.GetByIdViewModel(id);
+            if (property == null || property.AgentId != userId)
+            {
+                return NotFound(new { hasError = true, error = "Propiedad no encontrada o no autorizada." });
+            }
+
+            var propertyDto = _mapper.Map<PropertyDto>(property);
+            return Ok(propertyDto);
+        }
+
+        /// <summary>
+        /// Actualiza un inmueble publicado por el propietario directo.
+        /// </summary>
+        [HttpPut("properties/{id}")]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateProperty(int id, [FromForm] SavePropertyViewModel vm)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            if (id != vm.Id)
+            {
+                return BadRequest(new { hasError = true, error = "El ID de la ruta no coincide con el modelo." });
+            }
+
+            var property = await _propertyService.GetByIdViewModel(id);
+            if (property == null || property.AgentId != userId)
+            {
+                return NotFound(new { hasError = true, error = "Propiedad no encontrada o no autorizada." });
+            }
+
+            vm.AgentId = userId;
+            await _propertyService.Update(vm, id);
+            return Ok(new { success = true, message = "Inmueble directo actualizado exitosamente." });
         }
     }
 }

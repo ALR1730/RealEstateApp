@@ -23,6 +23,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         MaxFeaturedProperties = 0,
                         Allows3DTours = true,
                         AllowsVideo = true,
+                        CommissionPercentage = 5.00m,
                         IsActive = true
                     },
                     new SubscriptionPlan
@@ -34,6 +35,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         MaxFeaturedProperties = 3,
                         Allows3DTours = true,
                         AllowsVideo = true,
+                        CommissionPercentage = 4.50m,
                         IsActive = true
                     },
                     new SubscriptionPlan
@@ -45,6 +47,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         MaxFeaturedProperties = 10,
                         Allows3DTours = true,
                         AllowsVideo = true,
+                        CommissionPercentage = 3.50m,
                         IsActive = true
                     }
                 };

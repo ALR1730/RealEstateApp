@@ -1,8 +1,10 @@
+using System.Globalization;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -22,6 +24,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
+
+// Cultura invariante para un parsing numérico estable (decimales con punto, fechas ISO)
+var invariantCulture = CultureInfo.InvariantCulture;
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture(invariantCulture, invariantCulture);
+    options.SupportedCultures = new[] { invariantCulture };
+    options.SupportedUICultures = new[] { invariantCulture };
+    options.RequestCultureProviders.Clear();
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSignalR();
@@ -132,6 +144,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
+    options.MapInboundClaims = false;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
@@ -208,6 +221,7 @@ try
                 await DefaultAgentUser.SeedAsync(userManager);
                 await DefaultClientUser.SeedAsync(userManager);
                 await DefaultDeveloperUser.SeedAsync(userManager);
+                await DefaultOwnerUser.SeedAsync(userManager);
                 await DefaultSubscriptionPlans.SeedAsync(dbContext);
                 await DefaultDominicanProvinces.SeedAsync(dbContext);
                 await DefaultRealEstateData.SeedAsync(dbContext, userManager);
@@ -240,6 +254,7 @@ try
     app.UseRouting();
     app.UseCors("AllowSpecificOrigins");
     app.UseRateLimiter();
+    app.UseRequestLocalization();
 
     app.UseAuthentication();
     app.UseAuthorization();

@@ -16,6 +16,12 @@ namespace RealEstateApp.Core.Domain.Entities
         public bool AllowsVideo { get; set; } = true;
         public bool IsActive { get; set; } = true;
 
+        /// <summary>
+        /// Porcentaje de comisión del agente asociado a este plan (ej. 5.00 = 5%).
+        /// Si es null o cero se usa el default global.
+        /// </summary>
+        public decimal? CommissionPercentage { get; set; }
+
         public ICollection<AgentSubscription>? Subscriptions { get; set; }
     }
 }

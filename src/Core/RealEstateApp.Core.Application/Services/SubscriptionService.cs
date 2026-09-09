@@ -38,6 +38,7 @@ namespace RealEstateApp.Core.Application.Services
                 MaxFeaturedProperties = p.MaxFeaturedProperties,
                 Allows3DTours = p.Allows3DTours,
                 AllowsVideo = p.AllowsVideo,
+                CommissionPercentage = p.CommissionPercentage,
                 IsActive = p.IsActive
             }).ToList();
         }
@@ -61,6 +62,7 @@ namespace RealEstateApp.Core.Application.Services
                         MaxFeaturedProperties = freePlan.MaxFeaturedProperties,
                         Allows3DTours = freePlan.Allows3DTours,
                         AllowsVideo = freePlan.AllowsVideo,
+                        CommissionPercentage = freePlan.CommissionPercentage,
                         StartDate = DateTime.UtcNow,
                         IsActive = true,
                         AutoRenew = true
@@ -82,6 +84,7 @@ namespace RealEstateApp.Core.Application.Services
                 MaxFeaturedProperties = plan?.MaxFeaturedProperties ?? 0,
                 Allows3DTours = plan?.Allows3DTours ?? true,
                 AllowsVideo = plan?.AllowsVideo ?? true,
+                CommissionPercentage = plan?.CommissionPercentage,
                 StartDate = sub.StartDate,
                 EndDate = sub.EndDate,
                 IsActive = sub.IsActive,
@@ -143,7 +146,7 @@ namespace RealEstateApp.Core.Application.Services
             return agentProperties.Count < maxAllowed;
         }
 
-        public async Task<(bool Allowed, string Message)> CanAgentFeaturePropertyAsync(string agentId, int propertyId = 0)
+public async Task<(bool Allowed, string Message)> CanAgentFeaturePropertyAsync(string agentId, int propertyId = 0)
         {
             var currentSub = await GetCurrentSubscriptionByAgentIdAsync(agentId);
             var maxAllowed = currentSub?.MaxFeaturedProperties ?? 0;
@@ -163,5 +166,110 @@ namespace RealEstateApp.Core.Application.Services
 
             return (true, "Permitido");
         }
+
+        public async Task<bool> UpdatePlanCommissionPercentageAsync(int planId, decimal percentage)
+        {
+            if (percentage < 0 || percentage > 100) return false;
+
+            var plan = await _planRepository.GetByIdAsync(planId);
+            if (plan == null) return false;
+
+            plan.CommissionPercentage = percentage;
+            await _planRepository.UpdateAsync(plan);
+            return true;
+        }
+
+        // ==================== Administración de planes (CRUD) ====================
+
+        public async Task<List<SubscriptionPlanViewModel>> GetAllPlansAsync()
+        {
+            var plans = await _planRepository.GetAllAsync();
+            return plans.Select(p => MapToViewModel(p)).OrderBy(p => p.MonthlyPrice).ToList();
+        }
+
+        public async Task<SubscriptionPlanViewModel?> GetPlanByIdAsync(int planId)
+        {
+            var plan = await _planRepository.GetByIdAsync(planId);
+            return plan == null ? null : MapToViewModel(plan);
+        }
+
+        public async Task<SubscriptionPlanViewModel?> CreatePlanAsync(SaveSubscriptionPlanViewModel model)
+        {
+            if (model == null || string.IsNullOrWhiteSpace(model.Name)) return null;
+
+            var plan = new SubscriptionPlan
+            {
+                Name = model.Name.Trim(),
+                Description = model.Description ?? string.Empty,
+                MonthlyPrice = model.MonthlyPrice,
+                MaxActiveProperties = model.MaxActiveProperties,
+                MaxFeaturedProperties = model.MaxFeaturedProperties,
+                Allows3DTours = model.Allows3DTours,
+                AllowsVideo = model.AllowsVideo,
+                CommissionPercentage = model.CommissionPercentage,
+                IsActive = model.IsActive
+            };
+
+            await _planRepository.AddAsync(plan);
+            return MapToViewModel(plan);
+        }
+
+        public async Task<SubscriptionPlanViewModel?> UpdatePlanAsync(int planId, SaveSubscriptionPlanViewModel model)
+        {
+            if (model == null || string.IsNullOrWhiteSpace(model.Name)) return null;
+
+            var plan = await _planRepository.GetByIdAsync(planId);
+            if (plan == null) return null;
+
+            plan.Name = model.Name.Trim();
+            plan.Description = model.Description ?? string.Empty;
+            plan.MonthlyPrice = model.MonthlyPrice;
+            plan.MaxActiveProperties = model.MaxActiveProperties;
+            plan.MaxFeaturedProperties = model.MaxFeaturedProperties;
+            plan.Allows3DTours = model.Allows3DTours;
+            plan.AllowsVideo = model.AllowsVideo;
+            plan.CommissionPercentage = model.CommissionPercentage;
+            plan.IsActive = model.IsActive;
+
+            await _planRepository.UpdateAsync(plan);
+            return MapToViewModel(plan);
+        }
+
+        public async Task<bool> SetPlanActiveAsync(int planId, bool isActive)
+        {
+            var plan = await _planRepository.GetByIdAsync(planId);
+            if (plan == null) return false;
+
+            plan.IsActive = isActive;
+            await _planRepository.UpdateAsync(plan);
+            return true;
+        }
+
+        public async Task<bool> DeletePlanAsync(int planId)
+        {
+            var plan = await _planRepository.GetByIdAsync(planId);
+            if (plan == null) return false;
+
+            // No se permite eliminar un plan que ya tiene agentes suscritos (integridad referencial).
+            var subscriptions = await _agentSubscriptionRepository.GetAllAsync();
+            if (subscriptions.Any(s => s.SubscriptionPlanId == planId)) return false;
+
+            await _planRepository.DeleteAsync(plan);
+            return true;
+        }
+
+        private SubscriptionPlanViewModel MapToViewModel(SubscriptionPlan plan) => new SubscriptionPlanViewModel
+        {
+            Id = plan.Id,
+            Name = plan.Name,
+            Description = plan.Description,
+            MonthlyPrice = plan.MonthlyPrice,
+            MaxActiveProperties = plan.MaxActiveProperties,
+            MaxFeaturedProperties = plan.MaxFeaturedProperties,
+            Allows3DTours = plan.Allows3DTours,
+            AllowsVideo = plan.AllowsVideo,
+            CommissionPercentage = plan.CommissionPercentage,
+            IsActive = plan.IsActive
+        };
     }
 }

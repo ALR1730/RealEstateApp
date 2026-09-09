@@ -11,6 +11,7 @@ namespace RealEstateApp.Core.Domain.Entities
         public string ClienteId { get; set; } = string.Empty;
         public DateTime FechaOferta { get; set; } = DateTime.UtcNow;
         public string? PreApprovalLetterUrl { get; set; }
+        public string? Notes { get; set; }
 
         // Campos de Contra-Oferta (Ítem 2.1)
         public decimal? CounterOfferAmount { get; set; }

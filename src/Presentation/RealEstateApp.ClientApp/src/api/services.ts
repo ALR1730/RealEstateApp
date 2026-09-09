@@ -12,8 +12,37 @@ import {
   DashboardKPIs,
   MortgageSimulationResult,
   User,
-  PriceHistory
+  PriceHistory,
+  ValuationResult,
+  Lead,
+  LeadPipelineStats,
+  CreateLeadPayload,
+  UpdateLeadPayload,
+  BuyAbilityResult,
+  BuyAbilityRequest,
+  Review,
+  ReviewSummary,
+  Commission,
+  CommissionSummary,
+  PropertyDocument,
+  SubscriptionPlan,
+  SubscriptionPlanInput
 } from '../types';
+
+function combineDateAndTime(date: string, timeSlot: string): string {
+  if (!date) return date;
+  const timeMatch = timeSlot.match(/^(\d{1,2}):(\d{2})\s*([AP]M)/i);
+  if (!timeMatch) {
+    return date;
+  }
+  let hours = parseInt(timeMatch[1], 10);
+  const minutes = parseInt(timeMatch[2], 10);
+  const ampm = timeMatch[3].toUpperCase();
+  if (ampm === 'PM' && hours !== 12) hours += 12;
+  if (ampm === 'AM' && hours === 12) hours = 0;
+  const iso = `${date}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
+  return new Date(iso).toISOString();
+}
 
 // ==================== AUTH SERVICE ====================
 export const authService = {
@@ -135,7 +164,11 @@ export const offersService = {
   },
 
   makeOffer: async (data: { propertyId: number; amount: number; notes?: string }): Promise<any> => {
-    const res = await apiClient.post('/offers', data);
+    const res = await apiClient.post('/offers', {
+      propertyId: data.propertyId,
+      montoOfertado: data.amount,
+      notes: data.notes,
+    });
     return res.data;
   },
 
@@ -150,7 +183,10 @@ export const offersService = {
   },
 
   counterOffer: async (offerId: number, data: { amount: number; message?: string }): Promise<any> => {
-    const res = await apiClient.post(`/offers/${offerId}/counter-offer`, data);
+    const res = await apiClient.post(`/offers/${offerId}/counter-offer`, {
+      counterAmount: data.amount,
+      counterMessage: data.message,
+    });
     return res.data;
   },
 
@@ -173,7 +209,12 @@ export const appointmentsService = {
   },
 
   requestAppointment: async (data: { propertyId: number; date: string; timeSlot: string; clientNotes?: string }): Promise<any> => {
-    const res = await apiClient.post('/appointments', data);
+    const appointmentDate = combineDateAndTime(data.date, data.timeSlot);
+    const res = await apiClient.post('/appointments', {
+      propertyId: data.propertyId,
+      appointmentDate,
+      comments: data.clientNotes ?? '',
+    });
     return res.data;
   },
 
@@ -290,8 +331,8 @@ export const verificationsService = {
 
 // ==================== SUBSCRIPTIONS SERVICE ====================
 export const subscriptionsService = {
-  getPlans: async (): Promise<any[]> => {
-    const res = await apiClient.get<any[]>('/subscriptions/plans');
+  getPlans: async (): Promise<SubscriptionPlan[]> => {
+    const res = await apiClient.get<SubscriptionPlan[]>('/subscriptions/plans');
     return res.data || [];
   },
 
@@ -302,6 +343,42 @@ export const subscriptionsService = {
 
   upgrade: async (planId: number, paymentMethodId?: string): Promise<any> => {
     const res = await apiClient.post('/subscriptions/upgrade', { planId, paymentMethodId });
+    return res.data;
+  },
+
+  updatePlanCommission: async (planId: number, percentage: number): Promise<any> => {
+    const res = await apiClient.patch(`/subscriptions/plans/${planId}/commission`, { percentage });
+    return res.data;
+  },
+
+  // ==================== Administración de planes (CRUD) ====================
+  getAdminPlans: async (): Promise<SubscriptionPlan[]> => {
+    const res = await apiClient.get<SubscriptionPlan[]>('/subscriptions/admin/plans');
+    return res.data || [];
+  },
+
+  getAdminPlan: async (planId: number): Promise<SubscriptionPlan> => {
+    const res = await apiClient.get<SubscriptionPlan>(`/subscriptions/admin/plans/${planId}`);
+    return res.data;
+  },
+
+  createPlan: async (model: SubscriptionPlanInput): Promise<any> => {
+    const res = await apiClient.post('/subscriptions/admin/plans', model);
+    return res.data;
+  },
+
+  updatePlan: async (planId: number, model: SubscriptionPlanInput): Promise<any> => {
+    const res = await apiClient.put(`/subscriptions/admin/plans/${planId}`, model);
+    return res.data;
+  },
+
+  setPlanActive: async (planId: number, isActive: boolean): Promise<any> => {
+    const res = await apiClient.patch(`/subscriptions/admin/plans/${planId}/active`, { isActive });
+    return res.data;
+  },
+
+  deletePlan: async (planId: number): Promise<any> => {
+    const res = await apiClient.delete(`/subscriptions/admin/plans/${planId}`);
     return res.data;
   }
 };
@@ -315,6 +392,18 @@ export const ownersService = {
 
   createProperty: async (formData: FormData): Promise<any> => {
     const res = await apiClient.post('/owners/properties', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return res.data;
+  },
+
+  getProperty: async (id: number): Promise<any> => {
+    const res = await apiClient.get(`/owners/properties/${id}`);
+    return res.data;
+  },
+
+  updateProperty: async (id: number, formData: FormData): Promise<any> => {
+    const res = await apiClient.put(`/owners/properties/${id}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     return res.data;
@@ -490,6 +579,160 @@ export const simulatorService = {
       annualRate: params.annualRate ?? 11.5,
       termInYears: params.termInYears ?? 20,
     });
+    return res.data;
+  }
+};
+
+// ==================== AVM SERVICE (Valuación Automatizada - F-01) ====================
+export const avmService = {
+  calculate: async (propertyId: number, searchRadiusKm?: number): Promise<ValuationResult> => {
+    const res = await apiClient.get<ValuationResult>(`/properties/${propertyId}/valuation`, {
+      params: { searchRadiusKm: searchRadiusKm ?? 5 },
+    });
+    return res.data;
+  },
+  getLast: async (propertyId: number): Promise<ValuationResult | null> => {
+    const res = await apiClient.get<ValuationResult>(`/properties/${propertyId}/valuation/last`);
+    return res.data || null;
+  }
+};
+
+// ==================== LEAD PIPELINE SERVICE (Kanban - F-04) ====================
+export const leadPipelineService = {
+  getAll: async (): Promise<Lead[]> => {
+    const res = await apiClient.get<Lead[]>('/leads');
+    return res.data || [];
+  },
+  getByStage: async (stage: string): Promise<Lead[]> => {
+    const res = await apiClient.get<Lead[]>(`/leads/stage/${encodeURIComponent(stage)}`);
+    return res.data || [];
+  },
+  getStats: async (): Promise<LeadPipelineStats> => {
+    const res = await apiClient.get<LeadPipelineStats>('/leads/stats');
+    return res.data;
+  },
+  getById: async (id: number): Promise<Lead> => {
+    const res = await apiClient.get<Lead>(`/leads/${id}`);
+    return res.data;
+  },
+  create: async (payload: CreateLeadPayload): Promise<Lead> => {
+    const res = await apiClient.post<Lead>('/leads', payload);
+    return res.data;
+  },
+  update: async (id: number, payload: UpdateLeadPayload): Promise<Lead> => {
+    const res = await apiClient.put<Lead>(`/leads/${id}`, payload);
+    return res.data;
+  },
+  moveToStage: async (id: number, stage: string): Promise<Lead> => {
+    const res = await apiClient.patch<Lead>(`/leads/${id}/stage`, { stage });
+    return res.data;
+  },
+  updateSortOrder: async (id: number, sortOrder: number): Promise<Lead> => {
+    const res = await apiClient.patch<Lead>(`/leads/${id}/sort-order`, { sortOrder });
+    return res.data;
+  },
+  remove: async (id: number): Promise<void> => {
+    await apiClient.delete(`/leads/${id}`);
+  }
+};
+
+// ==================== BUY ABILITY SERVICE (Capacidad de Compra - F-09) ====================
+export const buyAbilityService = {
+  evaluate: async (payload: BuyAbilityRequest): Promise<BuyAbilityResult> => {
+    const res = await apiClient.post<BuyAbilityResult>('/buyability/evaluate', payload);
+    return res.data;
+  },
+  getLast: async (): Promise<BuyAbilityResult | null> => {
+    const res = await apiClient.get<BuyAbilityResult>('/buyability/last');
+    return res.data || null;
+  }
+};
+
+// ==================== REVIEWS SERVICE (Reseñas a Agentes - Ítem 2.9) ====================
+export const reviewsService = {
+  getByAgent: async (agentId: string): Promise<Review[]> => {
+    const res = await apiClient.get<Review[]>(`/reviews/agent/${agentId}`);
+    return res.data || [];
+  },
+
+  getSummary: async (agentId: string): Promise<ReviewSummary> => {
+    const res = await apiClient.get<ReviewSummary>(`/reviews/agent/${agentId}/summary`);
+    return res.data;
+  },
+
+  canReview: async (agentId: string, propertyId: number): Promise<boolean> => {
+    const res = await apiClient.get<boolean>('/reviews/can-review', {
+      params: { agentId, propertyId }
+    });
+    return res.data;
+  },
+
+  hasReviewed: async (agentId: string, propertyId: number): Promise<boolean> => {
+    const res = await apiClient.get<boolean>('/reviews/has-reviewed', {
+      params: { agentId, propertyId }
+    });
+    return res.data;
+  },
+
+  create: async (data: { agentId: string; propertyId: number; rating: number; comment?: string }): Promise<any> => {
+    const res = await apiClient.post('/reviews', data);
+    return res.data;
+  },
+
+  getAll: async (): Promise<Review[]> => {
+    const res = await apiClient.get<Review[]>('/reviews');
+    return res.data || [];
+  }
+};
+
+// ==================== COMMISSIONS SERVICE (Comisiones - Ítem 2.3) ====================
+export const commissionsService = {
+  getMyCommissions: async (): Promise<Commission[]> => {
+    const res = await apiClient.get<Commission[]>('/commissions/my-commissions');
+    return res.data || [];
+  },
+
+  getMySummary: async (): Promise<CommissionSummary> => {
+    const res = await apiClient.get<CommissionSummary>('/commissions/my-commissions/summary');
+    return res.data;
+  },
+
+  getAll: async (): Promise<Commission[]> => {
+    const res = await apiClient.get<Commission[]>('/commissions');
+    return res.data || [];
+  },
+
+  markAsPaid: async (commissionId: number): Promise<any> => {
+    const res = await apiClient.patch(`/commissions/${commissionId}/pay`);
+    return res.data;
+  }
+};
+
+// ==================== PROPERTY DOCUMENTS SERVICE (Documentos - Ítem 2.6) ====================
+export const documentsService = {
+  upload: async (propertyId: number, documentType: string, file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append('propertyId', String(propertyId));
+    formData.append('documentType', documentType);
+    formData.append('file', file);
+    const res = await apiClient.post('/documents', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return res.data;
+  },
+
+  getByProperty: async (propertyId: number): Promise<PropertyDocument[]> => {
+    const res = await apiClient.get<PropertyDocument[]>(`/documents/property/${propertyId}`);
+    return res.data || [];
+  },
+
+  getAll: async (): Promise<PropertyDocument[]> => {
+    const res = await apiClient.get<PropertyDocument[]>('/documents');
+    return res.data || [];
+  },
+
+  remove: async (documentId: number): Promise<any> => {
+    const res = await apiClient.delete(`/documents/${documentId}`);
     return res.data;
   }
 };

@@ -136,7 +136,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             }
 
             var created = await _propertyService.Add(model);
-            return CreatedAtAction(nameof(GetByIdAsync), new { id = created.Id }, created);
+            return StatusCode(StatusCodes.Status201Created, created);
         }
 
         /// <summary>

@@ -2,17 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { adminService } from '../../api/services';
 import { DashboardKPIs } from '../../types';
 import { Loader } from '../../components/common/Loader';
-import { 
+import { ChartCard } from '../../components/common/ChartCard';
+import {
+  PieChart as PieChartIcon,
+  BarChart3,
   Building2, 
   Home, 
   CheckCircle, 
   Users, 
   ShieldCheck, 
   TrendingUp, 
-  PieChart, 
   Tag, 
   Code
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from 'recharts';
 import { Link } from 'react-router-dom';
 
 export const AdminDashboard: React.FC = () => {
@@ -118,51 +133,78 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Distribution by Category / Types */}
+      {/* Interactive Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        {/* Properties by Type Breakdown */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
-              <PieChart className="w-5 h-5 text-royal-600" />
-              Distribución por Tipo de Propiedad
-            </h3>
-            <span className="text-xs font-mono font-bold text-slate-500">
-              Total: {kpis?.totalProperties || 0}
-            </span>
-          </div>
+        <ChartCard
+          title="Distribución por Estado"
+          subtitle={`Total: ${kpis?.totalProperties || 0}`}
+          icon={<PieChartIcon className="w-5 h-5 text-royal-600" />}
+        >
+          {(kpis?.totalProperties ?? 0) > 0 ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Disponibles', value: kpis?.totalAvailableProperties || 0 },
+                    { name: 'Reservadas', value: kpis?.totalReservedProperties || 0 },
+                    { name: 'Vendidas', value: kpis?.totalSoldProperties || 0 },
+                  ]}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={85}
+                  paddingAngle={2}
+                >
+                  <Cell fill="#10b981" />
+                  <Cell fill="#f59e0b" />
+                  <Cell fill="#475569" />
+                </Pie>
+                <Tooltip
+                  formatter={(value: number) => [`${value}`, 'Propiedades']}
+                />
+                <Legend wrapperStyle={{ fontSize: 12, fontWeight: 600 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-xs text-slate-400 py-10 text-center">Aún no hay propiedades registradas.</p>
+          )}
+        </ChartCard>
 
-          <div className="space-y-3">
-            {kpis?.propertiesByType && kpis.propertiesByType.length > 0 ? (
-              kpis.propertiesByType.map((item, idx) => {
-                const percent = kpis.totalProperties > 0 ? Math.round((item.count / kpis.totalProperties) * 100) : 0;
-                return (
-                  <div key={idx} className="space-y-1">
-                    <div className="flex justify-between text-xs font-bold text-slate-700">
-                      <span>{item.typeName}</span>
-                      <span className="font-mono">{item.count} ({percent}%)</span>
-                    </div>
-                    <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-brand-600 rounded-full transition-all duration-500"
-                        style={{ width: `${percent}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <p className="text-xs text-slate-400 py-6 text-center">No hay datos de distribución disponibles.</p>
-            )}
-          </div>
-        </div>
+        <ChartCard
+          title="Propiedades por Tipo"
+          subtitle="Unidades"
+          icon={<BarChart3 className="w-5 h-5 text-brand-600" />}
+        >
+          {(kpis?.propertiesByType ?? []).length > 0 ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={kpis?.propertiesByType || []}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  dataKey="typeName"
+                  tick={{ fontSize: 11, fontWeight: 700 }}
+                  interval={0}
+                  angle={-18}
+                  textAnchor="end"
+                  height={40}
+                />
+                <YAxis allowDecimals={false} width={32} tick={{ fontSize: 11 }} />
+                <Tooltip formatter={(value: number) => [`${value}`, 'Propiedades']} />
+                <Bar dataKey="count" name="Propiedades" fill="#0ea5e9" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-xs text-slate-400 py-10 text-center">No hay datos de distribución disponibles.</p>
+          )}
+        </ChartCard>
+      </div>
 
-        {/* Quick Management Shortcuts */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-4">
-          <h3 className="font-extrabold text-base text-slate-900">
-            Accesos Rápidos de Gobernanza
-          </h3>
+      {/* Quick Management Shortcuts */}
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+        <h3 className="font-extrabold text-base text-slate-900">
+          Accesos Rápidos de Gobernanza
+        </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link
               to="/admin/agents"
@@ -201,7 +243,6 @@ export const AdminDashboard: React.FC = () => {
             </Link>
           </div>
         </div>
-      </div>
     </div>
   );
 };

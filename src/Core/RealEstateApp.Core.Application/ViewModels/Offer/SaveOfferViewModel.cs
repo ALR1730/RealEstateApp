@@ -30,6 +30,9 @@ namespace RealEstateApp.Core.Application.ViewModels.Offer
 
         public string? PreApprovalLetterUrl { get; set; }
 
+        [MaxLength(1000, ErrorMessage = "Las notas no pueden exceder de 1000 caracteres.")]
+        public string? Notes { get; set; }
+
         // Campos de solo lectura para mostrar en la vista
         public string? PropertyCode { get; set; }
         public decimal? PropertyPrice { get; set; }

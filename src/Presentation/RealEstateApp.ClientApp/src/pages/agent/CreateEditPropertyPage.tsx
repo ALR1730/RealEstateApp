@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { catalogsService, propertiesService } from '../../api/services';
+import { catalogsService, propertiesService, provincesService } from '../../api/services';
 import { PropertyType, SaleType, Improvement } from '../../types';
 import { Loader } from '../../components/common/Loader';
 import { 
@@ -26,22 +26,43 @@ export const CreateEditPropertyPage: React.FC = () => {
   const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([]);
   const [saleTypes, setSaleTypes] = useState<SaleType[]>([]);
   const [improvements, setImprovements] = useState<Improvement[]>([]);
+  const [provinces, setProvinces] = useState<{ id: number; name: string }[]>([]);
+  const [municipalities, setMunicipalities] = useState<{ id: number; name: string }[]>([]);
   const [selectedImprovements, setSelectedImprovements] = useState<number[]>([]);
 
   // Form Fields
   const [form, setForm] = useState({
     propertyTypeId: '',
     saleTypeId: '',
+    name: '',
     price: '',
     landSizeMeters: '',
     bedrooms: '',
     bathrooms: '',
     description: '',
-    provinceName: 'Santo Domingo',
+    provinceId: '',
+    municipalityId: '',
     sector: 'Piantini',
+    fullAddress: '',
+    montoSeparacion: '',
+    porcentajeInicialRequerido: '',
+    latitude: '18.4861',
+    longitude: '-69.9312',
     videoTourUrl: '',
     virtualTour360Url: '',
   });
+
+  const handleProvinceChange = async (provinceId: string) => {
+    setForm((prev) => ({ ...prev, provinceId, municipalityId: '' }));
+    setMunicipalities([]);
+    if (!provinceId) return;
+    try {
+      const list = await provincesService.getMunicipalities(Number(provinceId));
+      setMunicipalities(list);
+    } catch (err) {
+      console.error("Error loading municipalities:", err);
+    }
+  };
 
   // Images state (up to 15 files)
   const [files, setFiles] = useState<File[]>([]);
@@ -54,28 +75,50 @@ export const CreateEditPropertyPage: React.FC = () => {
     const loadCatalogs = async () => {
       try {
         setIsLoading(true);
-        const [pt, st, imp] = await Promise.all([
+        const [pt, st, imp, provs] = await Promise.all([
           catalogsService.getPropertyTypes(),
           catalogsService.getSaleTypes(),
           catalogsService.getImprovements(),
+          provincesService.getAll(),
         ]);
         setPropertyTypes(pt);
         setSaleTypes(st);
         setImprovements(imp);
+        setProvinces(provs);
 
         if (isEditing && id) {
           const prop = await propertiesService.getById(Number(id));
           if (prop) {
+            const matchedProvince = provs.find((p: any) => p.name === prop.provinceName);
+            const provinceId = matchedProvince ? String(matchedProvince.id) : '';
+            let matchedMunicipality = '';
+            if (provinceId) {
+              try {
+                const muns = await provincesService.getMunicipalities(Number(provinceId));
+                setMunicipalities(muns);
+                const match = muns.find((m: any) => m.name === prop.municipalityName);
+                if (match) matchedMunicipality = String(match.id);
+              } catch (err) {
+                console.error("Error loading municipalities:", err);
+              }
+            }
             setForm({
               propertyTypeId: String(prop.propertyTypeId),
               saleTypeId: String(prop.saleTypeId),
+              name: prop.name || '',
               price: String(prop.price),
               landSizeMeters: String(prop.landSizeMeters),
               bedrooms: String(prop.bedrooms),
               bathrooms: String(prop.bathrooms),
               description: prop.description || '',
-              provinceName: prop.provinceName || 'Santo Domingo',
+              provinceId,
+              municipalityId: matchedMunicipality,
               sector: prop.sector || 'Piantini',
+              fullAddress: prop.fullAddress || '',
+              montoSeparacion: prop.montoSeparacion != null ? String(prop.montoSeparacion) : '',
+              porcentajeInicialRequerido: prop.porcentajeInicialRequerido != null ? String(prop.porcentajeInicialRequerido) : '',
+              latitude: prop.latitude != null ? String(prop.latitude) : '18.4861',
+              longitude: prop.longitude != null ? String(prop.longitude) : '-69.9312',
               videoTourUrl: prop.videoTourUrl || '',
               virtualTour360Url: prop.virtualTour360Url || '',
             });
@@ -119,7 +162,17 @@ export const CreateEditPropertyPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.propertyTypeId || !form.saleTypeId || !form.price) {
+    if (
+      !form.propertyTypeId ||
+      !form.saleTypeId ||
+      !form.name.trim() ||
+      !form.price ||
+      !form.provinceId ||
+      !form.municipalityId ||
+      !form.fullAddress.trim() ||
+      !form.montoSeparacion ||
+      !form.porcentajeInicialRequerido
+    ) {
       setError("Por favor completa los campos requeridos.");
       return;
     }
@@ -128,26 +181,34 @@ export const CreateEditPropertyPage: React.FC = () => {
       setIsSubmitting(true);
       setError(null);
       const formData = new FormData();
+      formData.append('Name', form.name.trim());
       formData.append('PropertyTypeId', form.propertyTypeId);
       formData.append('SaleTypeId', form.saleTypeId);
       formData.append('Price', form.price);
-      formData.append('LandSizeMeters', form.landSizeMeters);
-      formData.append('Bedrooms', form.bedrooms);
-      formData.append('Bathrooms', form.bathrooms);
+      formData.append('Currency', 'DOP');
+      formData.append('Rooms', form.bedrooms || '0');
+      formData.append('Bathrooms', form.bathrooms || '0');
+      formData.append('SizeInMeters', form.landSizeMeters || '1');
       formData.append('Description', form.description);
-      formData.append('ProvinceName', form.provinceName);
+      formData.append('ProvinceId', form.provinceId);
+      formData.append('MunicipalityId', form.municipalityId);
       formData.append('Sector', form.sector);
-      formData.append('VideoTourUrl', form.videoTourUrl);
-      formData.append('VirtualTour360Url', form.virtualTour360Url);
+      formData.append('FullAddress', form.fullAddress.trim());
+      formData.append('Latitude', form.latitude);
+      formData.append('Longitude', form.longitude);
+      formData.append('MontoSeparacion', form.montoSeparacion);
+      formData.append('PorcentajeInicialRequerido', form.porcentajeInicialRequerido);
+      formData.append('VideoUrl', form.videoTourUrl);
+      formData.append('Tour360Url', form.virtualTour360Url);
 
       // Selected improvements
       selectedImprovements.forEach((impId) => {
-        formData.append('SelectedImprovementIds', String(impId));
+        formData.append('ImprovementIds', String(impId));
       });
 
       // Photos (up to 15 files)
       files.forEach((file) => {
-        formData.append('Photos', file);
+        formData.append('Files', file);
       });
 
       if (isEditing && id) {
@@ -252,6 +313,20 @@ export const CreateEditPropertyPage: React.FC = () => {
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-6">
           <h3 className="font-bold text-base text-slate-900">Datos Principales del Inmueble</h3>
           
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              Nombre o Título del Inmueble *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Ej: Apartamento de lujo en Bella Vista"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500"
+            />
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -352,33 +427,106 @@ export const CreateEditPropertyPage: React.FC = () => {
                 className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500"
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Provincia
+                Monto de Separación (RD$) *
               </label>
               <input
-                type="text"
-                value={form.provinceName}
-                onChange={(e) => setForm({ ...form, provinceName: e.target.value })}
+                type="number"
+                required
+                min={1}
+                placeholder="Ej: 500000"
+                value={form.montoSeparacion}
+                onChange={(e) => setForm({ ...form, montoSeparacion: e.target.value })}
                 className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Sector / Barrio
+                Porcentaje Inicial Requerido (%) *
+              </label>
+              <input
+                type="number"
+                required
+                min={1}
+                max={100}
+                placeholder="Ej: 20"
+                value={form.porcentajeInicialRequerido}
+                onChange={(e) => setForm({ ...form, porcentajeInicialRequerido: e.target.value })}
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Provincia *
+              </label>
+              <select
+                required
+                value={form.provinceId}
+                onChange={(e) => handleProvinceChange(e.target.value)}
+                className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-white"
+              >
+                <option value="">Seleccione la provincia...</option>
+                {provinces.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Municipio *
+              </label>
+              <select
+                required
+                disabled={!form.provinceId}
+                value={form.municipalityId}
+                onChange={(e) => setForm({ ...form, municipalityId: e.target.value })}
+                className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-white"
+              >
+                <option value="">{form.provinceId ? 'Seleccione el municipio...' : 'Primero seleccione la provincia'}</option>
+                {municipalities.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Sector / Barrio *
               </label>
               <input
                 type="text"
+                required
                 placeholder="Ej: Piantini, Naco, Bella Vista..."
                 value={form.sector}
                 onChange={(e) => setForm({ ...form, sector: e.target.value })}
                 className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              Dirección Completa *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Ej: Av. Winston Churchill No. 35, Edificio Vista del Sol, Apto. 6B"
+              value={form.fullAddress}
+              onChange={(e) => setForm({ ...form, fullAddress: e.target.value })}
+              className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500"
+            />
           </div>
 
           <div>

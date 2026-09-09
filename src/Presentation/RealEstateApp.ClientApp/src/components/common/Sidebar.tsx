@@ -19,7 +19,12 @@ import {
   Sliders,
   ShieldCheck,
   Award,
-  Building2
+  Building2,
+  Kanban,
+  Calculator,
+  Wallet,
+  Star,
+  FileText
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -75,6 +80,10 @@ export const Sidebar: React.FC = () => {
                 <Calendar className="w-4 h-4" />
                 Mis Citas
               </NavLink>
+              <NavLink to="/client/buy-ability" className={navClass}>
+                <Wallet className="w-4 h-4" />
+                Capacidad de Compra
+              </NavLink>
               <NavLink to="/client/saved-searches" className={navClass}>
                 <BookmarkCheck className="w-4 h-4" />
                 Búsquedas Guardadas
@@ -104,6 +113,10 @@ export const Sidebar: React.FC = () => {
                 <PlusCircle className="w-4 h-4" />
                 Publicar Directo
               </NavLink>
+              <NavLink to="/owner/offers" className={navClass}>
+                <Tag className="w-4 h-4" />
+                Ofertas Recibidas
+              </NavLink>
               <NavLink to="/owner/profile" className={navClass}>
                 <User className="w-4 h-4" />
                 Mi Perfil
@@ -129,9 +142,21 @@ export const Sidebar: React.FC = () => {
                 <PlusCircle className="w-4 h-4" />
                 Publicar Inmueble
               </NavLink>
+              <NavLink to="/agent/avm" className={navClass}>
+                <Calculator className="w-4 h-4" />
+                Valuación (AVM)
+              </NavLink>
+              <NavLink to="/agent/leads" className={navClass}>
+                <Kanban className="w-4 h-4" />
+                Pipeline de Leads
+              </NavLink>
               <NavLink to="/agent/offers" className={navClass}>
                 <Tag className="w-4 h-4" />
                 Ofertas Recibidas
+              </NavLink>
+              <NavLink to="/agent/commissions" className={navClass}>
+                <Wallet className="w-4 h-4" />
+                Mis Comisiones
               </NavLink>
               <NavLink to="/agent/appointments" className={navClass}>
                 <Calendar className="w-4 h-4" />
@@ -177,6 +202,18 @@ export const Sidebar: React.FC = () => {
               <NavLink to="/admin/subscriptions" className={navClass}>
                 <Award className="w-4 h-4" />
                 Membresías & Planes
+              </NavLink>
+              <NavLink to="/admin/reviews" className={navClass}>
+                <Star className="w-4 h-4" />
+                Reseñas de Agentes
+              </NavLink>
+              <NavLink to="/admin/commissions" className={navClass}>
+                <Wallet className="w-4 h-4" />
+                Comisiones por Venta
+              </NavLink>
+              <NavLink to="/admin/documents" className={navClass}>
+                <FileText className="w-4 h-4" />
+                Documentos Legales
               </NavLink>
               <NavLink to="/admin/agents" className={navClass}>
                 <UserCheck className="w-4 h-4" />

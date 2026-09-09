@@ -27,6 +27,7 @@ namespace RealEstateApp.UnitTests.Services
         private readonly Mock<ICurrencyService> _currencyServiceMock;
         private readonly Mock<ISavedSearchService> _savedSearchServiceMock;
         private readonly Mock<ISubscriptionService> _subscriptionServiceMock;
+        private readonly Mock<IAccountService> _accountServiceMock;
         private readonly IMapper _mapper;
         private readonly PropertyService _sut; // System Under Test
 
@@ -41,6 +42,7 @@ namespace RealEstateApp.UnitTests.Services
             _currencyServiceMock = new Mock<ICurrencyService>();
             _savedSearchServiceMock = new Mock<ISavedSearchService>();
             _subscriptionServiceMock = new Mock<ISubscriptionService>();
+            _accountServiceMock = new Mock<IAccountService>();
             _mapper = AutoMapperTestFactory.CreateMapper();
 
             // Default currency service mocks
@@ -63,6 +65,7 @@ namespace RealEstateApp.UnitTests.Services
                 _currencyServiceMock.Object,
                 _savedSearchServiceMock.Object,
                 _subscriptionServiceMock.Object,
+                _accountServiceMock.Object,
                 _mapper
             );
         }

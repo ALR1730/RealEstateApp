@@ -43,6 +43,9 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
         public DbSet<PropertyValuation> PropertyValuations { get; set; } = null!;
         public DbSet<LeadPipeline> LeadPipelines { get; set; } = null!;
         public DbSet<BuyAbilityEvaluation> BuyAbilityEvaluations { get; set; } = null!;
+        public DbSet<AgentReview> AgentReviews { get; set; } = null!;
+        public DbSet<Commission> Commissions { get; set; } = null!;
+        public DbSet<PropertyDocument> PropertyDocuments { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -305,6 +308,9 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                 entity.Property(o => o.CounterOfferMessage)
                     .HasMaxLength(1000);
 
+                entity.Property(o => o.Notes)
+                    .HasMaxLength(1000);
+
                 entity.Property(o => o.ClienteId)
                     .IsRequired()
                     .HasMaxLength(450);
@@ -482,6 +488,9 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
 
                 entity.Property(p => p.MonthlyPrice)
                     .HasColumnType("decimal(18,2)");
+
+                entity.Property(p => p.CommissionPercentage)
+                    .HasColumnType("decimal(5,2)");
             });
 
             #endregion
@@ -729,6 +738,118 @@ namespace RealEstateApp.Infrastructure.Persistence.Contexts
                     .HasMaxLength(2000);
 
                 entity.HasIndex(ba => ba.ClientId);
+            });
+
+            #endregion
+
+            #region AgentReview
+
+            modelBuilder.Entity<AgentReview>(entity =>
+            {
+                entity.ToTable("AgentReviews");
+                entity.HasKey(r => r.Id);
+
+                entity.Property(r => r.AgentId)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                entity.Property(r => r.ClienteId)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                entity.Property(r => r.Rating)
+                    .IsRequired();
+
+                entity.Property(r => r.Comment)
+                    .HasMaxLength(1000);
+
+                // Un cliente solo puede dejar una reseña por agente+propiedad
+                entity.HasIndex(r => new { r.ClienteId, r.AgentId, r.PropertyId })
+                    .IsUnique();
+
+                entity.HasOne(r => r.Property)
+                    .WithMany()
+                    .HasForeignKey(r => r.PropertyId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(r => r.AgentId);
+            });
+
+            #endregion
+
+            #region Commission
+
+            modelBuilder.Entity<Commission>(entity =>
+            {
+                entity.ToTable("Commissions");
+                entity.HasKey(c => c.Id);
+
+                entity.Property(c => c.AgentId)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                entity.Property(c => c.SalePrice)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(c => c.Rate)
+                    .HasColumnType("decimal(5,2)");
+
+                entity.Property(c => c.Amount)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(c => c.Status)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasDefaultValue(CommissionStatus.Pending);
+
+                entity.HasOne(c => c.Property)
+                    .WithMany()
+                    .HasForeignKey(c => c.PropertyId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(c => c.Offer)
+                    .WithMany()
+                    .HasForeignKey(c => c.OfferId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(c => c.AgentId);
+                entity.HasIndex(c => c.Status);
+            });
+
+            #endregion
+
+            #region PropertyDocument
+
+            modelBuilder.Entity<PropertyDocument>(entity =>
+            {
+                entity.ToTable("PropertyDocuments");
+                entity.HasKey(d => d.Id);
+
+                entity.Property(d => d.DocumentType)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(d => d.FileUrl)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(d => d.OriginalFileName)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(d => d.ContentType)
+                    .HasMaxLength(100);
+
+                entity.Property(d => d.UploadedBy)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                entity.HasOne(d => d.Property)
+                    .WithMany()
+                    .HasForeignKey(d => d.PropertyId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(d => d.PropertyId);
             });
 
             #endregion

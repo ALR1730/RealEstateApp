@@ -97,6 +97,9 @@ namespace RealEstateApp.Infrastructure.Persistence
             services.AddScoped<IPropertyValuationRepository, PropertyValuationRepository>();
             services.AddScoped<ILeadPipelineRepository, LeadPipelineRepository>();
             services.AddScoped<IBuyAbilityEvaluationRepository, BuyAbilityEvaluationRepository>();
+            services.AddScoped<IReviewRepository, ReviewRepository>();
+            services.AddScoped<ICommissionRepository, CommissionRepository>();
+            services.AddScoped<IPropertyDocumentRepository, PropertyDocumentRepository>();
 
             #endregion
         }
