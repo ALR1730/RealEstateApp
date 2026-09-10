@@ -412,5 +412,92 @@ namespace RealEstateApp.UnitTests.Services
         }
 
         #endregion
+
+        #region ToggleFeaturedAsync Tests
+
+        [Fact]
+        public async Task ToggleFeaturedAsync_DeberiaLanzarValidationException_CuandoAgenteAlcanzaLimiteDestacados()
+        {
+            // Arrange
+            var propertyId = 10;
+            var agentId = "agent-123";
+            var property = new Property
+            {
+                Id = propertyId,
+                AgentId = agentId,
+                IsFeatured = false,
+                FeaturedUntil = null
+            };
+
+            _propertyRepositoryMock.Setup(r => r.GetByIdAsync(propertyId))
+                .ReturnsAsync(property);
+
+            _subscriptionServiceMock.Setup(s => s.CanAgentFeaturePropertyAsync(agentId, propertyId))
+                .ReturnsAsync((false, "Has alcanzado el límite de propiedades destacadas"));
+
+            // Act
+            var act = async () => await _sut.ToggleFeaturedAsync(propertyId);
+
+            // Assert
+            await act.Should().ThrowAsync<RealEstateApp.Core.Domain.Exceptions.ValidationException>()
+                .WithMessage("*límite de propiedades destacadas*");
+            _propertyRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<Property>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task ToggleFeaturedAsync_DeberiaActivarDestacado_CuandoAgenteTieneCuotaDisponible()
+        {
+            // Arrange
+            var propertyId = 11;
+            var agentId = "agent-123";
+            var property = new Property
+            {
+                Id = propertyId,
+                AgentId = agentId,
+                IsFeatured = false,
+                FeaturedUntil = null
+            };
+
+            _propertyRepositoryMock.Setup(r => r.GetByIdAsync(propertyId))
+                .ReturnsAsync(property);
+
+            _subscriptionServiceMock.Setup(s => s.CanAgentFeaturePropertyAsync(agentId, propertyId))
+                .ReturnsAsync((true, "Permitido"));
+
+            // Act
+            await _sut.ToggleFeaturedAsync(propertyId, 15);
+
+            // Assert
+            property.IsFeatured.Should().BeTrue();
+            property.FeaturedUntil.Should().NotBeNull();
+            _propertyRepositoryMock.Verify(r => r.UpdateAsync(property), Times.Once);
+        }
+
+        [Fact]
+        public async Task ToggleFeaturedAsync_DeberiaDesactivarDestacado_CuandoInmuebleYaEsDestacado()
+        {
+            // Arrange
+            var propertyId = 12;
+            var property = new Property
+            {
+                Id = propertyId,
+                AgentId = "agent-123",
+                IsFeatured = true,
+                FeaturedUntil = DateTime.UtcNow.AddDays(10)
+            };
+
+            _propertyRepositoryMock.Setup(r => r.GetByIdAsync(propertyId))
+                .ReturnsAsync(property);
+
+            // Act
+            await _sut.ToggleFeaturedAsync(propertyId);
+
+            // Assert
+            property.IsFeatured.Should().BeFalse();
+            property.FeaturedUntil.Should().BeNull();
+            _propertyRepositoryMock.Verify(r => r.UpdateAsync(property), Times.Once);
+        }
+
+        #endregion
     }
 }

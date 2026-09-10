@@ -199,7 +199,7 @@ namespace RealEstateApp.Core.Application.Services
             sb.AppendLine($"      <p style='margin: 0; font-size: 14px; color: #475569;'>{prop.Description}</p>");
             sb.AppendLine("    </div>");
             sb.AppendLine("    <div style='text-align: center; margin: 24px 0;'>");
-            sb.AppendLine($"      <a href='http://localhost:5080/Home/Details/{prop.Id}' style='display: inline-block; background: #0d6efd; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 50px; font-weight: bold; font-size: 15px;'>Ver Propiedad Completa</a>");
+            sb.AppendLine($"      <a href='http://localhost:5173/properties/{prop.Id}' style='display: inline-block; background: #059669; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 50px; font-weight: bold; font-size: 15px;'>Ver Propiedad Completa</a>");
             sb.AppendLine("    </div>");
             sb.AppendLine("    <hr style='border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;' />");
             sb.AppendLine($"    <p style='font-size: 12px; color: #94a3b8; text-align: center;'>Recibes este correo porque tienes activadas las alertas para la búsqueda \"{searchName}\". Puedes gestionar tus alertas desde tu perfil en RealEstateApp.</p>");

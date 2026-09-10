@@ -184,7 +184,7 @@ export const PropertiesCatalogPage: React.FC = () => {
   const sortedProperties = [...properties].sort((a, b) => {
     if (sortBy === 'price-asc') return a.price - b.price;
     if (sortBy === 'price-desc') return b.price - a.price;
-    if (sortBy === 'bedrooms-desc') return b.bedrooms - a.bedrooms;
+    if (sortBy === 'bedrooms-desc') return (b.bedrooms ?? b.rooms ?? 0) - (a.bedrooms ?? a.rooms ?? 0);
     if (sortBy === 'featured') return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
     return b.id - a.id;
   });

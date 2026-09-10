@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Property, PriceHistory } from '../../types';
 import { propertiesService, favoritesService } from '../../api/services';
-import { formatCurrencyRD } from '../../utils/formatters';
+import { useCurrency } from '../../context/CurrencyContext';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
 import { GalleryModal } from '../../components/properties/GalleryModal';
@@ -37,6 +37,7 @@ export const PropertyDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated, isClient, user } = useAuth();
+  const { formatPrice } = useCurrency();
 
   const [property, setProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -58,8 +59,8 @@ export const PropertyDetailPage: React.FC = () => {
 
       if (isAuthenticated && isClient) {
         try {
-          const fav = await favoritesService.checkIsFavorite(Number(id));
-          setIsFavorite(fav);
+          const isFav = await favoritesService.checkIsFavorite(Number(id));
+          setIsFavorite(isFav);
         } catch (e) {
           // ignore
         }
@@ -126,8 +127,8 @@ export const PropertyDetailPage: React.FC = () => {
   if (!property) {
     return (
       <div className="max-w-xl mx-auto py-20 text-center space-y-4">
-        <h2 className="text-2xl font-bold text-slate-800">Propiedad no encontrada</h2>
-        <p className="text-xs text-slate-500">El inmueble solicitado no existe o fue retirado del catálogo.</p>
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Propiedad no encontrada</h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400">El inmueble solicitado no existe o fue retirado del catálogo.</p>
         <Link to="/catalog" className="inline-block px-5 py-2 bg-brand-600 text-white font-bold text-xs rounded-xl">
           Volver al Catálogo
         </Link>
@@ -135,39 +136,47 @@ export const PropertyDetailPage: React.FC = () => {
     );
   }
 
-  const isSold = property.status === 'Sold';
+  const isSold = property.status === 'Sold' || property.status === 'Vendida';
   const images = property.images || [];
-  const mainImage = images.length > 0 ? images[0].imageUrl : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80';
+  const firstImg = images.length > 0 ? images[0] : null;
+  const mainImage = firstImg
+    ? (typeof firstImg === 'string' ? firstImg : firstImg.imageUrl || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80')
+    : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 pb-20">
       
       {/* Top Breadcrumb & Actions Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs hover:bg-slate-50 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Regresar</span>
-        </button>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+          <Link to="/catalog" className="hover:text-brand-600 flex items-center gap-1">
+            <ArrowLeft className="w-4 h-4" />
+            <span>Catálogo</span>
+          </Link>
+          <span>/</span>
+          <span className="text-slate-900 dark:text-slate-200 font-bold">{property.propertyTypeName || 'Propiedad'}</span>
+          <span>/</span>
+          <span className="font-mono text-slate-400">#{property.code}</span>
+        </div>
 
         <div className="flex items-center gap-2">
+          {/* Share Button */}
           <button
             onClick={handleShare}
-            className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors shadow-2xs"
-            title="Compartir"
+            className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold transition-colors flex items-center gap-1.5"
+            title="Compartir enlace"
           >
-            <Share2 className="w-4 h-4" />
+            <span>Compartir</span>
           </button>
 
+          {/* Favorite Button */}
           {isClient && (
             <button
               onClick={handleToggleFavorite}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-bold transition-all shadow-2xs ${
+              className={`px-4 py-2.5 rounded-xl border text-xs font-bold transition-colors flex items-center gap-2 shadow-xs ${
                 isFavorite
-                  ? 'bg-rose-50 border-rose-200 text-rose-600'
-                  : 'bg-white border-slate-200 text-slate-700 hover:text-rose-600'
+                  ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-rose-600'
               }`}
             >
               <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
@@ -178,8 +187,8 @@ export const PropertyDetailPage: React.FC = () => {
       </div>
 
       {/* Hero Gallery Grid (Up to 5 photo preview) */}
-      <div className="relative rounded-3xl overflow-hidden shadow-lg bg-slate-900 border border-slate-200">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 aspect-16/9 max-h-[500px] p-2 bg-slate-900">
+      <div className="relative rounded-3xl overflow-hidden shadow-lg bg-slate-900 border border-slate-200 dark:border-slate-800">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 aspect-[16/9] max-h-[500px] p-2 bg-slate-900">
           
           {/* Main Photo (Takes 2 cols) */}
           <div
@@ -198,15 +207,16 @@ export const PropertyDetailPage: React.FC = () => {
           <div className="hidden md:grid md:col-span-2 grid-cols-2 gap-2">
             {[1, 2, 3, 4].map((idx) => {
               const img = images[idx];
+              const imgSrc = img ? (typeof img === 'string' ? img : img.imageUrl) : null;
               return (
                 <div
                   key={idx}
                   onClick={() => { setGalleryIndex(idx < images.length ? idx : 0); setGalleryOpen(true); }}
                   className="relative rounded-2xl overflow-hidden bg-slate-800 cursor-pointer group"
                 >
-                  {img ? (
+                  {imgSrc ? (
                     <img
-                      src={img.imageUrl}
+                      src={imgSrc}
                       alt=""
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
@@ -262,10 +272,10 @@ export const PropertyDetailPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <p className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-mono text-emerald-600">
-                {formatCurrencyRD(property.price)}
+              <p className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight font-mono text-emerald-600 dark:text-emerald-400">
+                {formatPrice(property.price)}
               </p>
-              <div className="flex items-center gap-1.5 text-xs sm:text-sm text-slate-500 font-medium">
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
                 <MapPin className="w-4 h-4 text-brand-600 shrink-0" />
                 <span>
                   {property.provinceName ? `${property.provinceName}, ${property.municipalityName || ''} - ${property.sector || 'RD'}` : 'República Dominicana'}
@@ -274,43 +284,43 @@ export const PropertyDetailPage: React.FC = () => {
             </div>
 
             {/* Core Specs Bar */}
-            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100 text-center">
-              <div className="p-3 bg-slate-50 rounded-2xl">
+            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl">
                 <Bed className="w-5 h-5 text-brand-600 mx-auto mb-1" />
-                <span className="text-base font-extrabold text-slate-800">{property.bedrooms}</span>
-                <p className="text-[11px] text-slate-500 uppercase font-semibold">Habitaciones</p>
+                <span className="text-base font-extrabold text-slate-800 dark:text-slate-200">{property.bedrooms ?? property.rooms ?? 0}</span>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold">Habitaciones</p>
               </div>
-              <div className="p-3 bg-slate-50 rounded-2xl">
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl">
                 <Bath className="w-5 h-5 text-brand-600 mx-auto mb-1" />
-                <span className="text-base font-extrabold text-slate-800">{property.bathrooms}</span>
-                <p className="text-[11px] text-slate-500 uppercase font-semibold">Baños</p>
+                <span className="text-base font-extrabold text-slate-800 dark:text-slate-200">{property.bathrooms}</span>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold">Baños</p>
               </div>
-              <div className="p-3 bg-slate-50 rounded-2xl">
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl">
                 <Maximize2 className="w-5 h-5 text-brand-600 mx-auto mb-1" />
-                <span className="text-base font-extrabold text-slate-800">{property.landSizeMeters}</span>
-                <p className="text-[11px] text-slate-500 uppercase font-semibold">Metros² (m²)</p>
+                <span className="text-base font-extrabold text-slate-800 dark:text-slate-200">{property.landSizeMeters ?? property.sizeInMeters ?? 0}</span>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold">Metros² (m²)</p>
               </div>
             </div>
           </div>
 
           {/* Description */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 space-y-4 shadow-xs">
-            <h3 className="font-extrabold text-lg text-slate-900">Descripción del Inmueble</h3>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+            <h3 className="font-extrabold text-lg text-slate-900 dark:text-slate-100">Descripción del Inmueble</h3>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
               {property.description}
             </p>
           </div>
 
           {/* Amenities & Improvements */}
           {property.improvements && property.improvements.length > 0 && (
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 space-y-4 shadow-xs">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-brand-600" />
-                <h3 className="font-extrabold text-lg text-slate-900">Amenidades y Mejoras</h3>
+                <h3 className="font-extrabold text-lg text-slate-900 dark:text-slate-100">Amenidades y Mejoras</h3>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {property.improvements.map((imp) => (
-                  <div key={imp.id} className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs font-semibold text-slate-700">
+                  <div key={imp.id} className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 text-xs font-semibold text-slate-700 dark:text-slate-300">
                     <Check className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span className="truncate">{imp.name}</span>
                   </div>
@@ -320,13 +330,13 @@ export const PropertyDetailPage: React.FC = () => {
           )}
 
           {/* Virtual Tour 360° Embedded */}
-          {property.virtualTour360Url && (
-            <VirtualTourEmbed url={property.virtualTour360Url} />
+          {(property.virtualTour360Url || property.tour360Url) && (
+            <VirtualTourEmbed url={property.virtualTour360Url || property.tour360Url || ''} />
           )}
 
           {/* Video Tour Embedded */}
-          {property.videoTourUrl && (
-            <VideoPlayer url={property.videoTourUrl} />
+          {(property.videoTourUrl || property.videoUrl) && (
+            <VideoPlayer url={property.videoTourUrl || property.videoUrl || ''} />
           )}
 
           {/* Price History Timeline */}
@@ -342,14 +352,14 @@ export const PropertyDetailPage: React.FC = () => {
         <div className="space-y-6">
           
           {/* Action Card */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-6 sticky top-24">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 sticky top-24">
             
             <div className="space-y-1">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 Valor Transaccional
               </span>
-              <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono text-emerald-600">
-                {formatCurrencyRD(property.price)}
+              <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 font-mono text-emerald-600 dark:text-emerald-400">
+                {formatPrice(property.price)}
               </p>
             </div>
 

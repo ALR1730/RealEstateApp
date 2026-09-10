@@ -84,7 +84,7 @@ const DeveloperDashboard = lazy(() => import('./pages/developer/DeveloperDashboa
 // Public Layout
 const PublicLayout: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-slate-50 text-slate-900">
+    <div className="min-h-screen flex flex-col justify-between bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
       <Navbar />
       <main className="flex-1">
         <Outlet />
@@ -97,11 +97,11 @@ const PublicLayout: React.FC = () => {
 // Protected Dashboard Layout with Sidebar
 const DashboardLayout: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-slate-50 text-slate-900">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       <Navbar />
-      <div className="flex-1 flex max-w-7xl w-full mx-auto">
+      <div className="flex flex-col md:flex-row flex-1">
         <Sidebar />
-        <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
+        <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-7xl">
           <Outlet />
         </main>
       </div>

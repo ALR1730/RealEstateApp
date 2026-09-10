@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { propertiesService } from '../../api/services';
 import { Property } from '../../types';
-import { formatCurrencyRD } from '../../utils/formatters';
+import { useCurrency } from '../../context/CurrencyContext';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
 import { Home, PlusCircle, Edit3, Trash2, Eye, ExternalLink, Image as ImageIcon, FileText } from 'lucide-react';
 
 export const MyPropertiesPage: React.FC = () => {
+  const { formatPrice } = useCurrency();
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -97,7 +98,7 @@ export const MyPropertiesPage: React.FC = () => {
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
                           {prop.images && prop.images.length > 0 ? (
-                            <img src={prop.images[0].imageUrl} alt="" className="w-full h-full object-cover" />
+                            <img src={typeof prop.images[0] === 'string' ? prop.images[0] : prop.images[0].imageUrl} alt="" className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-slate-400">
                               <ImageIcon className="w-4 h-4" />
@@ -115,10 +116,10 @@ export const MyPropertiesPage: React.FC = () => {
                       <span className="text-[10px] text-slate-500 font-normal">{prop.saleTypeName || 'Venta'}</span>
                     </td>
                     <td className="py-3 px-4 font-mono font-bold text-emerald-600 text-sm">
-                      {formatCurrencyRD(prop.price)}
+                      {formatPrice(prop.price)}
                     </td>
                     <td className="py-3 px-4 text-slate-600">
-                      {prop.bedrooms} hab • {prop.bathrooms} bñ • {prop.landSizeMeters} m²
+                      {prop.bedrooms ?? prop.rooms ?? 0} hab • {prop.bathrooms} bñ • {prop.landSizeMeters ?? prop.sizeInMeters ?? 0} m²
                     </td>
                     <td className="py-3 px-4">
                       <Badge status={prop.status} />

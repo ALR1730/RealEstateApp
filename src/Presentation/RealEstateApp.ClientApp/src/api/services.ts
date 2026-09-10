@@ -101,26 +101,95 @@ export const authService = {
   }
 };
 
+// ==================== PROPERTY ADAPTER ====================
+export function adaptProperty(p: any): Property {
+  if (!p) return p;
+
+  let normalizedStatus = p.status || 'Available';
+  if (normalizedStatus === 'Disponible' || normalizedStatus === 'Available') {
+    normalizedStatus = 'Available';
+  } else if (normalizedStatus === 'Reservada' || normalizedStatus === 'Reserved') {
+    normalizedStatus = 'Reserved';
+  } else if (normalizedStatus === 'Vendida' || normalizedStatus === 'Sold') {
+    normalizedStatus = 'Sold';
+  }
+
+  const images = Array.isArray(p.images)
+    ? p.images.map((img: any, index: number) => {
+        if (typeof img === 'string') {
+          return { id: index + 1, propertyId: p.id, imageUrl: img, isMain: index === 0 };
+        }
+        if (img && typeof img === 'object') {
+          return {
+            id: img.id ?? index + 1,
+            propertyId: img.propertyId ?? p.id,
+            imageUrl: img.imageUrl || img.url || '',
+            isMain: img.isMain ?? index === 0,
+          };
+        }
+        return img;
+      })
+    : [];
+
+  const improvements = Array.isArray(p.improvements)
+    ? p.improvements.map((imp: any, index: number) => {
+        if (typeof imp === 'string') {
+          return { id: index + 1, name: imp };
+        }
+        return imp;
+      })
+    : [];
+
+  return {
+    ...p,
+    status: normalizedStatus,
+    bedrooms: p.bedrooms ?? p.rooms ?? 0,
+    rooms: p.rooms ?? p.bedrooms ?? 0,
+    landSizeMeters: p.landSizeMeters ?? p.sizeInMeters ?? 0,
+    sizeInMeters: p.sizeInMeters ?? p.landSizeMeters ?? 0,
+    videoTourUrl: p.videoTourUrl ?? p.videoUrl ?? '',
+    videoUrl: p.videoUrl ?? p.videoTourUrl ?? '',
+    virtualTour360Url: p.virtualTour360Url ?? p.tour360Url ?? '',
+    tour360Url: p.tour360Url ?? p.virtualTour360Url ?? '',
+    images,
+    improvements,
+  };
+}
+
+export function adaptProperties(props: any[]): Property[] {
+  if (!Array.isArray(props)) return [];
+  return props.map(adaptProperty);
+}
+
+export function adaptVerification(v: any): any {
+  if (!v) return v;
+  let status = v.status;
+  if (status === 'Pendiente' || status === 'Pending') status = 'Pending';
+  else if (status === 'Aprobado' || status === 'Approved') status = 'Approved';
+  else if (status === 'Rechazado' || status === 'Rejected') status = 'Rejected';
+  return { ...v, status };
+}
+
 // ==================== PROPERTIES SERVICE ====================
 export const propertiesService = {
   getAll: async (params?: any): Promise<Property[]> => {
-    const res = await apiClient.get<Property[]>('/properties', { params });
-    return res.data || [];
+    const res = await apiClient.get<any[]>('/properties', { params });
+    return adaptProperties(res.data || []);
   },
 
   getById: async (id: number): Promise<Property> => {
-    const res = await apiClient.get<Property>(`/properties/${id}`);
-    return res.data;
+    const res = await apiClient.get<any>(`/properties/${id}`);
+    return adaptProperty(res.data);
   },
 
   getByCode: async (code: string): Promise<Property> => {
-    const res = await apiClient.get<Property>(`/properties/code/${code}`);
-    return res.data;
+    const res = await apiClient.get<any>(`/properties/code/${code}`);
+    return adaptProperty(res.data);
   },
 
   getMyProperties: async (): Promise<Property[]> => {
-    const res = await apiClient.get<Property[]>('/properties/my-properties');
-    return res.data || [];
+    const res = await apiClient.get<any[]>('/properties/my-properties');
+    return adaptProperties(res.data || []);
   },
 
   create: async (formData: FormData): Promise<any> => {
@@ -310,12 +379,12 @@ export const chatsService = {
 export const verificationsService = {
   getAll: async (): Promise<any[]> => {
     const res = await apiClient.get<any[]>('/verifications');
-    return res.data || [];
+    return (res.data || []).map(adaptVerification);
   },
 
   getMyStatus: async (): Promise<any> => {
     const res = await apiClient.get<any>('/verifications/my-status');
-    return res.data;
+    return adaptVerification(res.data);
   },
 
   submit: async (formData: FormData): Promise<any> => {
@@ -394,6 +463,12 @@ export const subscriptionsService = {
 export const ownersService = {
   getMyProperties: async (): Promise<any> => {
     const res = await apiClient.get('/owners/my-properties');
+    if (res.data && Array.isArray(res.data.properties)) {
+      return {
+        ...res.data,
+        properties: adaptProperties(res.data.properties),
+      };
+    }
     return res.data;
   },
 
@@ -406,7 +481,7 @@ export const ownersService = {
 
   getProperty: async (id: number): Promise<any> => {
     const res = await apiClient.get(`/owners/properties/${id}`);
-    return res.data;
+    return adaptProperty(res.data);
   },
 
   updateProperty: async (id: number, formData: FormData): Promise<any> => {

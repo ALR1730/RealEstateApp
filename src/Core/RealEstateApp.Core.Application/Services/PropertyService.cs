@@ -520,7 +520,16 @@ namespace RealEstateApp.Core.Application.Services
             }
             else
             {
-                // Activar destacado
+                // Activar destacado - validar cuota de suscripción del agente
+                if (!string.IsNullOrEmpty(property.AgentId))
+                {
+                    var (allowed, message) = await _subscriptionService.CanAgentFeaturePropertyAsync(property.AgentId, property.Id);
+                    if (!allowed)
+                    {
+                        throw new ValidationException(message);
+                    }
+                }
+
                 property.IsFeatured = true;
                 property.FeaturedUntil = DateTime.UtcNow.AddDays(durationDays);
             }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ownersService } from '../../api/services';
 import { Property } from '../../types';
-import { formatCurrencyRD } from '../../utils/formatters';
+import { useCurrency } from '../../context/CurrencyContext';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
 import { Home, PlusCircle, Trash2, ExternalLink, AlertCircle, Pencil, BedDouble, Bath, Ruler, MapPin } from 'lucide-react';
@@ -10,6 +10,7 @@ import { Home, PlusCircle, Trash2, ExternalLink, AlertCircle, Pencil, BedDouble,
 type StatusFilter = 'All' | 'Available' | 'Reserved' | 'Sold';
 
 export const OwnerDashboard: React.FC = () => {
+  const { formatPrice } = useCurrency();
   const [properties, setProperties] = useState<Property[]>([]);
   const [canCreate, setCanCreate] = useState(true);
   const [maxAllowed, setMaxAllowed] = useState(2);
@@ -45,7 +46,12 @@ export const OwnerDashboard: React.FC = () => {
 
   const filteredProperties = filter === 'All'
     ? properties
-    : properties.filter((p) => p.status === filter);
+    : properties.filter((p) => {
+        if (filter === 'Available') return p.status === 'Available' || p.status === 'Disponible';
+        if (filter === 'Reserved') return p.status === 'Reserved' || p.status === 'Reservada';
+        if (filter === 'Sold') return p.status === 'Sold' || p.status === 'Vendida';
+        return p.status === filter;
+      });
 
   const filters: { value: StatusFilter; label: string }[] = [
     { value: 'All', label: 'Todas' },
@@ -134,7 +140,11 @@ export const OwnerDashboard: React.FC = () => {
               {/* Image thumbnail */}
               <div className="h-44 bg-slate-100 relative">
                 {prop.images && prop.images.length > 0 ? (
-                  <img src={prop.images[0].imageUrl} alt={prop.name || prop.code} className="w-full h-full object-cover" />
+                  <img
+                    src={typeof prop.images[0] === 'string' ? prop.images[0] : prop.images[0].imageUrl}
+                    alt={prop.name || prop.code}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-slate-300">
                     <Home className="w-10 h-10" />
@@ -150,7 +160,7 @@ export const OwnerDashboard: React.FC = () => {
                   <div>
                     <span className="font-mono text-xs font-bold text-slate-500">#{prop.code}</span>
                     <h3 className="font-bold text-base text-slate-900">{prop.name || `${prop.propertyTypeName} en ${prop.saleTypeName}`}</h3>
-                    <p className="text-sm font-extrabold font-mono text-emerald-600">{formatCurrencyRD(prop.price)}</p>
+                    <p className="text-sm font-extrabold font-mono text-emerald-600">{formatPrice(prop.price)}</p>
                   </div>
                 </div>
 
@@ -163,13 +173,13 @@ export const OwnerDashboard: React.FC = () => {
 
                 <div className="flex items-center gap-4 text-[11px] font-semibold text-slate-600">
                   <span className="flex items-center gap-1">
-                    <BedDouble className="w-4 h-4 text-slate-400" /> {prop.bedrooms} Hab.
+                    <BedDouble className="w-4 h-4 text-slate-400" /> {prop.bedrooms ?? prop.rooms ?? 0} Hab.
                   </span>
                   <span className="flex items-center gap-1">
                     <Bath className="w-4 h-4 text-slate-400" /> {prop.bathrooms} Baños
                   </span>
                   <span className="flex items-center gap-1">
-                    <Ruler className="w-4 h-4 text-slate-400" /> {prop.landSizeMeters} m²
+                    <Ruler className="w-4 h-4 text-slate-400" /> {prop.landSizeMeters ?? prop.sizeInMeters ?? 0} m²
                   </span>
                 </div>
 

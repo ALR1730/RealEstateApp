@@ -513,8 +513,9 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var resetPath = origin?.Contains("5080") == true ? "/Account/ResetPassword" : "/reset-password";
             var resetUrl = !string.IsNullOrWhiteSpace(origin)
-                ? $"{origin}/Account/ResetPassword?email={Uri.EscapeDataString(user.Email ?? string.Empty)}&token={encodedToken}"
+                ? $"{origin}{resetPath}?email={Uri.EscapeDataString(user.Email ?? string.Empty)}&token={encodedToken}"
                 : $"token={encodedToken}";
 
             await _emailService.SendAsync(

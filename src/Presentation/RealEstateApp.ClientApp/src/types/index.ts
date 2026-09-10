@@ -88,7 +88,9 @@ export interface Property {
   saleTypeName?: string;
   price: number;
   landSizeMeters: number;
+  sizeInMeters?: number;
   bedrooms: number;
+  rooms?: number;
   bathrooms: number;
   description: string;
   agentId: string;
@@ -96,7 +98,7 @@ export interface Property {
   agentPhone?: string;
   agentEmail?: string;
   agentPhotoUrl?: string;
-  status: string; // 'Available' | 'Reserved' | 'Sold'
+  status: string; // 'Available' | 'Reserved' | 'Sold' | 'Disponible' | 'Reservada' | 'Vendida'
   isFeatured?: boolean;
   featuredUntil?: string;
   provinceName?: string;
@@ -105,7 +107,9 @@ export interface Property {
   latitude?: number;
   longitude?: number;
   videoTourUrl?: string;
+  videoUrl?: string;
   virtualTour360Url?: string;
+  tour360Url?: string;
   images: PropertyImage[];
   improvements: Improvement[];
   created?: string;
@@ -124,7 +128,7 @@ export interface Offer {
   clientPhone?: string;
   agentId?: string;
   amount: number;
-  status: 'Pending' | 'Accepted' | 'Rejected' | 'CounterOffered';
+  status: 'Pending' | 'Accepted' | 'Rejected' | 'CounterOffered' | 'Aceptada' | 'Pendiente' | 'Rechazada' | 'Contraofertada';
   created?: string;
   notes?: string;
   counterOfferAmount?: number;
@@ -242,7 +246,7 @@ export interface AgentVerification {
   cedula: string;
   cedulaFrontImageUrl?: string;
   cedulaBackImageUrl?: string;
-  status: 'Pending' | 'Approved' | 'Rejected';
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Pendiente' | 'Aprobado' | 'Rechazado';
   rejectionReason?: string;
   reviewedByAdminId?: string;
   reviewedAt?: string;

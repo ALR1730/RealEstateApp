@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCompare } from '../../context/CompareContext';
-import { formatCurrencyRD } from '../../utils/formatters';
+import { useCurrency } from '../../context/CurrencyContext';
 import { Loader } from '../../components/common/Loader';
 import {
   BarChart3,
@@ -16,6 +16,7 @@ import {
 
 export const ComparePage: React.FC = () => {
   const { compareProperties, removeFromCompare, clearCompare } = useCompare();
+  const { formatPrice } = useCurrency();
 
   if (compareProperties.length === 0) {
     return (
@@ -41,10 +42,10 @@ export const ComparePage: React.FC = () => {
     {
       label: 'Imagen',
       render: (p) => {
-        const img =
-          p.images && p.images.length > 0
-            ? p.images[0].imageUrl
-            : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80';
+        const firstImg = p.images && p.images.length > 0 ? p.images[0] : null;
+        const img = firstImg
+          ? (typeof firstImg === 'string' ? firstImg : firstImg.imageUrl || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80')
+          : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80';
         return (
           <img
             src={img}
@@ -58,7 +59,7 @@ export const ComparePage: React.FC = () => {
       label: 'Precio',
       render: (p) => (
         <span className="text-sm font-extrabold text-slate-900">
-          {formatCurrencyRD(p.price)}
+          {formatPrice(p.price)}
         </span>
       ),
     },
@@ -75,7 +76,7 @@ export const ComparePage: React.FC = () => {
       render: (p) => (
         <div className="flex items-center justify-center gap-1">
           <Bed className="w-4 h-4 text-slate-400" />
-          <span className="text-xs font-bold text-slate-700">{p.bedrooms}</span>
+          <span className="text-xs font-bold text-slate-700">{p.bedrooms ?? p.rooms ?? 0}</span>
         </div>
       ),
     },
@@ -93,7 +94,7 @@ export const ComparePage: React.FC = () => {
       render: (p) => (
         <div className="flex items-center justify-center gap-1">
           <Maximize2 className="w-4 h-4 text-slate-400" />
-          <span className="text-xs font-bold text-slate-700">{p.landSizeMeters} m²</span>
+          <span className="text-xs font-bold text-slate-700">{p.landSizeMeters ?? p.sizeInMeters ?? 0} m²</span>
         </div>
       ),
     },
@@ -122,18 +123,22 @@ export const ComparePage: React.FC = () => {
     },
     {
       label: 'Estado',
-      render: (p) => (
-        <span className={`inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border ${
-          p.status === 'Available'
-            ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
-            : p.status === 'Reserved'
-            ? 'bg-amber-50 text-amber-700 border-amber-200/60'
-            : 'bg-rose-50 text-rose-700 border-rose-200/60'
-        }`}>
-          <span className="w-1.5 h-1.5 rounded-full bg-current opacity-75" />
-          {p.status === 'Available' ? 'Disponible' : p.status === 'Reserved' ? 'Reservada' : 'Vendida'}
-        </span>
-      ),
+      render: (p) => {
+        const isAvail = p.status === 'Available' || p.status === 'Disponible';
+        const isRes = p.status === 'Reserved' || p.status === 'Reservada';
+        return (
+          <span className={`inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border ${
+            isAvail
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
+              : isRes
+              ? 'bg-amber-50 text-amber-700 border-amber-200/60'
+              : 'bg-rose-50 text-rose-700 border-rose-200/60'
+          }`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-75" />
+            {isAvail ? 'Disponible' : isRes ? 'Reservada' : 'Vendida'}
+          </span>
+        );
+      },
     },
   ];
 

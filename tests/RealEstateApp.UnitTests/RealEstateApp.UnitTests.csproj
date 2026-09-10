@@ -22,7 +22,6 @@
     <ProjectReference Include="..\..\src\Core\RealEstateApp.Core.Domain\RealEstateApp.Core.Domain.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure\RealEstateApp.Infrastructure.Persistence\RealEstateApp.Infrastructure.Persistence.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure\RealEstateApp.Infrastructure.Shared\RealEstateApp.Infrastructure.Shared.csproj" />
-    <ProjectReference Include="..\..\src\Presentation\RealEstateApp.Presentation.WebApp\RealEstateApp.Presentation.WebApp.csproj" />
     <ProjectReference Include="..\..\src\Presentation\RealEstateApp.Presentation.WebApi\RealEstateApp.Presentation.WebApi.csproj" />
   </ItemGroup>
 

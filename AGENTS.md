@@ -2,11 +2,10 @@
 
 ## Architecture
 
-Onion architecture with two independent presentation layers:
+Clean Onion architecture:
 
-- **`src/Presentation/RealEstateApp.ClientApp`** — React 18 SPA (Vite + TypeScript + Tailwind). This is the active frontend.
-- **`src/Presentation/RealEstateApp.Presentation.WebApi`** — .NET 10 ASP.NET Core REST API. The backend the SPA talks to.
-- **`src/Presentation/RealEstateApp.Presentation.WebApp`** — Legacy ASP.NET MVC Razor app. Reference only, do not modify.
+- **`src/Presentation/RealEstateApp.ClientApp`** — React 18 SPA (Vite + TypeScript + Tailwind). Active frontend.
+- **`src/Presentation/RealEstateApp.Presentation.WebApi`** — .NET 10 ASP.NET Core REST API. Backend with JWT Bearer & SignalR.
 - **`src/Core/RealEstateApp.Core.Application`** — Business logic, DTOs, services.
 - **`src/Core/RealEstateApp.Core.Domain`** — Domain entities.
 - **`src/Infrastructure/RealEstateApp.Infrastructure.Persistence`** — EF Core + SQL Server.
@@ -53,7 +52,6 @@ dotnet test RealEstateApp.slnx
 ### Backend
 
 - User Secrets for connection strings and Google OAuth (see `.csproj` `UserSecretsId` fields)
-- WebApp runs on HTTP :5080 / HTTPS :7103
 - WebApi runs on port 5196 (configured in `launchSettings.json`)
 
 ## Frontend Conventions

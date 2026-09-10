@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Property } from '../../types';
-import { formatCurrencyRD } from '../../utils/formatters';
+import { useCurrency } from '../../context/CurrencyContext';
 import { Badge } from '../common/Badge';
 import { useAuth } from '../../context/AuthContext';
 import { CompareCheckbox } from './CompareCheckbox';
@@ -29,11 +29,13 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   isFavoriteInitial = false,
 }) => {
   const { isAuthenticated, isClient } = useAuth();
+  const { formatPrice } = useCurrency();
   const [isFavorite, setIsFavorite] = useState(isFavoriteInitial);
   const [isTogglingFav, setIsTogglingFav] = useState(false);
 
-  const mainImage = property.images && property.images.length > 0
-    ? property.images[0].imageUrl
+  const firstImg = property.images && property.images.length > 0 ? property.images[0] : null;
+  const mainImage = firstImg
+    ? (typeof firstImg === 'string' ? firstImg : firstImg.imageUrl || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80')
     : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
@@ -63,13 +65,13 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     }
   };
 
-  const isSold = property.status === 'Sold';
+  const isSold = property.status === 'Sold' || property.status === 'Vendida';
 
   return (
-    <div className="group relative bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-xs hover:shadow-xl hover:border-slate-300 transition-all duration-300 flex flex-col">
+    <div className="group relative bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-300 flex flex-col">
       
       {/* Image & Badges Container */}
-      <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
+      <div className="relative aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-slate-800">
         <img
           src={mainImage}
           alt={property.description || `Propiedad ${property.code}`}
@@ -121,7 +123,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               {property.propertyTypeName || 'Inmueble'} • {property.saleTypeName || 'Venta'}
             </span>
             <p className="text-xl font-extrabold tracking-tight mt-1 text-white drop-shadow-sm">
-              {formatCurrencyRD(property.price)}
+              {formatPrice(property.price)}
             </p>
           </div>
 
@@ -140,28 +142,28 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         <div className="space-y-3">
           
           {/* Location & Code */}
-          <div className="flex items-center justify-between text-xs text-slate-500">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-1 truncate max-w-[70%]">
-              <MapPin className="w-3.5 h-3.5 text-brand-600 shrink-0" />
+              <MapPin className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400 shrink-0" />
               <span className="truncate font-medium">
                 {property.provinceName ? `${property.provinceName}, ${property.sector || 'RD'}` : 'República Dominicana'}
               </span>
             </div>
-            <span className="font-mono text-[11px] bg-slate-100 font-bold px-2 py-0.5 rounded text-slate-600">
+            <span className="font-mono text-[11px] bg-slate-100 dark:bg-slate-800 font-bold px-2 py-0.5 rounded text-slate-600 dark:text-slate-300">
               #{property.code}
             </span>
           </div>
 
           {/* Description */}
-          <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+          <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
             {property.description || 'Excelente oportunidad inmobiliaria con amenidades completas y ubicación estratégica.'}
           </p>
 
           {/* Specs: Bedrooms, Bathrooms, Size */}
-          <div className="grid grid-cols-3 gap-2 py-2 border-y border-slate-100 text-slate-700 text-xs font-semibold">
+          <div className="grid grid-cols-3 gap-2 py-2 border-y border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold">
             <div className="flex items-center gap-1.5">
               <Bed className="w-4 h-4 text-slate-400" />
-              <span>{property.bedrooms} hab</span>
+              <span>{property.bedrooms ?? property.rooms ?? 0} hab</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Bath className="w-4 h-4 text-slate-400" />
@@ -169,7 +171,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             </div>
             <div className="flex items-center gap-1.5">
               <Maximize2 className="w-4 h-4 text-slate-400" />
-              <span>{property.landSizeMeters} m²</span>
+              <span>{property.landSizeMeters ?? property.sizeInMeters ?? 0} m²</span>
             </div>
           </div>
         </div>
@@ -178,20 +180,20 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         <div className="pt-4 mt-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             {property.agentPhotoUrl ? (
-              <img src={property.agentPhotoUrl} alt="Agente" className="w-7 h-7 rounded-full object-cover border border-slate-200" />
+              <img src={property.agentPhotoUrl} alt="Agente" className="w-7 h-7 rounded-full object-cover border border-slate-200 dark:border-slate-700" />
             ) : (
-              <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-[10px]">
+              <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-[10px]">
                 {property.agentName ? property.agentName[0] : 'A'}
               </div>
             )}
-            <span className="text-xs font-medium text-slate-600 truncate max-w-[110px]">
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400 truncate max-w-[110px]">
               {property.agentName || 'Agente'}
             </span>
           </div>
 
           <Link
             to={`/property/${property.id}`}
-            className="inline-flex items-center gap-1 text-xs font-bold text-brand-600 hover:text-brand-700 group/link"
+            className="inline-flex items-center gap-1 text-xs font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 group/link"
           >
             <span>Ver Detalle</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover/link:translate-x-1 transition-transform" />

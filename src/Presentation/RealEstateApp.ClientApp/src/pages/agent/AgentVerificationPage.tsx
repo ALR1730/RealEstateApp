@@ -62,9 +62,9 @@ export const AgentVerificationPage: React.FC = () => {
 
   if (isLoading) return <Loader text="Consultando estado de verificación KYC..." />;
 
-  const isApproved = verification?.status === 'Approved';
-  const isPending = verification?.status === 'Pending';
-  const isRejected = verification?.status === 'Rejected';
+  const isApproved = verification?.status === 'Approved' || verification?.status === 'Aprobado';
+  const isPending = verification?.status === 'Pending' || verification?.status === 'Pendiente';
+  const isRejected = verification?.status === 'Rejected' || verification?.status === 'Rechazado';
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 pb-16">
@@ -142,7 +142,7 @@ export const AgentVerificationPage: React.FC = () => {
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                 Foto Frontal de la Cédula *
               </label>
-              <div className="aspect-4/3 rounded-2xl border-2 border-dashed border-slate-300 hover:border-brand-500 bg-slate-50 flex flex-col items-center justify-center overflow-hidden relative cursor-pointer group">
+              <div className="aspect-[4/3] rounded-2xl border-2 border-dashed border-slate-300 hover:border-brand-500 bg-slate-50 flex flex-col items-center justify-center overflow-hidden relative cursor-pointer group">
                 {frontPreview ? (
                   <img src={frontPreview} alt="Cédula Frontal" className="w-full h-full object-cover" />
                 ) : (
@@ -171,7 +171,7 @@ export const AgentVerificationPage: React.FC = () => {
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                 Foto Posterior de la Cédula *
               </label>
-              <div className="aspect-4/3 rounded-2xl border-2 border-dashed border-slate-300 hover:border-brand-500 bg-slate-50 flex flex-col items-center justify-center overflow-hidden relative cursor-pointer group">
+              <div className="aspect-[4/3] rounded-2xl border-2 border-dashed border-slate-300 hover:border-brand-500 bg-slate-50 flex flex-col items-center justify-center overflow-hidden relative cursor-pointer group">
                 {backPreview ? (
                   <img src={backPreview} alt="Cédula Posterior" className="w-full h-full object-cover" />
                 ) : (

@@ -107,9 +107,9 @@ export const CreateEditPropertyPage: React.FC = () => {
               saleTypeId: String(prop.saleTypeId),
               name: prop.name || '',
               price: String(prop.price),
-              landSizeMeters: String(prop.landSizeMeters),
-              bedrooms: String(prop.bedrooms),
-              bathrooms: String(prop.bathrooms),
+              landSizeMeters: String(prop.landSizeMeters ?? prop.sizeInMeters ?? ''),
+              bedrooms: String(prop.bedrooms ?? prop.rooms ?? ''),
+              bathrooms: String(prop.bathrooms ?? ''),
               description: prop.description || '',
               provinceId,
               municipalityId: matchedMunicipality,
@@ -119,12 +119,12 @@ export const CreateEditPropertyPage: React.FC = () => {
               porcentajeInicialRequerido: prop.porcentajeInicialRequerido != null ? String(prop.porcentajeInicialRequerido) : '',
               latitude: prop.latitude != null ? String(prop.latitude) : '18.4861',
               longitude: prop.longitude != null ? String(prop.longitude) : '-69.9312',
-              videoTourUrl: prop.videoTourUrl || '',
-              virtualTour360Url: prop.virtualTour360Url || '',
+              videoTourUrl: prop.videoTourUrl || prop.videoUrl || '',
+              virtualTour360Url: prop.virtualTour360Url || prop.tour360Url || '',
             });
-            setSelectedImprovements(prop.improvements?.map((i) => i.id) || []);
+            setSelectedImprovements(prop.improvements?.map((i: any) => typeof i === 'number' ? i : i.id) || []);
             if (prop.images) {
-              setPreviews(prop.images.map((i) => i.imageUrl));
+              setPreviews(prop.images.map((i: any) => typeof i === 'string' ? i : i.imageUrl));
             }
           }
         }

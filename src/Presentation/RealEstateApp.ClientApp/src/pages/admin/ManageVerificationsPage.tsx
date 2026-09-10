@@ -59,9 +59,12 @@ export const ManageVerificationsPage: React.FC = () => {
 
   if (isLoading) return <Loader text="Cargando solicitudes de verificación KYC..." />;
 
-  const filtered = verifications.filter((v) =>
-    filterStatus === 'All' ? true : v.status === filterStatus
-  );
+  const filtered = verifications.filter((v) => {
+    if (filterStatus === 'All') return true;
+    if (filterStatus === 'Pending') return v.status === 'Pending' || v.status === 'Pendiente';
+    if (filterStatus === 'Approved') return v.status === 'Approved' || v.status === 'Aprobado';
+    return v.status === filterStatus;
+  });
 
   return (
     <div className="space-y-8 pb-16">
@@ -92,7 +95,7 @@ export const ManageVerificationsPage: React.FC = () => {
               filterStatus === 'Pending' ? 'bg-amber-500 text-navy-950' : 'bg-amber-50 text-amber-800'
             }`}
           >
-            Pendientes ({verifications.filter((v) => v.status === 'Pending').length})
+            Pendientes ({verifications.filter((v) => v.status === 'Pending' || v.status === 'Pendiente').length})
           </button>
           <button
             onClick={() => setFilterStatus('Approved')}
@@ -100,7 +103,7 @@ export const ManageVerificationsPage: React.FC = () => {
               filterStatus === 'Approved' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-800'
             }`}
           >
-            Aprobados ({verifications.filter((v) => v.status === 'Approved').length})
+            Aprobados ({verifications.filter((v) => v.status === 'Approved' || v.status === 'Aprobado').length})
           </button>
         </div>
       </div>
@@ -148,25 +151,25 @@ export const ManageVerificationsPage: React.FC = () => {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${
-                          item.status === 'Approved'
+                          (item.status === 'Approved' || item.status === 'Aprobado')
                             ? 'bg-emerald-50 text-emerald-700'
-                            : item.status === 'Pending'
+                            : (item.status === 'Pending' || item.status === 'Pendiente')
                             ? 'bg-amber-50 text-amber-700'
                             : 'bg-rose-50 text-rose-700'
                         }`}
                       >
-                        {item.status === 'Approved' && 'Aprobado'}
-                        {item.status === 'Pending' && 'Pendiente de Revisión'}
-                        {item.status === 'Rejected' && 'Rechazado'}
+                        {(item.status === 'Approved' || item.status === 'Aprobado') && 'Aprobado'}
+                        {(item.status === 'Pending' || item.status === 'Pendiente') && 'Pendiente de Revisión'}
+                        {(item.status === 'Rejected' || item.status === 'Rechazado') && 'Rechazado'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right space-x-2">
-                      {item.status === 'Pending' && (
+                      {(item.status === 'Pending' || item.status === 'Pendiente') && (
                         <>
                           <button
                             onClick={() => handleApprove(item.id)}
                             disabled={isProcessing}
-                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs"
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-sm"
                           >
                             Aprobar
                           </button>
@@ -176,7 +179,7 @@ export const ManageVerificationsPage: React.FC = () => {
                               setShowRejectModal(true);
                             }}
                             disabled={isProcessing}
-                            className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-xs"
+                            className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-sm"
                           >
                             Rechazar
                           </button>
@@ -205,7 +208,7 @@ export const ManageVerificationsPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <span className="text-xs font-bold text-slate-600 uppercase">Lado Frontal</span>
-                <div className="aspect-4/3 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100">
+                <div className="aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 bg-slate-100">
                   {selectedKyc.cedulaFrontImageUrl ? (
                     <img src={selectedKyc.cedulaFrontImageUrl} alt="Front" className="w-full h-full object-cover" />
                   ) : (
@@ -216,7 +219,7 @@ export const ManageVerificationsPage: React.FC = () => {
 
               <div className="space-y-1">
                 <span className="text-xs font-bold text-slate-600 uppercase">Lado Posterior</span>
-                <div className="aspect-4/3 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100">
+                <div className="aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 bg-slate-100">
                   {selectedKyc.cedulaBackImageUrl ? (
                     <img src={selectedKyc.cedulaBackImageUrl} alt="Back" className="w-full h-full object-cover" />
                   ) : (
