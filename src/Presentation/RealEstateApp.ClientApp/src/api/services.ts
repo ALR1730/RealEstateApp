@@ -61,6 +61,13 @@ export const authService = {
     return res.data;
   },
 
+  confirmEmail: async (userId: string, token: string): Promise<any> => {
+    const res = await apiClient.get('/account/confirm-email', {
+      params: { userId, token },
+    });
+    return res.data;
+  },
+
   getProfile: async (): Promise<any> => {
     const res = await apiClient.get('/account/profile');
     return res.data;
@@ -599,13 +606,13 @@ export const simulatorService = {
 // ==================== AVM SERVICE (Valuación Automatizada - F-01) ====================
 export const avmService = {
   calculate: async (propertyId: number, searchRadiusKm?: number): Promise<ValuationResult> => {
-    const res = await apiClient.get<ValuationResult>(`/properties/${propertyId}/valuation`, {
+    const res = await apiClient.get<ValuationResult>(`/valuation/properties/${propertyId}/valuation`, {
       params: { searchRadiusKm: searchRadiusKm ?? 5 },
     });
     return res.data;
   },
   getLast: async (propertyId: number): Promise<ValuationResult | null> => {
-    const res = await apiClient.get<ValuationResult>(`/properties/${propertyId}/valuation/last`);
+    const res = await apiClient.get<ValuationResult>(`/valuation/properties/${propertyId}/valuation/last`);
     return res.data || null;
   }
 };

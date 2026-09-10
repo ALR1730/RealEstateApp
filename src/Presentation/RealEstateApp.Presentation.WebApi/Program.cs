@@ -24,7 +24,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-});
+}).AddMvcOptions(o => o.Filters.Add<RealEstateApp.Presentation.WebApi.Filters.ApiGlobalExceptionFilter>());
 
 // Cultura invariante para un parsing numérico estable (decimales con punto, fechas ISO)
 var invariantCulture = CultureInfo.InvariantCulture;

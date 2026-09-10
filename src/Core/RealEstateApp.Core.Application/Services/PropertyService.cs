@@ -345,11 +345,16 @@ namespace RealEstateApp.Core.Application.Services
             if (property == null)
                 throw new NotFoundException($"No se encontró la propiedad con ID {id}");
 
-            // Eliminar archivos físicos de imágenes
-            var images = await _propertyImageRepository.GetByPropertyIdAsync(id);
+            // Eliminar archivos físicos de imágenes usando las imágenes ya cargadas con la propiedad.
+            // Evita una segunda consulta trackeada de PropertyImage, que al eliminar la propiedad
+            // provocaba un conflicto de tracking con las instancias AsNoTracking de GetByIdAsync.
+            var images = property.Images ?? new List<PropertyImage>();
             foreach (var img in images)
             {
-                await _fileStorageService.DeleteFileAsync(img.ImageUrl, "properties");
+                if (!string.IsNullOrEmpty(img?.ImageUrl))
+                {
+                    await _fileStorageService.DeleteFileAsync(img.ImageUrl, "properties");
+                }
             }
 
             await _propertyRepository.DeleteAsync(property);

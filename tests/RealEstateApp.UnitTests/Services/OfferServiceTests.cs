@@ -161,5 +161,63 @@ namespace RealEstateApp.UnitTests.Services
             offer.Status.Should().Be(OfferStatus.Rejected);
             _offerRepositoryMock.Verify(r => r.UpdateAsync(offer), Times.Once);
         }
+
+        [Fact]
+        public async Task AcceptCounterOffer_ShouldTransitionToPendingBeforeAtomicAccept()
+        {
+            // Arrange
+            int offerId = 15;
+            var offer = new Offer
+            {
+                Id = offerId,
+                ClienteId = "client-001",
+                Status = OfferStatus.CounterOffered,
+                CounterOfferAmount = 87000m
+            };
+
+            _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId))
+                .ReturnsAsync(offer);
+
+            // Act
+            await _sut.AcceptCounterOffer(offerId, "client-001");
+
+            // Assert: primero transita a Pending (requisito de la aceptación atómica) y luego ejecuta la transacción
+            offer.Status.Should().Be(OfferStatus.Pending);
+            _offerRepositoryMock.Verify(r => r.UpdateAsync(offer), Times.Once);
+            _offerRepositoryMock.Verify(r => r.AcceptOfferTransactionAsync(offerId), Times.Once);
+            _commissionServiceMock.Verify(c => c.CreateForAcceptedOfferAsync(offerId), Times.Once);
+            _userActivityServiceMock.Verify(u => u.LogActivityAsync(
+                "client-001",
+                "Contra-Oferta Aceptada",
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()
+            ), Times.Once);
+        }
+
+        [Fact]
+        public async Task AcceptCounterOffer_ShouldThrow_WhenClientIsNotOwner()
+        {
+            // Arrange
+            int offerId = 16;
+            var offer = new Offer
+            {
+                Id = offerId,
+                ClienteId = "client-001",
+                Status = OfferStatus.CounterOffered
+            };
+
+            _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId))
+                .ReturnsAsync(offer);
+
+            // Act
+            var act = async () => await _sut.AcceptCounterOffer(offerId, "client-002");
+
+            // Assert
+            await act.Should().ThrowAsync<ValidationException>()
+                .WithMessage("No tiene permisos para modificar esta oferta");
+            _offerRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<Offer>()), Times.Never);
+            _offerRepositoryMock.Verify(r => r.AcceptOfferTransactionAsync(It.IsAny<int>()), Times.Never);
+        }
     }
 }

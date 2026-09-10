@@ -367,6 +367,50 @@ namespace RealEstateApp.UnitTests.Services
             _propertyRepositoryMock.Verify(r => r.UpdateAsync(property), Times.Once);
         }
 
+        [Fact]
+        public async Task Delete_ShouldRemovePropertyAndCleanImageFiles_UsingLoadedImages()
+        {
+            // Arrange
+            int propertyId = 99;
+            var property = new Property
+            {
+                Id = propertyId,
+                Images = new List<PropertyImage>
+                {
+                    new PropertyImage { Id = 1, PropertyId = propertyId, ImageUrl = "img1.png" },
+                    new PropertyImage { Id = 2, PropertyId = propertyId, ImageUrl = "img2.png" }
+                }
+            };
+
+            _propertyRepositoryMock.Setup(r => r.GetByIdAsync(propertyId))
+                .ReturnsAsync(property);
+
+            // Act
+            await _sut.Delete(propertyId);
+
+            // Assert: los archivos se limpian desde las imágenes ya cargadas (sin re-consultar el repositorio de imágenes)
+            _fileStorageServiceMock.Verify(f => f.DeleteFileAsync("img1.png", "properties"), Times.Once);
+            _fileStorageServiceMock.Verify(f => f.DeleteFileAsync("img2.png", "properties"), Times.Once);
+            _propertyImageRepositoryMock.Verify(r => r.GetByPropertyIdAsync(It.IsAny<int>()), Times.Never);
+            _propertyRepositoryMock.Verify(r => r.DeleteAsync(property), Times.Once);
+        }
+
+        [Fact]
+        public async Task Delete_ShouldThrowNotFoundException_WhenPropertyDoesNotExist()
+        {
+            // Arrange
+            _propertyRepositoryMock.Setup(r => r.GetByIdAsync(1234))
+                .ReturnsAsync((Property?)null);
+
+            // Act
+            var act = async () => await _sut.Delete(1234);
+
+            // Assert
+            await act.Should().ThrowAsync<RealEstateApp.Core.Domain.Exceptions.NotFoundException>();
+            _propertyRepositoryMock.Verify(r => r.DeleteAsync(It.IsAny<Property>()), Times.Never);
+            _fileStorageServiceMock.Verify(f => f.DeleteFileAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
         #endregion
     }
 }

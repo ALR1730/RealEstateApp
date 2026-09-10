@@ -1,0 +1,53 @@
+{
+  "spaCalls": 119,
+  "apiEndpoints": 127,
+  "red": [],
+  "amber": [
+    {
+      "method": "POST",
+      "rel": "register-admin",
+      "controller": "Account"
+    },
+    {
+      "method": "POST",
+      "rel": "register-developer",
+      "controller": "Account"
+    },
+    {
+      "method": "GET",
+      "rel": "confirm-email",
+      "controller": "Account"
+    },
+    {
+      "method": "GET",
+      "rel": "{id}/properties",
+      "controller": "Agents"
+    },
+    {
+      "method": "PATCH",
+      "rel": "{id}/change-status",
+      "controller": "Agents"
+    },
+    {
+      "method": "GET",
+      "rel": "{id:int}",
+      "controller": "Improvements"
+    },
+    {
+      "method": "GET",
+      "rel": "{id:int}",
+      "controller": "Leads"
+    },
+    {
+      "method": "GET",
+      "rel": "{id:int}",
+      "controller": "PropertyTypes"
+    },
+    {
+      "method": "GET",
+      "rel": "{id:int}",
+      "controller": "SaleTypes"
+    }
+  ],
+  "samePathNoMethod": []
+}

@@ -168,7 +168,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
                     ? route
                     : (origin.Contains("api", StringComparison.OrdinalIgnoreCase)
                         ? "api/v1/account/confirm-email"
-                        : "Account/ConfirmEmail");
+                        : "confirm-email");
                 var verificationUri = $"{origin}/{targetRoute}?userId={user.Id}&token={encodedToken}";
 
                 await _emailService.SendAsync(
@@ -191,18 +191,19 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return "No existe ningún usuario registrado con este ID";
+                throw new NotFoundException("No existe ningún usuario registrado con este ID");
             }
 
             var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
             var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                return $"Cuenta confirmada exitosamente para {user.Email}. Ya puede iniciar sesión.";
+                var reason = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new ValidationException($"Error al confirmar la cuenta para {user.Email}: {reason}");
             }
 
-            return $"Error al confirmar la cuenta para {user.Email}";
+            return $"Cuenta confirmada exitosamente para {user.Email}. Ya puede iniciar sesión.";
         }
 
         public async Task ChangeUserStatusAsync(string userId, bool isActive)

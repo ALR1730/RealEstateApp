@@ -51,6 +51,22 @@ namespace RealEstateApp.Core.Application.Mappings
             // PropertyViewModel <-> PropertyDto (conversión entre DTO de API y ViewModel de servicio)
             CreateMap<PropertyViewModel, PropertyDto>().ReverseMap();
 
+            // Property → ComparablePropertyDto (comparable para tasación (AVM))
+            CreateMap<Property, RealEstateApp.Core.Application.ViewModels.Valuation.ComparablePropertyDto>()
+                .ForMember(dest => dest.PropertyId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.Code, opt => opt.MapFrom(src => src.Code))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
+                .ForMember(dest => dest.Currency, opt => opt.MapFrom(src => src.Currency))
+                .ForMember(dest => dest.SizeInMeters, opt => opt.MapFrom(src => src.SizeInMeters))
+                .ForMember(dest => dest.Sector, opt => opt.MapFrom(src => src.Sector))
+                .ForMember(dest => dest.Rooms, opt => opt.MapFrom(src => src.Rooms))
+                .ForMember(dest => dest.Bathrooms, opt => opt.MapFrom(src => src.Bathrooms))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.PricePerSqm, opt => opt.Ignore()) // Se resuelve en el servicio
+                .ForMember(dest => dest.MunicipalityName, opt => opt.Ignore()) // Se resuelve en el servicio
+                .ForMember(dest => dest.DistanceKm, opt => opt.Ignore()); // Se resuelve en el servicio
+
             // SavePropertyViewModel → Property (escritura desde formulario)
             CreateMap<SavePropertyViewModel, Property>()
                 .ForMember(dest => dest.Images, opt => opt.Ignore()) // Se maneja manualmente (IFormFile)

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
@@ -10,73 +10,76 @@ import { Footer } from './components/common/Footer';
 import { Sidebar } from './components/common/Sidebar';
 import { Loader } from './components/common/Loader';
 
-// Public Pages
-import { HomePage } from './pages/public/HomePage';
-import { PropertiesCatalogPage } from './pages/public/PropertiesCatalogPage';
-import { PropertyDetailPage } from './pages/public/PropertyDetailPage';
-import { AgentsPage } from './pages/public/AgentsPage';
-import { AgentDetailPage } from './pages/public/AgentDetailPage';
-import { MortgagePage } from './pages/public/MortgagePage';
-import { MapPage } from './pages/public/MapPage';
-import { NotFoundPage } from './pages/public/NotFoundPage';
-import { ComparePage } from './pages/public/ComparePage';
+// Public Pages (lazy)
+const HomePage = lazy(() => import('./pages/public/HomePage').then((m) => ({ default: m.HomePage })));
+const PropertiesCatalogPage = lazy(() => import('./pages/public/PropertiesCatalogPage').then((m) => ({ default: m.PropertiesCatalogPage })));
+const PropertyDetailPage = lazy(() => import('./pages/public/PropertyDetailPage').then((m) => ({ default: m.PropertyDetailPage })));
+const AgentsPage = lazy(() => import('./pages/public/AgentsPage').then((m) => ({ default: m.AgentsPage })));
+const AgentDetailPage = lazy(() => import('./pages/public/AgentDetailPage').then((m) => ({ default: m.AgentDetailPage })));
+const MortgagePage = lazy(() => import('./pages/public/MortgagePage').then((m) => ({ default: m.MortgagePage })));
+const MapPage = lazy(() => import('./pages/public/MapPage').then((m) => ({ default: m.MapPage })));
+const NotFoundPage = lazy(() => import('./pages/public/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
+const ComparePage = lazy(() => import('./pages/public/ComparePage').then((m) => ({ default: m.ComparePage })));
 
-// Auth Pages
-import { LoginPage } from './pages/auth/LoginPage';
-import { RegisterClientPage } from './pages/auth/RegisterClientPage';
-import { RegisterAgentPage } from './pages/auth/RegisterAgentPage';
-import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
-import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
-import { PendingActivationPage } from './pages/auth/PendingActivationPage';
-import { ConfirmEmailPage } from './pages/auth/ConfirmEmailPage';
+// Auth Pages (lazy)
+const LoginPage = lazy(() => import('./pages/auth/LoginPage').then((m) => ({ default: m.LoginPage })));
+const RegisterClientPage = lazy(() => import('./pages/auth/RegisterClientPage').then((m) => ({ default: m.RegisterClientPage })));
+const RegisterAgentPage = lazy(() => import('./pages/auth/RegisterAgentPage').then((m) => ({ default: m.RegisterAgentPage })));
+const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })));
+const PendingActivationPage = lazy(() => import('./pages/auth/PendingActivationPage').then((m) => ({ default: m.PendingActivationPage })));
+const ConfirmEmailPage = lazy(() => import('./pages/auth/ConfirmEmailPage').then((m) => ({ default: m.ConfirmEmailPage })));
 
-// Client Pages
-import { ClientDashboard } from './pages/client/ClientDashboard';
-import { MyFavoritesPage } from './pages/client/MyFavoritesPage';
-import { MyOffersPage } from './pages/client/MyOffersPage';
-import { MyAppointmentsPage } from './pages/client/MyAppointmentsPage';
-import { SavedSearchesPage } from './pages/client/SavedSearchesPage';
-import { ClientChatPage } from './pages/client/ClientChatPage';
-import { ClientProfilePage } from './pages/client/ClientProfilePage';
-import { ActivityPage } from './pages/client/ActivityPage';
-import { BuyAbilityPage } from './pages/client/BuyAbilityPage';
+// Client Pages (lazy)
+const ClientDashboard = lazy(() => import('./pages/client/ClientDashboard').then((m) => ({ default: m.ClientDashboard })));
+const MyFavoritesPage = lazy(() => import('./pages/client/MyFavoritesPage').then((m) => ({ default: m.MyFavoritesPage })));
+const MyOffersPage = lazy(() => import('./pages/client/MyOffersPage').then((m) => ({ default: m.MyOffersPage })));
+const MyAppointmentsPage = lazy(() => import('./pages/client/MyAppointmentsPage').then((m) => ({ default: m.MyAppointmentsPage })));
+const SavedSearchesPage = lazy(() => import('./pages/client/SavedSearchesPage').then((m) => ({ default: m.SavedSearchesPage })));
+const ClientChatPage = lazy(() => import('./pages/client/ClientChatPage').then((m) => ({ default: m.ClientChatPage })));
+const ClientProfilePage = lazy(() => import('./pages/client/ClientProfilePage').then((m) => ({ default: m.ClientProfilePage })));
+const ActivityPage = lazy(() => import('./pages/client/ActivityPage').then((m) => ({ default: m.ActivityPage })));
+const BuyAbilityPage = lazy(() => import('./pages/client/BuyAbilityPage').then((m) => ({ default: m.BuyAbilityPage })));
 
-// Agent Pages
-import { AgentDashboard } from './pages/agent/AgentDashboard';
-import { MyPropertiesPage } from './pages/agent/MyPropertiesPage';
-import { CreateEditPropertyPage } from './pages/agent/CreateEditPropertyPage';
-import { ReceivedOffersPage } from './pages/agent/ReceivedOffersPage';
-import { AgentAppointmentsPage } from './pages/agent/AgentAppointmentsPage';
-import { AgentChatPage } from './pages/agent/AgentChatPage';
-import { AgentProfilePage } from './pages/agent/AgentProfilePage';
-import { AgentVerificationPage } from './pages/agent/AgentVerificationPage';
-import { AgentSubscriptionPage } from './pages/agent/AgentSubscriptionPage';
-import { AvmValuationPage } from './pages/agent/AvmValuationPage';
-import { LeadPipelinePage } from './pages/agent/LeadPipelinePage';
-import { AgentCommissionsPage } from './pages/agent/AgentCommissionsPage';
-import { AgentDocumentsPage } from './pages/agent/AgentDocumentsPage';
+// Agent Pages (lazy)
+const AgentDashboard = lazy(() => import('./pages/agent/AgentDashboard').then((m) => ({ default: m.AgentDashboard })));
+const MyPropertiesPage = lazy(() => import('./pages/agent/MyPropertiesPage').then((m) => ({ default: m.MyPropertiesPage })));
+const CreateEditPropertyPage = lazy(() => import('./pages/agent/CreateEditPropertyPage').then((m) => ({ default: m.CreateEditPropertyPage })));
+const ReceivedOffersPage = lazy(() => import('./pages/agent/ReceivedOffersPage').then((m) => ({ default: m.ReceivedOffersPage })));
+const AgentAppointmentsPage = lazy(() => import('./pages/agent/AgentAppointmentsPage').then((m) => ({ default: m.AgentAppointmentsPage })));
+const AgentChatPage = lazy(() => import('./pages/agent/AgentChatPage').then((m) => ({ default: m.AgentChatPage })));
+const AgentProfilePage = lazy(() => import('./pages/agent/AgentProfilePage').then((m) => ({ default: m.AgentProfilePage })));
+const AgentVerificationPage = lazy(() => import('./pages/agent/AgentVerificationPage').then((m) => ({ default: m.AgentVerificationPage })));
+const AgentSubscriptionPage = lazy(() => import('./pages/agent/AgentSubscriptionPage').then((m) => ({ default: m.AgentSubscriptionPage })));
+const AvmValuationPage = lazy(() => import('./pages/agent/AvmValuationPage').then((m) => ({ default: m.AvmValuationPage })));
+const LeadPipelinePage = lazy(() => import('./pages/agent/LeadPipelinePage').then((m) => ({ default: m.LeadPipelinePage })));
+const AgentCommissionsPage = lazy(() => import('./pages/agent/AgentCommissionsPage').then((m) => ({ default: m.AgentCommissionsPage })));
+const AgentDocumentsPage = lazy(() => import('./pages/agent/AgentDocumentsPage').then((m) => ({ default: m.AgentDocumentsPage })));
 
-// Owner Pages
-import { OwnerDashboard } from './pages/owner/OwnerDashboard';
-import { CreateOwnerPropertyPage } from './pages/owner/CreateOwnerPropertyPage';
+// Owner Pages (lazy)
+const OwnerDashboard = lazy(() => import('./pages/owner/OwnerDashboard').then((m) => ({ default: m.OwnerDashboard })));
+const CreateOwnerPropertyPage = lazy(() => import('./pages/owner/CreateOwnerPropertyPage').then((m) => ({ default: m.CreateOwnerPropertyPage })));
 
-// Admin Pages
-import { AdminDashboard } from './pages/admin/AdminDashboard';
-import { ManageAgentsPage } from './pages/admin/ManageAgentsPage';
-import { ManageDevelopersPage } from './pages/admin/ManageDevelopersPage';
-import { CreateEditDeveloperPage } from './pages/admin/CreateEditDeveloperPage';
-import { ManageAdminsPage } from './pages/admin/ManageAdminsPage';
-import { CreateAdminPage } from './pages/admin/CreateAdminPage';
-import { ManageUsersPage } from './pages/admin/ManageUsersPage';
-import { ManagePropertyTypesPage } from './pages/admin/ManagePropertyTypesPage';
-import { ManageSaleTypesPage } from './pages/admin/ManageSaleTypesPage';
-import { ManageImprovementsPage } from './pages/admin/ManageImprovementsPage';
-import { ManageVerificationsPage } from './pages/admin/ManageVerificationsPage';
-import { ManageSubscriptionsPage } from './pages/admin/ManageSubscriptionsPage';
-import { ManageAllPropertiesPage } from './pages/admin/ManageAllPropertiesPage';
-import { AdminReviewsPage } from './pages/admin/AdminReviewsPage';
-import { AdminCommissionsPage } from './pages/admin/AdminCommissionsPage';
-import { AdminDocumentsPage } from './pages/admin/AdminDocumentsPage';
+// Admin Pages (lazy)
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
+const ManageAgentsPage = lazy(() => import('./pages/admin/ManageAgentsPage').then((m) => ({ default: m.ManageAgentsPage })));
+const ManageDevelopersPage = lazy(() => import('./pages/admin/ManageDevelopersPage').then((m) => ({ default: m.ManageDevelopersPage })));
+const CreateEditDeveloperPage = lazy(() => import('./pages/admin/CreateEditDeveloperPage').then((m) => ({ default: m.CreateEditDeveloperPage })));
+const ManageAdminsPage = lazy(() => import('./pages/admin/ManageAdminsPage').then((m) => ({ default: m.ManageAdminsPage })));
+const CreateAdminPage = lazy(() => import('./pages/admin/CreateAdminPage').then((m) => ({ default: m.CreateAdminPage })));
+const ManageUsersPage = lazy(() => import('./pages/admin/ManageUsersPage').then((m) => ({ default: m.ManageUsersPage })));
+const ManagePropertyTypesPage = lazy(() => import('./pages/admin/ManagePropertyTypesPage').then((m) => ({ default: m.ManagePropertyTypesPage })));
+const ManageSaleTypesPage = lazy(() => import('./pages/admin/ManageSaleTypesPage').then((m) => ({ default: m.ManageSaleTypesPage })));
+const ManageImprovementsPage = lazy(() => import('./pages/admin/ManageImprovementsPage').then((m) => ({ default: m.ManageImprovementsPage })));
+const ManageVerificationsPage = lazy(() => import('./pages/admin/ManageVerificationsPage').then((m) => ({ default: m.ManageVerificationsPage })));
+const ManageSubscriptionsPage = lazy(() => import('./pages/admin/ManageSubscriptionsPage').then((m) => ({ default: m.ManageSubscriptionsPage })));
+const ManageAllPropertiesPage = lazy(() => import('./pages/admin/ManageAllPropertiesPage').then((m) => ({ default: m.ManageAllPropertiesPage })));
+const AdminReviewsPage = lazy(() => import('./pages/admin/AdminReviewsPage').then((m) => ({ default: m.AdminReviewsPage })));
+const AdminCommissionsPage = lazy(() => import('./pages/admin/AdminCommissionsPage').then((m) => ({ default: m.AdminCommissionsPage })));
+const AdminDocumentsPage = lazy(() => import('./pages/admin/AdminDocumentsPage').then((m) => ({ default: m.AdminDocumentsPage })));
+
+// Developer Pages (lazy)
+const DeveloperDashboard = lazy(() => import('./pages/developer/DeveloperDashboard').then((m) => ({ default: m.DeveloperDashboard })));
 
 // Public Layout
 const PublicLayout: React.FC = () => {
@@ -110,9 +113,10 @@ const DashboardLayout: React.FC = () => {
 // Protected Route Guard
 interface ProtectedRouteProps {
   requiredRole?: 'Admin' | 'Agent' | 'Client' | 'Developer' | 'Owner';
+  allowedRoles?: Array<'Admin' | 'Agent' | 'Client' | 'Developer' | 'Owner'>;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole, allowedRoles }) => {
   const { isAuthenticated, isLoading, hasRole } = useAuth();
 
   if (isLoading) {
@@ -127,6 +131,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
     return <Navigate to="/" replace />;
   }
 
+  if (allowedRoles && !allowedRoles.some((r) => hasRole(r))) {
+    return <Navigate to="/" replace />;
+  }
+
   return <Outlet />;
 };
 
@@ -138,6 +146,7 @@ export const App: React.FC = () => {
           <NotificationProvider>
             <CompareProvider>
               <BrowserRouter>
+          <Suspense fallback={<Loader text="Cargando aplicación..." />}>
           <Routes>
             {/* Public Routes */}
             <Route element={<PublicLayout />}>
@@ -205,6 +214,17 @@ export const App: React.FC = () => {
               </Route>
             </Route>
 
+            {/* Developer Portal Routes */}
+            <Route element={<ProtectedRoute requiredRole="Developer" />}>
+              <Route element={<DashboardLayout />}>
+                <Route path="/developer" element={<DeveloperDashboard />} />
+                <Route path="/developer/property-types" element={<ManagePropertyTypesPage />} />
+                <Route path="/developer/sale-types" element={<ManageSaleTypesPage />} />
+                <Route path="/developer/improvements" element={<ManageImprovementsPage />} />
+                <Route path="/developer/profile" element={<ClientProfilePage />} />
+              </Route>
+            </Route>
+
             {/* Admin Portal Routes */}
             <Route element={<ProtectedRoute requiredRole="Admin" />}>
               <Route element={<DashboardLayout />}>
@@ -234,6 +254,7 @@ export const App: React.FC = () => {
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>
+          </Suspense>
         </BrowserRouter>
             </CompareProvider>
           </NotificationProvider>

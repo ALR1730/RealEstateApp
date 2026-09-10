@@ -12,6 +12,8 @@ export const CreateAdminPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
     userName: '',
     email: '',
     password: '',
@@ -37,9 +39,12 @@ export const CreateAdminPage: React.FC = () => {
       setIsSubmitting(true);
       setError(null);
       await adminService.createAdmin({
+        firstName: form.firstName,
+        lastName: form.lastName,
         userName: form.userName,
         email: form.email,
         password: form.password,
+        confirmPassword: form.confirmPassword,
       });
 
       setSuccess(true);
@@ -86,6 +91,33 @@ export const CreateAdminPage: React.FC = () => {
       ) : (
         <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4 max-w-lg">
           
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nombre *</label>
+              <input
+                type="text"
+                name="firstName"
+                required
+                placeholder="Juan"
+                value={form.firstName}
+                onChange={handleChange}
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Apellido *</label>
+              <input
+                type="text"
+                name="lastName"
+                required
+                placeholder="Pérez"
+                value={form.lastName}
+                onChange={handleChange}
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nombre de Usuario *</label>
             <input

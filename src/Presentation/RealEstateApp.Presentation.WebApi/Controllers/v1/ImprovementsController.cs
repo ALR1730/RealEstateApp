@@ -75,7 +75,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         /// </summary>
         [Authorize(Roles = "Admin,Developer")]
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ImprovementDto))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ImprovementDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -93,7 +93,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 Name = createdVm.Name,
                 Description = createdVm.Description
             };
-            return CreatedAtAction(nameof(GetByIdAsync), new { id = dto.Id }, dto);
+            return Ok(dto);
         }
 
         /// <summary>

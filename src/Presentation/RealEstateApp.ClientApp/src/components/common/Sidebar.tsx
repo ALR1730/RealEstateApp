@@ -24,12 +24,14 @@ import {
   Calculator,
   Wallet,
   Star,
-  FileText
+  FileText,
+  Terminal
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
   const { isAdmin, isAgent, isClient, hasRole, user } = useAuth();
   const isOwner = hasRole('Owner');
+  const isDeveloper = hasRole('Developer');
 
   const navClass = ({ isActive }: { isActive: boolean }) =>
     `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
@@ -50,7 +52,7 @@ export const Sidebar: React.FC = () => {
           <div className="overflow-hidden">
             <p className="text-xs font-bold text-slate-800 truncate">{user?.userName}</p>
             <span className="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-brand-100 text-brand-800 uppercase tracking-wider">
-              {isAdmin ? 'Administrador' : isAgent ? 'Agente' : isOwner ? 'Propietario' : 'Cliente'}
+              {isAdmin ? 'Administrador' : isAgent ? 'Agente' : isOwner ? 'Propietario' : isDeveloper ? 'Desarrollador' : 'Cliente'}
             </span>
           </div>
         </div>
@@ -177,6 +179,35 @@ export const Sidebar: React.FC = () => {
               <NavLink to="/agent/profile" className={navClass}>
                 <User className="w-4 h-4" />
                 Mi Perfil de Agente
+              </NavLink>
+            </>
+          )}
+
+          {/* DEVELOPER MENU */}
+          {isDeveloper && (
+            <>
+              <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-3 py-1">
+                Developer Portal
+              </div>
+              <NavLink to="/developer" end className={navClass}>
+                <Terminal className="w-4 h-4" />
+                Panel de Desarrollo
+              </NavLink>
+              <NavLink to="/developer/property-types" className={navClass}>
+                <Building className="w-4 h-4" />
+                Tipos de Propiedad
+              </NavLink>
+              <NavLink to="/developer/sale-types" className={navClass}>
+                <Layers className="w-4 h-4" />
+                Tipos de Venta
+              </NavLink>
+              <NavLink to="/developer/improvements" className={navClass}>
+                <Sparkles className="w-4 h-4" />
+                Amenidades / Mejoras
+              </NavLink>
+              <NavLink to="/developer/profile" className={navClass}>
+                <User className="w-4 h-4" />
+                Mi Perfil
               </NavLink>
             </>
           )}

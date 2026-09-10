@@ -15,9 +15,12 @@ export const CreateEditDeveloperPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
     userName: '',
     email: '',
     password: '',
+    confirmPassword: '',
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -34,9 +37,12 @@ export const CreateEditDeveloperPage: React.FC = () => {
           const dev = developers.find((d: any) => d.id === id);
           if (dev) {
             setForm({
+              firstName: '',
+              lastName: '',
               userName: dev.userName || '',
               email: dev.email || '',
               password: '',
+              confirmPassword: '',
             });
           }
         } catch (err) {
@@ -69,7 +75,14 @@ export const CreateEditDeveloperPage: React.FC = () => {
         }
         await adminService.updateDeveloper(id, payload);
       } else {
-        await adminService.createDeveloper(form);
+        await adminService.createDeveloper({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          userName: form.userName,
+          email: form.email,
+          password: form.password,
+          confirmPassword: form.confirmPassword,
+        });
       }
 
       setSuccess(true);
@@ -124,6 +137,33 @@ export const CreateEditDeveloperPage: React.FC = () => {
       ) : (
         <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4 max-w-lg">
           
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nombre *</label>
+              <input
+                type="text"
+                name="firstName"
+                required={!isEditing}
+                placeholder="José"
+                value={form.firstName}
+                onChange={handleChange}
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Apellido *</label>
+              <input
+                type="text"
+                name="lastName"
+                required={!isEditing}
+                placeholder="Pérez"
+                value={form.lastName}
+                onChange={handleChange}
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nombre de Usuario *</label>
             <input
@@ -150,19 +190,35 @@ export const CreateEditDeveloperPage: React.FC = () => {
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Contraseña {isEditing ? '(dejar vacío para no cambiar)' : '*'}
-            </label>
-            <input
-              type="password"
-              name="password"
-              required={!isEditing}
-              placeholder="••••••••"
-              value={form.password}
-              onChange={handleChange}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Contraseña {isEditing ? '(dejar vacío para no cambiar)' : '*'}
+              </label>
+              <input
+                type="password"
+                name="password"
+                required={!isEditing}
+                placeholder="••••••••"
+                value={form.password}
+                onChange={handleChange}
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Confirmar Contraseña {isEditing ? '(dejar vacío para no cambiar)' : '*'}
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                required={!isEditing}
+                placeholder="••••••••"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+              />
+            </div>
           </div>
 
           {error && (

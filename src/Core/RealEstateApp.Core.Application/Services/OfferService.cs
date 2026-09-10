@@ -143,6 +143,11 @@ namespace RealEstateApp.Core.Application.Services
             if (offer.Status != OfferStatus.CounterOffered)
                 throw new ValidationException("Esta oferta no tiene una contra-oferta pendiente de aceptación");
 
+            // La aceptación atómica sólo opera sobre ofertas Pending:
+            // al aceptar una contra-oferta el cliente la convierte en oferta firme antes de ejecutar la transacción.
+            offer.Status = OfferStatus.Pending;
+            await _offerRepository.UpdateAsync(offer);
+
             // Aceptar la propuesta ejecutando la transacción atómica
             await _offerRepository.AcceptOfferTransactionAsync(offerId);
 
