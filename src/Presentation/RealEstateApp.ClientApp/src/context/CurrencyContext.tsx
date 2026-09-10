@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { currencyService } from '../api/services';
 
 type Currency = 'DOP' | 'USD';
 
@@ -26,13 +27,9 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     const fetchRate = async () => {
       try {
-        const base = import.meta.env.VITE_API_URL || 'http://localhost:5196/api/v1';
-        const res = await fetch(`${base}/currency/rates`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.rate) {
-            setExchangeRate(data.rate);
-          }
+        const data = await currencyService.getRates();
+        if (data && data.rate) {
+          setExchangeRate(data.rate);
         }
       } catch {
         // keep default rate

@@ -29,7 +29,8 @@ export const LoginPage: React.FC = () => {
       const roles = res.roles || [];
       if (roles.includes('Admin')) navigate('/admin');
       else if (roles.includes('Agent')) navigate('/agent');
-      else if (roles.includes('Developer')) navigate('/admin');
+      else if (roles.includes('Developer')) navigate('/developer');
+      else if (roles.includes('Owner')) navigate('/owner');
       else navigate('/client');
     } catch (err: any) {
       console.error("Login error:", err);

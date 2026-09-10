@@ -159,6 +159,15 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
                 await _userManager.AddToRoleAsync(user, role);
             }
 
+            if (!string.IsNullOrWhiteSpace(request.FirstName))
+            {
+                await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim("FirstName", request.FirstName));
+            }
+            if (!string.IsNullOrWhiteSpace(request.LastName))
+            {
+                await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim("LastName", request.LastName));
+            }
+
             // Enviar correo de activación si corresponde
             if (role == Roles.Client.ToString() && !string.IsNullOrWhiteSpace(origin))
             {

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
 import { useAuth } from './AuthContext';
 
@@ -27,6 +27,34 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [notificationHubConnection, setNotificationHubConnection] = useState<signalR.HubConnection | null>(null);
   const [chatHubConnection, setChatHubConnection] = useState<signalR.HubConnection | null>(null);
 
+  const tokenRef = useRef(token);
+
+  useEffect(() => {
+    tokenRef.current = token;
+  }, [token]);
+
+  const handleReceiveNotification = useCallback((data: any) => {
+    const newItem: NotificationItem = {
+      id: Math.random().toString(),
+      title: data.title || 'Notificación',
+      message: data.message || '',
+      type: data.type || 'info',
+      timestamp: data.timestamp || new Date().toLocaleTimeString(),
+    };
+    setNotifications((prev) => [newItem, ...prev]);
+  }, []);
+
+  const handleNewChatMessage = useCallback((data: any) => {
+    const newItem: NotificationItem = {
+      id: Math.random().toString(),
+      title: 'Nuevo Mensaje en Chat',
+      message: data.messageContent || 'Has recibido un nuevo mensaje.',
+      type: 'info',
+      timestamp: data.sentAtFormatted || new Date().toLocaleTimeString(),
+    };
+    setNotifications((prev) => [newItem, ...prev]);
+  }, []);
+
   useEffect(() => {
     if (!isAuthenticated || !token) {
       const stopConnections = async () => {
@@ -49,39 +77,21 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     const notificationConn = new signalR.HubConnectionBuilder()
       .withUrl(`${baseUrl}/hubs/notifications`, {
-        accessTokenFactory: () => token,
+        accessTokenFactory: () => tokenRef.current ?? '',
       })
       .withAutomaticReconnect()
       .build();
 
-    notificationConn.on('ReceiveNotification', (data: any) => {
-      const newItem: NotificationItem = {
-        id: Math.random().toString(),
-        title: data.title || 'Notificación',
-        message: data.message || '',
-        type: data.type || 'info',
-        timestamp: data.timestamp || new Date().toLocaleTimeString(),
-      };
-      setNotifications((prev) => [newItem, ...prev]);
-    });
+    notificationConn.on('ReceiveNotification', handleReceiveNotification);
 
     const chatConn = new signalR.HubConnectionBuilder()
       .withUrl(`${baseUrl}/hubs/chat`, {
-        accessTokenFactory: () => token,
+        accessTokenFactory: () => tokenRef.current ?? '',
       })
       .withAutomaticReconnect()
       .build();
 
-    chatConn.on('NewChatMessageNotification', (data: any) => {
-      const newItem: NotificationItem = {
-        id: Math.random().toString(),
-        title: 'Nuevo Mensaje en Chat',
-        message: data.messageContent || 'Has recibido un nuevo mensaje.',
-        type: 'info',
-        timestamp: data.sentAtFormatted || new Date().toLocaleTimeString(),
-      };
-      setNotifications((prev) => [newItem, ...prev]);
-    });
+    chatConn.on('NewChatMessageNotification', handleNewChatMessage);
 
     Promise.all([
       notificationConn.start(),
@@ -97,7 +107,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       notificationConn.stop();
       chatConn.stop();
     };
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, token, handleReceiveNotification, handleNewChatMessage]);
 
   const clearNotifications = () => setNotifications([]);
   const removeNotification = (id: string) => {

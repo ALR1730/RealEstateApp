@@ -16,12 +16,14 @@ namespace RealEstateApp.UnitTests.Controllers
     public class AccountControllerTests
     {
         private readonly Mock<IAccountService> _accountServiceMock;
+        private readonly Mock<IUserActivityService> _userActivityServiceMock;
         private readonly AccountController _controller;
 
         public AccountControllerTests()
         {
             _accountServiceMock = new Mock<IAccountService>();
-            _controller = new AccountController(_accountServiceMock.Object);
+            _userActivityServiceMock = new Mock<IUserActivityService>();
+            _controller = new AccountController(_accountServiceMock.Object, _userActivityServiceMock.Object);
         }
 
         [Fact]

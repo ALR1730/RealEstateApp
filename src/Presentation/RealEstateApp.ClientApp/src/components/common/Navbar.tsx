@@ -23,7 +23,10 @@ import {
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { user, isAuthenticated, logout, isAdmin, isAgent, isClient } = useAuth();
+  const { user, isAuthenticated, logout, isAdmin, isAgent, isClient, isDeveloper, isOwner } = useAuth();
+
+  const panelUrl = isAdmin ? '/admin' : isAgent ? '/agent' : isDeveloper ? '/developer' : isOwner ? '/owner' : '/client';
+  const profileUrl = isAdmin ? '/admin/profile' : isAgent ? '/agent/profile' : '/client/profile';
   const { unreadCount, notifications } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
@@ -112,7 +115,7 @@ export const Navbar: React.FC = () => {
             {/* Quick Link to Portals */}
             {isAuthenticated && (
               <Link
-                to={isAdmin ? '/admin' : isAgent ? '/agent' : '/client'}
+                to={panelUrl}
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-royal-600 bg-indigo-50 hover:bg-indigo-100 transition-colors ml-2 font-semibold"
               >
                 <LayoutDashboard className="w-4 h-4" />
@@ -211,7 +214,7 @@ export const Navbar: React.FC = () => {
 
                       <div className="py-1">
                         <Link
-                          to={isAdmin ? '/admin' : isAgent ? '/agent' : '/client'}
+                          to={panelUrl}
                           onClick={() => setUserDropdownOpen(false)}
                           className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-600"
                         >
@@ -220,7 +223,7 @@ export const Navbar: React.FC = () => {
                         </Link>
 
                         <Link
-                          to={isAdmin ? '/admin/profile' : isAgent ? '/agent/profile' : '/client/profile'}
+                          to={profileUrl}
                           onClick={() => setUserDropdownOpen(false)}
                           className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-600"
                         >
@@ -300,7 +303,7 @@ export const Navbar: React.FC = () => {
 
           {isAuthenticated && (
             <Link
-              to={isAdmin ? '/admin' : isAgent ? '/agent' : '/client'}
+              to={panelUrl}
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-royal-600 bg-indigo-50 font-bold"
             >

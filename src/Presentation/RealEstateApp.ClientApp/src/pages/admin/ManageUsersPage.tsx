@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { adminService, authService } from '../../api/services';
+import { adminService } from '../../api/services';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
 import { Modal } from '../../components/common/Modal';
@@ -74,9 +74,9 @@ export const ManageUsersPage: React.FC = () => {
       setIsSubmitting(true);
       setError(null);
       if (createRole === 'Admin') {
-        await authService.registerClient({ ...form, role: 'Admin' }); // WebApi register-admin
+        await adminService.createAdmin(form);
       } else {
-        await authService.registerClient({ ...form, role: 'Developer' }); // WebApi register-developer
+        await adminService.createDeveloper(form);
       }
       setCreateModalOpen(false);
       setForm({ firstName: '', lastName: '', email: '', userName: '', password: '', confirmPassword: '', phone: '' });

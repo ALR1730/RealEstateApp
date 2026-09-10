@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -14,10 +15,12 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
     public class AccountController : BaseApiController
     {
         private readonly IAccountService _accountService;
+        private readonly IUserActivityService _userActivityService;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, IUserActivityService userActivityService)
         {
             _accountService = accountService;
+            _userActivityService = userActivityService;
         }
 
         /// <summary>
@@ -237,14 +240,16 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [Authorize]
         [HttpGet("activity")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult GetActivityAsync()
+        public async Task<IActionResult> GetActivityAsync()
         {
-            var activities = new object[]
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
             {
-                new { type = "info", message = "Sesión iniciada correctamente", timestamp = DateTime.UtcNow.AddMinutes(-5).ToString("o") },
-                new { type = "info", message = "Perfil actualizado", timestamp = DateTime.UtcNow.AddHours(-1).ToString("o") }
-            };
-            return Ok(activities);
+                return Unauthorized();
+            }
+
+            var activities = await _userActivityService.GetRecentActivitiesAsync(userId, 50);
+            return Ok(activities.Select(a => new { id = a.Id, description = a.Description, timestamp = a.CreatedAt.ToString("o"), type = a.Action }));
         }
     }
 }
