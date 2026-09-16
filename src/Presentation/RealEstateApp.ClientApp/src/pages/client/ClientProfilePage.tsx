@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../api/services';
 import { Loader } from '../../components/common/Loader';
-import { User, Mail, Phone, Camera, Save, CheckCircle, ShieldAlert, Lock, KeyRound } from 'lucide-react';
+import { User, Camera, Save, CheckCircle, ShieldAlert, Lock, KeyRound } from 'lucide-react';
 
 export const ClientProfilePage: React.FC = () => {
   const { user, refreshProfile } = useAuth();
@@ -74,9 +74,10 @@ export const ClientProfilePage: React.FC = () => {
       await refreshProfile();
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error updating profile:", err);
-      setError(err.response?.data?.error || "Error al actualizar perfil.");
+      const apiError = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setError(apiError || "Error al actualizar perfil.");
     } finally {
       setIsSaving(false);
     }
@@ -102,9 +103,10 @@ export const ClientProfilePage: React.FC = () => {
       setPasswordSuccess(true);
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
       setTimeout(() => setPasswordSuccess(false), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error changing password:", err);
-      setPasswordError(err.response?.data?.error || 'Error al cambiar la contraseña.');
+      const apiError = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setPasswordError(apiError || 'Error al cambiar la contraseña.');
     } finally {
       setIsChangingPassword(false);
     }

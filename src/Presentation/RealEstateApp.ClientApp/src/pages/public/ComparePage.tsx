@@ -2,15 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCompare } from '../../context/CompareContext';
 import { useCurrency } from '../../context/CurrencyContext';
-import { Loader } from '../../components/common/Loader';
 import {
   BarChart3,
   Bed,
   Bath,
   Maximize2,
-  MapPin,
   User,
-  Image as ImageIcon,
   ArrowLeft,
 } from 'lucide-react';
 

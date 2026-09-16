@@ -7,9 +7,19 @@ import { Loader } from '../../components/common/Loader';
 import { StarRating } from '../../components/common/StarRating';
 import { Phone, Mail, MessageSquare, ShieldCheck, ArrowLeft, Building2, Star, Quote } from 'lucide-react';
 
+interface AgentDetailData {
+  id: string;
+  fullName: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  phone: string;
+  photoUrl?: string;
+}
+
 export const AgentDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [agent, setAgent] = useState<any | null>(null);
+  const [agent, setAgent] = useState<AgentDetailData | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(null);

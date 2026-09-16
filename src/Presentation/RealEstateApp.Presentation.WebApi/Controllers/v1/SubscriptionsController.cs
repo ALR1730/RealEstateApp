@@ -66,13 +66,14 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return BadRequest(new { hasError = true, error = "Plan seleccionado inválido." });
             }
 
-            var sub = await _subscriptionService.SubscribeAgentAsync(userId, request.PlanId);
-            if (sub == null)
+            var success = await _subscriptionService.SubscribeAgentAsync(userId, request.PlanId);
+            if (!success)
             {
                 return BadRequest(new { hasError = true, error = "No se pudo procesar la suscripción al plan." });
             }
 
-            return Ok(new { success = true, subscription = sub, message = "¡Suscripción actualizada exitosamente!" });
+            var currentSub = await _subscriptionService.GetCurrentSubscriptionByAgentIdAsync(userId);
+            return Ok(new { success = true, subscription = currentSub, message = "¡Suscripción actualizada exitosamente!" });
         }
 
         public class UpgradeSubscriptionRequest

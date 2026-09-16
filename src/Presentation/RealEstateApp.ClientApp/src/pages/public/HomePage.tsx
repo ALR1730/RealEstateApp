@@ -1,23 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Property, PropertyType, SaleType } from '../../types';
+import { Property, PropertyType, SaleType, AiSearchInterpretation, User } from '../../types';
 import { propertiesService, catalogsService, agentsService } from '../../api/services';
 import { PropertyCard } from '../../components/properties/PropertyCard';
 import { MortgageCalculator } from '../../components/simulator/MortgageCalculator';
 import { Loader } from '../../components/common/Loader';
+import { AiSearchBar } from '../../components/properties/AiSearchBar';
 import { 
   Search, 
   Sparkles, 
-  Building2, 
   ShieldCheck, 
   Calculator, 
   TrendingUp, 
   ArrowRight, 
   Users, 
-  CheckCircle2, 
-  PhoneCall,
-  Flame,
-  Award
+  Flame
 } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -25,13 +22,38 @@ export const HomePage: React.FC = () => {
   const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
   const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([]);
   const [saleTypes, setSaleTypes] = useState<SaleType[]>([]);
-  const [agents, setAgents] = useState<any[]>([]);
+  const [agents, setAgents] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Search mode: 'ai' | 'standard'
+  const [searchMode, setSearchMode] = useState<'ai' | 'standard'>('ai');
 
   // Quick search state
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedSaleType, setSelectedSaleType] = useState<string>('');
   const [keyword, setKeyword] = useState<string>('');
+
+  const handleAiSearchComplete = (result: AiSearchInterpretation) => {
+    if (!result || !result.parsedFilter) return;
+    const params = new URLSearchParams();
+    const f = result.parsedFilter;
+    if (f.propertyTypeId) params.set('propertyTypeId', String(f.propertyTypeId));
+    if (f.saleTypeId) params.set('saleTypeId', String(f.saleTypeId));
+    if (f.provinceId) params.set('provinceId', String(f.provinceId));
+    if (f.municipalityId) params.set('municipalityId', String(f.municipalityId));
+    if (f.sector) params.set('sector', f.sector);
+    if (f.minRooms) params.set('minRooms', String(f.minRooms));
+    if (f.minBathrooms) params.set('minBathrooms', String(f.minBathrooms));
+    if (f.minPrice) params.set('minPrice', String(f.minPrice));
+    if (f.maxPrice) params.set('maxPrice', String(f.maxPrice));
+    if (f.onlyWithVirtualTour) params.set('onlyWithVirtualTour', 'true');
+    if (f.onlyFinanciable) params.set('onlyFinanciable', 'true');
+    if (f.onlyFeatured) params.set('onlyFeatured', 'true');
+    if (Array.isArray(f.improvementIds)) {
+      f.improvementIds.forEach((id: number) => params.append('improvementIds', String(id)));
+    }
+    navigate(`/catalog?${params.toString()}`);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -100,74 +122,110 @@ export const HomePage: React.FC = () => {
             </p>
           </div>
 
-          {/* Quick Search Floating Bar */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="glass-card-dark p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-2xl border border-white/15 max-w-4xl grid grid-cols-1 sm:grid-cols-4 gap-3 text-left"
-          >
-            {/* Field 1: Property Type */}
-            <div>
-              <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
-                Tipo de Propiedad
-              </label>
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 text-white rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-              >
-                <option value="">Todos los tipos</option>
-                {propertyTypes.map((pt) => (
-                  <option key={pt.id} value={pt.id}>
-                    {pt.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Mode Switcher */}
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+            <button
+              type="button"
+              onClick={() => setSearchMode('ai')}
+              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
+                searchMode === 'ai'
+                  ? 'bg-gradient-to-r from-brand-600 to-teal-500 text-white shadow-lg shadow-brand-500/25 border border-brand-400/40'
+                  : 'bg-slate-900/60 text-slate-300 hover:text-white border border-slate-700/60'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-teal-300 animate-spin-slow" />
+              <span>Búsqueda Inteligente con IA (NLP)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSearchMode('standard')}
+              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
+                searchMode === 'standard'
+                  ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/25 border border-brand-400/40'
+                  : 'bg-slate-900/60 text-slate-300 hover:text-white border border-slate-700/60'
+              }`}
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>Búsqueda Estándar</span>
+            </button>
+          </div>
 
-            {/* Field 2: Sale Type */}
-            <div>
-              <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
-                Modalidad
-              </label>
-              <select
-                value={selectedSaleType}
-                onChange={(e) => setSelectedSaleType(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 text-white rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-              >
-                <option value="">Cualquier modalidad</option>
-                {saleTypes.map((st) => (
-                  <option key={st.id} value={st.id}>
-                    {st.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {searchMode === 'ai' ? (
+            /* AI Natural Language Search Bar */
+            <AiSearchBar
+              variant="hero"
+              onSearchComplete={handleAiSearchComplete}
+            />
+          ) : (
+            /* Quick Search Floating Bar */
+            <form
+              onSubmit={handleSearchSubmit}
+              className="glass-card-dark p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-2xl border border-white/15 max-w-4xl grid grid-cols-1 sm:grid-cols-4 gap-3 text-left"
+            >
+              {/* Field 1: Property Type */}
+              <div>
+                <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
+                  Tipo de Propiedad
+                </label>
+                <select
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 text-white rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                >
+                  <option value="">Todos los tipos</option>
+                  {propertyTypes.map((pt) => (
+                    <option key={pt.id} value={pt.id}>
+                      {pt.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Field 3: Code / Keyword */}
-            <div>
-              <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
-                Código o Sector
-              </label>
-              <input
-                type="text"
-                placeholder="Ej: 104928, Piantini..."
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 text-white placeholder-slate-400 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-              />
-            </div>
+              {/* Field 2: Sale Type */}
+              <div>
+                <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
+                  Modalidad
+                </label>
+                <select
+                  value={selectedSaleType}
+                  onChange={(e) => setSelectedSaleType(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 text-white rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                >
+                  <option value="">Cualquier modalidad</option>
+                  {saleTypes.map((st) => (
+                    <option key={st.id} value={st.id}>
+                      {st.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Search Button */}
-            <div className="flex items-end">
-              <button
-                type="submit"
-                className="w-full h-[42px] bg-brand-600 hover:bg-brand-500 text-white font-extrabold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand-600/30 transition-all cursor-pointer"
-              >
-                <Search className="w-4 h-4" />
-                Buscar Inmuebles
-              </button>
-            </div>
-          </form>
+              {/* Field 3: Code / Keyword */}
+              <div>
+                <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
+                  Código o Sector
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej: 104928, Piantini..."
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 text-white placeholder-slate-400 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
+
+              {/* Search Button */}
+              <div className="flex items-end">
+                <button
+                  type="submit"
+                  className="w-full h-[42px] bg-brand-600 hover:bg-brand-500 text-white font-extrabold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand-600/30 transition-all cursor-pointer"
+                >
+                  <Search className="w-4 h-4" />
+                  Buscar Inmuebles
+                </button>
+              </div>
+            </form>
+          )}
 
           {/* Quick Metrics Chips */}
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 sm:gap-8 pt-2 text-white">

@@ -1,38 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { favoritesService, propertiesService } from '../../api/services';
-import { Property } from '../../types';
+import { Property, Favorite } from '../../types';
 import { PropertyCard } from '../../components/properties/PropertyCard';
 import { Loader } from '../../components/common/Loader';
-import { Heart, Sliders } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const MyFavoritesPage: React.FC = () => {
   const [favoriteProperties, setFavoriteProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadFavorites = async () => {
-    try {
-      const favList = await favoritesService.getAll();
-      
-      // Load detailed properties
-      if (favList.length > 0) {
-        const propPromises = favList.map((f: any) =>
-          propertiesService.getById(f.propertyId).catch(() => null)
-        );
-        const results = await Promise.all(propPromises);
-        setFavoriteProperties(results.filter((p): p is Property => p !== null));
-      } else {
-        setFavoriteProperties([]);
-      }
-    } catch (err) {
-      console.error("Error loading favorites:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    Promise.resolve().then(() => loadFavorites()).catch(console.error);
+    let isMounted = true;
+    const fetchFavorites = async () => {
+      try {
+        const favList: Favorite[] = await favoritesService.getAll();
+        
+        // Load detailed properties
+        if (favList.length > 0) {
+          const propPromises = favList.map((f: Favorite) =>
+            propertiesService.getById(f.propertyId).catch(() => null)
+          );
+          const results = await Promise.all(propPromises);
+          if (isMounted) {
+            setFavoriteProperties(results.filter((p): p is Property => p !== null));
+          }
+        } else if (isMounted) {
+          setFavoriteProperties([]);
+        }
+      } catch (err) {
+        console.error("Error loading favorites:", err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchFavorites();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleFavoriteToggle = (propId: number, isFav: boolean) => {

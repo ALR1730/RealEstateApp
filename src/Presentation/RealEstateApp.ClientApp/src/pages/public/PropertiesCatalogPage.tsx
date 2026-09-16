@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Property, PropertyType, SaleType, FilterState } from '../../types';
+import { Property, PropertyType, SaleType, FilterState, AiSearchInterpretation } from '../../types';
 import { propertiesService, catalogsService, favoritesService, savedSearchesService } from '../../api/services';
 import { PropertyCard } from '../../components/properties/PropertyCard';
 import { PropertyFilter } from '../../components/properties/PropertyFilter';
+import { AiSearchBar } from '../../components/properties/AiSearchBar';
 import { Loader } from '../../components/common/Loader';
 import { useAuth } from '../../context/AuthContext';
 import { LayoutGrid, List, SlidersHorizontal, ArrowUpDown, BookmarkPlus, X } from 'lucide-react';
@@ -108,45 +109,54 @@ export const PropertiesCatalogPage: React.FC = () => {
     setFilters(readFiltersFromURL(searchParams));
   }, [searchParams]);
 
-  const loadData = async () => {
-    try {
-      const cleanParams: Record<string, any> = {};
-      Object.entries(filters).forEach(([k, v]) => {
-        if (v === undefined || v === '' || v === null) return;
-        if (Array.isArray(v)) {
-          cleanParams.ImprovementIds = v.map(String);
-          return;
+  useEffect(() => {
+    let isMounted = true;
+    const fetchCatalogData = async () => {
+      try {
+        const cleanParams: Record<string, string | number | boolean | string[]> = {};
+        Object.entries(filters).forEach(([k, v]) => {
+          if (v === undefined || v === '' || v === null) return;
+          if (Array.isArray(v)) {
+            cleanParams.ImprovementIds = v.map(String);
+            return;
+          }
+          cleanParams[k] = v;
+        });
+        const [props, types, sales] = await Promise.all([
+          propertiesService.getAll(cleanParams),
+          catalogsService.getPropertyTypes(),
+          catalogsService.getSaleTypes(),
+        ]);
+
+        if (!isMounted) return;
+        setProperties(props);
+        setPropertyTypes(types);
+        setSaleTypes(sales);
+
+        if (isAuthenticated && isClient) {
+          try {
+            const favs = await favoritesService.getAll();
+            if (isMounted) {
+              setFavoriteIds(new Set(favs.map((f) => f.propertyId)));
+            }
+          } catch {
+            // ignore
+          }
         }
-        cleanParams[k] = v;
-      });
-      const [props, types, sales] = await Promise.all([
-        propertiesService.getAll(cleanParams),
-        catalogsService.getPropertyTypes(),
-        catalogsService.getSaleTypes(),
-      ]);
-
-      setProperties(props);
-      setPropertyTypes(types);
-      setSaleTypes(sales);
-
-      if (isAuthenticated && isClient) {
-        try {
-          const favs = await favoritesService.getAll();
-          setFavoriteIds(new Set(favs.map((f) => f.propertyId)));
-        } catch {
-          // ignore
+      } catch (err) {
+        console.error("Error loading catalog:", err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
         }
       }
-    } catch (err) {
-      console.error("Error loading catalog:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
-  useEffect(() => {
-    Promise.resolve().then(() => loadData()).catch(console.error);
-  }, [filters]);
+    fetchCatalogData();
+    return () => {
+      isMounted = false;
+    };
+  }, [filters, isAuthenticated, isClient]);
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
@@ -181,6 +191,28 @@ export const PropertiesCatalogPage: React.FC = () => {
     }
   };
 
+  const handleAiSearchComplete = (result: AiSearchInterpretation) => {
+    if (result && result.parsedFilter) {
+      const nextFilters: FilterState = {
+        ...filters,
+        ...(result.parsedFilter.propertyTypeId !== undefined && { propertyTypeId: result.parsedFilter.propertyTypeId }),
+        ...(result.parsedFilter.saleTypeId !== undefined && { saleTypeId: result.parsedFilter.saleTypeId }),
+        ...(result.parsedFilter.provinceId !== undefined && { provinceId: result.parsedFilter.provinceId }),
+        ...(result.parsedFilter.municipalityId !== undefined && { municipalityId: result.parsedFilter.municipalityId }),
+        ...(result.parsedFilter.sector && { sector: result.parsedFilter.sector }),
+        ...(result.parsedFilter.minRooms !== undefined && { minRooms: result.parsedFilter.minRooms }),
+        ...(result.parsedFilter.minBathrooms !== undefined && { minBathrooms: result.parsedFilter.minBathrooms }),
+        ...(result.parsedFilter.minPrice !== undefined && { minPrice: result.parsedFilter.minPrice }),
+        ...(result.parsedFilter.maxPrice !== undefined && { maxPrice: result.parsedFilter.maxPrice }),
+        ...(result.parsedFilter.onlyWithVirtualTour !== undefined && { onlyWithVirtualTour: result.parsedFilter.onlyWithVirtualTour }),
+        ...(result.parsedFilter.onlyFinanciable !== undefined && { onlyFinanciable: result.parsedFilter.onlyFinanciable }),
+        ...(result.parsedFilter.onlyFeatured !== undefined && { onlyFeatured: result.parsedFilter.onlyFeatured }),
+        ...(result.parsedFilter.improvementIds && result.parsedFilter.improvementIds.length > 0 && { improvementIds: result.parsedFilter.improvementIds }),
+      };
+      handleFilterChange(nextFilters);
+    }
+  };
+
   const sortedProperties = [...properties].sort((a, b) => {
     if (sortBy === 'price-asc') return a.price - b.price;
     if (sortBy === 'price-desc') return b.price - a.price;
@@ -196,7 +228,7 @@ export const PropertiesCatalogPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-      <div className="bg-navy-950 text-white rounded-3xl p-6 sm:p-10 relative overflow-hidden shadow-xl">
+      <div className="bg-navy-950 text-white rounded-3xl p-6 sm:p-10 relative overflow-hidden shadow-xl space-y-6">
         <div className="relative z-10 max-w-2xl space-y-2">
           <span className="text-brand-400 font-extrabold text-xs uppercase tracking-widest">
             Catálogo Oficial de Inmuebles
@@ -207,6 +239,15 @@ export const PropertiesCatalogPage: React.FC = () => {
           <p className="text-xs sm:text-sm text-slate-300">
             Filtra por tipo, ubicación, amenidades, habitaciones y rango de precios con cálculo hipotecario en tiempo real.
           </p>
+        </div>
+
+        {/* AI Conversational Search Bar */}
+        <div className="relative z-10 pt-2">
+          <AiSearchBar
+            variant="hero"
+            onSearchComplete={handleAiSearchComplete}
+            placeholder="Pregúntale a la IA: Ej. 'Apartamento de 3 habitaciones en Bella Vista con balcón por menos de 8M'..."
+          />
         </div>
       </div>
 

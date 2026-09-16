@@ -6,7 +6,7 @@ import { formatDate } from '../../utils/formatters';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
 import { StarRating } from '../../components/common/StarRating';
-import { Tag, ExternalLink, ShieldCheck, Clock, Check, X, Star } from 'lucide-react';
+import { Tag, ExternalLink, ShieldCheck, Check, X, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const MyOffersPage: React.FC = () => {
@@ -21,21 +21,26 @@ export const MyOffersPage: React.FC = () => {
   const [reviewComment, setReviewComment] = useState('');
   const [alreadyReviewed, setAlreadyReviewed] = useState(false);
   const [isReviewSubmitting, setIsReviewSubmitting] = useState(false);
-
-  const loadOffers = async () => {
-    try {
-      const data = await offersService.getMyOffers();
-      setOffers(data || []);
-    } catch (err) {
-      console.error("Error loading client offers:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    Promise.resolve().then(() => loadOffers()).catch(console.error);
-  }, []);
+    let isMounted = true;
+    const fetchOffers = async () => {
+      try {
+        const data = await offersService.getMyOffers();
+        if (isMounted) setOffers(data || []);
+      } catch (err) {
+        console.error("Error loading client offers:", err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    fetchOffers();
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshKey]);
 
   const openReview = async (offer: Offer) => {
     setReviewOffer(offer);
@@ -58,10 +63,11 @@ export const MyOffersPage: React.FC = () => {
     try {
       setIsProcessing(true);
       await offersService.acceptCounterOffer(offerId);
-      await loadOffers();
+      setRefreshKey((k) => k + 1);
       alert("¡Contraoferta aceptada exitosamente! Has cerrado la negociación.");
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Error al aceptar contraoferta.");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg || "Error al aceptar contraoferta.");
     } finally {
       setIsProcessing(false);
     }
@@ -72,9 +78,10 @@ export const MyOffersPage: React.FC = () => {
     try {
       setIsProcessing(true);
       await offersService.rejectCounterOffer(offerId);
-      await loadOffers();
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Error al rechazar contraoferta.");
+      setRefreshKey((k) => k + 1);
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg || "Error al rechazar contraoferta.");
     } finally {
       setIsProcessing(false);
     }
@@ -98,8 +105,9 @@ export const MyOffersPage: React.FC = () => {
       setAlreadyReviewed(true);
       alert("¡Gracias! Tu reseña ha sido registrada exitosamente.");
       setReviewOffer(null);
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Error al enviar la reseña.");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg || "Error al enviar la reseña.");
     } finally {
       setIsReviewSubmitting(false);
     }
@@ -167,7 +175,7 @@ export const MyOffersPage: React.FC = () => {
                       <Badge status={offer.status} />
                     </td>
                     <td className="py-3 px-4">
-                      {offer.status === 'CounterOffered' || (offer.status as any) === 'Contraofertada' ? (
+                      {offer.status === 'CounterOffered' || offer.status === 'Contraofertada' ? (
                         <div className="space-y-2">
                           <div className="p-2.5 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200/60 dark:border-amber-800/60 mb-2">
                             <p className="text-[10px] text-amber-600 dark:text-amber-400 uppercase font-bold mb-0.5">Contraoferta del Agente</p>
@@ -197,7 +205,7 @@ export const MyOffersPage: React.FC = () => {
                             </button>
                           </div>
                         </div>
-                      ) : offer.status === 'Accepted' || (offer.status as any) === 'Aceptada' ? (
+                      ) : offer.status === 'Accepted' || offer.status === 'Aceptada' ? (
                         <div className="space-y-2">
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold rounded-lg border border-emerald-200 dark:border-emerald-800/60">
                             <Check className="w-3 h-3" />

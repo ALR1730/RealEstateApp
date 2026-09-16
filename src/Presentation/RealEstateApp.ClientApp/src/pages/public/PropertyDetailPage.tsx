@@ -23,10 +23,8 @@ import {
   Tag, 
   Calendar, 
   MessageSquare, 
-  ShieldCheck, 
   Sparkles, 
   Phone, 
-  Mail, 
   Check, 
   Share2, 
   ArrowLeft,
@@ -36,13 +34,14 @@ import {
 export const PropertyDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated, isClient, user } = useAuth();
+  const { isAuthenticated, isClient } = useAuth();
   const { formatPrice } = useCurrency();
 
   const [property, setProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Modals state
   const [galleryOpen, setGalleryOpen] = useState<boolean>(false);
@@ -51,37 +50,42 @@ export const PropertyDetailPage: React.FC = () => {
   const [appointmentModalOpen, setAppointmentModalOpen] = useState<boolean>(false);
   const [chatOpen, setChatOpen] = useState<boolean>(false);
 
-  const loadProperty = async () => {
-    if (!id) return;
-    try {
-      const data = await propertiesService.getById(Number(id));
-      setProperty(data);
+  useEffect(() => {
+    let isMounted = true;
+    const fetchPropertyDetails = async () => {
+      if (!id) return;
+      try {
+        const data = await propertiesService.getById(Number(id));
+        if (!isMounted) return;
+        setProperty(data);
 
-      if (isAuthenticated && isClient) {
+        if (isAuthenticated && isClient) {
+          try {
+            const isFav = await favoritesService.checkIsFavorite(Number(id));
+            if (isMounted) setIsFavorite(isFav);
+          } catch {
+            // ignore
+          }
+        }
+
         try {
-          const isFav = await favoritesService.checkIsFavorite(Number(id));
-          setIsFavorite(isFav);
-        } catch (e) {
+          const history = await propertiesService.getPriceHistory(Number(id));
+          if (isMounted) setPriceHistory(history);
+        } catch {
           // ignore
         }
+      } catch (err) {
+        console.error("Error loading property:", err);
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
+    };
 
-      try {
-        const history = await propertiesService.getPriceHistory(Number(id));
-        setPriceHistory(history);
-      } catch (e) {
-        // ignore
-      }
-    } catch (err) {
-      console.error("Error loading property:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    Promise.resolve().then(() => loadProperty()).catch(console.error);
-  }, [id]);
+    fetchPropertyDetails();
+    return () => {
+      isMounted = false;
+    };
+  }, [id, isAuthenticated, isClient, refreshKey]);
 
   const handleToggleFavorite = async () => {
     if (!isAuthenticated || !isClient) {
@@ -166,6 +170,7 @@ export const PropertyDetailPage: React.FC = () => {
             className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold transition-colors flex items-center gap-1.5"
             title="Compartir enlace"
           >
+            <Share2 className="w-4 h-4" />
             <span>Compartir</span>
           </button>
 
@@ -482,7 +487,7 @@ export const PropertyDetailPage: React.FC = () => {
         isOpen={offerModalOpen}
         onClose={() => setOfferModalOpen(false)}
         property={property}
-        onOfferSuccess={() => loadProperty()}
+        onOfferSuccess={() => setRefreshKey((k) => k + 1)}
       />
 
       {/* Appointment Modal */}

@@ -12,17 +12,12 @@ import {
   Home, 
   Tag, 
   Calendar, 
-  MessageSquare, 
   PlusCircle, 
-  TrendingUp, 
   ShieldCheck, 
   CheckCircle,
-  Building2,
   Wallet,
   CheckSquare,
-  Square,
-  Clock,
-  AlertCircle
+  Square
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -94,9 +89,9 @@ export const AgentDashboard: React.FC = () => {
     return <Loader text="Cargando tu panel de agente..." />;
   }
 
-  const availableCount = properties.filter((p) => p.status === 'Available' || (p.status as any) === 'Disponible').length;
-  const soldCount = properties.filter((p) => p.status === 'Sold' || (p.status as any) === 'Vendida').length;
-  const pendingOffersCount = receivedOffers.filter((o) => o.status === 'Pending' || (o.status as any) === 'Pendiente').length;
+  const availableCount = properties.filter((p) => p.status === 'Available' || p.status === 'Disponible').length;
+  const soldCount = properties.filter((p) => p.status === 'Sold' || p.status === 'Vendida').length;
+  const pendingOffersCount = receivedOffers.filter((o) => o.status === 'Pending' || o.status === 'Pendiente').length;
 
   return (
     <div className="space-y-8">
@@ -269,19 +264,19 @@ export const AgentDashboard: React.FC = () => {
                   data={[
                     {
                       name: 'Pendiente',
-                      Cantidad: appointments.filter((a) => a.status === 'Pending' || (a.status as any) === 'Pendiente').length,
+                      Cantidad: appointments.filter((a) => (a.status as string) === 'Pending' || (a.status as string) === 'Pendiente').length,
                     },
                     {
                       name: 'Confirmada',
-                      Cantidad: appointments.filter((a) => a.status === 'Confirmed' || (a.status as any) === 'Confirmada').length,
+                      Cantidad: appointments.filter((a) => (a.status as string) === 'Confirmed' || (a.status as string) === 'Confirmada').length,
                     },
                     {
                       name: 'Completada',
-                      Cantidad: appointments.filter((a) => a.status === 'Completed' || (a.status as any) === 'Completada').length,
+                      Cantidad: appointments.filter((a) => (a.status as string) === 'Completed' || (a.status as string) === 'Completada').length,
                     },
                     {
                       name: 'Cancelada',
-                      Cantidad: appointments.filter((a) => a.status === 'Cancelled' || (a.status as any) === 'Cancelada').length,
+                      Cantidad: appointments.filter((a) => (a.status as string) === 'Cancelled' || (a.status as string) === 'Cancelada').length,
                     },
                   ]}
                 >

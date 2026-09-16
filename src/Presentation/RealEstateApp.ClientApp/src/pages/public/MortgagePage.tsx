@@ -1,6 +1,6 @@
 import React from 'react';
 import { MortgageCalculator } from '../../components/simulator/MortgageCalculator';
-import { Calculator, ShieldCheck, CheckCircle2, HelpCircle } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, HelpCircle } from 'lucide-react';
 
 export const MortgagePage: React.FC = () => {
   return (

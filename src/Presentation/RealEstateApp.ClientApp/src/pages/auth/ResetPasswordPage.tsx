@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { authService } from '../../api/services';
-import { Lock, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Lock, CheckCircle2 } from 'lucide-react';
 
 export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -33,9 +32,10 @@ export const ResetPasswordPage: React.FC = () => {
         confirmPassword,
       });
       setIsSuccess(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error resetting password:", err);
-      setError(err.response?.data?.error || "Error al restablecer la contraseña.");
+      const apiError = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setError(apiError || "Error al restablecer la contraseña.");
     } finally {
       setIsSubmitting(false);
     }

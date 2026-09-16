@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { agentsService } from '../../api/services';
 import { Loader } from '../../components/common/Loader';
-import { Users, Phone, Mail, Home, Search, ShieldCheck } from 'lucide-react';
+import { User as UserType } from '../../types';
+import { Phone, Home, Search, ShieldCheck } from 'lucide-react';
 
 export const AgentsPage: React.FC = () => {
-  const [agents, setAgents] = useState<any[]>([]);
+  const [agents, setAgents] = useState<UserType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
 

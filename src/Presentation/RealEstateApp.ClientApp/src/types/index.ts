@@ -35,6 +35,7 @@ export interface User {
   lastName?: string;
   phone?: string;
   photoUrl?: string;
+  propertiesCount?: number;
 }
 
 export interface AuthResponse {
@@ -115,6 +116,14 @@ export interface Property {
   created?: string;
 }
 
+export interface Favorite {
+  id?: number;
+  clientId?: string;
+  propertyId: number;
+  created?: string;
+  property?: Property;
+}
+
 export interface Offer {
   id: number;
   propertyId: number;
@@ -149,7 +158,7 @@ export interface Appointment {
   agentName?: string;
   date: string;
   timeSlot: string;
-  status: 'Pending' | 'Confirmed' | 'Completed' | 'Cancelled';
+  status: 'Pending' | 'Confirmed' | 'Completed' | 'Cancelled' | 'Pendiente' | 'Confirmada' | 'Completada' | 'Cancelada';
   clientNotes?: string;
   agentNotes?: string;
 }
@@ -516,3 +525,38 @@ export const DOCUMENT_TYPES = [
   'Certificación de registro',
   'Otro',
 ] as const;
+
+// ============ AI Conversational Search (F-17) ============
+export interface AiSearchQueryRequest {
+  query: string;
+}
+
+export interface AiExtractedEntities {
+  propertyType?: string;
+  saleType?: string;
+  province?: string;
+  sector?: string;
+  minRooms?: number;
+  minBathrooms?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  improvements: string[];
+  hasVirtualTour?: boolean;
+  isFinanciable?: boolean;
+  isFeatured?: boolean;
+}
+
+export interface AiSearchInterpretation {
+  originalQuery: string;
+  explanation: string;
+  confidenceScore: number;
+  extractedEntities: AiExtractedEntities;
+  parsedFilter: FilterState;
+  matchedPropertiesCount: number;
+  properties: Property[];
+}
+
+export interface AiSearchSuggestions {
+  suggestions: string[];
+}
+

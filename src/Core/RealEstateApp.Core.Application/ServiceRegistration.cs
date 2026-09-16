@@ -38,6 +38,7 @@ namespace RealEstateApp.Core.Application
             services.AddTransient<IReviewService, ReviewService>();
             services.AddTransient<ICommissionService, CommissionService>();
             services.AddTransient<IPropertyDocumentService, PropertyDocumentService>();
+            services.AddTransient<IAiSearchService, AiSearchService>();
 
             #endregion
         }

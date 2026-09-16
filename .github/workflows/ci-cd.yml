@@ -1,0 +1,83 @@
+name: CI/CD Pipeline - RealEstateApp
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test-backend:
+    name: Backend (.NET 10) - Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore Dependencies
+        run: dotnet restore RealEstateApp.slnx
+
+      - name: Build Solution
+        run: dotnet build RealEstateApp.slnx --no-restore -c Release
+
+      - name: Run Backend Unit Tests (xUnit)
+        run: dotnet test RealEstateApp.slnx --no-build -c Release --verbosity normal
+
+  test-frontend:
+    name: Frontend (React 18 + Vite) - Lint, Test & Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/Presentation/RealEstateApp.ClientApp
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: src/Presentation/RealEstateApp.ClientApp/package-lock.json
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run Frontend Unit Tests (Vitest)
+        run: npm run test
+
+      - name: Build Production Bundle (Vite)
+        run: npm run build
+
+  deploy-render:
+    name: Deploy to Render
+    needs: [test-backend, test-frontend]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Backend Render Deploy Hook
+        if: env.RENDER_BACKEND_HOOK != ''
+        env:
+          RENDER_BACKEND_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
+        run: |
+          echo "Disparando deploy hook del backend en Render..."
+          curl -X POST -s "$RENDER_BACKEND_HOOK" > /dev/null
+          echo "Despliegue del backend iniciado exitosamente."
+
+      - name: Trigger Frontend Render Deploy Hook
+        if: env.RENDER_FRONTEND_HOOK != ''
+        env:
+          RENDER_FRONTEND_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
+        run: |
+          echo "Disparando deploy hook del frontend en Render..."
+          curl -X POST -s "$RENDER_FRONTEND_HOOK" > /dev/null
+          echo "Despliegue del frontend iniciado exitosamente."

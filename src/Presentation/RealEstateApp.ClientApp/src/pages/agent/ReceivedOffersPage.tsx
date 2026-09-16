@@ -5,8 +5,7 @@ import { useCurrency } from '../../context/CurrencyContext';
 import { formatDate } from '../../utils/formatters';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
-import { Tag, Check, X, ShieldAlert, AlertTriangle, ExternalLink, ArrowLeftRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Tag, Check, X, ShieldAlert, AlertTriangle, ArrowLeftRight } from 'lucide-react';
 import { CounterOfferModal } from '../../components/offers/CounterOfferModal';
 
 export const ReceivedOffersPage: React.FC = () => {
@@ -16,21 +15,26 @@ export const ReceivedOffersPage: React.FC = () => {
   const [selectedOfferToAccept, setSelectedOfferToAccept] = useState<Offer | null>(null);
   const [selectedOfferToCounter, setSelectedOfferToCounter] = useState<Offer | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-
-  const loadOffers = async () => {
-    try {
-      const data = await offersService.getReceivedOffers();
-      setOffers(data || []);
-    } catch (err) {
-      console.error("Error loading agent offers:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    Promise.resolve().then(() => loadOffers()).catch(console.error);
-  }, []);
+    let isMounted = true;
+    const fetchReceivedOffers = async () => {
+      try {
+        const data = await offersService.getReceivedOffers();
+        if (isMounted) setOffers(data || []);
+      } catch (err) {
+        console.error("Error loading agent offers:", err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    fetchReceivedOffers();
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshKey]);
 
   const handleAcceptConfirm = async () => {
     if (!selectedOfferToAccept) return;
@@ -38,11 +42,12 @@ export const ReceivedOffersPage: React.FC = () => {
       setIsProcessing(true);
       await offersService.acceptOffer(selectedOfferToAccept.id);
       setSelectedOfferToAccept(null);
-      await loadOffers();
+      setRefreshKey((k) => k + 1);
       alert("¡Oferta aceptada exitosamente! La propiedad ha sido marcada como VENDIDA y las demás ofertas competidoras fueron rechazadas automáticamente.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error accepting offer:", err);
-      alert(err.response?.data?.message || "Error al aceptar oferta.");
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg || "Error al aceptar oferta.");
     } finally {
       setIsProcessing(false);
     }
@@ -52,10 +57,11 @@ export const ReceivedOffersPage: React.FC = () => {
     if (!confirm("¿Estás seguro de que deseas rechazar esta oferta?")) return;
     try {
       await offersService.rejectOffer(offerId);
-      await loadOffers();
-    } catch (err: any) {
+      setRefreshKey((k) => k + 1);
+    } catch (err: unknown) {
       console.error("Error rejecting offer:", err);
-      alert(err.response?.data?.message || "Error al rechazar la oferta.");
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg || "Error al rechazar la oferta.");
     }
   };
 
@@ -109,8 +115,8 @@ export const ReceivedOffersPage: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {offers.map((offer) => {
-                  const isPending = offer.status === 'Pending' || (offer.status as any) === 'Pendiente';
-                  const isCounter = offer.status === 'CounterOffered' || (offer.status as any) === 'Contraofertada';
+                  const isPending = offer.status === 'Pending' || offer.status === 'Pendiente';
+                  const isCounter = offer.status === 'CounterOffered' || offer.status === 'Contraofertada';
                   return (
                     <tr key={offer.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                       <td className="py-3 px-4">
@@ -242,7 +248,7 @@ export const ReceivedOffersPage: React.FC = () => {
           originalAmount={selectedOfferToCounter.amount}
           onSubmit={() => {
             setSelectedOfferToCounter(null);
-            loadOffers();
+            setRefreshKey((k) => k + 1);
           }}
         />
       )}

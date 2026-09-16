@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { verificationsService } from '../../api/services';
 import { AgentVerification } from '../../types';
 import { Loader } from '../../components/common/Loader';
-import { ShieldCheck, ShieldAlert, Clock, CheckCircle2, Upload, AlertCircle } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Clock, CheckCircle2, Upload } from 'lucide-react';
 
 export const AgentVerificationPage: React.FC = () => {
   const [verification, setVerification] = useState<AgentVerification | null>(null);
@@ -15,29 +15,58 @@ export const AgentVerificationPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const loadStatus = async () => {
-    try {
-      const data = await verificationsService.getMyStatus();
-      setVerification(data);
-      if (data) {
-        setCedula(data.cedula || '');
+  useEffect(() => {
+    let isMounted = true;
+    const fetchVerificationStatus = async () => {
+      try {
+        const data = await verificationsService.getMyStatus();
+        if (isMounted) {
+          setVerification(data);
+          if (data) {
+            setCedula(data.cedula || '');
+          }
+        }
+      } catch (err) {
+        console.error("Error loading verification status:", err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
-    } catch (err) {
-      console.error("Error loading verification status:", err);
-    } finally {
-      setIsLoading(false);
+    };
+
+    fetchVerificationStatus();
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshKey]);
+
+  const handleFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setFrontFile(file);
+      setFrontPreview(URL.createObjectURL(file));
     }
   };
 
-  useEffect(() => {
-    Promise.resolve().then(() => loadStatus()).catch(console.error);
-  }, []);
+  const handleBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setBackFile(file);
+      setBackPreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!cedula || !frontFile || !backFile) {
-      setError("Por favor ingresa tu número de cédula y adjunta ambas fotos.");
+    if (!cedula.trim()) {
+      setError("Por favor ingresa tu número de Cédula.");
+      return;
+    }
+    if (!frontFile || !backFile) {
+      setError("Debes adjuntar ambas fotos (Frente y Reverso) de tu Cédula.");
       return;
     }
 
@@ -51,10 +80,11 @@ export const AgentVerificationPage: React.FC = () => {
 
       await verificationsService.submit(formData);
       setSuccessMsg("¡Documentos KYC enviados exitosamente! El equipo administrativo revisará tu solicitud.");
-      await loadStatus();
-    } catch (err: any) {
+      setRefreshKey((k) => k + 1);
+    } catch (err: unknown) {
       console.error("Error submitting verification:", err);
-      setError(err.response?.data?.error || "Error al enviar la verificación.");
+      const apiError = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setError(apiError || "Error al enviar la verificación.");
     } finally {
       setIsSubmitting(false);
     }
@@ -153,12 +183,7 @@ export const AgentVerificationPage: React.FC = () => {
                       type="file"
                       accept="image/*"
                       required
-                      onChange={(e) => {
-                        if (e.target.files?.[0]) {
-                          setFrontFile(e.target.files[0]);
-                          setFrontPreview(URL.createObjectURL(e.target.files[0]));
-                        }
-                      }}
+                      onChange={handleFrontChange}
                       className="hidden"
                     />
                   </label>
@@ -182,12 +207,7 @@ export const AgentVerificationPage: React.FC = () => {
                       type="file"
                       accept="image/*"
                       required
-                      onChange={(e) => {
-                        if (e.target.files?.[0]) {
-                          setBackFile(e.target.files[0]);
-                          setBackPreview(URL.createObjectURL(e.target.files[0]));
-                        }
-                      }}
+                      onChange={handleBackChange}
                       className="hidden"
                     />
                   </label>

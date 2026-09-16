@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
-import { useCurrency } from '../../context/CurrencyContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { CurrencySwitcher } from './CurrencySwitcher';
 import { ThemeToggle } from './ThemeToggle';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { InstallAppButton } from './InstallAppButton';
 import {
   Building2,
@@ -28,6 +29,7 @@ export const Navbar: React.FC = () => {
   const panelUrl = isAdmin ? '/admin' : isAgent ? '/agent' : isDeveloper ? '/developer' : isOwner ? '/owner' : '/client';
   const profileUrl = isAdmin ? '/admin/profile' : isAgent ? '/agent/profile' : isDeveloper ? '/developer/profile' : isOwner ? '/owner/profile' : '/client/profile';
   const { unreadCount, notifications } = useNotifications();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -73,7 +75,7 @@ export const Navbar: React.FC = () => {
               }`}
             >
               <Search className="w-4 h-4" />
-              Catálogo
+              {t('nav.catalog', 'Catálogo')}
             </Link>
 
             <Link
@@ -85,7 +87,7 @@ export const Navbar: React.FC = () => {
               }`}
             >
               <Calculator className="w-4 h-4" />
-              Simulador Hipotecario
+              {t('nav.mortgage', 'Simulador Hipotecario')}
             </Link>
 
             <Link
@@ -97,7 +99,7 @@ export const Navbar: React.FC = () => {
               }`}
             >
               <Users className="w-4 h-4" />
-              Agentes
+              {t('nav.agents', 'Agentes')}
             </Link>
 
             <Link
@@ -109,7 +111,7 @@ export const Navbar: React.FC = () => {
               }`}
             >
               <Map className="w-4 h-4" />
-              Mapa
+              {t('nav.map', 'Mapa')}
             </Link>
 
             {/* Quick Link to Portals */}
@@ -119,7 +121,7 @@ export const Navbar: React.FC = () => {
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-royal-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors ml-2 font-semibold"
               >
                 <LayoutDashboard className="w-4 h-4" />
-                Mi Panel
+                {t('nav.myPanel', 'Mi Panel')}
               </Link>
             )}
 
@@ -131,6 +133,7 @@ export const Navbar: React.FC = () => {
 
           {/* Right Action Icons & User Menu */}
           <div className="flex items-center gap-2 sm:gap-3">
+            <LanguageSwitcher />
             <CurrencySwitcher />
             <ThemeToggle />
 
@@ -251,13 +254,13 @@ export const Navbar: React.FC = () => {
                   to="/login"
                   className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 >
-                  Iniciar Sesión
+                  {t('nav.login', 'Iniciar Sesión')}
                 </Link>
                 <Link
                   to="/register"
                   className="text-xs sm:text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 px-4 py-2 rounded-xl shadow-md shadow-brand-600/20 hover:shadow-lg transition-all"
                 >
-                  Registrarse
+                  {t('nav.register', 'Registrarse')}
                 </Link>
               </div>
             )}
@@ -314,6 +317,10 @@ export const Navbar: React.FC = () => {
 
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
             <InstallAppButton />
+          </div>
+          <div className="pt-2 flex items-center gap-2">
+            <LanguageSwitcher />
+            <CurrencySwitcher />
           </div>
         </div>
       )}

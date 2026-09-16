@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../api/services';
 import { Loader } from '../../components/common/Loader';
-import { User, Mail, Phone, Camera, Save, CheckCircle, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { User, Camera, Save, CheckCircle, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 export const AgentProfilePage: React.FC = () => {
   const { user, refreshProfile } = useAuth();
@@ -65,9 +65,10 @@ export const AgentProfilePage: React.FC = () => {
       await refreshProfile();
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error updating agent profile:", err);
-      setError(err.response?.data?.error || "Error al actualizar perfil.");
+      const apiError = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setError(apiError || "Error al actualizar perfil.");
     } finally {
       setIsSaving(false);
     }

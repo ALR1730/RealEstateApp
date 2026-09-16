@@ -4,7 +4,6 @@ import { catalogsService, propertiesService, provincesService } from '../../api/
 import { PropertyType, SaleType, Improvement } from '../../types';
 import { Loader } from '../../components/common/Loader';
 import { 
-  Building2, 
   Upload, 
   Trash2, 
   Plus, 
@@ -14,7 +13,6 @@ import {
   Video, 
   Compass, 
   ArrowLeft,
-  CheckCircle2,
   AlertCircle
 } from 'lucide-react';
 
@@ -89,14 +87,14 @@ export const CreateEditPropertyPage: React.FC = () => {
         if (isEditing && id) {
           const prop = await propertiesService.getById(Number(id));
           if (prop) {
-            const matchedProvince = provs.find((p: any) => p.name === prop.provinceName);
+            const matchedProvince = provs.find((p: { id: number; name: string }) => p.name === prop.provinceName);
             const provinceId = matchedProvince ? String(matchedProvince.id) : '';
             let matchedMunicipality = '';
             if (provinceId) {
               try {
                 const muns = await provincesService.getMunicipalities(Number(provinceId));
                 setMunicipalities(muns);
-                const match = muns.find((m: any) => m.name === prop.municipalityName);
+                const match = muns.find((m: { id: number; name: string }) => m.name === prop.municipalityName);
                 if (match) matchedMunicipality = String(match.id);
               } catch (err) {
                 console.error("Error loading municipalities:", err);
@@ -122,9 +120,9 @@ export const CreateEditPropertyPage: React.FC = () => {
               videoTourUrl: prop.videoTourUrl || prop.videoUrl || '',
               virtualTour360Url: prop.virtualTour360Url || prop.tour360Url || '',
             });
-            setSelectedImprovements(prop.improvements?.map((i: any) => typeof i === 'number' ? i : i.id) || []);
+            setSelectedImprovements(prop.improvements?.map((i: Improvement | number) => typeof i === 'number' ? i : i.id) || []);
             if (prop.images) {
-              setPreviews(prop.images.map((i: any) => typeof i === 'string' ? i : i.imageUrl));
+              setPreviews(prop.images.map((i: { imageUrl?: string } | string) => typeof i === 'string' ? i : i.imageUrl || ''));
             }
           }
         }
@@ -219,9 +217,10 @@ export const CreateEditPropertyPage: React.FC = () => {
       }
 
       navigate('/agent/properties');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error saving property:", err);
-      setError(err.response?.data?.error || "Error al registrar la propiedad. Revisa los datos ingresados.");
+      const apiError = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setError(apiError || "Error al registrar la propiedad. Revisa los datos ingresados.");
     } finally {
       setIsSubmitting(false);
     }

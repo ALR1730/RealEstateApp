@@ -5,7 +5,7 @@ import { ChatBox } from '../../components/chat/ChatBox';
 import { Loader } from '../../components/common/Loader';
 import { useAuth } from '../../context/AuthContext';
 import { mapConversations } from '../../utils/chat';
-import { MessageSquare, User, Building } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 
 export const ClientChatPage: React.FC = () => {
   const { user } = useAuth();

@@ -20,6 +20,13 @@ using RealEstateApp.Presentation.WebApi.Hubs;
 // RealEstateApp WebApi V2 - .NET 10 + SignalR + JWT Bearer (Updated Mappings)
 var builder = WebApplication.CreateBuilder(args);
 
+// Soporte para puerto dinámico de Render/contenedores en la nube
+var renderPort = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(renderPort))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{renderPort}");
+}
+
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -58,27 +65,40 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
-// Configurar política de CORS restrictiva basada en orígenes permitidos
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() 
-    ?? new[] { 
-        "http://localhost:5173", 
-        "http://127.0.0.1:5173", 
-        "http://localhost:3000", 
-        "http://localhost:5174", 
-        "http://localhost:5000", 
-        "https://localhost:5001", 
-        "http://localhost:5196", 
-        "https://localhost:7196" 
-    };
+// Configurar política de CORS adaptativa (local + Render)
+var allowedOriginsConfig = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+var frontendUrlEnv = Environment.GetEnvironmentVariable("FRONTEND_URL");
+var defaultOrigins = new List<string>
+{
+    "http://localhost:5173", 
+    "http://127.0.0.1:5173", 
+    "http://localhost:3000", 
+    "http://localhost:5174", 
+    "http://localhost:5000", 
+    "https://localhost:5001", 
+    "http://localhost:5196", 
+    "https://localhost:7196" 
+};
+if (allowedOriginsConfig != null) defaultOrigins.AddRange(allowedOriginsConfig);
+if (!string.IsNullOrWhiteSpace(frontendUrlEnv)) defaultOrigins.Add(frontendUrlEnv.TrimEnd('/'));
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigins", policy =>
     {
-        policy.WithOrigins(allowedOrigins)
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+        policy.SetIsOriginAllowed(origin =>
+        {
+            if (defaultOrigins.Any(d => string.Equals(d, origin, StringComparison.OrdinalIgnoreCase))) return true;
+            if (Uri.TryCreate(origin, UriKind.Absolute, out var uri) && 
+                (uri.Host.EndsWith(".onrender.com", StringComparison.OrdinalIgnoreCase) || uri.Host == "localhost"))
+            {
+                return true;
+            }
+            return false;
+        })
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
     });
 });
 
@@ -202,7 +222,15 @@ try
             var dbContext = services.GetRequiredService<ApplicationDbContext>();
             if (dbContext.Database.IsRelational())
             {
-                await dbContext.Database.MigrateAsync();
+                try
+                {
+                    await dbContext.Database.MigrateAsync();
+                }
+                catch (Exception migEx)
+                {
+                    Console.WriteLine($"Nota en MigrateAsync: {migEx.Message}. Aplicando EnsureCreatedAsync...");
+                    await dbContext.Database.EnsureCreatedAsync();
+                }
             }
             else
             {
@@ -214,8 +242,12 @@ try
 
             await DefaultRoles.SeedAsync(roleManager);
 
-            // Seeding de usuarios de prueba y datos de demostración solo en ambiente de desarrollo
-            if (app.Environment.IsDevelopment())
+            // Seeding de usuarios de prueba y datos de demostración (en desarrollo o por variable de entorno)
+            var shouldSeed = app.Environment.IsDevelopment() || 
+                             builder.Configuration.GetValue<bool>("SeedInitialData") || 
+                             string.Equals(Environment.GetEnvironmentVariable("SEED_INITIAL_DATA"), "true", StringComparison.OrdinalIgnoreCase);
+
+            if (shouldSeed)
             {
                 await DefaultAdminUser.SeedAsync(userManager);
                 await DefaultAgentUser.SeedAsync(userManager);
@@ -229,12 +261,16 @@ try
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error al ejecutar los seeds: {ex.Message}");
+            Console.WriteLine($"Error al ejecutar los seeds o inicializar base de datos: {ex.Message}");
         }
     }
 
-    // Enable Swagger UI solo en ambiente de desarrollo
-    if (app.Environment.IsDevelopment())
+    // Enable Swagger UI en desarrollo o si se habilita explícitamente en producción
+    var enableSwagger = app.Environment.IsDevelopment() || 
+                        builder.Configuration.GetValue<bool>("EnableSwaggerInProduction") || 
+                        string.Equals(Environment.GetEnvironmentVariable("ENABLE_SWAGGER"), "true", StringComparison.OrdinalIgnoreCase);
+
+    if (enableSwagger)
     {
         app.UseSwagger();
         app.UseSwaggerUI(c =>

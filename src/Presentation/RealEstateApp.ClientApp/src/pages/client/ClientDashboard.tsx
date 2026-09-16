@@ -11,15 +11,12 @@ import {
   Heart, 
   Tag, 
   Calendar, 
-  MessageSquare, 
   ArrowRight, 
   Search, 
-  Building2,
-  CheckCircle2,
-  Circle,
-  HelpCircle,
-  TrendingUp,
-  ShieldCheck
+  CheckCircle2, 
+  Circle, 
+  TrendingUp, 
+  ShieldCheck 
 } from 'lucide-react';
 
 export const ClientDashboard: React.FC = () => {

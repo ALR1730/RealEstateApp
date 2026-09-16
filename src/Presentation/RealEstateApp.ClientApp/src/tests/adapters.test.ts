@@ -36,7 +36,7 @@ describe('Schema Adapters (services.ts)', () => {
 
   it('adaptProperties handles empty or invalid arrays gracefully', () => {
     expect(adaptProperties([])).toEqual([]);
-    expect(adaptProperties(null as any)).toEqual([]);
+    expect(adaptProperties(null as unknown as Parameters<typeof adaptProperties>[0])).toEqual([]);
   });
 
   it('adaptVerification normalizes KYC status correctly', () => {

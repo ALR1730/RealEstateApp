@@ -26,7 +26,9 @@ import {
   CommissionSummary,
   PropertyDocument,
   SubscriptionPlan,
-  SubscriptionPlanInput
+  SubscriptionPlanInput,
+  AiSearchInterpretation,
+  AiSearchSuggestions
 } from '../types';
 
 function combineDateAndTime(date: string, timeSlot: string): string {
@@ -831,3 +833,25 @@ export const documentsService = {
     return res.data;
   }
 };
+
+// ==================== AI CONVERSATIONAL SEARCH SERVICE (F-17) ====================
+export const aiSearchService = {
+  searchByAi: async (query: string): Promise<AiSearchInterpretation> => {
+    const res = await apiClient.post<AiSearchInterpretation>('/aisearch/query', { query });
+    if (res.data && Array.isArray(res.data.properties)) {
+      res.data.properties = adaptProperties(res.data.properties);
+    }
+    return res.data;
+  },
+
+  interpret: async (query: string): Promise<AiSearchInterpretation> => {
+    const res = await apiClient.post<AiSearchInterpretation>('/aisearch/interpret', { query });
+    return res.data;
+  },
+
+  getSuggestions: async (): Promise<string[]> => {
+    const res = await apiClient.get<AiSearchSuggestions>('/aisearch/suggestions');
+    return res.data?.suggestions || [];
+  }
+};
+

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { verificationsService } from '../../api/services';
 import { AgentVerification } from '../../types';
 import { Loader } from '../../components/common/Loader';
-import { ShieldCheck, CheckCircle, XCircle, Eye, AlertCircle, Search } from 'lucide-react';
+import { ShieldCheck, Eye, AlertCircle } from 'lucide-react';
 
 export const ManageVerificationsPage: React.FC = () => {
   const [verifications, setVerifications] = useState<AgentVerification[]>([]);
@@ -13,28 +13,33 @@ export const ManageVerificationsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('All');
-
-  const loadData = async () => {
-    try {
-      const data = await verificationsService.getAll();
-      setVerifications(data || []);
-    } catch (err) {
-      console.error("Error loading verifications:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    Promise.resolve().then(() => loadData()).catch(console.error);
-  }, []);
+    let isMounted = true;
+    const fetchVerifications = async () => {
+      try {
+        const data = await verificationsService.getAll();
+        if (isMounted) setVerifications(data || []);
+      } catch (err) {
+        console.error("Error loading verifications:", err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    fetchVerifications();
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshKey]);
 
   const handleApprove = async (id: number) => {
     if (!window.confirm("¿Aprobar esta verificación KYC y otorgar la insignia de Agente Verificado?")) return;
     try {
       setIsProcessing(true);
       await verificationsService.approve(id);
-      await loadData();
+      setRefreshKey((k) => k + 1);
     } catch (err) {
       console.error("Error approving verification:", err);
     } finally {
@@ -49,7 +54,7 @@ export const ManageVerificationsPage: React.FC = () => {
       await verificationsService.reject(selectedKyc.id, rejectionReason.trim());
       setShowRejectModal(false);
       setRejectionReason('');
-      await loadData();
+      setRefreshKey((k) => k + 1);
     } catch (err) {
       console.error("Error rejecting verification:", err);
     } finally {

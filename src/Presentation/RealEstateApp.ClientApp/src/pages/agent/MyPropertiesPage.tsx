@@ -5,33 +5,38 @@ import { Property } from '../../types';
 import { useCurrency } from '../../context/CurrencyContext';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
-import { Home, PlusCircle, Edit3, Trash2, Eye, ExternalLink, Image as ImageIcon, FileText } from 'lucide-react';
+import { Home, PlusCircle, Trash2, ExternalLink, Image as ImageIcon, FileText } from 'lucide-react';
 
 export const MyPropertiesPage: React.FC = () => {
   const { formatPrice } = useCurrency();
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  const loadProperties = async () => {
-    try {
-      const data = await propertiesService.getMyProperties();
-      setProperties(data || []);
-    } catch (err) {
-      console.error("Error loading agent properties:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    Promise.resolve().then(() => loadProperties()).catch(console.error);
-  }, []);
+    let isMounted = true;
+    const fetchAgentProperties = async () => {
+      try {
+        const data = await propertiesService.getMyProperties();
+        if (isMounted) setProperties(data || []);
+      } catch (err) {
+        console.error("Error loading agent properties:", err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    fetchAgentProperties();
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshKey]);
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("¿Seguro que deseas eliminar esta propiedad? Esta acción no se puede deshacer.")) return;
     try {
       await propertiesService.delete(id);
-      loadProperties();
+      setRefreshKey((k) => k + 1);
     } catch (err) {
       console.error("Error deleting property:", err);
       alert("Error al eliminar la propiedad.");

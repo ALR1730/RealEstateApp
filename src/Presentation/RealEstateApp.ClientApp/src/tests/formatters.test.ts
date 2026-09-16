@@ -17,4 +17,12 @@ describe('Formatters & Utilities', () => {
     const formatted = formatDate('2026-08-24T12:00:00Z');
     expect(formatted).toBeTruthy();
   });
+
+  it('calculateFrenchAmortization computes french mortgage installment properly', () => {
+    const sim = calculateFrenchAmortization(5000000, 1000000, 12, 20);
+    expect(sim.loanAmount).toBe(4000000);
+    expect(sim.totalMonths).toBe(240);
+    expect(sim.monthlyInstallment).toBeGreaterThan(40000);
+    expect(sim.schedule).toHaveLength(240);
+  });
 });

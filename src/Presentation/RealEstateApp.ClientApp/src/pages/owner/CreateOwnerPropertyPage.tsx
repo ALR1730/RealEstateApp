@@ -79,14 +79,14 @@ export const CreateOwnerPropertyPage: React.FC = () => {
         if (isEditing && id) {
           const prop = await ownersService.getProperty(Number(id));
           if (prop) {
-            const matchedProvince = provs.find((p: any) => p.name === prop.provinceName);
+            const matchedProvince = provs.find((p: { id: number; name: string }) => p.name === prop.provinceName);
             const provinceId = matchedProvince ? String(matchedProvince.id) : '';
             let matchedMunicipality = '';
             if (provinceId) {
               try {
                 const muns = await provincesService.getMunicipalities(Number(provinceId));
                 setMunicipalities(muns);
-                const match = muns.find((m: any) => m.name === prop.municipalityName);
+                const match = muns.find((m: { id: number; name: string }) => m.name === prop.municipalityName);
                 if (match) matchedMunicipality = String(match.id);
               } catch (err) {
                 console.error("Error loading municipalities:", err);
@@ -108,9 +108,9 @@ export const CreateOwnerPropertyPage: React.FC = () => {
               montoSeparacion: prop.montoSeparacion != null ? String(prop.montoSeparacion) : '',
               porcentajeInicialRequerido: prop.porcentajeInicialRequerido != null ? String(prop.porcentajeInicialRequerido) : '',
             });
-            setSelectedImprovements(prop.improvements?.map((i: any) => i.id) || []);
+            setSelectedImprovements(prop.improvements?.map((i: Improvement) => i.id) || []);
             if (prop.images) {
-              setPreviews(prop.images.map((i: any) => i.imageUrl));
+              setPreviews(prop.images.map((i: { imageUrl: string }) => i.imageUrl));
             }
           }
         }
@@ -191,9 +191,10 @@ export const CreateOwnerPropertyPage: React.FC = () => {
         await ownersService.createProperty(formData);
       }
       navigate('/owner');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error saving owner property:", err);
-      setError(err.response?.data?.error || "Error al publicar la propiedad directa.");
+      const apiError = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setError(apiError || "Error al publicar la propiedad directa.");
     } finally {
       setIsSubmitting(false);
     }

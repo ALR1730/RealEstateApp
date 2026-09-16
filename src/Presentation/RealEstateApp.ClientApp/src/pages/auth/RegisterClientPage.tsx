@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../api/services';
-import { Building2, UserPlus, CheckCircle, ShieldAlert, User, Mail, Phone, Key } from 'lucide-react';
+import { Building2, UserPlus, CheckCircle, ShieldAlert } from 'lucide-react';
 
 export const RegisterClientPage: React.FC = () => {
   const navigate = useNavigate();
@@ -44,9 +44,10 @@ export const RegisterClientPage: React.FC = () => {
       setTimeout(() => {
         navigate('/login');
       }, 2500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Register error:", err);
-      setError(err.response?.data?.error || "Error al conectar con el servidor.");
+      const apiError = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setError(apiError || "Error al conectar con el servidor.");
     } finally {
       setIsLoading(false);
     }

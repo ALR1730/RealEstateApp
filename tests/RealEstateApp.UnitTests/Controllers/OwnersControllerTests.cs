@@ -245,9 +245,9 @@ namespace RealEstateApp.UnitTests.Controllers
             return Task.FromResult(IdentityResult.Success);
         }
 
-        public Task<string?> GetUserIdAsync(IdentityUser user, System.Threading.CancellationToken cancellationToken)
+        public Task<string> GetUserIdAsync(IdentityUser user, System.Threading.CancellationToken cancellationToken)
         {
-            return Task.FromResult<string?>(user.Id);
+            return Task.FromResult(user.Id);
         }
 
         public Task<string?> GetUserNameAsync(IdentityUser user, System.Threading.CancellationToken cancellationToken)

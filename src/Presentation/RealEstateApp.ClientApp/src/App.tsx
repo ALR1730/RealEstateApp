@@ -5,6 +5,7 @@ import { NotificationProvider } from './context/NotificationContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { CompareProvider } from './context/CompareContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { Sidebar } from './components/common/Sidebar';
@@ -145,7 +146,8 @@ export const App: React.FC = () => {
         <AuthProvider>
           <NotificationProvider>
             <CompareProvider>
-              <BrowserRouter>
+              <LanguageProvider>
+                <BrowserRouter>
           <Suspense fallback={<Loader text="Cargando aplicación..." />}>
           <Routes>
             {/* Public Routes */}
@@ -256,6 +258,7 @@ export const App: React.FC = () => {
           </Routes>
           </Suspense>
         </BrowserRouter>
+              </LanguageProvider>
             </CompareProvider>
           </NotificationProvider>
         </AuthProvider>

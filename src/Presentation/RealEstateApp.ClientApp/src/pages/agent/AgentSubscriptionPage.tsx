@@ -3,7 +3,7 @@ import { subscriptionsService } from '../../api/services';
 import { SubscriptionPlan, AgentSubscription } from '../../types';
 import { useCurrency } from '../../context/CurrencyContext';
 import { Loader } from '../../components/common/Loader';
-import { Award, Check, Zap, Sparkles, CreditCard, ShieldCheck, Lock } from 'lucide-react';
+import { Award, Check, Zap, Sparkles, CreditCard, Lock } from 'lucide-react';
 
 export const AgentSubscriptionPage: React.FC = () => {
   const { formatPrice } = useCurrency();
@@ -14,6 +14,7 @@ export const AgentSubscriptionPage: React.FC = () => {
   const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // B6: Mock Payment Form State
   const [cardHolder, setCardHolder] = useState('');
@@ -22,24 +23,32 @@ export const AgentSubscriptionPage: React.FC = () => {
   const [cardCvc, setCardCvc] = useState('');
   const [cardError, setCardError] = useState<string | null>(null);
 
-  const loadData = async () => {
-    try {
-      const [plansData, subData] = await Promise.all([
-        subscriptionsService.getPlans(),
-        subscriptionsService.getMySubscription(),
-      ]);
-      setPlans(plansData);
-      setCurrentSub(subData);
-    } catch (err) {
-      console.error("Error loading subscriptions:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    Promise.resolve().then(() => loadData()).catch(console.error);
-  }, []);
+    let isMounted = true;
+    const fetchSubscriptions = async () => {
+      try {
+        const [plansData, subData] = await Promise.all([
+          subscriptionsService.getPlans(),
+          subscriptionsService.getMySubscription(),
+        ]);
+        if (isMounted) {
+          setPlans(plansData);
+          setCurrentSub(subData);
+        }
+      } catch (err) {
+        console.error("Error loading subscriptions:", err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchSubscriptions();
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshKey]);
 
   const handleSelectPlan = (planId: number) => {
     setSelectedPlanId(planId);
@@ -94,10 +103,11 @@ export const AgentSubscriptionPage: React.FC = () => {
       await subscriptionsService.upgrade(selectedPlanId, mockPaymentToken);
       setSuccessMsg("¡Plan actualizado y activado exitosamente! Tu límite de inmuebles destacados ha sido ampliado.");
       setShowCheckoutModal(false);
-      await loadData();
-    } catch (err: any) {
+      setRefreshKey((k) => k + 1);
+    } catch (err: unknown) {
       console.error("Error upgrading plan:", err);
-      setCardError(err.response?.data?.message || "Error al procesar el pago con la pasarela.");
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setCardError(msg || "Error al procesar el pago con la pasarela.");
     } finally {
       setIsUpgrading(false);
     }
