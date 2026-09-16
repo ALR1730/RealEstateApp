@@ -67,7 +67,7 @@ export const ClientDashboard: React.FC = () => {
       title: '2. Capacidad de Compra',
       description: 'Calcula tu cuota hipotecaria y poder de pago',
       isCompleted: true,
-      link: '/client/buy-ability'
+      link: '/client/capacidad-compra'
     },
     {
       id: 3,

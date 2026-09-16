@@ -118,22 +118,42 @@ namespace RealEstateApp.Core.Application.Services
 
         private static void ValidateInputs(BuyAbilityRequestDto request)
         {
+            const decimal maxAllowedAmount = 1_000_000_000m;
+
             if (request.MonthlyGrossIncome < 0)
                 throw new ValidationException("El ingreso mensual bruto no puede ser negativo.");
 
-            if (request.MonthlyNetIncome <= 0)
+            if (request.MonthlyGrossIncome == 0)
+                throw new ValidationException("El ingreso mensual bruto debe ser mayor a cero.");
+
+            if (request.MonthlyNetIncome < 0)
+                throw new ValidationException("El ingreso mensual neto no puede ser negativo.");
+
+            if (request.MonthlyNetIncome == 0)
                 throw new ValidationException("El ingreso mensual neto debe ser mayor a cero.");
+
+            if (request.MonthlyNetIncome > request.MonthlyGrossIncome)
+                throw new ValidationException("El ingreso mensual neto no puede ser mayor que el ingreso mensual bruto.");
 
             if (request.MonthlyDebtPayments < 0)
                 throw new ValidationException("El total de deudas mensuales no puede ser negativo.");
 
             if (request.AvailableDownPayment < 0)
                 throw new ValidationException("El pago inicial disponible no puede ser negativo.");
+
+            if (request.MonthlyGrossIncome > maxAllowedAmount ||
+                request.MonthlyNetIncome > maxAllowedAmount ||
+                request.MonthlyDebtPayments > maxAllowedAmount ||
+                request.AvailableDownPayment > maxAllowedAmount)
+            {
+                throw new ValidationException("Los montos ingresados no pueden exceder RD$ 1,000,000,000.");
+            }
         }
 
         private static decimal CalculateDebtToIncomeRatio(decimal monthlyDebtPayments, decimal monthlyNetIncome)
         {
-            return (monthlyDebtPayments / monthlyNetIncome) * 100;
+            if (monthlyNetIncome <= 0) return 0m;
+            return (monthlyDebtPayments / monthlyNetIncome) * 100m;
         }
 
         private static string DetermineCreditScoreRating(decimal dti)
@@ -204,25 +224,30 @@ namespace RealEstateApp.Core.Application.Services
             decimal annualRate,
             int termYears)
         {
-            var observations = new List<string>();
+            var culture = System.Globalization.CultureInfo.InvariantCulture;
+            var formattedPrice = "RD$" + maxPropertyPrice.ToString("N2", culture);
+            var formattedDti = dti.ToString("F1", culture) + "%";
+            var formattedRate = annualRate.ToString("F1", culture) + "%";
 
-            observations.Add($"Con un nivel de endeudamiento de {dti:F1}%, su perfil crediticio es considerado como \"{creditScoreRating}\".");
-            observations.Add($"Tasa de interés anual estimada: {annualRate:F1}% a {termYears} años.");
+            var observations = new List<string>
+            {
+                $"Con un nivel de endeudamiento del {formattedDti}, su perfil crediticio es considerado \"{creditScoreRating}\", con una tasa anual estimada del {formattedRate} a un plazo de {termYears} años."
+            };
 
             if (evaluationResult == "Aprobado")
             {
-                observations.Add($"Felicidades. Su capacidad de compra máxima estimada es de ${maxPropertyPrice:N2}.");
-                observations.Add("Cumple con los requisitos para una aprobación completa. Se recomienda iniciar el proceso de precalificación con una entidad financiera.");
+                observations.Add($"Felicidades. Su capacidad de compra máxima estimada es de {formattedPrice}.");
+                observations.Add("Su relación deuda/ingreso es favorable y cumple satisfactoriamente con los requisitos crediticios. Se recomienda iniciar el proceso de precalificación con una entidad bancaria.");
             }
             else if (evaluationResult == "Pre-Aprobado")
             {
-                observations.Add($"Su capacidad de compra máxima estimada es de ${maxPropertyPrice:N2}.");
-                observations.Add("Se encuentra en rango de pre-aprobación. Se recomienda reducir deudas existentes para mejorar su perfil antes de solicitar el préstamo.");
+                observations.Add($"Su capacidad de compra máxima estimada es de {formattedPrice}.");
+                observations.Add("Se encuentra en rango de pre-aprobación. Para optimizar las condiciones del préstamo y calificar a una menor tasa de interés, se sugiere amortizar deudas existentes previo a la solicitud formal.");
             }
             else
             {
-                observations.Add("No cumple actualmente con los requisitos mínimos para una aprobación hipotecaria.");
-                observations.Add("Se recomienda: 1) Reducir deudas existentes para mejorar su ratio de endeudamiento, 2) Incrementar su ahorro para el pago inicial, 3) Reevaluar su capacidad de compra en 6 meses.");
+                observations.Add("Actualmente no cumple con los parámetros mínimos requeridos para una aprobación hipotecaria.");
+                observations.Add("Recomendaciones clave: 1) Reducir deudas corrientes para disminuir su ratio de endeudamiento por debajo del 43%, 2) Incrementar el fondo de ahorro para el inicial, 3) Reevaluar su perfil financiero en un periodo de 3 a 6 meses.");
             }
 
             return string.Join(" ", observations);

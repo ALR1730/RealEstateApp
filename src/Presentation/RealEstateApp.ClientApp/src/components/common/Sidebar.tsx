@@ -105,7 +105,7 @@ export const Sidebar: React.FC = () => {
                 <Calendar className="w-4 h-4" />
                 Mis Citas
               </NavLink>
-              <NavLink to="/client/buy-ability" className={navClass}>
+              <NavLink to="/client/capacidad-compra" className={navClass}>
                 <Wallet className="w-4 h-4" />
                 Capacidad de Compra
               </NavLink>

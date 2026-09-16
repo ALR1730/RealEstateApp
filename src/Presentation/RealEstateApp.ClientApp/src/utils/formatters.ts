@@ -2,18 +2,18 @@ import { MortgageSimulationResult, AmortizationScheduleItem } from '../types';
 
 /**
  * Formatea un número como Moneda de República Dominicana (RD$).
- * Ejemplo: 1500000 -> "RD$ 1,500,000.00"
+ * Ejemplo: 1500000 -> "RD$1,500,000.00"
  */
 export function formatCurrencyRD(amount: number | null | undefined): string {
-  if (amount === null || amount === undefined || isNaN(amount)) {
-    return 'RD$ 0.00';
+  if (amount === null || amount === undefined || !Number.isFinite(amount)) {
+    return 'RD$0.00';
   }
-  return new Intl.NumberFormat('es-DO', {
-    style: 'currency',
-    currency: 'DOP',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount).replace('DOP', 'RD$');
+  const isNegative = amount < 0;
+  const absVal = Math.abs(amount);
+  const parts = absVal.toFixed(2).split('.');
+  const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const decimalPart = parts[1];
+  return `${isNegative ? '-' : ''}RD$${integerPart}.${decimalPart}`;
 }
 
 /**

@@ -10,6 +10,7 @@ import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { Sidebar } from './components/common/Sidebar';
 import { Loader } from './components/common/Loader';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 // Public Pages (lazy)
 const HomePage = lazy(() => import('./pages/public/HomePage').then((m) => ({ default: m.HomePage })));
@@ -141,6 +142,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole, allowedRo
 
 export const App: React.FC = () => {
   return (
+    <ErrorBoundary context="Aplicacion">
     <ThemeProvider>
       <CurrencyProvider>
         <AuthProvider>
@@ -181,6 +183,7 @@ export const App: React.FC = () => {
                 <Route path="/client/chats" element={<ClientChatPage />} />
                 <Route path="/client/profile" element={<ClientProfilePage />} />
                 <Route path="/client/activity" element={<ActivityPage />} />
+                <Route path="/client/capacidad-compra" element={<BuyAbilityPage />} />
                 <Route path="/client/buy-ability" element={<BuyAbilityPage />} />
               </Route>
             </Route>
@@ -264,5 +267,6 @@ export const App: React.FC = () => {
         </AuthProvider>
       </CurrencyProvider>
     </ThemeProvider>
+    </ErrorBoundary>
   );
 };
