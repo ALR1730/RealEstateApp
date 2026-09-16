@@ -33,6 +33,10 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         [Display(Name = "Precio")]
         public decimal Price { get; set; }
 
+        [Required(ErrorMessage = "La moneda es requerida")]
+        [Display(Name = "Moneda")]
+        public string Currency { get; set; } = "DOP";
+
         [Required(ErrorMessage = "La cantidad de habitaciones es requerida")]
         [Range(0, 50, ErrorMessage = "Las habitaciones deben estar entre 0 y 50")]
         [Display(Name = "Habitaciones")]
@@ -64,6 +68,24 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         [Display(Name = "Tipo de Venta")]
         public int SaleTypeId { get; set; }
 
+        [Required(ErrorMessage = "La provincia es requerida")]
+        [Display(Name = "Provincia")]
+        public int? ProvinceId { get; set; }
+
+        [Required(ErrorMessage = "El municipio es requerido")]
+        [Display(Name = "Municipio")]
+        public int? MunicipalityId { get; set; }
+
+        [Required(ErrorMessage = "El sector o barrio es requerido")]
+        [StringLength(100, ErrorMessage = "El sector no puede exceder 100 caracteres")]
+        [Display(Name = "Sector / Barrio")]
+        public string? Sector { get; set; }
+
+        [Required(ErrorMessage = "La dirección completa es requerida")]
+        [StringLength(300, ErrorMessage = "La dirección no puede exceder 300 caracteres")]
+        [Display(Name = "Dirección Completa")]
+        public string? FullAddress { get; set; }
+
         [Required(ErrorMessage = "La latitud es requerida")]
         [Range(-90, 90, ErrorMessage = "La latitud debe estar entre -90 y 90")]
         [Display(Name = "Latitud")]
@@ -84,6 +106,11 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         [Display(Name = "URL del Tour 360°")]
         public string? Tour360Url { get; set; }
 
+        [StringLength(50, ErrorMessage = "El ID de Matterport no puede exceder 50 caracteres")]
+        [RegularExpression(@"^[a-zA-Z0-9_-]*$", ErrorMessage = "El ID de Matterport solo puede contener letras, números, guiones y guiones bajos")]
+        [Display(Name = "ID del Modelo Matterport (Tour 3D)")]
+        public string? MatterportModelId { get; set; }
+
         [Required(ErrorMessage = "El monto de separación es requerido")]
         [Range(0.01, double.MaxValue, ErrorMessage = "El monto de separación debe ser mayor a cero")]
         [DataType(DataType.Currency)]
@@ -97,6 +124,12 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
 
         [Display(Name = "¿Pre-investigación para Financiamiento aprobada?")]
         public bool IsFinanciable { get; set; }
+
+        [Display(Name = "¿Listado Destacado (Featured)?")]
+        public bool IsFeatured { get; set; }
+
+        [Display(Name = "Destacado hasta")]
+        public System.DateTime? FeaturedUntil { get; set; }
 
         /// <summary>
         /// Archivos de imagen subidos por el formulario.
@@ -127,6 +160,16 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         /// Lista de mejoras disponibles para los checkboxes.
         /// </summary>
         public List<ImprovementViewModel>? Improvements { get; set; }
+
+        /// <summary>
+        /// Lista de provincias para el dropdown de ubicación.
+        /// </summary>
+        public List<ProvinceDropdownViewModel>? Provinces { get; set; }
+
+        /// <summary>
+        /// Lista de municipios filtrados por la provincia seleccionada.
+        /// </summary>
+        public List<MunicipalityDropdownViewModel>? Municipalities { get; set; }
 
         /// <summary>
         /// URLs de imágenes ya subidas (para edición).

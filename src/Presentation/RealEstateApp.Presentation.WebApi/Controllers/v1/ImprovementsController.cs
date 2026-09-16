@@ -33,10 +33,16 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 
             if (list == null || list.Count == 0)
             {
-                return NoContent();
+                return Ok(new List<ImprovementDto>());
             }
 
-            var dtos = _mapper.Map<List<ImprovementDto>>(list);
+            var dtos = list.Select(x => new ImprovementDto
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Description = x.Description
+            }).ToList();
+
             return Ok(dtos);
         }
 
@@ -55,7 +61,12 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return NotFound(new { hasError = true, error = $"No se encontró ninguna mejora con el ID {id}" });
             }
 
-            var dto = _mapper.Map<ImprovementDto>(saveVm);
+            var dto = new ImprovementDto
+            {
+                Id = saveVm.Id,
+                Name = saveVm.Name,
+                Description = saveVm.Description
+            };
             return Ok(dto);
         }
 
@@ -64,7 +75,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         /// </summary>
         [Authorize(Roles = "Admin,Developer")]
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ImprovementDto))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ImprovementDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -76,8 +87,13 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             }
 
             var createdVm = await _improvementService.Add(vm);
-            var dto = _mapper.Map<ImprovementDto>(createdVm);
-            return CreatedAtAction(nameof(GetByIdAsync), new { id = dto.Id }, dto);
+            var dto = new ImprovementDto
+            {
+                Id = createdVm.Id,
+                Name = createdVm.Name,
+                Description = createdVm.Description
+            };
+            return Ok(dto);
         }
 
         /// <summary>
@@ -106,7 +122,12 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             vm.Id = id;
             await _improvementService.Update(vm, id);
             var updatedVm = await _improvementService.GetByIdSaveViewModel(id);
-            var dto = _mapper.Map<ImprovementDto>(updatedVm);
+            var dto = new ImprovementDto
+            {
+                Id = updatedVm?.Id ?? id,
+                Name = updatedVm?.Name ?? vm.Name,
+                Description = updatedVm?.Description ?? vm.Description
+            };
 
             return Ok(dto);
         }

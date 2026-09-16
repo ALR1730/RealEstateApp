@@ -13,9 +13,9 @@ namespace RealEstateApp.Core.Domain.Entities
         public string AgentId { get; set; } = string.Empty;
 
         public DateTime AppointmentDate { get; set; }
-        public string? Comments { get; set; }
-
         public AppointmentStatus Status { get; set; } = AppointmentStatus.Pending;
+
+        public string? Notes { get; set; }
         public string? AgentNotes { get; set; }
     }
 }

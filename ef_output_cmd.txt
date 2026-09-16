@@ -1,7 +1,0 @@
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Infrastructure\RealEstateApp.Infrastructure.Persistence\RealEstateApp.Infrastructure.Persistence.csproj : warning NU1608: Detected package version outside of dependency constraint: AutoMapper.Extensions.Microsoft.DependencyInjection 12.0.1 requires AutoMapper (= 12.0.1) but version AutoMapper 16.2.0 was resolved.
-C:\Users\DELL\Desktop\New folder\RealEstateApp\src\Presentation\RealEstateApp.Presentation.WebApp\RealEstateApp.Presentation.WebApp.csproj : warning NU1608: Detected package version outside of dependency constraint: AutoMapper.Extensions.Microsoft.DependencyInjection 12.0.1 requires AutoMapper (= 12.0.1) but version AutoMapper 16.2.0 was resolved.
-Build started...
-Build succeeded.
-warn: Microsoft.EntityFrameworkCore.Model.Validation[30000]
-      No store type was specified for the decimal property 'SizeInMeters' on entity type 'Property'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
-The name 'InitialCreate' is used by an existing migration.

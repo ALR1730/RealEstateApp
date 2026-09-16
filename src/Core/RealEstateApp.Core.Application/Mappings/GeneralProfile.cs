@@ -8,6 +8,7 @@ using RealEstateApp.Core.Application.ViewModels.Property;
 using RealEstateApp.Core.Application.ViewModels.Offer;
 using RealEstateApp.Core.Application.ViewModels.Chat;
 using RealEstateApp.Core.Application.ViewModels.Favorite;
+using RealEstateApp.Core.Application.ViewModels.LeadPipeline;
 using System.Linq;
 using VmPropertyType = RealEstateApp.Core.Application.ViewModels.PropertyType;
 using VmSaleType = RealEstateApp.Core.Application.ViewModels.SaleType;
@@ -29,6 +30,8 @@ namespace RealEstateApp.Core.Application.Mappings
             CreateMap<Property, PropertyViewModel>()
                 .ForMember(dest => dest.PropertyTypeName, opt => opt.MapFrom(src => src.PropertyType != null ? src.PropertyType.Name : string.Empty))
                 .ForMember(dest => dest.SaleTypeName, opt => opt.MapFrom(src => src.SaleType != null ? src.SaleType.Name : string.Empty))
+                .ForMember(dest => dest.ProvinceName, opt => opt.MapFrom(src => src.Province != null ? src.Province.Name : string.Empty))
+                .ForMember(dest => dest.MunicipalityName, opt => opt.MapFrom(src => src.Municipality != null ? src.Municipality.Name : string.Empty))
                 .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images != null ? src.Images.Select(i => i.ImageUrl).ToList() : new System.Collections.Generic.List<string>()))
                 .ForMember(dest => dest.Improvements, opt => opt.MapFrom(src => src.PropertyImprovements != null ? src.PropertyImprovements.Where(pi => pi.Improvement != null).Select(pi => pi.Improvement!.Name).ToList() : new System.Collections.Generic.List<string>()))
                 .ForMember(dest => dest.FavoritesCount, opt => opt.MapFrom(src => src.Favorites != null ? src.Favorites.Count : 0))
@@ -39,9 +42,30 @@ namespace RealEstateApp.Core.Application.Mappings
             CreateMap<Property, PropertyDto>()
                 .ForMember(dest => dest.PropertyTypeName, opt => opt.MapFrom(src => src.PropertyType != null ? src.PropertyType.Name : string.Empty))
                 .ForMember(dest => dest.SaleTypeName, opt => opt.MapFrom(src => src.SaleType != null ? src.SaleType.Name : string.Empty))
+                .ForMember(dest => dest.ProvinceName, opt => opt.MapFrom(src => src.Province != null ? src.Province.Name : string.Empty))
+                .ForMember(dest => dest.MunicipalityName, opt => opt.MapFrom(src => src.Municipality != null ? src.Municipality.Name : string.Empty))
                 .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images != null ? src.Images.Select(i => i.ImageUrl).ToList() : new System.Collections.Generic.List<string>()))
                 .ForMember(dest => dest.Improvements, opt => opt.MapFrom(src => src.PropertyImprovements != null ? src.PropertyImprovements.Where(pi => pi.Improvement != null).Select(pi => pi.Improvement!.Name).ToList() : new System.Collections.Generic.List<string>()))
                 .ForMember(dest => dest.AgentName, opt => opt.Ignore()); // Se resuelve en el servicio
+
+            // PropertyViewModel <-> PropertyDto (conversión entre DTO de API y ViewModel de servicio)
+            CreateMap<PropertyViewModel, PropertyDto>().ReverseMap();
+
+            // Property → ComparablePropertyDto (comparable para tasación (AVM))
+            CreateMap<Property, RealEstateApp.Core.Application.ViewModels.Valuation.ComparablePropertyDto>()
+                .ForMember(dest => dest.PropertyId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.Code, opt => opt.MapFrom(src => src.Code))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
+                .ForMember(dest => dest.Currency, opt => opt.MapFrom(src => src.Currency))
+                .ForMember(dest => dest.SizeInMeters, opt => opt.MapFrom(src => src.SizeInMeters))
+                .ForMember(dest => dest.Sector, opt => opt.MapFrom(src => src.Sector))
+                .ForMember(dest => dest.Rooms, opt => opt.MapFrom(src => src.Rooms))
+                .ForMember(dest => dest.Bathrooms, opt => opt.MapFrom(src => src.Bathrooms))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.PricePerSqm, opt => opt.Ignore()) // Se resuelve en el servicio
+                .ForMember(dest => dest.MunicipalityName, opt => opt.Ignore()) // Se resuelve en el servicio
+                .ForMember(dest => dest.DistanceKm, opt => opt.Ignore()); // Se resuelve en el servicio
 
             // SavePropertyViewModel → Property (escritura desde formulario)
             CreateMap<SavePropertyViewModel, Property>()
@@ -49,6 +73,8 @@ namespace RealEstateApp.Core.Application.Mappings
                 .ForMember(dest => dest.PropertyImprovements, opt => opt.Ignore()) // Se maneja manualmente
                 .ForMember(dest => dest.PropertyType, opt => opt.Ignore())
                 .ForMember(dest => dest.SaleType, opt => opt.Ignore())
+                .ForMember(dest => dest.Province, opt => opt.Ignore())
+                .ForMember(dest => dest.Municipality, opt => opt.Ignore())
                 .ForMember(dest => dest.Offers, opt => opt.Ignore())
                 .ForMember(dest => dest.Chats, opt => opt.Ignore())
                 .ForMember(dest => dest.Favorites, opt => opt.Ignore())
@@ -66,7 +92,9 @@ namespace RealEstateApp.Core.Application.Mappings
                     src.Images != null ? src.Images.Select(i => i.ImageUrl).ToList() : new System.Collections.Generic.List<string>()))
                 .ForMember(dest => dest.PropertyTypes, opt => opt.Ignore())
                 .ForMember(dest => dest.SaleTypes, opt => opt.Ignore())
-                .ForMember(dest => dest.Improvements, opt => opt.Ignore());
+                .ForMember(dest => dest.Improvements, opt => opt.Ignore())
+                .ForMember(dest => dest.Provinces, opt => opt.Ignore())
+                .ForMember(dest => dest.Municipalities, opt => opt.Ignore());
 
             #endregion
 
@@ -77,6 +105,9 @@ namespace RealEstateApp.Core.Application.Mappings
 
             CreateMap<Domain.Entities.PropertyType, PropertyTypeDto>()
                 .ForMember(dest => dest.PropertiesCount, opt => opt.MapFrom(src => src.Properties != null ? src.Properties.Count : 0));
+
+            CreateMap<VmPropertyType.PropertyTypeViewModel, PropertyTypeDto>().ReverseMap();
+            CreateMap<VmPropertyType.SavePropertyTypeViewModel, PropertyTypeDto>().ReverseMap();
 
             CreateMap<VmPropertyType.SavePropertyTypeViewModel, Domain.Entities.PropertyType>()
                 .ForMember(dest => dest.Properties, opt => opt.Ignore());
@@ -93,6 +124,9 @@ namespace RealEstateApp.Core.Application.Mappings
             CreateMap<Domain.Entities.SaleType, SaleTypeDto>()
                 .ForMember(dest => dest.PropertiesCount, opt => opt.MapFrom(src => src.Properties != null ? src.Properties.Count : 0));
 
+            CreateMap<VmSaleType.SaleTypeViewModel, SaleTypeDto>().ReverseMap();
+            CreateMap<VmSaleType.SaveSaleTypeViewModel, SaleTypeDto>().ReverseMap();
+
             CreateMap<VmSaleType.SaveSaleTypeViewModel, Domain.Entities.SaleType>()
                 .ForMember(dest => dest.Properties, opt => opt.Ignore());
 
@@ -105,6 +139,9 @@ namespace RealEstateApp.Core.Application.Mappings
             CreateMap<Domain.Entities.Improvement, VmImprovement.ImprovementViewModel>();
 
             CreateMap<Domain.Entities.Improvement, ImprovementDto>();
+
+            CreateMap<VmImprovement.ImprovementViewModel, ImprovementDto>().ReverseMap();
+            CreateMap<VmImprovement.SaveImprovementViewModel, ImprovementDto>().ReverseMap();
 
             CreateMap<VmImprovement.SaveImprovementViewModel, Domain.Entities.Improvement>()
                 .ForMember(dest => dest.PropertyImprovements, opt => opt.Ignore());
@@ -119,6 +156,7 @@ namespace RealEstateApp.Core.Application.Mappings
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
                 .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : string.Empty))
                 .ForMember(dest => dest.PropertyPrice, opt => opt.MapFrom(src => src.Property != null ? src.Property.Price : 0))
+                .ForMember(dest => dest.AgentId, opt => opt.MapFrom(src => src.Property != null ? src.Property.AgentId : string.Empty))
                 .ForMember(dest => dest.ClienteName, opt => opt.Ignore()); // Se resuelve en el servicio
 
             CreateMap<SaveOfferViewModel, Offer>()
@@ -174,11 +212,82 @@ namespace RealEstateApp.Core.Application.Mappings
 
             #region PropertyAppointment
 
+<<<<<<< HEAD
             CreateMap<PropertyAppointment, RealEstateApp.Core.Application.ViewModels.Appointment.PropertyAppointmentViewModel>()
                 .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : string.Empty))
                 .ForMember(dest => dest.PropertyName, opt => opt.MapFrom(src => src.Property != null ? src.Property.Name : string.Empty))
                 .ForMember(dest => dest.PropertyTypeName, opt => opt.MapFrom(src => src.Property != null && src.Property.PropertyType != null ? src.Property.PropertyType.Name : string.Empty))
                 .ForMember(dest => dest.PropertyImage, opt => opt.MapFrom(src => src.Property != null && src.Property.Images != null && src.Property.Images.Any() ? src.Property.Images.First().ImageUrl : null));
+=======
+            CreateMap<PropertyAppointment, RealEstateApp.Core.Application.ViewModels.Appointment.AppointmentViewModel>()
+                .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : string.Empty))
+                .ForMember(dest => dest.PropertyName, opt => opt.MapFrom(src => src.Property != null ? src.Property.Name : string.Empty))
+                .ForMember(dest => dest.PropertyMainImage, opt => opt.MapFrom(src =>
+                    src.Property != null && src.Property.Images != null && src.Property.Images.Any()
+                        ? src.Property.Images.First().ImageUrl
+                        : null))
+                .ForMember(dest => dest.ClienteName, opt => opt.Ignore())
+                .ForMember(dest => dest.AgentName, opt => opt.Ignore())
+                .ForMember(dest => dest.StatusFormatted, opt => opt.Ignore());
+
+            #endregion
+
+            #region SavedSearch
+
+            CreateMap<SavedSearch, RealEstateApp.Core.Application.ViewModels.SavedSearch.SavedSearchViewModel>()
+                .ForMember(dest => dest.PropertyTypeName, opt => opt.MapFrom(src => src.PropertyType != null ? src.PropertyType.Name : null))
+                .ForMember(dest => dest.SaleTypeName, opt => opt.MapFrom(src => src.SaleType != null ? src.SaleType.Name : null))
+                .ForMember(dest => dest.ProvinceName, opt => opt.MapFrom(src => src.Province != null ? src.Province.Name : null))
+                .ForMember(dest => dest.MunicipalityName, opt => opt.MapFrom(src => src.Municipality != null ? src.Municipality.Name : null))
+                .ForMember(dest => dest.SummaryCriteria, opt => opt.Ignore())
+                .ForMember(dest => dest.CurrentMatchingCount, opt => opt.Ignore());
+
+            CreateMap<RealEstateApp.Core.Application.ViewModels.SavedSearch.SaveSavedSearchViewModel, SavedSearch>()
+                .ForMember(dest => dest.PropertyType, opt => opt.Ignore())
+                .ForMember(dest => dest.SaleType, opt => opt.Ignore())
+                .ForMember(dest => dest.Province, opt => opt.Ignore())
+                .ForMember(dest => dest.Municipality, opt => opt.Ignore())
+                .ForMember(dest => dest.LastAlertSent, opt => opt.Ignore())
+                .ForMember(dest => dest.Created, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
+                .ForMember(dest => dest.LastModified, opt => opt.Ignore())
+                .ForMember(dest => dest.LastModifiedBy, opt => opt.Ignore());
+
+            #endregion
+
+            #region AgentReview
+
+            CreateMap<AgentReview, RealEstateApp.Core.Application.ViewModels.Review.AgentReviewViewModel>()
+                .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : string.Empty))
+                .ForMember(dest => dest.PropertyName, opt => opt.MapFrom(src => src.Property != null ? src.Property.Name : string.Empty))
+                .ForMember(dest => dest.ClienteName, opt => opt.Ignore())
+                .ForMember(dest => dest.ClienteEmail, opt => opt.Ignore());
+
+            #endregion
+
+            #region Commission
+
+            CreateMap<Commission, RealEstateApp.Core.Application.ViewModels.Commission.CommissionViewModel>()
+                .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : string.Empty))
+                .ForMember(dest => dest.PropertyName, opt => opt.MapFrom(src => src.Property != null ? src.Property.Name : string.Empty))
+                .ForMember(dest => dest.AgentName, opt => opt.Ignore());
+
+            #endregion
+
+            #region PropertyDocument
+
+            CreateMap<PropertyDocument, RealEstateApp.Core.Application.ViewModels.Document.PropertyDocumentViewModel>()
+                .ForMember(dest => dest.PropertyCode, opt => opt.MapFrom(src => src.Property != null ? src.Property.Code : string.Empty))
+                .ForMember(dest => dest.PropertyName, opt => opt.MapFrom(src => src.Property != null ? src.Property.Name : string.Empty))
+                .ForMember(dest => dest.UploadedByName, opt => opt.Ignore());
+
+            #endregion
+
+            #region LeadPipeline
+
+            CreateMap<LeadPipeline, LeadPipelineDto>()
+                .ForMember(dest => dest.PropertyName, opt => opt.MapFrom(src => src.Property != null ? src.Property.Name : null));
+>>>>>>> feature/filtros-catalogo
 
             #endregion
         }

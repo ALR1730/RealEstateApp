@@ -14,36 +14,36 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
         {
         }
 
-        public async Task<List<PropertyAppointment>> GetByAgentIdAsync(string agentId)
+        public async Task<List<PropertyAppointment>> GetByPropertyIdAsync(int propertyId)
         {
             return await _dbContext.Set<PropertyAppointment>()
-                .Include(a => a.Property)
+                .AsNoTracking()
+                .Include(pa => pa.Property)
                     .ThenInclude(p => p!.Images)
-                .Include(a => a.Property)
-                    .ThenInclude(p => p!.PropertyType)
-                .Where(a => a.AgentId == agentId)
-                .OrderByDescending(a => a.AppointmentDate)
+                .Where(pa => pa.PropertyId == propertyId)
+                .OrderByDescending(pa => pa.AppointmentDate)
                 .ToListAsync();
         }
 
         public async Task<List<PropertyAppointment>> GetByClienteIdAsync(string clienteId)
         {
             return await _dbContext.Set<PropertyAppointment>()
-                .Include(a => a.Property)
+                .AsNoTracking()
+                .Include(pa => pa.Property)
                     .ThenInclude(p => p!.Images)
-                .Include(a => a.Property)
-                    .ThenInclude(p => p!.PropertyType)
-                .Where(a => a.ClienteId == clienteId)
-                .OrderByDescending(a => a.AppointmentDate)
+                .Where(pa => pa.ClienteId == clienteId)
+                .OrderByDescending(pa => pa.AppointmentDate)
                 .ToListAsync();
         }
 
-        public async Task<List<PropertyAppointment>> GetByPropertyIdAsync(int propertyId)
+        public async Task<List<PropertyAppointment>> GetByAgentIdAsync(string agentId)
         {
             return await _dbContext.Set<PropertyAppointment>()
-                .Include(a => a.Property)
-                .Where(a => a.PropertyId == propertyId)
-                .OrderByDescending(a => a.AppointmentDate)
+                .AsNoTracking()
+                .Include(pa => pa.Property)
+                    .ThenInclude(p => p!.Images)
+                .Where(pa => pa.AgentId == agentId)
+                .OrderByDescending(pa => pa.AppointmentDate)
                 .ToListAsync();
         }
     }

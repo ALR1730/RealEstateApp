@@ -40,9 +40,9 @@ graph TD
 
 | Rol | Usuario (Email) | Contraseña | Valor Demostrable |
 | :--- | :--- | :--- | :--- |
-| **Administrador** | `adminuser@realestate.com` | `Admin123!` | Dashboard de KPIs, reasignación de agentes y borrado seguro de publicaciones. |
-| **Agente** | `agentuser@realestate.com` | `Agent123!` | Publicación de propiedades, chat directo y aceptación de ofertas con cierre automático. |
-| **Cliente** | `clientuser@realestate.com` | `Client123!` | Simulación hipotecaria en RD$, favoritos, mensajería y envío de propuestas. |
+| **Administrador** | `admin@realestate.com` | `Admin123!` | Dashboard de KPIs, reasignación de agentes y borrado seguro de publicaciones. |
+| **Agente** | `agent@realestate.com` | `Agent123!` | Publicación de propiedades, chat directo y aceptación de ofertas con cierre automático. |
+| **Cliente** | `client@realestate.com` | `Client123!` | Simulación hipotecaria en RD$, favoritos, mensajería y envío de propuestas. |
 
 ---
 

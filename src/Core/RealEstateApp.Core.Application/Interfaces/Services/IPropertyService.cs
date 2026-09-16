@@ -37,5 +37,20 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         /// Reasigna una propiedad a un nuevo agente.
         /// </summary>
         Task ReassignAgent(int propertyId, string newAgentId);
+
+        /// <summary>
+        /// Alterna el estado de propiedad destacada (Featured) por una cantidad de días.
+        /// </summary>
+        Task ToggleFeaturedAsync(int propertyId, int durationDays = 30);
+
+        /// <summary>
+        /// Obtiene la lista de sectores únicos registrados en las propiedades de la base de datos.
+        /// </summary>
+        Task<List<string>> GetDistinctSectorsAsync(int? provinceId = null, int? municipalityId = null);
+
+        /// <summary>
+        /// Obtiene el historial de precios y análisis de tendencias de una propiedad.
+        /// </summary>
+        Task<List<PriceHistoryViewModel>> GetPriceHistoryAsync(int propertyId);
     }
 }

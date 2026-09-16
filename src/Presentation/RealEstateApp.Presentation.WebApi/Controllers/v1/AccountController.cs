@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -14,14 +15,16 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
     public class AccountController : BaseApiController
     {
         private readonly IAccountService _accountService;
+        private readonly IUserActivityService _userActivityService;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, IUserActivityService userActivityService)
         {
             _accountService = accountService;
+            _userActivityService = userActivityService;
         }
 
         /// <summary>
-        /// Inicia sesión y genera el token de autenticación JWT Bearer.
+        /// Inicia sesión y genera el token de autenticación JWT Bearer con roles y perfil de usuario.
         /// </summary>
         [HttpPost("authenticate")]
         [EnableRateLimiting("AuthPolicy")]
@@ -36,14 +39,42 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return BadRequest(response);
             }
 
-            // Validación de Seguridad Cruzada: Clientes y Agentes no pueden consumir la Web API REST
-            if (response.Roles != null && (response.Roles.Contains(Roles.Client.ToString()) || response.Roles.Contains(Roles.Agent.ToString())))
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Registra un nuevo usuario Cliente en la plataforma.
+        /// </summary>
+        [HttpPost("register-client")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegisterResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> RegisterClientAsync([FromBody] RegisterRequest request)
+        {
+            var origin = $"{Request.Scheme}://{Request.Host}";
+            var response = await _accountService.RegisterUserAsync(request, Roles.Client.ToString(), origin);
+
+            if (response.HasError)
             {
-                return BadRequest(new AuthenticationResponse
-                {
-                    HasError = true,
-                    Error = "Acceso Denegado: Las cuentas con rol Cliente o Agente no tienen permitido el acceso a los servicios REST de la Web API."
-                });
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Registra un nuevo usuario Agente Inmobiliario en la plataforma.
+        /// </summary>
+        [HttpPost("register-agent")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegisterResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> RegisterAgentAsync([FromBody] RegisterRequest request)
+        {
+            var origin = $"{Request.Scheme}://{Request.Host}";
+            var response = await _accountService.RegisterUserAsync(request, Roles.Agent.ToString(), origin);
+
+            if (response.HasError)
+            {
+                return BadRequest(response);
             }
 
             return Ok(response);
@@ -102,7 +133,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         public async Task<IActionResult> ConfirmEmailAsync([FromQuery] string userId, [FromQuery] string token)
         {
             var result = await _accountService.ConfirmAccountAsync(userId, token);
-            return Ok(result);
+            return Ok(new { message = result });
         }
 
         /// <summary>
@@ -155,6 +186,70 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             }
 
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Solicita el restablecimiento de contraseña vía correo electrónico.
+        /// </summary>
+        [HttpPost("forgot-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> ForgotPasswordAsync([FromBody] ForgotPasswordRequest request)
+        {
+            var origin = $"{Request.Scheme}://{Request.Host}";
+            var result = await _accountService.ForgotPasswordAsync(request, origin);
+            return Ok(new { message = result });
+        }
+
+        /// <summary>
+        /// Restablece la contraseña utilizando el token enviado por correo.
+        /// </summary>
+        [HttpPost("reset-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ResetPasswordAsync([FromBody] ResetPasswordRequest request)
+        {
+            var result = await _accountService.ResetPasswordAsync(request);
+            return Ok(new { message = result });
+        }
+
+        /// <summary>
+        /// Cambia la contraseña del usuario actualmente autenticado.
+        /// </summary>
+        [Authorize]
+        [HttpPost("change-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordViewModel model)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            model.Id = userId;
+            var result = await _accountService.ChangePasswordAsync(model);
+            if (result.HasError)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(new { success = true, message = "Contraseña actualizada exitosamente." });
+        }
+
+        /// <summary>
+        /// Obtiene el historial de actividad reciente del usuario autenticado.
+        /// </summary>
+        [Authorize]
+        [HttpGet("activity")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetActivityAsync()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var activities = await _userActivityService.GetRecentActivitiesAsync(userId, 50);
+            return Ok(activities.Select(a => new { id = a.Id, description = a.Description, timestamp = a.CreatedAt.ToString("o"), type = a.Action }));
         }
     }
 }

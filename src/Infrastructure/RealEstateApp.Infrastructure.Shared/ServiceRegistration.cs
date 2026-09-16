@@ -13,7 +13,7 @@ namespace RealEstateApp.Infrastructure.Shared
             services.AddTransient<IFileStorageService>(provider => new FileStorageService(webRootPath));
             services.AddTransient<IFinancingService, FinancingService>();
             services.AddTransient<IPaymentService, PaymentService>();
-            services.AddTransient<IWhatsAppService, WhatsAppService>();
+            services.AddSingleton<IWhatsAppService, WhatsAppService>();
         }
     }
 }

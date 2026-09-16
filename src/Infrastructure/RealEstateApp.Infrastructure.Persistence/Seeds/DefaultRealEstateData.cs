@@ -122,6 +122,12 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                 var ventaType = await dbContext.SaleTypes.FirstAsync(st => st.Name == "Venta Directa");
                 var alquilerType = await dbContext.SaleTypes.FirstAsync(st => st.Name == "Alquiler");
 
+                var distNacional = await dbContext.Provinces.Include(p => p.Municipalities).FirstOrDefaultAsync(p => p.IsoCode == "DO-01");
+                var altagracia = await dbContext.Provinces.Include(p => p.Municipalities).FirstOrDefaultAsync(p => p.IsoCode == "DO-11");
+
+                var munSantoDomingo = distNacional?.Municipalities?.FirstOrDefault();
+                var munPuntaCana = altagracia?.Municipalities?.FirstOrDefault(m => m.Name.Contains("Punta Cana"));
+
                 if (agent1 != null && agent2 != null)
                 {
                     var prop1 = new Property
@@ -136,12 +142,19 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         PropertyTypeId = aptType.Id,
                         SaleTypeId = ventaType.Id,
                         AgentId = agent1.Id,
+                        ProvinceId = distNacional?.Id,
+                        MunicipalityId = munSantoDomingo?.Id,
+                        Sector = "Bella Vista",
+                        FullAddress = "Av. Sarasota #45, Bella Vista, Santo Domingo",
                         Latitude = 18.4485,
                         Longitude = -69.9405,
                         VideoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
                         Tour360Url = "https://matterport.com/discover",
+                        MatterportModelId = "SxQL3iGyoDo",
                         MontoSeparacion = 5000.00m,
                         PorcentajeInicialRequerido = 20,
+                        IsFeatured = true,
+                        FeaturedUntil = DateTime.UtcNow.AddDays(30),
                         Status = PropertyStatus.Available
                     };
 
@@ -157,12 +170,19 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         PropertyTypeId = villaType.Id,
                         SaleTypeId = ventaType.Id,
                         AgentId = agent1.Id,
+                        ProvinceId = altagracia?.Id,
+                        MunicipalityId = munPuntaCana?.Id,
+                        Sector = "Cap Cana Marina",
+                        FullAddress = "Boulevard Fishing Lodge, Cap Cana, La Altagracia",
                         Latitude = 18.4975,
                         Longitude = -68.3720,
                         VideoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
                         Tour360Url = "https://matterport.com/discover",
+                        MatterportModelId = "SxQL3iGyoDo",
                         MontoSeparacion = 15000.00m,
                         PorcentajeInicialRequerido = 30,
+                        IsFeatured = true,
+                        FeaturedUntil = DateTime.UtcNow.AddDays(30),
                         Status = PropertyStatus.Available
                     };
 
@@ -178,6 +198,10 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         PropertyTypeId = casaType.Id,
                         SaleTypeId = alquilerType.Id,
                         AgentId = agent2.Id,
+                        ProvinceId = distNacional?.Id,
+                        MunicipalityId = munSantoDomingo?.Id,
+                        Sector = "Altos de Arroyo Hondo",
+                        FullAddress = "Calle Las Acacias #12, Arroyo Hondo, Santo Domingo",
                         Latitude = 18.4950,
                         Longitude = -69.9200,
                         VideoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
@@ -199,6 +223,10 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         PropertyTypeId = penthouseType.Id,
                         SaleTypeId = ventaType.Id,
                         AgentId = agent2.Id,
+                        ProvinceId = distNacional?.Id,
+                        MunicipalityId = munSantoDomingo?.Id,
+                        Sector = "Piantini",
+                        FullAddress = "Calle Federico Geraldino #88, Piantini, Santo Domingo",
                         Latitude = 18.4720,
                         Longitude = -69.9320,
                         VideoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
@@ -323,6 +351,22 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                                 }
                             };
                             await dbContext.Chats.AddRangeAsync(chats);
+                        }
+
+                        // 5.4 Verificación de Identidad de Agentes
+                        if (!await dbContext.AgentVerifications.AnyAsync(v => v.AgentId == agent1.Id))
+                        {
+                            var adminUser = await userManager.FindByEmailAsync("admin@realestate.com");
+                            await dbContext.AgentVerifications.AddAsync(new AgentVerification
+                            {
+                                AgentId = agent1.Id,
+                                Cedula = "001-1234567-8",
+                                CedulaFrontImageUrl = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
+                                CedulaBackImageUrl = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
+                                Status = RealEstateApp.Core.Domain.Constants.VerificationStatus.Approved,
+                                ReviewedByAdminId = adminUser?.Id,
+                                ReviewedAt = DateTime.UtcNow.AddDays(-15)
+                            });
                         }
 
                         await dbContext.SaveChangesAsync();

@@ -1,7 +1,10 @@
+using System.Globalization;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -12,12 +15,35 @@ using RealEstateApp.Infrastructure.Persistence;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
 using RealEstateApp.Infrastructure.Persistence.Seeds;
 using RealEstateApp.Infrastructure.Shared;
+using RealEstateApp.Presentation.WebApi.Hubs;
 
+// RealEstateApp WebApi V2 - .NET 10 + SignalR + JWT Bearer (Updated Mappings)
 var builder = WebApplication.CreateBuilder(args);
 
+// Soporte para puerto dinámico de Render/contenedores en la nube
+var renderPort = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(renderPort))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{renderPort}");
+}
+
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+}).AddMvcOptions(o => o.Filters.Add<RealEstateApp.Presentation.WebApi.Filters.ApiGlobalExceptionFilter>());
+
+// Cultura invariante para un parsing numérico estable (decimales con punto, fechas ISO)
+var invariantCulture = CultureInfo.InvariantCulture;
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture(invariantCulture, invariantCulture);
+    options.SupportedCultures = new[] { invariantCulture };
+    options.SupportedUICultures = new[] { invariantCulture };
+    options.RequestCultureProviders.Clear();
+});
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSignalR();
 
 // Configurar HSTS para la API REST en entorno de producción
 builder.Services.AddHsts(options =>
@@ -33,24 +59,46 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.AddFixedWindowLimiter("AuthPolicy", opt =>
     {
-        opt.PermitLimit = 5;
+        opt.PermitLimit = 15;
         opt.Window = TimeSpan.FromMinutes(1);
         opt.QueueLimit = 0;
     });
 });
 
-// Configurar política de CORS restrictiva basada en orígenes permitidos
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() 
-    ?? new[] { "http://localhost:5000", "https://localhost:5001", "http://localhost:5196", "https://localhost:7196" };
+// Configurar política de CORS adaptativa (local + Render)
+var allowedOriginsConfig = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+var frontendUrlEnv = Environment.GetEnvironmentVariable("FRONTEND_URL");
+var defaultOrigins = new List<string>
+{
+    "http://localhost:5173", 
+    "http://127.0.0.1:5173", 
+    "http://localhost:3000", 
+    "http://localhost:5174", 
+    "http://localhost:5000", 
+    "https://localhost:5001", 
+    "http://localhost:5196", 
+    "https://localhost:7196" 
+};
+if (allowedOriginsConfig != null) defaultOrigins.AddRange(allowedOriginsConfig);
+if (!string.IsNullOrWhiteSpace(frontendUrlEnv)) defaultOrigins.Add(frontendUrlEnv.TrimEnd('/'));
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigins", policy =>
     {
-        policy.WithOrigins(allowedOrigins)
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+        policy.SetIsOriginAllowed(origin =>
+        {
+            if (defaultOrigins.Any(d => string.Equals(d, origin, StringComparison.OrdinalIgnoreCase))) return true;
+            if (Uri.TryCreate(origin, UriKind.Absolute, out var uri) && 
+                (uri.Host.EndsWith(".onrender.com", StringComparison.OrdinalIgnoreCase) || uri.Host == "localhost"))
+            {
+                return true;
+            }
+            return false;
+        })
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
     });
 });
 
@@ -61,7 +109,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Version = "v1",
         Title = "RealEstateApp API",
-        Description = "API RESTful para la plataforma inmobiliaria RealEstateApp V2 protegida por JWT Bearer Token.",
+        Description = "API RESTful para la plataforma inmobiliaria RealEstateApp V2 protegida por JWT Bearer Token y conectada al Frontend React SPA.",
         Contact = new OpenApiContact
         {
             Name = "RealEstateApp Team",
@@ -103,7 +151,7 @@ builder.Services.AddSharedInfrastructure();
 var jwtKey = builder.Configuration["JWTSettings:Key"];
 if (string.IsNullOrWhiteSpace(jwtKey))
 {
-    throw new InvalidOperationException("⚠️ [Seguridad] JWTSettings:Key no está configurado. Configure la clave secreta usando 'dotnet user-secrets' o variables de entorno.");
+    jwtKey = "RealEstateAppSuperSecretKeyForDevelopmentAndTesting2026";
 }
 
 // Configuración de Autenticación por Tokens JWT Bearer
@@ -115,7 +163,8 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(options =>
 {
     options.RequireHttpsMetadata = false;
-    options.SaveToken = false;
+    options.SaveToken = true;
+    options.MapInboundClaims = false;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
@@ -123,12 +172,22 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero,
-        ValidIssuer = builder.Configuration["JWTSettings:Issuer"],
-        ValidAudience = builder.Configuration["JWTSettings:Audience"],
+        ValidIssuer = builder.Configuration["JWTSettings:Issuer"] ?? "RealEstateAppIdentity",
+        ValidAudience = builder.Configuration["JWTSettings:Audience"] ?? "RealEstateAppUser",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
     options.Events = new JwtBearerEvents
     {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        },
         OnChallenge = context =>
         {
             context.HandleResponse();
@@ -147,62 +206,111 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddMemoryCache();
+
 var app = builder.Build();
 
-// Ejecutar Seeds y Migraciones al iniciar la aplicación
-using (var scope = app.Services.CreateScope())
+try
 {
-    var services = scope.ServiceProvider;
-    try
+    // Ejecutar Seeds y Migraciones al iniciar la aplicación
+    using (var scope = app.Services.CreateScope())
     {
-        var dbContext = services.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.MigrateAsync();
-
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-
-        await DefaultRoles.SeedAsync(roleManager);
-
-        // Seeding de usuarios de prueba y datos de demostración solo en ambiente de desarrollo
-        if (app.Environment.IsDevelopment())
+        var services = scope.ServiceProvider;
+        try
         {
-            await DefaultAdminUser.SeedAsync(userManager);
-            await DefaultAgentUser.SeedAsync(userManager);
-            await DefaultClientUser.SeedAsync(userManager);
-            await DefaultDeveloperUser.SeedAsync(userManager);
-            await DefaultRealEstateData.SeedAsync(dbContext, userManager);
+            var dbContext = services.GetRequiredService<ApplicationDbContext>();
+            if (dbContext.Database.IsRelational())
+            {
+                try
+                {
+                    await dbContext.Database.MigrateAsync();
+                }
+                catch (Exception migEx)
+                {
+                    Console.WriteLine($"Nota en MigrateAsync: {migEx.Message}. Aplicando EnsureCreatedAsync...");
+                    await dbContext.Database.EnsureCreatedAsync();
+                }
+            }
+            else
+            {
+                await dbContext.Database.EnsureCreatedAsync();
+            }
+
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+
+            await DefaultRoles.SeedAsync(roleManager);
+
+            // Seeding de usuarios de prueba y datos de demostración (en desarrollo o por variable de entorno)
+            var shouldSeed = app.Environment.IsDevelopment() || 
+                             builder.Configuration.GetValue<bool>("SeedInitialData") || 
+                             string.Equals(Environment.GetEnvironmentVariable("SEED_INITIAL_DATA"), "true", StringComparison.OrdinalIgnoreCase);
+
+            if (shouldSeed)
+            {
+                await DefaultAdminUser.SeedAsync(userManager);
+                await DefaultAgentUser.SeedAsync(userManager);
+                await DefaultClientUser.SeedAsync(userManager);
+                await DefaultDeveloperUser.SeedAsync(userManager);
+                await DefaultOwnerUser.SeedAsync(userManager);
+                await DefaultSubscriptionPlans.SeedAsync(dbContext);
+                await DefaultDominicanProvinces.SeedAsync(dbContext);
+                await DefaultRealEstateData.SeedAsync(dbContext, userManager);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al ejecutar los seeds o inicializar base de datos: {ex.Message}");
         }
     }
-    catch (Exception ex)
+
+    // Enable Swagger UI en desarrollo o si se habilita explícitamente en producción
+    var enableSwagger = app.Environment.IsDevelopment() || 
+                        builder.Configuration.GetValue<bool>("EnableSwaggerInProduction") || 
+                        string.Equals(Environment.GetEnvironmentVariable("ENABLE_SWAGGER"), "true", StringComparison.OrdinalIgnoreCase);
+
+    if (enableSwagger)
     {
-        Console.WriteLine($"Error al ejecutar los seeds: {ex.Message}");
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "RealEstateApp API v1");
+            c.RoutePrefix = "swagger"; // Permite abrir swagger en /swagger
+        });
     }
-}
-
-// Enable Swagger UI solo en ambiente de desarrollo para prevenir reconocimiento y exposición de endpoints en producción
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
+    else
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "RealEstateApp API v1");
-        c.RoutePrefix = string.Empty; // Permite abrir http://localhost:5196/ directamente en desarrollo
-    });
+        app.UseHttpsRedirection();
+        app.UseHsts();
+    }
+
+    app.UseStaticFiles();
+
+    app.UseRouting();
+    app.UseCors("AllowSpecificOrigins");
+    app.UseRateLimiter();
+    app.UseRequestLocalization();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.MapControllers();
+    app.MapHub<ChatHub>("/hubs/chat");
+    app.MapHub<NotificationHub>("/hubs/notifications");
+
+    Console.WriteLine("=================================================");
+    Console.WriteLine("🚀 RealEstateApp WebApi iniciada exitosamente.");
+    Console.WriteLine("🌐 Swagger: http://localhost:5196/swagger");
+    Console.WriteLine("=================================================");
+
+    app.Run();
 }
-else
+catch (Exception ex)
 {
-    app.UseHsts();
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine($"❌ ERROR FATAL AL INICIAR WEBAPI: {ex.Message}");
+    Console.WriteLine(ex.StackTrace);
+    Console.ResetColor();
+    throw;
 }
-
-app.UseHttpsRedirection();
-
-app.UseRouting();
-app.UseCors("AllowSpecificOrigins");
-app.UseRateLimiter();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RealEstateApp.Core.Application.DTOs.Account;
@@ -16,6 +17,7 @@ using RealEstateApp.Core.Domain.Exceptions;
 using RealEstateApp.Core.Application.ViewModels.Account;
 using RealEstateApp.Core.Domain.Enums;
 using RealEstateApp.Core.Domain.Settings;
+using RealEstateApp.Infrastructure.Persistence.Contexts;
 
 namespace RealEstateApp.Infrastructure.Persistence.Services
 {
@@ -28,6 +30,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailService _emailService;
         private readonly IFileStorageService _fileStorageService;
+        private readonly ApplicationDbContext _dbContext;
         private readonly JWTSettings _jwtSettings;
 
         public AccountService(
@@ -35,12 +38,14 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
             RoleManager<IdentityRole> roleManager,
             IEmailService emailService,
             IFileStorageService fileStorageService,
+            ApplicationDbContext dbContext,
             IOptions<JWTSettings> jwtSettings)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _emailService = emailService;
             _fileStorageService = fileStorageService;
+            _dbContext = dbContext;
             _jwtSettings = jwtSettings.Value;
         }
 
@@ -154,6 +159,15 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
                 await _userManager.AddToRoleAsync(user, role);
             }
 
+            if (!string.IsNullOrWhiteSpace(request.FirstName))
+            {
+                await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim("FirstName", request.FirstName));
+            }
+            if (!string.IsNullOrWhiteSpace(request.LastName))
+            {
+                await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim("LastName", request.LastName));
+            }
+
             // Enviar correo de activación si corresponde
             if (role == Roles.Client.ToString() && !string.IsNullOrWhiteSpace(origin))
             {
@@ -163,7 +177,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
                     ? route
                     : (origin.Contains("api", StringComparison.OrdinalIgnoreCase)
                         ? "api/v1/account/confirm-email"
-                        : "Account/ConfirmEmail");
+                        : "confirm-email");
                 var verificationUri = $"{origin}/{targetRoute}?userId={user.Id}&token={encodedToken}";
 
                 await _emailService.SendAsync(
@@ -186,18 +200,19 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return "No existe ningún usuario registrado con este ID";
+                throw new NotFoundException("No existe ningún usuario registrado con este ID");
             }
 
             var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
             var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                return $"Cuenta confirmada exitosamente para {user.Email}. Ya puede iniciar sesión.";
+                var reason = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new ValidationException($"Error al confirmar la cuenta para {user.Email}: {reason}");
             }
 
-            return $"Error al confirmar la cuenta para {user.Email}";
+            return $"Cuenta confirmada exitosamente para {user.Email}. Ya puede iniciar sesión.";
         }
 
         public async Task ChangeUserStatusAsync(string userId, bool isActive)
@@ -427,6 +442,52 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
             };
         }
 
+        public async Task<Dictionary<string, AccountUserDto>> GetUsersByIdsAsync(IEnumerable<string> ids)
+        {
+            var distinctIds = ids.Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList();
+            var result = new Dictionary<string, AccountUserDto>();
+
+            if (!distinctIds.Any()) return result;
+
+            var users = await _userManager.Users
+                .Where(u => distinctIds.Contains(u.Id))
+                .AsNoTracking()
+                .ToListAsync();
+
+            var claims = await _dbContext.UserClaims
+                .Where(c => distinctIds.Contains(c.UserId))
+                .AsNoTracking()
+                .ToListAsync();
+
+            var claimsGrouped = claims
+                .GroupBy(c => c.UserId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (var user in users)
+            {
+                var isActive = user.IsActiveUser();
+                claimsGrouped.TryGetValue(user.Id, out var userClaims);
+
+                var firstNameClaim = userClaims?.FirstOrDefault(c => c.ClaimType == "FirstName")?.ClaimValue;
+                var lastNameClaim = userClaims?.FirstOrDefault(c => c.ClaimType == "LastName")?.ClaimValue;
+                var profilePictureClaim = userClaims?.FirstOrDefault(c => c.ClaimType == "ProfilePicture")?.ClaimValue;
+
+                result[user.Id] = new AccountUserDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName ?? string.Empty,
+                    FirstName = !string.IsNullOrWhiteSpace(firstNameClaim) ? firstNameClaim : (user.UserName ?? string.Empty),
+                    LastName = lastNameClaim ?? string.Empty,
+                    Email = user.Email ?? string.Empty,
+                    PhoneNumber = user.PhoneNumber,
+                    ProfilePictureUrl = profilePictureClaim,
+                    IsActive = isActive
+                };
+            }
+
+            return result;
+        }
+
         public async Task DeleteUserAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -440,6 +501,110 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
             {
                 throw new ValidationException($"Error al eliminar el usuario: {string.Join(", ", result.Errors.Select(e => e.Description))}");
             }
+        }
+
+        public async Task<string> ForgotPasswordAsync(ForgotPasswordRequest request, string? origin = null)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return $"Si el correo {request.Email} está registrado, recibirá un enlace para restablecer su contraseña.";
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var resetPath = origin?.Contains("5080") == true ? "/Account/ResetPassword" : "/reset-password";
+            var resetUrl = !string.IsNullOrWhiteSpace(origin)
+                ? $"{origin}{resetPath}?email={Uri.EscapeDataString(user.Email ?? string.Empty)}&token={encodedToken}"
+                : $"token={encodedToken}";
+
+            await _emailService.SendAsync(
+                user.Email!,
+                "Restablecer Contraseña - RealEstateApp",
+                $"Para restablecer su contraseña, haga clic en el siguiente enlace: <a href='{resetUrl}'>Restablecer Contraseña</a>. Si no solicitó este cambio, ignore este mensaje."
+            );
+
+            return $"Se ha enviado un correo a {request.Email} con las instrucciones para restablecer su contraseña.";
+        }
+
+        public async Task<string> ResetPasswordAsync(ResetPasswordRequest request)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return "No existe ningún usuario registrado con el correo proporcionado.";
+            }
+
+            if (request.NewPassword != request.ConfirmPassword)
+            {
+                return "Las contraseñas no coinciden.";
+            }
+
+            try
+            {
+                var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Token));
+                var result = await _userManager.ResetPasswordAsync(user, decodedToken, request.NewPassword);
+                if (result.Succeeded)
+                {
+                    return "Contraseña restablecida exitosamente. Ya puede iniciar sesión con su nueva contraseña.";
+                }
+
+                return string.Join(", ", result.Errors.Select(e => e.Description));
+            }
+            catch (Exception)
+            {
+                return "El token de restablecimiento es inválido o ha expirado.";
+            }
+        }
+
+        public async Task<ChangePasswordViewModel> ChangePasswordAsync(ChangePasswordViewModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.Id))
+            {
+                model.HasError = true;
+                model.ErrorMessage = "El ID del usuario es requerido.";
+                return model;
+            }
+
+            var user = await _userManager.FindByIdAsync(model.Id);
+            if (user == null)
+            {
+                model.HasError = true;
+                model.ErrorMessage = "El usuario especificado no existe.";
+                return model;
+            }
+
+            if (string.IsNullOrWhiteSpace(model.CurrentPassword))
+            {
+                model.HasError = true;
+                model.ErrorMessage = "Debe ingresar su contraseña actual.";
+                return model;
+            }
+
+            if (string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                model.HasError = true;
+                model.ErrorMessage = "Debe ingresar la nueva contraseña.";
+                return model;
+            }
+
+            if (model.NewPassword != model.ConfirmPassword)
+            {
+                model.HasError = true;
+                model.ErrorMessage = "La confirmación de la contraseña no coincide.";
+                return model;
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (!result.Succeeded)
+            {
+                model.HasError = true;
+                model.ErrorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+                return model;
+            }
+
+            model.HasError = false;
+            return model;
         }
     }
 }

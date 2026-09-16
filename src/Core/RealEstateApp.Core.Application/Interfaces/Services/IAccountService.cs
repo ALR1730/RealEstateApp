@@ -21,6 +21,10 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         Task<EditProfileViewModel> UpdateProfileAsync(EditProfileViewModel model);
         Task<List<AccountUserDto>> GetUsersInRoleAsync(string roleName);
         Task<AccountUserDto?> GetUserByIdAsync(string id);
+        Task<Dictionary<string, AccountUserDto>> GetUsersByIdsAsync(IEnumerable<string> ids);
         Task DeleteUserAsync(string userId);
+        Task<string> ForgotPasswordAsync(ForgotPasswordRequest request, string? origin = null);
+        Task<string> ResetPasswordAsync(ResetPasswordRequest request);
+        Task<ChangePasswordViewModel> ChangePasswordAsync(ChangePasswordViewModel model);
     }
 }

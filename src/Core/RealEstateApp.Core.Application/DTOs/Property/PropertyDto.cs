@@ -23,6 +23,16 @@ namespace RealEstateApp.Core.Application.DTOs.Property
         public string SaleTypeName { get; set; } = string.Empty;
         public int SaleTypeId { get; set; }
 
+        public int? ProvinceId { get; set; }
+        public string? ProvinceName { get; set; }
+        public int? MunicipalityId { get; set; }
+        public string? MunicipalityName { get; set; }
+        public string? Sector { get; set; }
+        public string? FullAddress { get; set; }
+
+        public bool IsFeatured { get; set; }
+        public System.DateTime? FeaturedUntil { get; set; }
+
         [Range(0.01, double.MaxValue)]
         public decimal Price { get; set; }
 
@@ -51,6 +61,8 @@ namespace RealEstateApp.Core.Application.DTOs.Property
 
         [Url]
         public string? Tour360Url { get; set; }
+
+        public string? MatterportModelId { get; set; }
 
         [Range(0, double.MaxValue)]
         public decimal MontoSeparacion { get; set; }
