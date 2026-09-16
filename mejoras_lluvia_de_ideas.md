@@ -55,13 +55,8 @@
 - **Mejora**: Flujo bidireccional donde el agente propone un nuevo monto/términos y el cliente decide aceptar (ejecutando venta en cascada) o rechazar la propuesta.
 
 ### 2.2 Agenda de Visitas / Calendario de Citas [✅ Implementado]
-<<<<<<< HEAD
-- **Estado actual**: ✅ Implementado con la entidad `PropertyAppointment`, repositorio/servicio `IAppointmentService`, integrador de **FullCalendar.js** en `Views/Appointments/AgentCalendar.cshtml`, gestión de solicitudes en `Views/Appointments/MyAppointments.cshtml` y modal en `Views/Home/Details.cshtml`.
-- **Mejora**: Sistema completo de agendamiento de visitas presenciales con estados en tiempo real (Pendiente, Confirmada, Cancelada, Completada) y calendario interactivo ejecutivo para agentes.
-=======
 - **Estado actual**: ✅ Implementado con la entidad `PropertyAppointment`, repositorio `AppointmentRepository`, servicio `AppointmentService`, controlador `AppointmentsController` y vistas interactivas con **FullCalendar.js** en `Views/Appointments/AgentCalendar.cshtml` y `Views/Appointments/MyAppointments.cshtml`.
 - **Mejora**: Flujo completo de solicitud de citas presenciales desde `Home/Details.cshtml`, gestión de estado (Pendiente, Confirmada, Cancelada, Completada) por parte del agente y auditoría automática en la línea de tiempo del usuario.
->>>>>>> feature/filtros-catalogo
 
 ### 2.3 Calculadora y Seguimiento de Comisiones
 - Cálculo automático de la comisión del agente (configurable por porcentaje).

@@ -27,8 +27,6 @@ namespace RealEstateApp.Core.Application
             services.AddTransient<IAgentService, AgentService>();
             services.AddTransient<IUserActivityService, UserActivityService>();
             services.AddTransient<IAppointmentService, AppointmentService>();
-<<<<<<< HEAD
-=======
             services.AddTransient<IAgentVerificationService, AgentVerificationService>();
             services.AddTransient<ISubscriptionService, SubscriptionService>();
             services.AddTransient<ICurrencyService, CurrencyService>();
@@ -41,7 +39,6 @@ namespace RealEstateApp.Core.Application
             services.AddTransient<ICommissionService, CommissionService>();
             services.AddTransient<IPropertyDocumentService, PropertyDocumentService>();
             services.AddTransient<IAiSearchService, AiSearchService>();
->>>>>>> feature/filtros-catalogo
 
             #endregion
         }
