@@ -1,3 +1,8 @@
+---
+trigger: always_on
+description: Norma de Calidad y Pruebas Unitarias Continuas
+---
+
 # Norma de Calidad y Pruebas Unitarias Continuas
 
 ## 1. Política Mandatoria

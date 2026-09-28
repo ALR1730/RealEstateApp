@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "sequential-thinking": {
+      "command": "C:/Program Files/nodejs/node.exe",
+      "args": [
+        "C:/Users/DELL/AppData/Roaming/npm/node_modules/@modelcontextprotocol/server-sequential-thinking/dist/index.js"
+      ]
+    },
+    "shadcn": {
+      "command": "C:/Program Files/nodejs/node.exe",
+      "args": [
+        "C:/Users/DELL/AppData/Roaming/npm/node_modules/shadcn-ui-mcp-server/build/index.js"
+      ]
+    },
+    "context7": {
+      "command": "C:/Program Files/nodejs/node.exe",
+      "args": [
+        "C:/Users/DELL/AppData/Roaming/npm/node_modules/@upstash/context7-mcp/dist/index.js"
+      ]
+    }
+  }
+}
