@@ -101,6 +101,15 @@ namespace RealEstateApp.UnitTests.Services
         public async Task ChangeStatusAsync_DebeInvocarAccountService()
         {
             // Arrange
+            var agentUser = new AccountUserDto
+            {
+                Id = "agent-1",
+                Roles = new List<string> { RealEstateApp.Core.Domain.Enums.Roles.Agent.ToString() }
+            };
+
+            _accountServiceMock.Setup(a => a.GetUserByIdAsync("agent-1"))
+                .ReturnsAsync(agentUser);
+
             _accountServiceMock.Setup(a => a.ChangeUserStatusAsync("agent-1", false))
                 .Returns(Task.CompletedTask);
 
@@ -109,6 +118,20 @@ namespace RealEstateApp.UnitTests.Services
 
             // Assert
             _accountServiceMock.Verify(a => a.ChangeUserStatusAsync("agent-1", false), Times.Once);
+        }
+
+        [Fact]
+        public async Task ChangeStatusAsync_DebeLanzarNotFoundException_CuandoAgenteNoExiste()
+        {
+            // Arrange
+            _accountServiceMock.Setup(a => a.GetUserByIdAsync("agent-999"))
+                .ReturnsAsync((AccountUserDto?)null);
+
+            // Act
+            var act = async () => await _sut.ChangeStatusAsync("agent-999", false);
+
+            // Assert
+            await act.Should().ThrowAsync<RealEstateApp.Core.Domain.Exceptions.NotFoundException>();
         }
 
         [Fact]

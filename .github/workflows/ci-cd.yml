@@ -27,7 +27,7 @@ jobs:
         run: dotnet build RealEstateApp.slnx --no-restore -c Release
 
       - name: Run Backend Unit Tests (xUnit)
-        run: dotnet test RealEstateApp.slnx --no-build -c Release --verbosity normal
+        run: dotnet test RealEstateApp.slnx --no-build -c Release --verbosity normal --logger "console;verbosity=detailed"
 
   test-frontend:
     name: Frontend (React 18 + Vite) - Lint, Test & Build
