@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.AspNetCore.Identity;
 using Moq;
+using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
+using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.Services;
 using RealEstateApp.Core.Application.ViewModels.Review;
 using RealEstateApp.Core.Domain.Entities;
@@ -19,16 +18,20 @@ namespace RealEstateApp.UnitTests.Services
     public class ReviewServiceTests
     {
         private readonly Mock<IReviewRepository> _reviewRepositoryMock;
-        private readonly Mock<UserManager<IdentityUser>> _userManagerMock;
+        private readonly Mock<IAccountService> _accountServiceMock;
         private readonly ReviewService _sut;
 
         public ReviewServiceTests()
         {
             _reviewRepositoryMock = new Mock<IReviewRepository>();
-            var store = new Mock<IUserStore<IdentityUser>>();
-            _userManagerMock = new Mock<UserManager<IdentityUser>>(
-                store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
-            _sut = new ReviewService(_reviewRepositoryMock.Object, _userManagerMock.Object);
+            _accountServiceMock = new Mock<IAccountService>();
+
+            // Default: batch lookup retorna diccionario vacío
+            _accountServiceMock
+                .Setup(a => a.GetUsersByIdsAsync(It.IsAny<IEnumerable<string>>()))
+                .ReturnsAsync(new Dictionary<string, AccountUserDto>());
+
+            _sut = new ReviewService(_reviewRepositoryMock.Object, _accountServiceMock.Object);
         }
 
         [Fact]
@@ -131,10 +134,10 @@ namespace RealEstateApp.UnitTests.Services
             // Arrange
             var reviews = new List<AgentReview>
             {
-                new AgentReview { AgentId = "agent-1", Rating = 5 },
-                new AgentReview { AgentId = "agent-1", Rating = 5 },
-                new AgentReview { AgentId = "agent-1", Rating = 4 },
-                new AgentReview { AgentId = "agent-1", Rating = 1 }
+                new() { AgentId = "agent-1", Rating = 5 },
+                new() { AgentId = "agent-1", Rating = 5 },
+                new() { AgentId = "agent-1", Rating = 4 },
+                new() { AgentId = "agent-1", Rating = 1 }
             };
             _reviewRepositoryMock.Setup(r => r.GetByAgentIdAsync("agent-1")).ReturnsAsync(reviews);
 
@@ -150,39 +153,43 @@ namespace RealEstateApp.UnitTests.Services
         }
 
         [Fact]
-        public async Task GetReviewsByAgentAsync_ResuelveIdentidadDelCliente()
+        public async Task GetReviewsByAgentAsync_DebeHacerBatchLookupDeClientes_SinN1()
         {
-            // Arrange
-            var review = new AgentReview
+            // Arrange — 2 reviews del mismo agente con clientes distintos
+            var reviews = new List<AgentReview>
             {
-                Id = 7,
-                AgentId = "agent-1",
-                ClienteId = "client-1",
-                PropertyId = 10,
-                Rating = 5,
-                Comment = "Muy profesional",
-                Created = DateTime.UtcNow,
-                Property = new Property { Id = 10, Code = "ABA001", Name = "Villa Sol" }
+                new() { Id = 1, AgentId = "agent-1", ClienteId = "client-A", PropertyId = 10, Rating = 5,
+                        Comment = "Muy profesional", Created = DateTime.UtcNow,
+                        Property = new Property { Id = 10, Code = "ABA001", Name = "Villa Sol" } },
+                new() { Id = 2, AgentId = "agent-1", ClienteId = "client-B", PropertyId = 11, Rating = 4,
+                        Comment = "Buen servicio", Created = DateTime.UtcNow,
+                        Property = new Property { Id = 11, Code = "ABA002", Name = "Piso Mar" } }
             };
-            _reviewRepositoryMock.Setup(r => r.GetByAgentIdAsync("agent-1")).ReturnsAsync(new List<AgentReview> { review });
+            _reviewRepositoryMock.Setup(r => r.GetByAgentIdAsync("agent-1")).ReturnsAsync(reviews);
 
-            var cliente = new IdentityUser { Id = "client-1", UserName = "cliente1", Email = "cliente@test.com" };
-            _userManagerMock.Setup(u => u.FindByIdAsync("client-1")).ReturnsAsync(cliente);
-            _userManagerMock.Setup(u => u.GetClaimsAsync(cliente)).ReturnsAsync(new List<Claim>
+            var clientDict = new Dictionary<string, AccountUserDto>
             {
-                new("FirstName", "Ana"),
-                new("LastName", "Lopez")
-            });
+                ["client-A"] = new AccountUserDto { Id = "client-A", FirstName = "Ana",  LastName = "Lopez",   Email = "ana@test.com" },
+                ["client-B"] = new AccountUserDto { Id = "client-B", FirstName = "Pedro", LastName = "Martín", Email = "pedro@test.com" }
+            };
+
+            _accountServiceMock
+                .Setup(a => a.GetUsersByIdsAsync(It.IsAny<IEnumerable<string>>()))
+                .ReturnsAsync(clientDict);
 
             // Act
             var result = await _sut.GetReviewsByAgentAsync("agent-1");
 
-            // Assert
-            var vm = result.Should().ContainSingle().Subject;
-            vm.PropertyCode.Should().Be("ABA001");
-            vm.PropertyName.Should().Be("Villa Sol");
-            vm.ClienteName.Should().Be("Ana Lopez");
-            vm.ClienteEmail.Should().Be("cliente@test.com");
+            // Assert — estado observable correcto
+            result.Should().HaveCount(2);
+            result.First(r => r.ClienteId == "client-A").ClienteName.Should().Be("Ana Lopez");
+            result.First(r => r.ClienteId == "client-B").ClienteName.Should().Be("Pedro Martín");
+
+            // El batch lookup debe llamarse exactamente UNA VEZ para ambos clientes
+            _accountServiceMock.Verify(
+                a => a.GetUsersByIdsAsync(It.IsAny<IEnumerable<string>>()),
+                Times.Once,
+                "Debe hacerse exactamente 1 batch lookup para N reviews, eliminando el N+1");
         }
     }
 }

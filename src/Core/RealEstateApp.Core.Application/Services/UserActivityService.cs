@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.UserActivity;
@@ -13,11 +15,16 @@ namespace RealEstateApp.Core.Application.Services
     {
         private readonly IUserActivityRepository _userActivityRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<UserActivityService> _logger;
 
-        public UserActivityService(IUserActivityRepository userActivityRepository, IMapper mapper)
+        public UserActivityService(
+            IUserActivityRepository userActivityRepository,
+            IMapper mapper,
+            ILogger<UserActivityService>? logger = null)
         {
             _userActivityRepository = userActivityRepository;
             _mapper = mapper;
+            _logger = logger ?? NullLogger<UserActivityService>.Instance;
         }
 
         public async Task LogActivityAsync(string userId, string action, string description, string icon = "bi-activity", string? targetUrl = null)
@@ -38,9 +45,9 @@ namespace RealEstateApp.Core.Application.Services
 
                 await _userActivityRepository.AddAsync(activity);
             }
-            catch
+            catch (Exception ex)
             {
-                // Silent catch so logging never interrupts primary user workflows
+                _logger.LogWarning(ex, "Fallo al registrar actividad para el usuario {UserId} ({Action})", userId, action);
             }
         }
 

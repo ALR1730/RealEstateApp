@@ -149,9 +149,9 @@ builder.Services.AddPersistenceInfrastructure(builder.Configuration);
 builder.Services.AddSharedInfrastructure();
 
 var jwtKey = builder.Configuration["JWTSettings:Key"];
-if (string.IsNullOrWhiteSpace(jwtKey))
+if (string.IsNullOrWhiteSpace(jwtKey) || jwtKey.Length < 32)
 {
-    jwtKey = "RealEstateAppSuperSecretKeyForDevelopmentAndTesting2026";
+    throw new InvalidOperationException("La clave secreta de JWT ('JWTSettings:Key') es obligatoria y debe tener al menos 32 caracteres (256 bits). Verifique la configuración o UserSecrets.");
 }
 
 // Configuración de Autenticación por Tokens JWT Bearer

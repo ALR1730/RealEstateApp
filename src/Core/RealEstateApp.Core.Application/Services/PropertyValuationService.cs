@@ -37,9 +37,9 @@ namespace RealEstateApp.Core.Application.Services
             if (property == null)
                 throw new NotFoundException(nameof(Property), propertyId);
 
-            var allProperties = await _propertyRepository.GetAllAsync();
+            var candidates = await _propertyRepository.GetCandidateComparablesAsync(property.Id, property.MunicipalityId, property.ProvinceId);
 
-            var comparables = FindComparables(property, allProperties, searchRadiusKm);
+            var comparables = FindComparables(property, candidates, searchRadiusKm);
 
             var pricePerSqmList = comparables
                 .Where(p => p.SizeInMeters > 0 && p.PriceInDOP > 0)
@@ -203,7 +203,8 @@ namespace RealEstateApp.Core.Application.Services
             else
                 valuationRating = "Justa";
 
-            var comparables = FindComparables(property, await _propertyRepository.GetAllAsync(), valuation.SearchRadiusKm);
+            var candidates = await _propertyRepository.GetCandidateComparablesAsync(property.Id, property.MunicipalityId, property.ProvinceId);
+            var comparables = FindComparables(property, candidates, valuation.SearchRadiusKm);
 
             var comparableDtos = comparables
                 .OrderBy(p => CalculateDistance(

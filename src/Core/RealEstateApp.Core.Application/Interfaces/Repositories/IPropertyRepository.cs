@@ -11,5 +11,6 @@ namespace RealEstateApp.Core.Application.Interfaces.Repositories
         Task<List<Property>> GetByAgentIdAsync(string agentId);
         Task<Property?> GetByCodeAsync(string code);
         Task<List<string>> GetDistinctSectorsAsync(int? provinceId = null, int? municipalityId = null);
+        Task<List<Property>> GetCandidateComparablesAsync(int targetPropertyId, int? municipalityId, int? provinceId);
     }
 }

@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Property;
@@ -18,24 +19,27 @@ namespace RealEstateApp.Core.Application.Services
         private readonly ISavedSearchRepository _savedSearchRepository;
         private readonly IPropertyRepository _propertyRepository;
         private readonly IEmailService _emailService;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IAccountService _accountService;
         private readonly IMapper _mapper;
         private readonly ICurrencyService _currencyService;
+        private readonly ILogger<SavedSearchService> _logger;
 
         public SavedSearchService(
             ISavedSearchRepository savedSearchRepository,
             IPropertyRepository propertyRepository,
             IEmailService emailService,
-            UserManager<IdentityUser> userManager,
+            IAccountService accountService,
             IMapper mapper,
-            ICurrencyService currencyService)
+            ICurrencyService currencyService,
+            ILogger<SavedSearchService>? logger = null)
         {
             _savedSearchRepository = savedSearchRepository;
             _propertyRepository = propertyRepository;
             _emailService = emailService;
-            _userManager = userManager;
+            _accountService = accountService;
             _mapper = mapper;
             _currencyService = currencyService;
+            _logger = logger ?? NullLogger<SavedSearchService>.Instance;
         }
 
         public async Task<List<SavedSearchViewModel>> GetUserSavedSearchesAsync(string userId)
@@ -134,19 +138,22 @@ namespace RealEstateApp.Core.Application.Services
             {
                 if (search.EmailAlertsEnabled)
                 {
-                    var user = await _userManager.FindByIdAsync(search.UserId);
+                    var user = await _accountService.GetUserByIdAsync(search.UserId);
                     if (user != null && !string.IsNullOrEmpty(user.Email))
                     {
+                        var displayName = !string.IsNullOrWhiteSpace(user.FirstName)
+                            ? $"{user.FirstName} {user.LastName}".Trim()
+                            : (user.UserName ?? "Cliente");
                         var emailSubject = $"🔔 ¡Nueva propiedad para tu búsqueda \"{search.Name}\"!";
-                        var emailBody = BuildEmailNotificationHtml(user.UserName ?? "Cliente", search.Name, newProperty, priceDOP, priceUSD);
+                        var emailBody = BuildEmailNotificationHtml(displayName, search.Name, newProperty, priceDOP, priceUSD);
 
                         try
                         {
                             await _emailService.SendAsync(user.Email, emailSubject, emailBody);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // Continuar con los demás usuarios si falla el envío individual de correo
+                            _logger.LogWarning(ex, "Fallo al enviar correo de alerta de búsqueda guardada a {Email} para búsqueda {SearchId}", user.Email, search.Id);
                         }
                     }
                 }

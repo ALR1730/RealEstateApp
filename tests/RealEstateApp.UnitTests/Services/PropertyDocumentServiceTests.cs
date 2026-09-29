@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.AspNetCore.Identity;
 using Moq;
+using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.Services;
@@ -22,7 +22,7 @@ namespace RealEstateApp.UnitTests.Services
         private readonly Mock<IPropertyDocumentRepository> _documentRepositoryMock;
         private readonly Mock<IPropertyRepository> _propertyRepositoryMock;
         private readonly Mock<IFileStorageService> _fileStorageServiceMock;
-        private readonly Mock<UserManager<IdentityUser>> _userManagerMock;
+        private readonly Mock<IAccountService> _accountServiceMock;
         private readonly PropertyDocumentService _sut;
 
         public PropertyDocumentServiceTests()
@@ -30,14 +30,18 @@ namespace RealEstateApp.UnitTests.Services
             _documentRepositoryMock = new Mock<IPropertyDocumentRepository>();
             _propertyRepositoryMock = new Mock<IPropertyRepository>();
             _fileStorageServiceMock = new Mock<IFileStorageService>();
-            var store = new Mock<IUserStore<IdentityUser>>();
-            _userManagerMock = new Mock<UserManager<IdentityUser>>(
-                store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
+            _accountServiceMock = new Mock<IAccountService>();
+
+            // Default: batch lookup retorna diccionario vacío
+            _accountServiceMock
+                .Setup(a => a.GetUsersByIdsAsync(It.IsAny<IEnumerable<string>>()))
+                .ReturnsAsync(new Dictionary<string, AccountUserDto>());
+
             _sut = new PropertyDocumentService(
                 _documentRepositoryMock.Object,
                 _propertyRepositoryMock.Object,
                 _fileStorageServiceMock.Object,
-                _userManagerMock.Object);
+                _accountServiceMock.Object);
         }
 
         private static MemoryStream CreateStream(string content = "pdf-content")
@@ -121,7 +125,8 @@ namespace RealEstateApp.UnitTests.Services
             _documentRepositoryMock.Setup(r => r.GetByPropertyIdAsync(5))
                 .ReturnsAsync(new List<PropertyDocument>
                 {
-                    new PropertyDocument { Id = 1, PropertyId = 5, Property = property, DocumentType = DocumentTypeConstants.Titulo, OriginalFileName = "titulo.pdf" }
+                    new() { Id = 1, PropertyId = 5, Property = property, DocumentType = DocumentTypeConstants.Titulo,
+                            OriginalFileName = "titulo.pdf", UploadedBy = "agent-1" }
                 });
 
             // Act
@@ -163,6 +168,45 @@ namespace RealEstateApp.UnitTests.Services
 
             // Assert
             result.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetAllAsync_DebeHacerBatchLookupDeUploaders_SinN1()
+        {
+            // Arrange — 3 documentos subidos por 2 agentes distintos
+            var property = new Property { Id = 5, Name = "Casa", Code = "CSA001" };
+            var documents = new List<PropertyDocument>
+            {
+                new() { Id = 1, PropertyId = 5, Property = property, UploadedBy = "agent-A", DocumentType = DocumentTypeConstants.Titulo, OriginalFileName = "a.pdf" },
+                new() { Id = 2, PropertyId = 5, Property = property, UploadedBy = "agent-B", DocumentType = DocumentTypeConstants.Titulo, OriginalFileName = "b.pdf" },
+                new() { Id = 3, PropertyId = 5, Property = property, UploadedBy = "agent-A", DocumentType = DocumentTypeConstants.ContratoVenta, OriginalFileName = "c.pdf" }
+            };
+
+            _documentRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(documents);
+
+            var userDict = new Dictionary<string, AccountUserDto>
+            {
+                ["agent-A"] = new AccountUserDto { Id = "agent-A", UserName = "agente.ana", Email = "ana@test.com" },
+                ["agent-B"] = new AccountUserDto { Id = "agent-B", UserName = "agente.pedro", Email = "pedro@test.com" }
+            };
+
+            _accountServiceMock
+                .Setup(a => a.GetUsersByIdsAsync(It.IsAny<IEnumerable<string>>()))
+                .ReturnsAsync(userDict);
+
+            // Act
+            var result = await _sut.GetAllAsync();
+
+            // Assert — datos correctamente mapeados
+            result.Should().HaveCount(3);
+            result.First(d => d.UploadedBy == "agent-A").UploadedByName.Should().Be("agente.ana");
+            result.First(d => d.UploadedBy == "agent-B").UploadedByName.Should().Be("agente.pedro");
+
+            // El batch lookup debe ejecutarse exactamente UNA VEZ para todos los documentos
+            _accountServiceMock.Verify(
+                a => a.GetUsersByIdsAsync(It.IsAny<IEnumerable<string>>()),
+                Times.Once,
+                "Debe hacerse exactamente 1 batch lookup, eliminando el N+1 en listados de documentos");
         }
     }
 }

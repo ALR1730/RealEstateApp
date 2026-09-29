@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Document;
@@ -24,18 +23,18 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IPropertyDocumentRepository _documentRepository;
         private readonly IPropertyRepository _propertyRepository;
         private readonly IFileStorageService _fileStorageService;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IAccountService _accountService;
 
         public PropertyDocumentService(
             IPropertyDocumentRepository documentRepository,
             IPropertyRepository propertyRepository,
             IFileStorageService fileStorageService,
-            UserManager<IdentityUser> userManager)
+            IAccountService accountService)
         {
             _documentRepository = documentRepository;
             _propertyRepository = propertyRepository;
             _fileStorageService = fileStorageService;
-            _userManager = userManager;
+            _accountService = accountService;
         }
 
         public async Task<PropertyDocumentViewModel> UploadAsync(
@@ -77,7 +76,9 @@ namespace RealEstateApp.Core.Application.Services
 
             await _documentRepository.AddAsync(document);
 
-            return await MapToViewModelAsync(document);
+            // Batch lookup para el documento recién subido (solo 1 usuario)
+            var userDict = await _accountService.GetUsersByIdsAsync(new[] { uploadedBy });
+            return MapToViewModel(document, userDict);
         }
 
         public async Task<List<PropertyDocumentViewModel>> GetByPropertyIdAsync(int propertyId, string currentUserId, bool isAdmin)
@@ -90,13 +91,13 @@ namespace RealEstateApp.Core.Application.Services
                 throw new ValidationException("No tiene permisos para ver estos documentos.");
 
             var documents = await _documentRepository.GetByPropertyIdAsync(propertyId);
-            return await MapToViewModelsAsync(documents);
+            return await MapListWithBatchLookupAsync(documents);
         }
 
         public async Task<List<PropertyDocumentViewModel>> GetAllAsync()
         {
             var documents = await _documentRepository.GetAllAsync();
-            return await MapToViewModelsAsync(documents);
+            return await MapListWithBatchLookupAsync(documents);
         }
 
         public async Task DeleteAsync(int documentId, string currentUserId, bool isAdmin)
@@ -127,17 +128,27 @@ namespace RealEstateApp.Core.Application.Services
             }
         }
 
-        private async Task<List<PropertyDocumentViewModel>> MapToViewModelsAsync(List<PropertyDocument> documents)
+        // ── Helpers ──────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Batch lookup: 1 sola query para todos los uploaders — elimina el N+1 en listados.
+        /// </summary>
+        private async Task<List<PropertyDocumentViewModel>> MapListWithBatchLookupAsync(
+            List<PropertyDocument> documents)
         {
-            var result = new List<PropertyDocumentViewModel>();
-            foreach (var d in documents)
-            {
-                result.Add(await MapToViewModelAsync(d));
-            }
-            return result;
+            var uploaderIds = documents
+                .Select(d => d.UploadedBy)
+                .Where(id => !string.IsNullOrEmpty(id))
+                .Distinct();
+
+            var userDict = await _accountService.GetUsersByIdsAsync(uploaderIds);
+
+            return documents.Select(d => MapToViewModel(d, userDict)).ToList();
         }
 
-        private async Task<PropertyDocumentViewModel> MapToViewModelAsync(PropertyDocument d)
+        private static PropertyDocumentViewModel MapToViewModel(
+            PropertyDocument d,
+            Dictionary<string, RealEstateApp.Core.Application.DTOs.Account.AccountUserDto> userDict)
         {
             var vm = new PropertyDocumentViewModel
             {
@@ -154,10 +165,11 @@ namespace RealEstateApp.Core.Application.Services
                 UploadedAt = d.Created
             };
 
-            var uploader = await _userManager.FindByIdAsync(d.UploadedBy);
-            if (uploader != null)
+            if (userDict.TryGetValue(d.UploadedBy, out var uploader))
             {
-                vm.UploadedByName = !string.IsNullOrEmpty(uploader.UserName) ? uploader.UserName : uploader.Email;
+                vm.UploadedByName = !string.IsNullOrEmpty(uploader.UserName)
+                    ? uploader.UserName
+                    : uploader.Email;
             }
 
             return vm;

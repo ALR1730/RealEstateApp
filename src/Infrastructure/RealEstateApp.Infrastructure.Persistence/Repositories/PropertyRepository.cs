@@ -317,5 +317,36 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 entity.PriceInDOP = entity.Price;
             }
         }
+
+        public async Task<List<Property>> GetCandidateComparablesAsync(int targetPropertyId, int? municipalityId, int? provinceId)
+        {
+            var query = _dbContext.Set<Property>()
+                .AsNoTracking()
+                .Include(p => p.Municipality)
+                .Where(p => p.Id != targetPropertyId && p.Status != RealEstateApp.Core.Domain.Constants.PropertyStatus.Sold);
+
+            if (municipalityId.HasValue)
+            {
+                var localCandidates = await query
+                    .Where(p => p.MunicipalityId == municipalityId.Value || (provinceId.HasValue && p.ProvinceId == provinceId.Value))
+                    .ToListAsync();
+
+                if (localCandidates.Count > 0)
+                    return localCandidates;
+            }
+            else if (provinceId.HasValue)
+            {
+                var localCandidates = await query
+                    .Where(p => p.ProvinceId == provinceId.Value)
+                    .ToListAsync();
+
+                if (localCandidates.Count > 0)
+                    return localCandidates;
+            }
+
+            return await query
+                .Where(p => p.Latitude != 0 || p.Longitude != 0)
+                .ToListAsync();
+        }
     }
 }

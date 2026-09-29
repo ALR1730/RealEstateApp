@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Review;
@@ -17,14 +16,14 @@ namespace RealEstateApp.Core.Application.Services
     public class ReviewService : IReviewService
     {
         private readonly IReviewRepository _reviewRepository;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IAccountService _accountService;
 
         public ReviewService(
             IReviewRepository reviewRepository,
-            UserManager<IdentityUser> userManager)
+            IAccountService accountService)
         {
             _reviewRepository = reviewRepository;
-            _userManager = userManager;
+            _accountService = accountService;
         }
 
         public async Task SubmitReviewAsync(SaveAgentReviewViewModel vm, string clienteId)
@@ -96,6 +95,10 @@ namespace RealEstateApp.Core.Application.Services
 
         private async Task<List<AgentReviewViewModel>> MapToViewModelsAsync(List<AgentReview> entities)
         {
+            // Batch lookup: 1 sola query para todos los clientes, eliminando el N+1
+            var clientIds = entities.Select(r => r.ClienteId).Distinct();
+            var userDict = await _accountService.GetUsersByIdsAsync(clientIds);
+
             var result = new List<AgentReviewViewModel>();
             foreach (var r in entities)
             {
@@ -112,16 +115,11 @@ namespace RealEstateApp.Core.Application.Services
                     Created = r.Created
                 };
 
-                var cliente = await _userManager.FindByIdAsync(r.ClienteId);
-                if (cliente != null)
+                if (userDict.TryGetValue(r.ClienteId, out var cliente))
                 {
-                    var claims = await _userManager.GetClaimsAsync(cliente);
-                    var firstName = claims.FirstOrDefault(c => c.Type == "FirstName")?.Value;
-                    var lastName = claims.FirstOrDefault(c => c.Type == "LastName")?.Value;
-                    var fullName = $"{firstName} {lastName}".Trim();
-
+                    var fullName = $"{cliente.FirstName} {cliente.LastName}".Trim();
                     vm.ClienteName = !string.IsNullOrEmpty(fullName) ? fullName : (cliente.UserName ?? "Cliente");
-                    vm.ClienteEmail = cliente.Email ?? string.Empty;
+                    vm.ClienteEmail = cliente.Email;
                 }
 
                 result.Add(vm);

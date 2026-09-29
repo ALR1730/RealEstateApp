@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
+using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Agent;
@@ -15,16 +15,16 @@ namespace RealEstateApp.Core.Application.Services
     {
         private readonly IAgentVerificationRepository _verificationRepository;
         private readonly IFileStorageService _fileStorageService;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IAccountService _accountService;
 
         public AgentVerificationService(
             IAgentVerificationRepository verificationRepository,
             IFileStorageService fileStorageService,
-            UserManager<IdentityUser> userManager)
+            IAccountService accountService)
         {
             _verificationRepository = verificationRepository;
             _fileStorageService = fileStorageService;
-            _userManager = userManager;
+            _accountService = accountService;
         }
 
         public async Task<AgentVerificationViewModel?> GetByAgentIdAsync(string agentId)
@@ -33,38 +33,27 @@ namespace RealEstateApp.Core.Application.Services
             if (entity == null) return null;
 
             var vm = MapToViewModel(entity);
-            await PopulateUserDetails(vm, entity.AgentId, entity.ReviewedByAdminId);
+
+            // Batch lookup con sólo los IDs necesarios para este registro individual
+            var ids = new List<string> { entity.AgentId };
+            if (!string.IsNullOrEmpty(entity.ReviewedByAdminId))
+                ids.Add(entity.ReviewedByAdminId);
+
+            var userDict = await _accountService.GetUsersByIdsAsync(ids);
+            PopulateUserDetails(vm, entity.AgentId, entity.ReviewedByAdminId, userDict);
             return vm;
         }
 
         public async Task<List<AgentVerificationViewModel>> GetAllAsync()
         {
             var entities = await _verificationRepository.GetAllAsync();
-            var result = new List<AgentVerificationViewModel>();
-
-            foreach (var entity in entities)
-            {
-                var vm = MapToViewModel(entity);
-                await PopulateUserDetails(vm, entity.AgentId, entity.ReviewedByAdminId);
-                result.Add(vm);
-            }
-
-            return result;
+            return await MapWithBatchLookupAsync(entities);
         }
 
         public async Task<List<AgentVerificationViewModel>> GetPendingAsync()
         {
             var entities = await _verificationRepository.GetPendingVerificationsAsync();
-            var result = new List<AgentVerificationViewModel>();
-
-            foreach (var entity in entities)
-            {
-                var vm = MapToViewModel(entity);
-                await PopulateUserDetails(vm, entity.AgentId, entity.ReviewedByAdminId);
-                result.Add(vm);
-            }
-
-            return result;
+            return await MapWithBatchLookupAsync(entities);
         }
 
         public async Task<bool> SubmitVerificationAsync(AgentVerificationViewModel vm)
@@ -136,6 +125,34 @@ namespace RealEstateApp.Core.Application.Services
             return entity != null && entity.Status == VerificationStatus.Approved;
         }
 
+        // ── Helpers ──────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Mapea una lista de entidades haciendo un único batch lookup para todos
+        /// los agentes y admins implicados — de N*4 queries a exactamente 1 query.
+        /// </summary>
+        private async Task<List<AgentVerificationViewModel>> MapWithBatchLookupAsync(
+            List<AgentVerification> entities)
+        {
+            // Recopilar todos los IDs únicos en un solo conjunto
+            var allIds = entities
+                .SelectMany(e => new[] { e.AgentId, e.ReviewedByAdminId })
+                .Where(id => !string.IsNullOrEmpty(id))
+                .Distinct()!;
+
+            var userDict = await _accountService.GetUsersByIdsAsync(allIds!);
+
+            var result = new List<AgentVerificationViewModel>();
+            foreach (var entity in entities)
+            {
+                var vm = MapToViewModel(entity);
+                PopulateUserDetails(vm, entity.AgentId, entity.ReviewedByAdminId, userDict);
+                result.Add(vm);
+            }
+
+            return result;
+        }
+
         private static AgentVerificationViewModel MapToViewModel(AgentVerification entity)
         {
             return new AgentVerificationViewModel
@@ -153,33 +170,27 @@ namespace RealEstateApp.Core.Application.Services
             };
         }
 
-        private async Task PopulateUserDetails(AgentVerificationViewModel vm, string agentId, string? adminId)
+        /// <summary>
+        /// Puebla los datos de usuario desde un diccionario pre-cargado (sin queries adicionales).
+        /// </summary>
+        private static void PopulateUserDetails(
+            AgentVerificationViewModel vm,
+            string agentId,
+            string? adminId,
+            Dictionary<string, AccountUserDto> userDict)
         {
-            var agent = await _userManager.FindByIdAsync(agentId);
-            if (agent != null)
+            if (userDict.TryGetValue(agentId, out var agent))
             {
-                var claims = await _userManager.GetClaimsAsync(agent);
-                var firstName = claims.FirstOrDefault(c => c.Type == "FirstName")?.Value;
-                var lastName = claims.FirstOrDefault(c => c.Type == "LastName")?.Value;
-                var fullName = $"{firstName} {lastName}".Trim();
-
+                var fullName = $"{agent.FirstName} {agent.LastName}".Trim();
                 vm.AgentName = !string.IsNullOrEmpty(fullName) ? fullName : (agent.UserName ?? "Agente");
-                vm.AgentEmail = agent.Email ?? string.Empty;
+                vm.AgentEmail = agent.Email;
                 vm.AgentPhone = agent.PhoneNumber ?? string.Empty;
             }
 
-            if (!string.IsNullOrEmpty(adminId))
+            if (!string.IsNullOrEmpty(adminId) && userDict.TryGetValue(adminId, out var admin))
             {
-                var admin = await _userManager.FindByIdAsync(adminId);
-                if (admin != null)
-                {
-                    var adminClaims = await _userManager.GetClaimsAsync(admin);
-                    var adminFirst = adminClaims.FirstOrDefault(c => c.Type == "FirstName")?.Value;
-                    var adminLast = adminClaims.FirstOrDefault(c => c.Type == "LastName")?.Value;
-                    var adminFull = $"{adminFirst} {adminLast}".Trim();
-
-                    vm.ReviewedByAdminName = !string.IsNullOrEmpty(adminFull) ? adminFull : (admin.UserName ?? "Administrador");
-                }
+                var adminFull = $"{admin.FirstName} {admin.LastName}".Trim();
+                vm.ReviewedByAdminName = !string.IsNullOrEmpty(adminFull) ? adminFull : (admin.UserName ?? "Administrador");
             }
         }
     }

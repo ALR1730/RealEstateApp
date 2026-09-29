@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Commission;
@@ -23,20 +22,20 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IOfferRepository _offerRepository;
         private readonly IPropertyRepository _propertyRepository;
         private readonly ISubscriptionService _subscriptionService;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IAccountService _accountService;
 
         public CommissionService(
             ICommissionRepository commissionRepository,
             IOfferRepository offerRepository,
             IPropertyRepository propertyRepository,
             ISubscriptionService subscriptionService,
-            UserManager<IdentityUser> userManager)
+            IAccountService accountService)
         {
             _commissionRepository = commissionRepository;
             _offerRepository = offerRepository;
             _propertyRepository = propertyRepository;
             _subscriptionService = subscriptionService;
-            _userManager = userManager;
+            _accountService = accountService;
         }
 
         public async Task CreateForAcceptedOfferAsync(int offerId)
@@ -111,20 +110,19 @@ namespace RealEstateApp.Core.Application.Services
             var commissions = await _commissionRepository.GetAllWithDetailsAsync();
             var result = MapToViewModel(commissions);
 
+            // Batch lookup: 1 sola query para todos los agentes, eliminando el N+1
+            var agentIds = result.Select(vm => vm.AgentId).Distinct();
+            var agentDict = await _accountService.GetUsersByIdsAsync(agentIds);
+
             foreach (var vm in result)
             {
-                var agent = await _userManager.FindByIdAsync(vm.AgentId);
-                if (agent != null)
+                if (agentDict.TryGetValue(vm.AgentId, out var agent))
                 {
-                    var claims = await _userManager.GetClaimsAsync(agent);
-                    var firstName = claims.FirstOrDefault(c => c.Type == "FirstName")?.Value;
-                    var lastName = claims.FirstOrDefault(c => c.Type == "LastName")?.Value;
-                    var fullName = $"{firstName} {lastName}".Trim();
-                    vm.AgentName = !string.IsNullOrEmpty(fullName)
-                        ? fullName
-                        : (agent.UserName ?? agent.Email);
+                    var fullName = $"{agent.FirstName} {agent.LastName}".Trim();
+                    vm.AgentName = !string.IsNullOrEmpty(fullName) ? fullName : (agent.UserName ?? agent.Email);
                 }
             }
+
             return result;
         }
 
@@ -157,3 +155,4 @@ namespace RealEstateApp.Core.Application.Services
         }
     }
 }
+

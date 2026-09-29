@@ -1,329 +1,320 @@
-# 🎓 Análisis Profundo: RealEstateApp
+# 🎓 Análisis Profundo: RealEstateApp (Segunda Edición — Ojo Crítico Implacable)
 ## Dictamen del Artesano — *Robert C. Martin "Uncle Bob"*
 
-> *"Now, listen closely. Before you can trust a system, you must be able to read it. Let's look at the shape of this code — what it says, what it hides, and what it's trying to become."*
+> *"Now, sit down and take a deep breath. We fixed the bleeding wounds in our first sprint: we silenced the silent catches, we carved out PropertyImageService, and we wrote unit tests. Good. That was hygiene. But do not confuse hygiene with health. Now that the dust has settled, let us look beneath the floorboards. Let us look at what you truly built."*
 
 ---
 
-## 1. Veredicto General
+## 1. Veredicto Radical
 
-**El proyecto tiene una arquitectura excelente como esqueleto — pero el cuerpo muestra síntomas de un profesional que sabe la teoría pero lucha con la disciplina.**
+**Has construido un sistema que se disfraza de Arquitectura Limpia, pero cuyo corazón todavía late como una aplicación procedural de los años 90.**
 
-La intención es clara: Onion Architecture, separación de capas, inversión de dependencias, pruebas unitarias. Eso es **muy bueno**. Pero hay patrones preocupantes que, si no se corrigen ahora, se convertirán en deuda técnica crónica. *"The only way to go fast, is to go well."*
+El esqueleto tiene las carpetas correctas: `Domain`, `Application`, `Infrastructure`, `Presentation`. Pero cuando entramos a las habitaciones, encontramos:
+- **Entidades de Dominio anémicas**, despojadas de comportamiento, reducidas a simples bolsas de datos con `get; set;` públicos.
+- **Contaminación de Frameworks** todavía incrustada en el Core (`Microsoft.AspNetCore.Identity` en 4 servicios).
+- **Ausencia total de límites transaccionales** (no hay Unit of Work; cada método de repositorio dispara un commit autónomo).
+- **Consultas N+1 camufladas** dentro de bucles `foreach` asíncronos que destruirán la base de datos a escala.
+- **Controladores que hacen de motor de base de datos**, cargando tablas completas en memoria para calcular métricas simples.
+- **Una plaga terminológica de "ViewModels"** viviendo en el núcleo de la lógica de negocio.
 
-| Dimensión | Calificación | Veredicto |
+| Dimensión Arquitectural | Calificación | Veredicto Implacable |
 |---|---|---|
-| Arquitectura (Onion) | ⭐⭐⭐⭐⭐ | Excelente separación de capas |
-| Diseño de Dominio | ⭐⭐⭐⭐ | Bueno, con oportunidades de mejora |
-| SRP / Tamaño de Clases | ⭐⭐⭐ | `PropertyService` viola SRP gravemente |
-| TDD / Cobertura de Tests | ⭐⭐⭐ | Cobertura incompleta — 12 servicios sin tests |
-| Clean Code | ⭐⭐⭐ | Silent catches y comentarios innecesarios |
-| Manejo de Errores | ⭐⭐ | Antipatrón crítico de `catch {}` vacíos |
-| Seguridad | ⭐⭐⭐⭐ | JWT, Rate Limiting, CORS — bien implementados |
-| Deuda Técnica | ⭐⭐⭐ | Moderada, pero con focos agudos |
+| **Encapsulamiento del Dominio** | ⭐⭐ | **Modelo Anémico**. Cero invariantes, cero métodos de negocio en entidades. |
+| **Pureza Arquitectural (Onion)** | ⭐⭐⭐ | **Contaminada**. `Core.Application` aún depende de ASP.NET Identity. |
+| **Atomicidad y Consistencia** | ⭐⭐ | **Grave riesgo**. No hay transacciones multi-repositorio ni Unit of Work. |
+| **Eficiencia de Acceso a Datos** | ⭐⭐ | **N+1 Crónico** en cascadas asíncronas de servicios maestros. |
+| **Diseño de Fronteras (Boundaries)** | ⭐⭐⭐ | **Confusión conceptual**. "ViewModels" en Application en vez de DTOs puros. |
+| **Diseño de Controladores** | ⭐⭐⭐ | **Controladores Gordos** calculando agregaciones LINQ en RAM. |
+| **Cultura de Pruebas (TDD)** | ⭐⭐⭐⭐ | Cobertura al 100%, pero con **síntoma de Mockitis Aguda**. |
+| **Resiliencia y Observabilidad** | ⭐⭐⭐⭐ | Mejorada con ILogger estructurado; pendiente métricas de salud. |
 
 ---
 
-## 2. Lo Que Está Bien — *"Clean code always looks like it was written by someone who cares."*
+## 2. Los 7 Pecados Capitales Descubiertos en la Inspección Profunda
 
-### ✅ Arquitectura Onion — Correcta y Respetada
+---
 
-```
-Domain → Application → Infrastructure → Presentation
-```
+### 🔴 PECADO #1: El Modelo de Dominio Anémico — *"Objects are about behavior, not data"*
 
-La regla de dependencia está siendo honrada. **`Domain` no tiene referencias externas.** `Application` habla sólo con interfaces. `Infrastructure` implementa sin contaminar el Core. Esto es artesanía real.
+Miren `Property.cs` o `Offer.cs`:
 
 ```csharp
-// Domain/Common/AuditableBaseEntity.cs — Puro. Sin dependencias externas. ✅
-public abstract class AuditableBaseEntity
+// Domain/Entities/Property.cs — 62 líneas de getters y setters públicos. Cero comportamiento. 🚨
+public class Property : AuditableBaseEntity
 {
-    public virtual int Id { get; set; }
-    public string? CreatedBy { get; set; }
-    public DateTime Created { get; set; }
-    public string? LastModifiedBy { get; set; }
-    public DateTime? LastModified { get; set; }
-}
-```
-
-### ✅ Regla de Negocio Atómica en Ofertas
-
-La lógica de aceptación de oferta que **cascadea el rechazo de todas las demás** está delegada correctamente al repositorio con `AcceptOfferTransactionAsync`. El servicio no intenta orquestar eso a mano — confía en la capa de datos para la atomicidad. Eso es correcto.
-
-### ✅ Interfaces Bien Definidas
-
-28 interfaces de servicio. Cada servicio tiene su contrato. La inversión de dependencias está en toda la codebase. El contenedor de DI en `ServiceRegistration.cs` es limpio.
-
-### ✅ Infraestructura de Seguridad Sólida
-
-- JWT Bearer con `ClockSkew = Zero`
-- Rate Limiting para AuthPolicy (15 req/min)
-- CORS restrictivo con lista de orígenes permitidos
-- HSTS en producción
-
-### ✅ Historial de Precios Bien Diseñado
-
-El patrón de registrar el precio inicial como `OldPrice = 0` es un **convención limpia y auto-explicativa**. La lógica de detección de rebajas en `GetByIdViewModel` está bien encapsulada.
-
----
-
-## 3. Hallazgos Críticos — *"The truth is, a mess always slows you down."*
-
----
-
-### 🔴 CRÍTICO #1: `catch {}` Vacíos — El Antipatrón del Silencio
-
-**Esto es el hallazgo más grave de toda la codebase.** Hay **al menos 6 bloques `catch` vacíos o que sólo imprimen en consola** en `PropertyService.cs`:
-
-```csharp
-// PropertyService.cs — líneas 191-194 🚨
-try
-{
-    await _priceHistoryRepository.AddAsync(new PropertyPriceHistory { ... });
-}
-catch
-{
-    // Silenciar error en auditoría secundaria para no abortar creación
+    public string Name { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public string Status { get; set; } = PropertyStatus.Available;
+    public decimal MontoSeparacion { get; set; }
+    // ... 25 propiedades más, todas con public set ...
 }
 ```
 
 ```csharp
-// PropertyService.cs — líneas 226-233 🚨
-try
+// Domain/Entities/Offer.cs — 🚨
+public class Offer : AuditableBaseEntity
 {
-    await _savedSearchService.CheckAndNotifyMatchesAsync(property);
-}
-catch
-{
-    // Silenciar excepciones en notificaciones secundarias
-}
-```
-
-```csharp
-// PropertyService.cs — líneas 447-460 🚨
-catch
-{
-    // Silenciar error secundario
+    public decimal MontoOfertado { get; set; }
+    public OfferStatus Status { get; set; } = OfferStatus.Pending;
+    public decimal? CounterOfferAmount { get; set; }
+    // ...
 }
 ```
 
-**¿Por qué esto es desastroso?**
+#### ¿Por qué esto es una violación grave?
+Esto es el clásico **Anemic Domain Model** denunciado por Martin Fowler. 
+- ¿Puede una propiedad tener un precio negativo? **Sí**, porque `Price` tiene un setter público.
+- ¿Puede una oferta pasar de `Rejected` a `Accepted` sin ninguna validación? **Sí**, cualquier desarrollador puede escribir `offer.Status = OfferStatus.Accepted;`.
+- ¿Dónde vive la regla de negocio que dice *"al aceptar una oferta, la propiedad pasa a vendida y las demás ofertas se rechazan"*? **Dispersa en repositorios y servicios de aplicación.**
 
-Un `catch {}` vacío es una **mentira**. Le dice al sistema: *"todo está bien"* cuando puede estar silenciando una corrupción de datos, una falla de red, o un bug crítico. *"Going fast by writing dirty code is a lie."*
-
-> **La solución correcta**: Loggear la excepción. Si la operación secundaria puede fallar silenciosamente, debe ir a un job de background o una cola de mensajes, **nunca** silenciada en el hilo principal de negocio.
-
-```csharp
-// ✅ Correcto
-catch (Exception ex)
-{
-    _logger.LogWarning(ex, "Fallo al registrar historial de precio para PropertyId={Id}", property.Id);
-}
-```
+> **El Dictamen**: Tus entidades no son objetos; son estructuras de datos de C con sintaxis de C#. Las verdaderas entidades de Dominio defienden sus **invariantes**, tienen constructores privados o de fábrica (`Factory Methods`), setters privados y métodos ricos como `property.MarkAsSold()`, `offer.Accept()`, `offer.Reject(reason)`.
 
 ---
 
-### 🔴 CRÍTICO #2: `PropertyService` Viola el Single Responsibility Principle
+### 🔴 PECADO #2: La Falsa Frontera — `Microsoft.AspNetCore.Identity` Sigue Envenenando el Core
 
-**603 líneas. 11 dependencias inyectadas.** Este servicio tiene *demasiadas razones para cambiar*:
-
-1. CRUD de propiedades
-2. Gestión de imágenes (upload, delete)
-3. Historial de precios
-4. Validación de límites de suscripción
-5. Enriquecimiento con datos de moneda
-6. Enriquecimiento con nombres de agentes
-7. Notificación de búsquedas guardadas
-8. Generación de códigos únicos
-9. Gestión de "Featured Properties"
-10. Reasignación de agentes
-
-*"If a class has more than one reason to change, demand that it be split."*
-
-El constructor con 11 parámetros es una señal de alarma arquitectural:
+En nuestra primera fase limpiamos `SavedSearchService`. Pero miren lo que todavía queda en `Core.Application`:
 
 ```csharp
-// 🚨 Demasiadas dependencias = demasiadas responsabilidades
-public PropertyService(
-    IPropertyRepository propertyRepository,
-    IPropertyImageRepository propertyImageRepository,
-    IPropertyTypeRepository propertyTypeRepository,
-    IPropertyImprovementRepository propertyImprovementRepository,
-    IPropertyPriceHistoryRepository priceHistoryRepository,
-    IFileStorageService fileStorageService,
-    ICurrencyService currencyService,        // Responsabilidad de presentación
-    ISavedSearchService savedSearchService,  // Responsabilidad de notificaciones
-    ISubscriptionService subscriptionService,// Responsabilidad de límites de negocio
-    IAccountService accountService,          // Responsabilidad de usuarios
-    IMapper mapper)
-```
-
-**La división sugerida:**
-
-| Nuevo Servicio | Responsabilidad |
-|---|---|
-| `PropertyCrudService` | CRUD básico, código único |
-| `PropertyImageService` | Gestión de imágenes |
-| `PropertyEnrichmentService` | Currency + AgentNames |
-| `PropertyPublicationService` | Límites de suscripción, Featured |
-
----
-
-### 🔴 CRÍTICO #3: Cobertura de Tests Gravemente Incompleta
-
-**22 servicios de aplicación. Sólo 10 tienen tests.** Esto es **54% de cobertura de servicios**.
-
-| Servicio | Tests | Estado |
-|---|---|---|
-| `PropertyService` | ✅ `PropertyServiceTests.cs` | Cubierto |
-| `OfferService` | ✅ `OfferServiceTests.cs` | Cubierto |
-| `AppointmentService` | ✅ `AppointmentServiceTests.cs` | Cubierto |
-| `BuyAbilityService` | ✅ `BuyAbilityServiceTests.cs` | Cubierto |
-| `CommissionService` | ✅ `CommissionServiceTests.cs` | Cubierto |
-| `CurrencyService` | ✅ `CurrencyServiceTests.cs` | Cubierto |
-| `SubscriptionService` | ✅ `SubscriptionServiceTests.cs` | Cubierto |
-| `ReviewService` | ✅ `ReviewServiceTests.cs` | Cubierto |
-| `PropertyDocumentService` | ✅ | Cubierto |
-| `AiSearchService` | ✅ | Cubierto |
-| `AgentService` | ❌ | **SIN TESTS** |
-| `AgentVerificationService` | ❌ | **SIN TESTS** |
-| `ChatService` | ❌ | **SIN TESTS** |
-| `FavoriteService` | ❌ | **SIN TESTS** |
-| `ImprovementService` | ❌ | **SIN TESTS** |
-| `LeadPipelineService` | ❌ | **SIN TESTS** |
-| `PropertyTypeService` | ❌ | **SIN TESTS** |
-| `PropertyValuationService` | ❌ | **SIN TESTS** |
-| `ProvinceService` | ❌ | **SIN TESTS** |
-| `SaleTypeService` | ❌ | **SIN TESTS** |
-| `SavedSearchService` | ❌ | **SIN TESTS** |
-| `UserActivityService` | ❌ | **SIN TESTS** |
-
-> *"TDD is non-negotiable. If you don't have tests, your code is not finished."*
-
-`LeadPipelineService`, `AgentVerificationService` y `PropertyValuationService` contienen lógica de negocio compleja que es imposible refactorizar con seguridad sin cobertura de tests.
-
----
-
-### 🟡 IMPORTANTE #4: `PropertyValuationService` — `GetAllAsync()` es un N+1 Latente
-
-```csharp
-// PropertyValuationService.cs — línea 40 🟡
-var allProperties = await _propertyRepository.GetAllAsync();
-var comparables = FindComparables(property, allProperties, searchRadiusKm);
-```
-
-Se carga **TODA la tabla de propiedades en memoria** para encontrar comparables. Esto funciona hoy con pocos registros, pero es una bomba de tiempo. Con 10,000 propiedades, esto saturará la memoria y el tiempo de respuesta.
-
-**Solución**: Agregar `GetNearbyPropertiesAsync(lat, lng, radiusKm)` al repositorio con un filtro en base de datos.
-
----
-
-### 🟡 IMPORTANTE #5: `SavedSearchService` tiene Dependencia Inapropiada de Capa
-
-```csharp
-// SavedSearchService.cs — línea 7 🟡
+// ReviewService.cs — línea 7 y 20 🚨
 using Microsoft.AspNetCore.Identity;
-// ...
+private readonly UserManager<IdentityUser> _userManager;
+
+// CommissionService.cs — línea 7 y 26 🚨
+using Microsoft.AspNetCore.Identity;
+private readonly UserManager<IdentityUser> _userManager;
+
+// AgentVerificationService.cs — línea 6 y 18 🚨
+using Microsoft.AspNetCore.Identity;
+private readonly UserManager<IdentityUser> _userManager;
+
+// PropertyDocumentService.cs — línea 8 y 27 🚨
+using Microsoft.AspNetCore.Identity;
 private readonly UserManager<IdentityUser> _userManager;
 ```
 
-**`Application` no debería referenciar `Microsoft.AspNetCore.Identity` directamente.** `UserManager<IdentityUser>` es un detalle de infraestructura. La capa de Application debería hablar con una abstracción como `IAccountService`, no con una clase concreta de ASP.NET Identity.
-
-Esto viola el principio de Clean Architecture: *"The database is a detail. The framework is a detail."*
+#### ¿Por qué esto es inaceptable en Clean Architecture?
+La **Regla de Dependencia** establece:
+```
+Entities → Use Cases (Application) → Interface Adapters → Frameworks & Drivers
+```
+`Microsoft.AspNetCore.Identity` es un **detalle de infraestructura**, un framework de entrega web creado por Microsoft. Cuando `Core.Application` hace `using Microsoft.AspNetCore.Identity;`, el núcleo de tu negocio queda **atado a la tecnología web de ASP.NET Core**.
+- Si mañana quieres migrar a Auth0, AWS Cognito, Duende IdentityServer o autenticación basada en gRPC, tu capa de negocio **se romperá por completo**.
+- Ya existe la abstracción [IAccountService](file:///c:/Users/DELL/Desktop/wordspace/RealEstateApp/src/Core/RealEstateApp.Core.Application/Interfaces/Services/IAccountService.cs) en el proyecto. **Que 4 servicios sigan inyectando `UserManager<IdentityUser>` es pura indisciplina.**
 
 ---
 
-### 🟡 IMPORTANTE #6: Código de Generación de Prefijos Demasiado Complejo
+### 🔴 PECADO #3: El Cáncer del N+1 en las Consultas Asíncronas
+
+Miren con horror lo que ocurre en `ReviewService.cs` y `CommissionService.cs`:
 
 ```csharp
-// PropertyService.cs — líneas 557-600
-private string GetPropertyTypePrefix(string? typeName)
+// ReviewService.cs — líneas 114-125 🚨
+foreach (var r in reviews)
 {
-    // 43 líneas de lógica para generar un prefijo de 3 letras
-    if (cleanWord.StartsWith("APARTAM")) return "APT";
-    if (cleanWord.StartsWith("VILL")) return "VIL";
-    // ...algoritmo de consonantes...
+    var cliente = await _userManager.FindByIdAsync(r.ClienteId); // Query 1 por iteración
+    if (cliente != null)
+    {
+        var claims = await _userManager.GetClaimsAsync(cliente); // Query 2 por iteración
+        // ...
+    }
 }
 ```
 
-*"Functions should do one thing, do it well, and do it only."* — Este método hace demasiado: normaliza, tokeniza, extrae iniciales, aplica reglas especiales, y aplica un algoritmo de consonantes. Debería ser **tabla de datos, no lógica en código**. Las reglas de prefijo pertenecen en configuración o en la entidad `PropertyType` misma.
+```csharp
+// AgentVerificationService.cs — líneas 158-179 🚨
+// 4 llamadas remotas por CADA elemento dentro de GetAllAsync():
+var agent = await _userManager.FindByIdAsync(agentId);           // Query 1
+var claims = await _userManager.GetClaimsAsync(agent);           // Query 2
+var admin = await _userManager.FindByIdAsync(adminId);           // Query 3
+var adminClaims = await _userManager.GetClaimsAsync(admin);      // Query 4
+```
+
+#### El Cálculo de la Catástrofe:
+- Si tienes **50 verificaciones**, `GetAllAsync()` ejecuta **201 consultas a la base de datos**.
+- Si tienes **100 comisiones**, `GetAllWithDetailsAsync()` ejecuta **201 consultas**.
+
+> **El Dictamen**: Esto se llama **N+1 Query Explosion**. En un entorno local con 3 registros y base de datos InMemory parece rápido; en producción con latencia de red de 15ms por query hacia SQL Server, esa petición tardará **más de 3 segundos** y saturará el pool de conexiones de Entity Framework.
 
 ---
 
-### 🟡 IMPORTANTE #7: Comentarios que Explican el "Qué", No el "Por Qué"
+### 🔴 PECADO #4: El Mito de la Atomicidad — Ausencia de `Unit of Work`
+
+Miren la implementación de `GenericRepository<T>`:
 
 ```csharp
-// Guardar entidad de propiedad   ← Esto es ruido, no información
-property = await _propertyRepository.AddAsync(property);
-
-// Guardar mejoras seleccionadas  ← El código ya lo dice
-if (vm.ImprovementIds != null && vm.ImprovementIds.Count > 0)
+// GenericRepository.cs — líneas 18-23 🚨
+public virtual async Task<T> AddAsync(T entity)
+{
+    await _dbContext.Set<T>().AddAsync(entity);
+    await _dbContext.SaveChangesAsync(); // ¡COMMIT INMEDIATO!
+    return entity;
+}
 ```
 
-*"Instead of writing a comment, rename the variable or extract the method to make the code self-documenting."*
+Ahora miren lo que hace un caso de uso de negocio en `PropertyService.Add(vm)`:
+1. `await _propertyRepository.AddAsync(property);` ➔ **COMMIT #1**
+2. `await _priceHistoryRepository.AddAsync(...);` ➔ **COMMIT #2**
+3. `await _propertyImprovementRepository.Update(...);` ➔ **COMMIT #3**
+4. `await _propertyImageService.SaveImagesAsync(...);` ➔ **COMMIT #4**
 
-Hay docenas de estos comentarios en `PropertyService.cs`. Son evidencia de que el método es demasiado largo y necesita ser dividido en métodos nombrados.
+#### La Pregunta Mortal:
+¿Qué pasa si el servidor se apaga o se corta la conexión en el paso 3?
+Tienes una propiedad huérfana en la base de datos, con precio en historial, pero sin amenidades y sin imágenes.
+**No hay rollback. Los datos están corruptos.**
+
+> **El Dictamen**: *"A business use case defines an ACID boundary."* Cada llamada a un repositorio guardando datos por su cuenta viola el patrón **Unit of Work**. Los repositorios deben encolar cambios en el contexto de persistencia, y el caso de uso (o el interceptor de la transacción) debe invocar un único `UnitOfWork.CommitAsync()` al final.
 
 ---
 
-### 🟢 MENOR #8: Hardcoded Fallback en Program.cs
+### 🟡 PECADO #5: "Mockitis Aguda" — Pruebas que Prueban Mocks, No Comportamiento
+
+Hemos logrado 24 suites de pruebas unitarias. Pero seamos implacables con nosotros mismos. Miren la anatomía de este test típico:
 
 ```csharp
-// Program.cs — línea 154 🟢
-jwtKey = "RealEstateAppSuperSecretKeyForDevelopmentAndTesting2026";
+// Arrange
+_repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(entity);
+_repoMock.Setup(r => r.DeleteAsync(entity)).Returns(Task.CompletedTask);
+
+// Act
+await _sut.Delete(1);
+
+// Assert
+_repoMock.Verify(r => r.DeleteAsync(entity), Times.Once);
 ```
 
-Una clave secreta hardcodeada, **aunque sea de desarrollo**, puede filtrarse si el código llega a producción sin la variable de entorno configurada. Debería lanzar una excepción explícita en lugar de usar un fallback silencioso.
+#### ¿Qué está probando este test?
+No está probando lógica de negocio. Está probando que si configuro a Moq para esperar `DeleteAsync`, el método llama a `DeleteAsync`.
+- Si cambiamos la implementación interna para hacer un soft-delete o delegar a una especificación, el test **falla** aunque el negocio funcione.
+- Los tests están **hiper-acoplados a la implementación**, no a los resultados observables.
+
+> **El Dictamen**: Hay una diferencia entre *Social Tests* (probar comportamiento real con fakes en memoria o estado controlado) y *Solitary Tests sobre-mockeados*. Moq es un bisturí, no una ametralladora. Cuando el 80% de las líneas de un test son `Setup` y `Verify`, tus tests son una jaula que impide el refactor.
 
 ---
 
-## 4. Mapa de Deuda Técnica
+### 🟡 PECADO #6: Confusión de Fronteras — La Plaga de los "ViewModels" en Application
+
+En `src/Core/RealEstateApp.Core.Application/` hay **20 carpetas llamadas `ViewModels`**:
+- `PropertyViewModel`
+- `SavePropertyViewModel`
+- `ChatViewModel`
+- `SaveChatViewModel`
+
+#### ¿Por qué esto es una señal de alarma arquitectural?
+- Un **ViewModel** es un concepto de la capa de **Presentación** (patrón MVVM o MVC). Es el modelo que consume la Vista (View).
+- La capa **Application** en Clean Architecture debe hablar en términos de **Casos de Uso**:
+  - DTOs de Entrada: `CreatePropertyCommand`, `UpdatePropertyRequest`, `PropertyFilterCriteria`.
+  - DTOs de Salida: `PropertyResponse`, `PropertyDetailResult`, `PriceHistoryDto`.
+
+> **El Dictamen**: Llamar a los DTOs de aplicación "ViewModels" demuestra que esta aplicación nació como un monolito ASP.NET MVC con Razor Views y fue adaptada a WebApi sin purificar los límites de capa. Los DTOs de aplicación no deben tener prefijos ni sufijos de UI (`Save...ViewModel`).
+
+---
+
+### 🟡 PECADO #7: El Controlador Convertido en Motor de Base de Datos
+
+Miren `AdminController.cs`:
+
+```csharp
+// AdminController.cs — líneas 46-60 🚨
+[HttpGet("dashboard-kpis")]
+public async Task<IActionResult> GetDashboardKPIsAsync()
+{
+    var properties = await _propertyService.GetAllViewModel(); // ¡Carga TODOS los inmuebles!
+    var agents = await _agentService.GetAllViewModelAsync();    // ¡Carga TODOS los agentes!
+    var clients = await _userManager.GetUsersInRoleAsync("Client");
+    var developers = await _userManager.GetUsersInRoleAsync("Developer");
+
+    var kpis = new
+    {
+        totalAvailableProperties = properties.Count(p => p.Status == PropertyStatus.Available),
+        totalReservedProperties = properties.Count(p => p.Status == PropertyStatus.Reserved),
+        totalSoldProperties = properties.Count(p => p.Status == PropertyStatus.Sold),
+        // ...
+    };
+    return Ok(kpis);
+}
+```
+
+#### La Locura Computacional:
+Para mostrar **5 números en una tarjeta de dashboard**:
+1. Traes miles de registros de SQL Server por la red.
+2. AutoMapper transforma miles de entidades a `PropertyViewModel`.
+3. Se ejecutan conversiones de divisas USD/DOP para cada propiedad en RAM.
+4. El procesador del servidor web ejecuta `Count()` con LINQ sobre la lista en memoria.
+
+> **El Dictamen**: Los dashboards y analíticas requieren **Consultas SQL de Agregación (`SELECT COUNT(*)... GROUP BY`)**, no volcar la base de datos a la memoria del proceso web. Esto debe ser un query handler o un método de repositorio dedicado `GetDashboardMetricsAsync()`.
+
+---
+
+## 3. Matriz de Severidad Crítica (Nivel Arquitecto Jefe)
 
 ```
-URGENCIA ALTA                    URGENCIA MEDIA               URGENCIA BAJA
-─────────────────────────────    ──────────────────────────    ──────────────────────
-catch{} vacíos en               Tests para 12 servicios       Prefijos en tabla de BD
-PropertyService                 sin cobertura                 en vez de código
+PELIGRO INMEDIATO (Corrupción & Crash)     DEUDA ARQUITECTURAL PROFUNDA
+──────────────────────────────────────     ────────────────────────────────────
+Pecado #4: Falta de Unit of Work           Pecado #1: Modelo de Dominio Anémico
+(Corrupción ante fallos a mitad de flujo)  (Entidades sin encapsulamiento ni reglas)
 
-PropertyService viola SRP       SavedSearchService con        Comentarios que
-(603 líneas, 11 deps)           UserManager en Application    explican el "qué"
+Pecado #3: Consultas N+1 en bucles         Pecado #2: Identity en Core.Application
+(Saturación de conexiones y lag masivo)    (Violación de la Regla de Dependencias)
 
-                                PropertyValuationService:     JWT fallback
-                                GetAllAsync() en memoria      hardcodeado
+Pecado #7: Volcado de BD en Dashboard      Pecado #6: Terminología "ViewModels" en Core
+(Consumo desmedido de RAM por requests)    (Fronteras contaminadas por la UI)
 ```
 
 ---
 
-## 5. Plan de Acción Prioritizado
+## 4. El Manifiesto del Artesano: Plan de Transformación a Clean Architecture Pura
 
-### Semana 1 — Eliminar los `catch {}` vacíos
-Agregar `ILogger<T>` a `PropertyService` y loggear todas las excepciones silenciadas. Costo: **bajo**. Impacto: **crítico**.
+Si de verdad queremos que este sistema sea digno de orgullo profesional, este es el camino:
 
-### Semana 2 — Tests para servicios de negocio críticos
-Prioridad: `AgentVerificationService`, `LeadPipelineService`, `PropertyValuationService`, `SavedSearchService`. Estos 4 tienen lógica de negocio compleja no cubierta.
+```mermaid
+journey
+    title Camino a la Maestría Arquitectural
+    section Fase A: Pureza del Core
+      Erradicar UserManager de los 4 servicios restantes: 5: Crítico
+      Consolidar IAccountService como única puerta de identidad: 5: Crítico
+    section Fase B: Consistencia y Rendimiento
+      Implementar IUnitOfWork y transacciones atómicas: 5: Crítico
+      Reemplazar bucles N+1 por consultas batch en repositorios: 4: Alto
+      Optimizar dashboard KPIs con consultas SQL agregadas: 4: Alto
+    section Fase C: Dominio Rico
+      Encapsular entidades (Property, Offer) con métodos de negocio: 3: Medio
+      Proteger invariantes de negocio en el Dominio: 3: Medio
+    section Fase D: Fronteras Limpias
+      Renombrar ViewModels a Request/Response DTOs en Application: 3: Limpieza
+```
 
-### Semana 3 — Extraer `PropertyImageService` y `PropertyEnrichmentService`
-Refactorizar `PropertyService` extrayendo las responsabilidades de imágenes y enriquecimiento. Los tests existentes de `PropertyServiceTests.cs` darán la red de seguridad para este refactor.
+### Mandato 1: Expulsar a Identity de una vez y por todas de Core.Application
+`ReviewService`, `CommissionService`, `AgentVerificationService` y `PropertyDocumentService` deben recibir `IAccountService`. Ningún archivo en `src/Core/` debe tener `using Microsoft.AspNetCore.Identity;`.
 
-### Semana 4 — Corregir la dependencia de `UserManager` en Application
-Crear una abstracción `IUserLookupService` en la capa Application e implementarla en Infrastructure.
+### Mandato 2: Matar el N+1 con Consultas en Lote (`Batch Lookups`)
+En lugar de consultar usuario por usuario en un `foreach`, los servicios deben pedir un diccionario de usuarios en un solo viaje:
+```csharp
+var clientIds = reviews.Select(r => r.ClienteId).Distinct();
+var clientDict = await _accountService.GetUsersByIdsAsync(clientIds); // 1 viaje, no N viajes.
+```
+
+### Mandato 3: Patrón Unit of Work
+Introducir `IUnitOfWork` con `CommitAsync()` para que las operaciones multi-entidad sean verdaderamente atómicas.
+
+### Mandato 4: Enriquecer el Dominio
+Mover las reglas de aceptación de ofertas, validaciones de cambio de estado y cálculo de límites hacia las entidades `Property` y `Offer`. El código debe leerse como prosa de negocio:
+```csharp
+property.AcceptOffer(offerId);
+```
 
 ---
 
-## 6. Conclusión
+## 5. Epílogo: El Estándar del Profesional
 
-> *"We are professionals. And professionals take responsibility for their code."*
-
-Este es un proyecto que tiene **visión arquitectural clara y bien ejecutada**. La elección de Onion Architecture, la implementación de JWT, SignalR, Rate Limiting, y el sistema de suscripciones habla de un equipo que piensa en grande.
-
-Pero la profesionalidad no termina en la arquitectura de alto nivel. **Se mide también en los detalles**: en si los errores se loggean o se silencian, en si cada método tiene una sola razón de cambiar, en si cada línea de lógica de negocio tiene un test que la respalda.
-
-Los `catch {}` vacíos son mentiras que el sistema se dice a sí mismo. El `PropertyService` de 603 líneas es una habitación que nadie quiere limpiar. Los 12 servicios sin tests son 12 promesas rotas al futuro mantenedor de este código.
-
-La buena noticia: **la base es sólida**. Corregir estos problemas no requiere reescribir — requiere disciplina.
-
-*"Clean code always looks like it was written by someone who cares."* — Cuida este código.
+> *"It is not enough that the code compiles. It is not enough that the tests pass. A system that works today can be impossible to change tomorrow.
+> 
+> You have demonstrated speed. You have demonstrated that you know how to create components and wire up dependency injection. Now, demonstrate discipline.
+> 
+> Clean Architecture is not about separating folders so you can feel good about having four projects in your solution. Clean Architecture is about independence: independence of frameworks, independence of databases, and ruthless protection of your business rules.
+> 
+> That is the craft. Now, let's get back to work."*
 
 ---
 
-*Análisis generado por el Agente Robert C. Martin — RealEstateApp — Septiembre 2026*
+*Dictamen Crítico emitido por Robert C. Martin "Uncle Bob" — Segunda Revisión Forense — Septiembre 2026*
