@@ -80,21 +80,21 @@ export const AgentProfilePage: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div className="pb-4 border-b border-slate-200">
-        <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-          <User className="w-6 h-6 text-brand-600" />
+      <div className="pb-4 border-b border-slate-200 dark:border-slate-800">
+        <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <User className="w-6 h-6 text-brand-600 dark:text-brand-400" />
           Mi Perfil Profesional de Agente
         </h2>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           Tus datos y fotografía serán visibles para todos los compradores en las fichas técnicas de tus propiedades.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
         
-        <div className="flex items-center gap-5 pb-6 border-b border-slate-100">
+        <div className="flex items-center gap-5 pb-6 border-b border-slate-100 dark:border-slate-800">
           <div className="relative group">
-            <div className="w-20 h-20 rounded-full bg-slate-100 text-slate-700 font-bold text-2xl flex items-center justify-center overflow-hidden border-2 border-slate-200">
+            <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-2xl flex items-center justify-center overflow-hidden border-2 border-slate-200 dark:border-slate-700">
               {photoPreview ? (
                 <img src={photoPreview} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
@@ -107,9 +107,9 @@ export const AgentProfilePage: React.FC = () => {
             </label>
           </div>
           <div>
-            <h4 className="font-bold text-sm text-slate-900">{user?.userName}</h4>
-            <p className="text-xs text-slate-500">{user?.email}</p>
-            <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+            <h4 className="font-bold text-sm text-slate-900 dark:text-white">{user?.userName}</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
+            <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
               <ShieldCheck className="w-3 h-3" />
               Corredor Inmobiliario Autorizado
             </span>
@@ -118,49 +118,49 @@ export const AgentProfilePage: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nombre</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nombre</label>
             <input
               type="text"
               required
               value={form.firstName}
               onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Apellido</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Apellido</label>
             <input
               type="text"
               required
               value={form.lastName}
               onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Teléfono Directo de Contacto</label>
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Teléfono Directo de Contacto</label>
           <input
             type="tel"
             required
             placeholder="809-555-0199"
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+            className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
           />
         </div>
 
         {success && (
-          <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-700 flex items-center gap-2">
+          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800/60 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
             <CheckCircle className="w-4 h-4 shrink-0" />
             <span>Perfil de agente actualizado exitosamente.</span>
           </div>
         )}
 
         {error && (
-          <div className="p-3 bg-rose-50 rounded-xl border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+          <div className="p-3 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-200 dark:border-rose-800/60 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
             <ShieldAlert className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
