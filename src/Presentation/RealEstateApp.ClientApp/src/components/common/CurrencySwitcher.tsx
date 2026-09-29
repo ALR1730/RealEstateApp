@@ -8,13 +8,13 @@ export const CurrencySwitcher: React.FC = () => {
   return (
     <button
       onClick={toggleCurrency}
-      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border border-slate-200/80 hover:border-brand-400 bg-white hover:bg-brand-50 text-slate-700 hover:text-brand-700"
+      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border border-slate-200/80 hover:border-brand-400 bg-white hover:bg-brand-50 text-slate-700 hover:text-brand-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer"
       title={currency === 'DOP' ? 'Cambiar a USD' : 'Cambiar a RD$'}
     >
       {currency === 'DOP' ? (
-        <Banknote className="w-3.5 h-3.5" />
+        <Banknote className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
       ) : (
-        <DollarSign className="w-3.5 h-3.5" />
+        <DollarSign className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
       )}
       <span>{currency === 'DOP' ? 'RD$' : 'USD'}</span>
     </button>
