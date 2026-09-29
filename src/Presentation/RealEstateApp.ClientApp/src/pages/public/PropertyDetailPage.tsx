@@ -260,18 +260,18 @@ export const PropertyDetailPage: React.FC = () => {
         <div className="lg:col-span-2 space-y-8">
           
           {/* Header Info */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 space-y-4 shadow-xs">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 space-y-4 shadow-xs">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Badge status={property.status} />
-                <span className="text-xs font-extrabold px-3 py-1 bg-brand-50 text-brand-700 rounded-full border border-brand-200/60 uppercase tracking-wider">
+                <span className="text-xs font-extrabold px-3 py-1 bg-brand-50 dark:bg-brand-950/50 text-brand-700 dark:text-brand-300 rounded-full border border-brand-200/60 dark:border-brand-800 uppercase tracking-wider">
                   {property.propertyTypeName || 'Inmueble'}
                 </span>
-                <span className="text-xs font-extrabold px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200/60 uppercase tracking-wider">
+                <span className="text-xs font-extrabold px-3 py-1 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 rounded-full border border-indigo-200/60 dark:border-indigo-800 uppercase tracking-wider">
                   {property.saleTypeName || 'Venta'}
                 </span>
               </div>
-              <span className="font-mono text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-lg">
+              <span className="font-mono text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">
                 Código: #{property.code}
               </span>
             </div>
@@ -430,7 +430,7 @@ export const PropertyDetailPage: React.FC = () => {
             </div>
 
             {/* Agent Profile Card */}
-            <div className="pt-4 border-t border-slate-100 space-y-3">
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
                 Agente Responsable
               </span>
@@ -444,16 +444,16 @@ export const PropertyDetailPage: React.FC = () => {
                   )}
                 </div>
                 <div className="overflow-hidden">
-                  <h4 className="font-bold text-slate-900 text-sm truncate">
+                  <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">
                     {property.agentName || 'Agente Inmobiliario'}
                   </h4>
-                  <p className="text-xs text-slate-500 truncate">{property.agentEmail}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{property.agentEmail}</p>
                 </div>
               </div>
 
               {property.agentPhone && (
-                <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <Phone className="w-4 h-4 text-brand-600" />
+                <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700">
+                  <Phone className="w-4 h-4 text-brand-600 dark:text-brand-400" />
                   <span>{property.agentPhone}</span>
                 </div>
               )}

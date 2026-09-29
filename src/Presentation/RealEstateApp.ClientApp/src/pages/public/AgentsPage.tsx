@@ -51,13 +51,13 @@ export const AgentsPage: React.FC = () => {
       {/* Search Bar */}
       <div className="max-w-md">
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             placeholder="Buscar agente por nombre o correo..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-2xs"
+            className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-2xs"
           />
         </div>
       </div>
@@ -66,7 +66,7 @@ export const AgentsPage: React.FC = () => {
       {isLoading ? (
         <Loader text="Consultando directorio de agentes..." />
       ) : filtered.length === 0 ? (
-        <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 text-slate-500">
+        <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400">
           No se encontraron agentes que coincidan con la búsqueda.
         </div>
       ) : (
@@ -74,7 +74,7 @@ export const AgentsPage: React.FC = () => {
           {filtered.map((agent) => (
             <div
               key={agent.id}
-              className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs hover:shadow-xl hover:border-slate-300 transition-all flex flex-col justify-between space-y-4 text-center"
+              className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-xl hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 text-center"
             >
               <div className="space-y-3">
                 <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-navy-800 to-slate-700 text-white flex items-center justify-center font-bold text-xl overflow-hidden shadow-md">
@@ -86,20 +86,20 @@ export const AgentsPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="font-bold text-base text-slate-900">
+                  <h3 className="font-bold text-base text-slate-900 dark:text-white">
                     {agent.firstName} {agent.lastName}
                   </h3>
-                  <p className="text-xs text-slate-500 truncate">{agent.email}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{agent.email}</p>
                 </div>
 
-                <div className="pt-2 border-t border-slate-100 space-y-1 text-xs text-slate-600">
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1 text-xs text-slate-600 dark:text-slate-400">
                   {agent.phone && (
-                    <div className="flex items-center justify-center gap-1.5 font-semibold text-brand-600">
+                    <div className="flex items-center justify-center gap-1.5 font-semibold text-brand-600 dark:text-brand-400">
                       <Phone className="w-3.5 h-3.5" />
                       <span>{agent.phone}</span>
                     </div>
                   )}
-                  <div className="flex items-center justify-center gap-1.5 font-semibold text-slate-500">
+                  <div className="flex items-center justify-center gap-1.5 font-semibold text-slate-500 dark:text-slate-400">
                     <Home className="w-3.5 h-3.5" />
                     <span>{agent.propertiesCount || 0} Propiedades asignadas</span>
                   </div>
@@ -107,7 +107,7 @@ export const AgentsPage: React.FC = () => {
               </div>
 
               <div className="pt-2">
-                <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
                   <ShieldCheck className="w-3 h-3" />
                   Corredor Autorizado
                 </span>

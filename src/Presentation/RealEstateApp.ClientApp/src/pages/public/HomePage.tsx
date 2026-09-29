@@ -249,13 +249,13 @@ export const HomePage: React.FC = () => {
               <Flame className="w-4 h-4" />
               Oportunidades Destacadas
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Propiedades Disponibles en RD$
             </h2>
           </div>
           <Link
             to="/catalog"
-            className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 group"
+            className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 group"
           >
             <span>Ver todo el catálogo</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -265,7 +265,7 @@ export const HomePage: React.FC = () => {
         {isLoading ? (
           <Loader text="Cargando propiedades destacadas..." />
         ) : featuredProperties.length === 0 ? (
-          <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 text-slate-500">
+          <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400">
             No hay propiedades registradas aún. Inicia sesión como Agente para publicar la primera.
           </div>
         ) : (
@@ -340,14 +340,14 @@ export const HomePage: React.FC = () => {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="flex justify-between items-end">
             <div>
-              <span className="text-xs font-extrabold uppercase tracking-widest text-brand-600">
+              <span className="text-xs font-extrabold uppercase tracking-widest text-brand-600 dark:text-brand-400">
                 Fuerza de Ventas Verificada
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
                 Nuestros Corredores Inmobiliarios
               </h2>
             </div>
-            <Link to="/agents" className="text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1">
+            <Link to="/agents" className="text-xs sm:text-sm font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 flex items-center gap-1">
               <span>Ver todos</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
@@ -355,7 +355,7 @@ export const HomePage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {agents.map((ag) => (
-              <div key={ag.id} className="bg-white rounded-3xl p-6 border border-slate-200 text-center space-y-4 hover:shadow-lg transition-all">
+              <div key={ag.id} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 text-center space-y-4 hover:shadow-lg transition-all">
                 <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-navy-800 to-slate-700 text-white flex items-center justify-center font-bold text-xl overflow-hidden shadow-md">
                   {ag.photoUrl ? (
                     <img src={ag.photoUrl} alt="" className="w-full h-full object-cover" />
@@ -364,14 +364,14 @@ export const HomePage: React.FC = () => {
                   )}
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-900 text-base">
+                  <h4 className="font-bold text-slate-900 dark:text-white text-base">
                     {ag.firstName} {ag.lastName}
                   </h4>
-                  <p className="text-xs text-slate-500">{ag.email}</p>
-                  {ag.phone && <p className="text-xs font-semibold text-brand-600 mt-1">{ag.phone}</p>}
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{ag.email}</p>
+                  {ag.phone && <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 mt-1">{ag.phone}</p>}
                 </div>
-                <div className="pt-2 border-t border-slate-100 flex justify-center gap-2">
-                  <span className="text-[11px] font-bold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg">
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-center gap-2">
+                  <span className="text-[11px] font-bold px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg">
                     {ag.propertiesCount || 0} Inmuebles
                   </span>
                 </div>

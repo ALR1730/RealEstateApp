@@ -344,14 +344,14 @@ export const PropertiesCatalogPage: React.FC = () => {
           {isLoading ? (
             <Loader text="Consultando catálogo en vivo..." />
           ) : sortedProperties.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800 space-y-4">
+              <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center mx-auto">
                 <SlidersHorizontal className="w-8 h-8" />
               </div>
-              <h3 className="text-base font-bold text-slate-800">
+              <h3 className="text-base font-bold text-slate-800 dark:text-white">
                 No se encontraron propiedades con los filtros seleccionados
               </h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
                 Intenta ajustar los criterios de búsqueda, ampliar el rango de precios en RD$ o limpiar los filtros.
               </p>
               <button

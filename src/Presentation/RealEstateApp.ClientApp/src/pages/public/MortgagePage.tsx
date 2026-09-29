@@ -26,32 +26,32 @@ export const MortgagePage: React.FC = () => {
 
       {/* Educational & Financial Insights Guide */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
-          <div className="w-10 h-10 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+          <div className="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-400 flex items-center justify-center font-bold">
             <CheckCircle2 className="w-5 h-5" />
           </div>
-          <h3 className="font-bold text-base text-slate-900">¿Qué es el Sistema Francés?</h3>
-          <p className="text-xs text-slate-600 leading-relaxed">
+          <h3 className="font-bold text-base text-slate-900 dark:text-white">¿Qué es el Sistema Francés?</h3>
+          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
             Es el método bancario más utilizado en República Dominicana. Se caracteriza por cuotas mensuales constantes a lo largo del crédito, amortizando más intereses al inicio y mayor capital al final.
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-100 text-royal-700 flex items-center justify-center font-bold">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+          <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-royal-900/40 text-royal-700 dark:text-royal-400 flex items-center justify-center font-bold">
             <ShieldCheck className="w-5 h-5" />
           </div>
-          <h3 className="font-bold text-base text-slate-900">Enganche Recomendado (20%)</h3>
-          <p className="text-xs text-slate-600 leading-relaxed">
+          <h3 className="font-bold text-base text-slate-900 dark:text-white">Enganche Recomendado (20%)</h3>
+          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
             Las principales entidades financieras (Banco Popular, BHD, Banreservas, APAP) suelen requerir un inicial mínimo del 10% al 20% del valor de tasación del inmueble.
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 flex items-center justify-center font-bold">
             <HelpCircle className="w-5 h-5" />
           </div>
-          <h3 className="font-bold text-base text-slate-900">Tasas Hipotecarias en RD$</h3>
-          <p className="text-xs text-slate-600 leading-relaxed">
+          <h3 className="font-bold text-base text-slate-900 dark:text-white">Tasas Hipotecarias en RD$</h3>
+          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
             Las tasas de interés promedio para préstamos en Pesos Dominicanos oscilan típicamente entre el 9.5% y el 14% anual, dependiendo del plazo fijado y la entidad bancaria.
           </p>
         </div>

@@ -169,22 +169,22 @@ export const ComparePage: React.FC = () => {
       </div>
 
       {/* Comparison Table */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-x-auto">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-x-auto">
         <table className="w-full min-w-[640px]">
           <thead>
-            <tr className="border-b border-slate-100">
+            <tr className="border-b border-slate-100 dark:border-slate-800">
               <th className="w-[140px] p-4 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 Característica
               </th>
               {compareProperties.map((p) => (
                 <th key={p.id} className="p-4 text-center min-w-[180px]">
                   <div className="flex flex-col items-center gap-1">
-                    <span className="text-xs font-bold text-slate-900 truncate max-w-[160px]">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[160px]">
                       #{p.code}
                     </span>
                     <button
                       onClick={() => removeFromCompare(p.id)}
-                      className="text-[10px] font-semibold text-rose-500 hover:text-rose-700"
+                      className="text-[10px] font-semibold text-rose-500 hover:text-rose-700 dark:hover:text-rose-400"
                     >
                       Quitar
                     </button>
@@ -197,11 +197,11 @@ export const ComparePage: React.FC = () => {
             {rows.map((row, idx) => (
               <tr
                 key={row.label}
-                className={idx % 2 === 0 ? 'bg-slate-50/60' : 'bg-white'}
+                className={idx % 2 === 0 ? 'bg-slate-50/60 dark:bg-slate-800/40' : 'bg-white dark:bg-slate-900'}
               >
-                <td className="p-4 text-xs font-bold text-slate-600">{row.label}</td>
+                <td className="p-4 text-xs font-bold text-slate-600 dark:text-slate-300">{row.label}</td>
                 {compareProperties.map((p) => (
-                  <td key={p.id} className="p-4 text-center">
+                  <td key={p.id} className="p-4 text-center text-slate-700 dark:text-slate-300">
                     {row.render(p)}
                   </td>
                 ))}
