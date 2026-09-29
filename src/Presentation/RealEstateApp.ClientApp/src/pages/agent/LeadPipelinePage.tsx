@@ -23,7 +23,7 @@ const stageColors: Record<string, string> = {
   'Contactado': 'border-indigo-300 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/30',
   'Visita': 'border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30',
   'Oferta': 'border-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/30',
-  'Cierre': 'border-brand-300 dark:border-brand-800 bg-brand-50 dark:bg-brand-950/30',
+  'Cierre': 'border-brand-300 dark:border-emerald-800 bg-brand-50 dark:bg-emerald-950/40',
   'Ganado': 'border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30',
   'Perdido': 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/30',
 };
@@ -274,7 +274,7 @@ export const LeadPipelinePage: React.FC = () => {
             </div>
           </div>
           <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-slate-800 text-brand-600 dark:text-brand-400 flex items-center justify-center border border-transparent dark:border-slate-700">
               <Sparkles className="w-6 h-6" />
             </div>
             <div>

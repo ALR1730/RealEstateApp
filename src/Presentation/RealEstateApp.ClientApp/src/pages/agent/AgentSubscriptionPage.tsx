@@ -121,7 +121,7 @@ export const AgentSubscriptionPage: React.FC = () => {
     <div className="max-w-5xl mx-auto space-y-8 pb-16">
       
       <div className="text-center max-w-2xl mx-auto space-y-2">
-        <span className="text-xs font-extrabold uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/60 px-3 py-1 rounded-full">
+        <span className="text-xs font-extrabold uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-slate-800 border dark:border-slate-700 px-3 py-1 rounded-full">
           Planes y Membresías
         </span>
         <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">

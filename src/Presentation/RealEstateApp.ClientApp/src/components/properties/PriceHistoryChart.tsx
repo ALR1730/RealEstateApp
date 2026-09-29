@@ -66,7 +66,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ history })
                       })}
                     </span>
                     {index === 0 && (
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 bg-brand-50 dark:bg-brand-950/50 text-brand-700 dark:text-brand-300 rounded-full border border-brand-200/60 dark:border-brand-800">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 bg-brand-50 dark:bg-slate-800 text-brand-700 dark:text-brand-400 rounded-full border border-brand-200/60 dark:border-slate-700">
                         Más reciente
                       </span>
                     )}

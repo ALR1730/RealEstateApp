@@ -261,7 +261,7 @@ export const AiSearchBar: React.FC<AiSearchBarProps> = ({
               className={`text-[11px] sm:text-xs px-2.5 py-1 rounded-full transition-all text-left truncate max-w-[280px] sm:max-w-none cursor-pointer ${
                 isHero
                   ? 'bg-slate-800/80 text-slate-300 hover:bg-brand-500/20 hover:text-white border border-slate-700/60 hover:border-brand-500/50'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-brand-950/30 hover:text-brand-600 dark:hover:text-brand-400 border border-slate-200 dark:border-slate-700'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-slate-700 hover:text-brand-600 dark:hover:text-brand-400 border border-slate-200 dark:border-slate-700'
               }`}
             >
               {item}

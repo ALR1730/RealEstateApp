@@ -74,7 +74,7 @@ export const Sidebar: React.FC = () => {
             </div>
             <div className="overflow-hidden">
               <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{user?.userName}</p>
-              <span className="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-950/70 text-brand-800 dark:text-brand-300 uppercase tracking-wider">
+              <span className="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-brand-100 dark:bg-slate-800 text-brand-800 dark:text-brand-400 border dark:border-slate-700 uppercase tracking-wider">
                 {isAdmin ? 'Administrador' : isAgent ? 'Agente' : isOwner ? 'Propietario' : isDeveloper ? 'Desarrollador' : 'Cliente'}
               </span>
             </div>

@@ -40,9 +40,9 @@ const FILTER_LABELS: Record<string, string> = {
 
 function readFiltersFromURL(sp: URLSearchParams): FilterState {
   const f: FilterState = {};
-  const num = (v: string | null) => v ? Number(v) : undefined;
+  const num = (v: string | null) => (v ? Number(v) : undefined);
   const str = (v: string | null) => v || undefined;
-  const bool = (v: string | null) => v === 'true';
+  const bool = (v: string | null) => (v === 'true' ? true : undefined);
 
   f.code = str(sp.get('code'));
   f.propertyTypeId = num(sp.get('propertyTypeId'));
@@ -73,7 +73,7 @@ function writeFiltersToURL(filters: FilterState): URLSearchParams {
   const params = new URLSearchParams();
   FILTER_URL_KEYS.forEach((k) => {
     const v = filters[k];
-    if (v === undefined || v === '' || v === null) return;
+    if (v === undefined || v === '' || v === null || v === false) return;
     if (Array.isArray(v)) {
       v.forEach((item) => params.append('improvementIds', String(item)));
       return;
@@ -115,7 +115,7 @@ export const PropertiesCatalogPage: React.FC = () => {
       try {
         const cleanParams: Record<string, string | number | boolean | string[]> = {};
         Object.entries(filters).forEach(([k, v]) => {
-          if (v === undefined || v === '' || v === null) return;
+          if (v === undefined || v === '' || v === null || v === false) return;
           if (Array.isArray(v)) {
             cleanParams.ImprovementIds = v.map(String);
             return;
@@ -222,8 +222,28 @@ export const PropertiesCatalogPage: React.FC = () => {
   });
 
   const activeFilters = Object.entries(filters).filter(
-    ([k, v]) => v !== undefined && v !== '' && v !== null && !['userLat', 'userLng'].includes(k)
+    ([k, v]) => v !== undefined && v !== '' && v !== null && v !== false && !['userLat', 'userLng'].includes(k)
   );
+
+  const getFilterDisplayValue = (key: string, value: any): string => {
+    if (typeof value === 'boolean') return '';
+    if (key === 'propertyTypeId') {
+      const pt = propertyTypes.find((t) => t.id === Number(value));
+      return pt ? pt.name : String(value);
+    }
+    if (key === 'saleTypeId') {
+      const st = saleTypes.find((s) => s.id === Number(value));
+      return st ? st.name : String(value);
+    }
+    if (key === 'minPrice') return `>= RD$ ${Number(value).toLocaleString()}`;
+    if (key === 'maxPrice') return `<= RD$ ${Number(value).toLocaleString()}`;
+    if (key === 'minRooms') return `${value}+ habs`;
+    if (key === 'minBathrooms') return `${value}+ baños`;
+    if (key === 'minSizeInMeters') return `>= ${value} m²`;
+    if (key === 'maxSizeInMeters') return `<= ${value} m²`;
+    if (Array.isArray(value)) return `${value.length} seleccionadas`;
+    return String(value);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -271,20 +291,30 @@ export const PropertiesCatalogPage: React.FC = () => {
           {activeFilters.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Filtros activos:</span>
-              {activeFilters.map(([key, value]) => (
-                <span
-                  key={key}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold bg-brand-50 dark:bg-brand-950/50 text-brand-700 dark:text-brand-300 rounded-full border border-brand-200 dark:border-brand-800"
-                >
-                  {FILTER_LABELS[key] || key}: {typeof value === 'boolean' ? 'Sí' : String(value)}
-                  <button onClick={() => handleRemoveFilter(key as keyof FilterState)} className="hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
+              {activeFilters.map(([key, value]) => {
+                const label = FILTER_LABELS[key] || key;
+                const display = getFilterDisplayValue(key, value);
+                return (
+                  <span
+                    key={key}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-full border border-slate-200 dark:border-slate-700 shadow-xs"
+                  >
+                    <span>{label}{display ? `: ${display}` : ''}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFilter(key as keyof FilterState)}
+                      className="text-slate-400 hover:text-rose-500 dark:text-slate-400 dark:hover:text-rose-400 p-0.5 rounded-full transition-colors cursor-pointer"
+                      title="Eliminar filtro"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </span>
+                );
+              })}
               <button
+                type="button"
                 onClick={handleResetFilters}
-                className="text-[11px] font-bold text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 ml-1 cursor-pointer"
+                className="text-xs font-bold text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 ml-1 cursor-pointer transition-colors"
               >
                 Limpiar todo
               </button>
@@ -302,7 +332,7 @@ export const PropertiesCatalogPage: React.FC = () => {
               {isAuthenticated && isClient && (
                 <button
                   onClick={() => setShowSaveModal(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-800 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-950/40 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-800 rounded-lg hover:bg-brand-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   <BookmarkPlus className="w-3.5 h-3.5" />
                   Guardar Búsqueda

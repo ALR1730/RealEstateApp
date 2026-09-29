@@ -47,7 +47,7 @@ export const PropertyFilter: React.FC<PropertyFilterProps> = ({
   const handleChange = (field: keyof FilterState, value: any) => {
     onChange({
       ...filters,
-      [field]: value === '' || value === null ? undefined : value,
+      [field]: value === '' || value === null || value === false ? undefined : value,
     });
   };
 
@@ -199,7 +199,7 @@ export const PropertyFilter: React.FC<PropertyFilterProps> = ({
           <button
             type="button"
             onClick={handleNearMe}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border border-brand-200 dark:border-brand-800 bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 hover:bg-brand-100 dark:hover:bg-brand-900/50 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border border-brand-200 dark:border-slate-700 bg-brand-50 dark:bg-slate-800 text-brand-700 dark:text-emerald-400 hover:bg-brand-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
           >
             <Navigation className="w-3.5 h-3.5" />
             Cerca de Mí
@@ -331,18 +331,18 @@ export const PropertyFilter: React.FC<PropertyFilterProps> = ({
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
-              checked={filters.onlyFeatured || false}
-              onChange={(e) => handleChange('onlyFeatured', e.target.checked || undefined)}
-              className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 dark:border-slate-600"
+              checked={Boolean(filters.onlyFeatured)}
+              onChange={(e) => handleChange('onlyFeatured', e.target.checked ? true : undefined)}
+              className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 dark:border-slate-600 cursor-pointer"
             />
             <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Solo Destacados</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
-              checked={filters.onlyVerifiedAgents || false}
-              onChange={(e) => handleChange('onlyVerifiedAgents', e.target.checked || undefined)}
-              className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 dark:border-slate-600"
+              checked={Boolean(filters.onlyVerifiedAgents)}
+              onChange={(e) => handleChange('onlyVerifiedAgents', e.target.checked ? true : undefined)}
+              className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 dark:border-slate-600 cursor-pointer"
             />
             <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -352,9 +352,9 @@ export const PropertyFilter: React.FC<PropertyFilterProps> = ({
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
-              checked={filters.onlyFinanciable || false}
-              onChange={(e) => handleChange('onlyFinanciable', e.target.checked || undefined)}
-              className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 dark:border-slate-600"
+              checked={Boolean(filters.onlyFinanciable)}
+              onChange={(e) => handleChange('onlyFinanciable', e.target.checked ? true : undefined)}
+              className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 dark:border-slate-600 cursor-pointer"
             />
             <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
               <Banknote className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
@@ -364,9 +364,9 @@ export const PropertyFilter: React.FC<PropertyFilterProps> = ({
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
-              checked={filters.onlyWithVirtualTour || false}
-              onChange={(e) => handleChange('onlyWithVirtualTour', e.target.checked || undefined)}
-              className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 dark:border-slate-600"
+              checked={Boolean(filters.onlyWithVirtualTour)}
+              onChange={(e) => handleChange('onlyWithVirtualTour', e.target.checked ? true : undefined)}
+              className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 dark:border-slate-600 cursor-pointer"
             />
             <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
               <Eye className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />

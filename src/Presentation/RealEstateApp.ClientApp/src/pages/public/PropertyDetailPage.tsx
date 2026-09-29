@@ -264,10 +264,10 @@ export const PropertyDetailPage: React.FC = () => {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Badge status={property.status} />
-                <span className="text-xs font-extrabold px-3 py-1 bg-brand-50 dark:bg-brand-950/50 text-brand-700 dark:text-brand-300 rounded-full border border-brand-200/60 dark:border-brand-800 uppercase tracking-wider">
+                <span className="text-xs font-extrabold px-3 py-1 bg-brand-50 dark:bg-slate-800 text-brand-700 dark:text-brand-400 rounded-full border border-brand-200/60 dark:border-slate-700 uppercase tracking-wider">
                   {property.propertyTypeName || 'Inmueble'}
                 </span>
-                <span className="text-xs font-extrabold px-3 py-1 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 rounded-full border border-indigo-200/60 dark:border-indigo-800 uppercase tracking-wider">
+                <span className="text-xs font-extrabold px-3 py-1 bg-indigo-50 dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 rounded-full border border-indigo-200/60 dark:border-slate-700 uppercase tracking-wider">
                   {property.saleTypeName || 'Venta'}
                 </span>
               </div>

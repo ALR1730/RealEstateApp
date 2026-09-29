@@ -42,7 +42,7 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({
             </p>
           </div>
         </div>
-        <span className="hidden sm:inline-block px-3 py-1 bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 text-xs font-extrabold rounded-full border border-brand-200/60 dark:border-brand-800/60">
+        <span className="hidden sm:inline-block px-3 py-1 bg-brand-50 dark:bg-slate-800 text-brand-700 dark:text-brand-400 text-xs font-extrabold rounded-full border border-brand-200/60 dark:border-slate-700">
           República Dominicana
         </span>
       </div>

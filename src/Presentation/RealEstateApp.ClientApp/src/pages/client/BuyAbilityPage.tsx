@@ -471,7 +471,7 @@ export const BuyAbilityPage: React.FC = () => {
 
                 {/* Tasa Anual / Plazo */}
                 <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-4 min-w-0">
-                  <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-slate-800 text-brand-600 dark:text-brand-400 flex items-center justify-center flex-shrink-0 border border-transparent dark:border-slate-700">
                     <TrendingUp className="w-6 h-6" />
                   </div>
                   <div className="min-w-0 flex-1 overflow-hidden">

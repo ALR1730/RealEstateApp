@@ -58,7 +58,7 @@ export const Navbar: React.FC = () => {
               <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-navy-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
                 RealEstate<span className="text-brand-600 dark:text-brand-400">App</span>
               </span>
-              <span className="hidden sm:inline-block ml-2 text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-brand-100 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 border dark:border-brand-800/50">
+              <span className="hidden sm:inline-block ml-2 text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-brand-100 text-brand-700 dark:bg-slate-800 dark:text-brand-400 border dark:border-slate-700">
                 RD$
               </span>
             </div>
@@ -70,7 +70,7 @@ export const Navbar: React.FC = () => {
               to="/catalog"
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive('/catalog')
-                  ? 'bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 font-semibold'
+                  ? 'bg-brand-50 text-brand-700 dark:bg-slate-800 dark:text-brand-400 font-semibold'
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/70'
               }`}
             >
@@ -82,7 +82,7 @@ export const Navbar: React.FC = () => {
               to="/simulator"
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive('/simulator')
-                  ? 'bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 font-semibold'
+                  ? 'bg-brand-50 text-brand-700 dark:bg-slate-800 dark:text-brand-400 font-semibold'
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/70'
               }`}
             >
@@ -94,7 +94,7 @@ export const Navbar: React.FC = () => {
               to="/agents"
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive('/agents')
-                  ? 'bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 font-semibold'
+                  ? 'bg-brand-50 text-brand-700 dark:bg-slate-800 dark:text-brand-400 font-semibold'
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/70'
               }`}
             >
@@ -106,7 +106,7 @@ export const Navbar: React.FC = () => {
               to="/map"
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive('/map')
-                  ? 'bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 font-semibold'
+                  ? 'bg-brand-50 text-brand-700 dark:bg-slate-800 dark:text-brand-400 font-semibold'
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/70'
               }`}
             >
@@ -154,7 +154,7 @@ export const Navbar: React.FC = () => {
                 <div className="relative">
                   <button
                     onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
-                    className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/30 transition-colors relative"
+                    className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-brand-50 dark:hover:bg-slate-800 transition-colors relative"
                     title="Notificaciones"
                   >
                     <Bell className="w-5 h-5" />
@@ -168,7 +168,7 @@ export const Navbar: React.FC = () => {
                     <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 py-3 z-50 animate-in fade-in zoom-in-95">
                       <div className="px-4 pb-2 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                         <span className="font-bold text-sm text-slate-800 dark:text-slate-100">Notificaciones</span>
-                        <span className="text-xs bg-brand-100 dark:bg-brand-950/70 text-brand-700 dark:text-brand-300 font-semibold px-2 py-0.5 rounded-full">
+                        <span className="text-xs bg-brand-100 dark:bg-slate-800 text-brand-700 dark:text-brand-400 font-semibold px-2 py-0.5 rounded-full border dark:border-slate-700">
                           {unreadCount} nuevas
                         </span>
                       </div>
