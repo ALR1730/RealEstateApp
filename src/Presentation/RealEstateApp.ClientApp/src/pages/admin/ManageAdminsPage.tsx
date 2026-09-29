@@ -72,14 +72,14 @@ export const ManageAdminsPage: React.FC = () => {
                 placeholder="Buscar admin..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-white"
+                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-brand-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
               />
             </div>
           </div>
 
           <button
             onClick={() => navigate('/admin/admins/create')}
-            className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 dark:bg-brand-600 hover:bg-slate-800 dark:hover:bg-brand-500 text-white font-bold text-xs rounded-xl shadow-md transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Nuevo Admin</span>
@@ -90,11 +90,11 @@ export const ManageAdminsPage: React.FC = () => {
       {isLoading ? (
         <Loader text="Cargando listado de administradores..." />
       ) : (
-        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 text-slate-700 font-extrabold uppercase tracking-wider border-b border-slate-200">
+                <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
                   <th className="py-3.5 px-4">Usuario</th>
                   <th className="py-3.5 px-4">Correo</th>
                   <th className="py-3.5 px-4">Teléfono</th>
@@ -102,16 +102,16 @@ export const ManageAdminsPage: React.FC = () => {
                   <th className="py-3.5 px-4 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {filtered.map((admin) => (
-                  <tr key={admin.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4 font-bold text-slate-900">
+                  <tr key={admin.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
                       @{admin.userName}
                     </td>
-                    <td className="py-3 px-4 text-slate-600">
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
                       {admin.email}
                     </td>
-                    <td className="py-3 px-4 text-slate-500 font-mono">
+                    <td className="py-3 px-4 text-slate-500 dark:text-slate-400 font-mono">
                       {admin.phoneNumber || 'N/A'}
                     </td>
                     <td className="py-3 px-4">
@@ -122,8 +122,8 @@ export const ManageAdminsPage: React.FC = () => {
                         onClick={() => handleToggleStatus(admin.id, admin.isActive)}
                         className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
                           admin.isActive
-                            ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
-                            : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                            ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800/50'
+                            : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800/50'
                         }`}
                         title={admin.isActive ? 'Inactivar Administrador' : 'Activar Administrador'}
                       >

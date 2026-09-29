@@ -123,13 +123,13 @@ export const ManageUsersPage: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-slate-200">
+      <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800">
         <button
           onClick={() => setActiveTab('admins')}
           className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition-all ${
             activeTab === 'admins'
-              ? 'border-brand-600 text-brand-700'
-              : 'border-transparent text-slate-500 hover:text-slate-900'
+              ? 'border-brand-600 text-brand-700 dark:text-brand-400'
+              : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
         >
           Administradores ({admins.length})
@@ -138,8 +138,8 @@ export const ManageUsersPage: React.FC = () => {
           onClick={() => setActiveTab('developers')}
           className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition-all ${
             activeTab === 'developers'
-              ? 'border-royal-600 text-royal-700'
-              : 'border-transparent text-slate-500 hover:text-slate-900'
+              ? 'border-royal-600 text-royal-700 dark:text-indigo-400'
+              : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
         >
           Desarrolladores Web API ({developers.length})
@@ -149,11 +149,11 @@ export const ManageUsersPage: React.FC = () => {
       {isLoading ? (
         <Loader text="Cargando usuarios del sistema..." />
       ) : (
-        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 text-slate-700 font-extrabold uppercase tracking-wider border-b border-slate-200">
+                <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
                   <th className="py-3.5 px-4">Usuario</th>
                   <th className="py-3.5 px-4">Correo</th>
                   <th className="py-3.5 px-4">Teléfono</th>
@@ -161,16 +161,16 @@ export const ManageUsersPage: React.FC = () => {
                   <th className="py-3.5 px-4 text-right">Acción</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {(activeTab === 'admins' ? admins : developers).map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4 font-bold text-slate-900">
+                  <tr key={u.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
                       @{u.userName}
                     </td>
-                    <td className="py-3 px-4 text-slate-600">
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
                       {u.email}
                     </td>
-                    <td className="py-3 px-4 text-slate-500 font-mono">
+                    <td className="py-3 px-4 text-slate-500 dark:text-slate-400 font-mono">
                       {u.phoneNumber || 'N/A'}
                     </td>
                     <td className="py-3 px-4">
@@ -181,8 +181,8 @@ export const ManageUsersPage: React.FC = () => {
                         onClick={() => activeTab === 'admins' ? handleToggleAdmin(u.id, u.isActive) : handleToggleDev(u.id, u.isActive)}
                         className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
                           u.isActive
-                            ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
-                            : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                            ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800/50'
+                            : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800/50'
                         }`}
                       >
                         {u.isActive ? 'Inactivar' : 'Activar'}

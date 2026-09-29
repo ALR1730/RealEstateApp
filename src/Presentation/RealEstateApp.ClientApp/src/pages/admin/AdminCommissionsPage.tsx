@@ -115,11 +115,11 @@ export const AdminCommissionsPage: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 text-slate-700 font-extrabold uppercase tracking-wider border-b border-slate-200">
+                <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
                   <th className="py-3.5 px-4">Agente</th>
                   <th className="py-3.5 px-4">Propiedad</th>
                   <th className="py-3.5 px-4">Precio Venta</th>
@@ -130,18 +130,18 @@ export const AdminCommissionsPage: React.FC = () => {
                   <th className="py-3.5 px-4 text-right">Acción</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {commissions.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4 font-bold text-slate-800">{c.agentName || c.agentId}</td>
+                  <tr key={c.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">{c.agentName || c.agentId}</td>
                     <td className="py-3 px-4">
-                      <span className="font-mono font-bold text-slate-700">#{c.propertyCode || c.propertyId}</span>
-                      <p className="text-[11px] text-slate-500 truncate max-w-xs">{c.propertyName}</p>
+                      <span className="font-mono font-bold text-slate-700 dark:text-slate-300">#{c.propertyCode || c.propertyId}</span>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-xs">{c.propertyName}</p>
                     </td>
-                    <td className="py-3 px-4 font-mono font-bold text-slate-800">{formatCurrencyRD(c.salePrice)}</td>
-                    <td className="py-3 px-4 font-mono font-bold text-brand-600">{c.rate.toFixed(2)}%</td>
-                    <td className="py-3 px-4 font-mono font-bold text-emerald-600">{formatCurrencyRD(c.amount)}</td>
-                    <td className="py-3 px-4 text-slate-600 font-medium">{formatDate(c.created)}</td>
+                    <td className="py-3 px-4 font-mono font-bold text-slate-800 dark:text-slate-200">{formatCurrencyRD(c.salePrice)}</td>
+                    <td className="py-3 px-4 font-mono font-bold text-brand-600 dark:text-brand-400">{c.rate.toFixed(2)}%</td>
+                    <td className="py-3 px-4 font-mono font-bold text-emerald-600 dark:text-emerald-400">{formatCurrencyRD(c.amount)}</td>
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium">{formatDate(c.created)}</td>
                     <td className="py-3 px-4">
                       <Badge status={c.status} />
                     </td>
@@ -156,7 +156,7 @@ export const AdminCommissionsPage: React.FC = () => {
                           {isUpdating === c.id ? 'Procesando...' : 'Marcar Pagada'}
                         </button>
                       ) : (
-                        <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Completada</span>
+                        <span className="text-[11px] font-bold text-slate-300 dark:text-slate-600 uppercase tracking-wider">Completada</span>
                       )}
                     </td>
                   </tr>

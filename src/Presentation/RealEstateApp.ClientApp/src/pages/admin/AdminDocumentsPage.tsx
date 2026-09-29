@@ -72,22 +72,20 @@ export const AdminDocumentsPage: React.FC = () => {
           <RefreshCw className="w-3.5 h-3.5" />
           Refrescar
         </button>
-      </div>
-
-      {documents.length === 0 ? (
-        <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-2">
-          <FileText className="w-12 h-12 text-slate-300 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800">Sin documentos registrados</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+      </div>      {documents.length === 0 ? (
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800 space-y-3">
+          <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto" />
+          <h3 className="text-base font-bold text-slate-800 dark:text-white">Sin documentos registrados</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
             Los agentes pueden subir la documentación legal de sus propiedades desde el portal del agente.
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 text-slate-700 font-extrabold uppercase tracking-wider border-b border-slate-200">
+                <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
                   <th className="py-3.5 px-4">Vista Previa</th>
                   <th className="py-3.5 px-4">Archivo</th>
                   <th className="py-3.5 px-4">Propiedad</th>
@@ -97,52 +95,52 @@ export const AdminDocumentsPage: React.FC = () => {
                   <th className="py-3.5 px-4 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {documents.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-slate-50/80 transition-colors">
+                  <tr key={doc.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                     <td className="py-3 px-4">
                       {doc.isImage ? (
                         <img
                           src={doc.fileUrl}
                           alt={doc.originalFileName}
-                          className="w-12 h-12 rounded-xl object-cover border border-slate-200"
+                          className="w-12 h-12 rounded-xl object-cover border border-slate-200 dark:border-slate-700"
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-xl bg-brand-50 dark:bg-brand-950/40 border border-brand-100 dark:border-brand-800/60 flex items-center justify-center">
                           <ImageIcon className="w-5 h-5 text-brand-500" />
                         </div>
                       )}
                     </td>
                     <td className="py-3 px-4">
-                      <span className="font-bold text-slate-800">{doc.originalFileName}</span>
-                      <p className="text-[10px] text-slate-400">{formatSize(doc.sizeBytes)}</p>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">{doc.originalFileName}</span>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500">{formatSize(doc.sizeBytes)}</p>
                     </td>
                     <td className="py-3 px-4">
-                      <span className="font-mono font-bold text-slate-700">#{doc.propertyCode || doc.propertyId}</span>
-                      <p className="text-[11px] text-slate-500 truncate max-w-xs flex items-center gap-1">
+                      <span className="font-mono font-bold text-slate-700 dark:text-slate-300">#{doc.propertyCode || doc.propertyId}</span>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-xs flex items-center gap-1">
                         <Building2 className="w-3 h-3" /> {doc.propertyName || ''}
                       </p>
                     </td>
                     <td className="py-3 px-4">
-                      <span className="inline-flex items-center px-2.5 py-1 bg-slate-100 text-slate-600 font-bold rounded-lg text-[10px]">
+                      <span className="inline-flex items-center px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-lg text-[10px]">
                         {doc.documentType}
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-semibold text-slate-600">{doc.uploadedByName || doc.uploadedBy}</td>
-                    <td className="py-3 px-4 text-slate-600 font-medium">{formatDate(doc.uploadedAt)}</td>
+                    <td className="py-3 px-4 font-semibold text-slate-600 dark:text-slate-300">{doc.uploadedByName || doc.uploadedBy}</td>
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium">{formatDate(doc.uploadedAt)}</td>
                     <td className="py-3 px-4 text-right space-x-1">
                       <a
                         href={doc.fileUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex p-2 text-slate-600 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition-colors"
+                        className="inline-flex p-2 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
                         title="Abrir Documento"
                       >
                         <Download className="w-4 h-4" />
                       </a>
                       <button
                         onClick={() => handleDelete(doc)}
-                        className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                        className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
                         title="Eliminar Documento"
                       >
                         <Trash2 className="w-4 h-4" />
