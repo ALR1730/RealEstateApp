@@ -75,13 +75,13 @@ export const ManageImprovementsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       
-      <div className="flex justify-between items-center pb-4 border-b border-slate-200">
+      <div className="flex justify-between items-center pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-brand-600" />
+          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-brand-600 dark:text-brand-400" />
             Mantenimiento de Amenidades y Mejoras
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Catálogo de características diferenciales (Piscina, Gimnasio, Planta Eléctrica, Seguridad 24/7, etc.).
           </p>
         </div>
