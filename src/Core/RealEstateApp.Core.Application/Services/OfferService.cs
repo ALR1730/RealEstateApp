@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using RealEstateApp.Core.Application.Interfaces;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Offer;
@@ -23,19 +24,22 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IUserActivityService _userActivityService;
         private readonly ICommissionService _commissionService;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork? _unitOfWork;
 
         public OfferService(
             IOfferRepository offerRepository,
             IPropertyRepository propertyRepository,
             IUserActivityService userActivityService,
             ICommissionService commissionService,
-            IMapper mapper)
+            IMapper mapper,
+            IUnitOfWork? unitOfWork = null)
         {
             _offerRepository = offerRepository;
             _propertyRepository = propertyRepository;
             _userActivityService = userActivityService;
             _commissionService = commissionService;
             _mapper = mapper;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<OfferViewModel>> GetAllViewModel()
@@ -85,9 +89,19 @@ namespace RealEstateApp.Core.Application.Services
 
         public async Task AcceptOffer(int offerId)
         {
-            await _offerRepository.AcceptOfferTransactionAsync(offerId);
-
-            await _commissionService.CreateForAcceptedOfferAsync(offerId);
+            if (_unitOfWork != null)
+            {
+                await _unitOfWork.ExecuteTransactionAsync(async () =>
+                {
+                    await _offerRepository.AcceptOfferTransactionAsync(offerId);
+                    await _commissionService.CreateForAcceptedOfferAsync(offerId);
+                });
+            }
+            else
+            {
+                await _offerRepository.AcceptOfferTransactionAsync(offerId);
+                await _commissionService.CreateForAcceptedOfferAsync(offerId);
+            }
         }
 
         public async Task RejectOffer(int offerId)
@@ -96,10 +110,7 @@ namespace RealEstateApp.Core.Application.Services
             if (offer == null)
                 throw new NotFoundException("La oferta no existe");
 
-            if (offer.Status != OfferStatus.Pending)
-                throw new ValidationException("Solo se pueden rechazar ofertas pendientes");
-
-            offer.Status = OfferStatus.Rejected;
+            offer.Reject();
             await _offerRepository.UpdateAsync(offer);
         }
 
@@ -109,16 +120,7 @@ namespace RealEstateApp.Core.Application.Services
             if (offer == null)
                 throw new NotFoundException("La oferta no existe");
 
-            if (offer.Status != OfferStatus.Pending)
-                throw new ValidationException("Solo se pueden realizar contra-ofertas sobre propuestas pendientes");
-
-            if (counterAmount <= 0)
-                throw new ValidationException("El monto de la contra-oferta debe ser mayor a cero");
-
-            offer.Status = OfferStatus.CounterOffered;
-            offer.CounterOfferAmount = counterAmount;
-            offer.CounterOfferMessage = counterMessage;
-            offer.CounterOfferDate = DateTime.UtcNow;
+            offer.MakeCounterOffer(counterAmount, counterMessage);
 
             await _offerRepository.UpdateAsync(offer);
 

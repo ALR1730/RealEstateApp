@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RealEstateApp.Core.Application.Interfaces;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Domain.Settings;
@@ -94,6 +95,7 @@ namespace RealEstateApp.Infrastructure.Persistence
 
             services.Configure<JWTSettings>(configuration.GetSection("JWTSettings"));
             services.AddTransient<IAccountService, AccountService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             #endregion
 

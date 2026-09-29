@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentAssertions;
 using Moq;
+using RealEstateApp.Core.Application.Interfaces;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.Services;
@@ -218,6 +219,34 @@ namespace RealEstateApp.UnitTests.Services
                 .WithMessage("No tiene permisos para modificar esta oferta");
             _offerRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<Offer>()), Times.Never);
             _offerRepositoryMock.Verify(r => r.AcceptOfferTransactionAsync(It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task AcceptOffer_DebeEjecutarTransaccionAtomica_CuandoUnitOfWorkEstaConfigurado()
+        {
+            // Arrange
+            int offerId = 42;
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            unitOfWorkMock
+                .Setup(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default))
+                .Returns<Func<Task>, System.Threading.CancellationToken>(async (action, _) => await action());
+
+            var sutWithUow = new OfferService(
+                _offerRepositoryMock.Object,
+                _propertyRepositoryMock.Object,
+                _userActivityServiceMock.Object,
+                _commissionServiceMock.Object,
+                _mapper,
+                unitOfWorkMock.Object
+            );
+
+            // Act
+            await sutWithUow.AcceptOffer(offerId);
+
+            // Assert
+            unitOfWorkMock.Verify(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default), Times.Once);
+            _offerRepositoryMock.Verify(r => r.AcceptOfferTransactionAsync(offerId), Times.Once);
+            _commissionServiceMock.Verify(c => c.CreateForAcceptedOfferAsync(offerId), Times.Once);
         }
     }
 }

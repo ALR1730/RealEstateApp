@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.DTOs.Account;
+using RealEstateApp.Core.Application.DTOs.Dashboard;
 using RealEstateApp.Core.Application.Extensions;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Account;
@@ -38,32 +39,26 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 
         /// <summary>
         /// Obtiene los KPIs ejecutivos consolidados para el Dashboard de Administración.
+        /// Optimizado con agregaciones directas sin volcado de entidades completas a memoria.
         /// </summary>
         [HttpGet("dashboard-kpis")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DashboardMetricsDto))]
         public async Task<IActionResult> GetDashboardKPIsAsync()
         {
-            var properties = await _propertyService.GetAllViewModel();
-            var agents = await _agentService.GetAllViewModelAsync();
-            var clients = await _userManager.GetUsersInRoleAsync(Roles.Client.ToString());
-            var developers = await _userManager.GetUsersInRoleAsync(Roles.Developer.ToString());
+            var propertyMetrics = await _propertyService.GetDashboardMetricsAsync();
+            var userMetrics = await _accountService.GetUserDashboardMetricsAsync();
 
-            var typeGroups = properties
-                .GroupBy(p => p.PropertyTypeName ?? "Sin Categoría")
-                .Select(g => new { typeName = g.Key, count = g.Count() })
-                .ToList();
-
-            var kpis = new
+            var kpis = new DashboardMetricsDto
             {
-                totalAvailableProperties = properties.Count(p => p.Status == PropertyStatus.Available),
-                totalReservedProperties = properties.Count(p => p.Status == PropertyStatus.Reserved),
-                totalSoldProperties = properties.Count(p => p.Status == PropertyStatus.Sold),
-                totalActiveAgents = agents.Count(a => a.IsActive),
-                totalInactiveAgents = agents.Count(a => !a.IsActive),
-                totalClients = clients.Count,
-                totalDevelopers = developers.Count,
-                totalProperties = properties.Count,
-                propertiesByType = typeGroups
+                TotalAvailableProperties = propertyMetrics.TotalAvailableProperties,
+                TotalReservedProperties = propertyMetrics.TotalReservedProperties,
+                TotalSoldProperties = propertyMetrics.TotalSoldProperties,
+                TotalProperties = propertyMetrics.TotalProperties,
+                PropertiesByType = propertyMetrics.PropertiesByType,
+                TotalActiveAgents = userMetrics.TotalActiveAgents,
+                TotalInactiveAgents = userMetrics.TotalInactiveAgents,
+                TotalClients = userMetrics.TotalClients,
+                TotalDevelopers = userMetrics.TotalDevelopers
             };
 
             return Ok(kpis);

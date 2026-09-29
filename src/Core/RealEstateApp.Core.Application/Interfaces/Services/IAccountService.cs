@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using RealEstateApp.Core.Application.DTOs.Account;
+using RealEstateApp.Core.Application.DTOs.Dashboard;
 using RealEstateApp.Core.Application.ViewModels.Account;
 
 namespace RealEstateApp.Core.Application.Interfaces.Services
@@ -26,5 +27,6 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         Task<string> ForgotPasswordAsync(ForgotPasswordRequest request, string? origin = null);
         Task<string> ResetPasswordAsync(ResetPasswordRequest request);
         Task<ChangePasswordViewModel> ChangePasswordAsync(ChangePasswordViewModel model);
+        Task<UserDashboardMetricsDto> GetUserDashboardMetricsAsync();
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using RealEstateApp.Core.Application.DTOs.Dashboard;
 using RealEstateApp.Core.Application.ViewModels.Property;
 using RealEstateApp.Core.Domain.Entities;
 
@@ -12,5 +13,6 @@ namespace RealEstateApp.Core.Application.Interfaces.Repositories
         Task<Property?> GetByCodeAsync(string code);
         Task<List<string>> GetDistinctSectorsAsync(int? provinceId = null, int? municipalityId = null);
         Task<List<Property>> GetCandidateComparablesAsync(int targetPropertyId, int? municipalityId, int? provinceId);
+        Task<PropertyDashboardMetricsDto> GetDashboardMetricsAsync();
     }
 }

@@ -51,7 +51,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
 
         public async Task AcceptOfferTransactionAsync(int offerId)
         {
-            if (_dbContext.Database.IsRelational())
+            if (_dbContext.Database.IsRelational() && _dbContext.Database.CurrentTransaction == null)
             {
                 using var transaction = await _dbContext.Database.BeginTransactionAsync();
                 try

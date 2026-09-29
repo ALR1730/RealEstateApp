@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using RealEstateApp.Core.Application.DTOs.Agent;
+using RealEstateApp.Core.Application.Interfaces;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Agent;
@@ -29,6 +30,7 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IFileStorageService _fileStorageService;
         private readonly IAgentVerificationRepository _agentVerificationRepository;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork? _unitOfWork;
 
         public AgentService(
             IPropertyRepository propertyRepository,
@@ -39,7 +41,8 @@ namespace RealEstateApp.Core.Application.Services
             IPropertyImageRepository propertyImageRepository,
             IFileStorageService fileStorageService,
             IAgentVerificationRepository agentVerificationRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IUnitOfWork? unitOfWork = null)
         {
             _propertyRepository = propertyRepository;
             _accountService = accountService;
@@ -50,6 +53,7 @@ namespace RealEstateApp.Core.Application.Services
             _fileStorageService = fileStorageService;
             _agentVerificationRepository = agentVerificationRepository;
             _mapper = mapper;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<AgentViewModel>> GetAllViewModelAsync()
@@ -209,58 +213,76 @@ namespace RealEstateApp.Core.Application.Services
                 throw new NotFoundException($"El agente con ID '{agentId}' no existe");
             }
 
-            // 1. Obtener todas las propiedades de este agente vía consulta directa en BD
-            var agentProperties = await _propertyRepository.GetByAgentIdAsync(agentId);
+            var imagesToDelete = new List<string>();
 
-            foreach (var prop in agentProperties)
+            async Task PerformCascadeDeleteAsync()
             {
-                // A. Borrar imágenes físicas de disco e imágenes en BD en lote
-                var images = await _propertyImageRepository.GetByPropertyIdAsync(prop.Id);
-                foreach (var img in images)
+                // 1. Obtener todas las propiedades de este agente vía consulta directa en BD
+                var agentProperties = await _propertyRepository.GetByAgentIdAsync(agentId);
+
+                foreach (var prop in agentProperties)
                 {
-                    await _fileStorageService.DeleteFileAsync(img.ImageUrl, "properties");
-                }
-                if (images.Any())
-                {
-                    await _propertyImageRepository.DeleteRangeAsync(images);
+                    // A. Identificar imágenes y eliminarlas en BD en lote
+                    var images = await _propertyImageRepository.GetByPropertyIdAsync(prop.Id);
+                    imagesToDelete.AddRange(images.Select(img => img.ImageUrl));
+                    if (images.Any())
+                    {
+                        await _propertyImageRepository.DeleteRangeAsync(images);
+                    }
+
+                    // B. Limpiar favoritos de la propiedad en lote vía SQL en BD
+                    var propFavs = await _favoriteRepository.GetByPropertyIdAsync(prop.Id);
+                    if (propFavs.Any())
+                    {
+                        await _favoriteRepository.DeleteRangeAsync(propFavs);
+                    }
+
+                    // C. Limpiar ofertas de la propiedad en lote vía SQL en BD
+                    var offers = await _offerRepository.GetByPropertyIdAsync(prop.Id);
+                    if (offers.Any())
+                    {
+                        await _offerRepository.DeleteRangeAsync(offers);
+                    }
+
+                    // D. Limpiar chats vinculados a la propiedad en lote vía SQL en BD
+                    var propChats = await _chatRepository.GetByPropertyIdAsync(prop.Id);
+                    if (propChats.Any())
+                    {
+                        await _chatRepository.DeleteRangeAsync(propChats);
+                    }
                 }
 
-                // B. Limpiar favoritos de la propiedad en lote vía SQL en BD
-                var propFavs = await _favoriteRepository.GetByPropertyIdAsync(prop.Id);
-                if (propFavs.Any())
+                // E. Eliminar las propiedades en lote
+                if (agentProperties.Any())
                 {
-                    await _favoriteRepository.DeleteRangeAsync(propFavs);
+                    await _propertyRepository.DeleteRangeAsync(agentProperties);
                 }
 
-                // C. Limpiar ofertas de la propiedad en lote vía SQL en BD
-                var offers = await _offerRepository.GetByPropertyIdAsync(prop.Id);
-                if (offers.Any())
+                // 2. Limpiar cualquier chat del agente que no esté vinculado a propiedades específicas en lote
+                var agentChats = await _chatRepository.GetByUserIdAsync(agentId);
+                if (agentChats.Any())
                 {
-                    await _offerRepository.DeleteRangeAsync(offers);
-                }
-
-                // D. Limpiar chats vinculados a la propiedad en lote vía SQL en BD
-                var propChats = await _chatRepository.GetByPropertyIdAsync(prop.Id);
-                if (propChats.Any())
-                {
-                    await _chatRepository.DeleteRangeAsync(propChats);
+                    await _chatRepository.DeleteRangeAsync(agentChats);
                 }
             }
 
-            // E. Eliminar las propiedades en lote
-            if (agentProperties.Any())
+            // Ejecución atómica de la eliminación de registros relacionales
+            if (_unitOfWork != null)
             {
-                await _propertyRepository.DeleteRangeAsync(agentProperties);
+                await _unitOfWork.ExecuteTransactionAsync(PerformCascadeDeleteAsync);
+            }
+            else
+            {
+                await PerformCascadeDeleteAsync();
             }
 
-            // 2. Limpiar cualquier chat del agente que no esté vinculado a propiedades específicas en lote
-            var agentChats = await _chatRepository.GetByUserIdAsync(agentId);
-            if (agentChats.Any())
+            // 3. Limpiar imágenes físicas de disco únicamente tras la confirmación exitosa de la transacción
+            foreach (var imgUrl in imagesToDelete)
             {
-                await _chatRepository.DeleteRangeAsync(agentChats);
+                await _fileStorageService.DeleteFileAsync(imgUrl, "properties");
             }
 
-            // 3. Eliminar usuario de Identity vía servicio de abstracción
+            // 4. Eliminar usuario de Identity vía servicio de abstracción
             await _accountService.DeleteUserAsync(agentId);
         }
     }

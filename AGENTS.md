@@ -99,19 +99,23 @@ src/
 
 - **Test naming**: `[Method]_[Expected]_[Condition]` (Hungarian-style, Spanish)
 - **Test pattern**: AAA (Arrange-Act-Assert) with FluentAssertions
-- **Test stack**: xUnit + Moq + FluentAssertions
+- **Test stack**: xUnit + Moq + FluentAssertions + InMemoryDbContext for state-based testing
 - **Test location**: `tests/RealEstateApp.UnitTests/Services/`, `Controllers/`, `Domain/`
+- **Clean Architecture DTOs**: Para nuevos casos de uso, usar exclusivamente `DTOs/{Modulo}/` con sufijos `Request`/`Response`. Prohibido crear nuevos ViewModels en `Core.Application`.
+- **Atomicidad Transaccional**: Operaciones multi-tabla deben usar `IUnitOfWork.ExecuteTransactionAsync(...)`.
 - **Nullability**: Enabled project-wide
 - **Target**: .NET 10.0
 
 ## Key Business Rules
 
-- Offer acceptance is atomic: accepting one offer cascade-rejects all others for that property
+- Offer acceptance is atomic: accepting one offer cascade-rejects all others for that property and registers commissions under a single unit of work.
 - Owners limited to 2 active properties max
 - Property codes are 6-character unique identifiers
 - Agent KYC verification requires admin approval
 - Subscription plans limit featured property count
 
-## Testing Standards
+## Testing & Architecture Standards
 
 See `.agents/rules/testing_standards.md` — mandatory unit tests for every new feature/fix. `dotnet test` must pass 100% before any change is considered complete.
+See `.agents/rules/architecture_standards.md` — Clean Architecture boundaries, DTO vs ViewModel conventions, and Anti-Mockitis guidelines.
+

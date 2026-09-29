@@ -4,6 +4,7 @@ using AutoMapper;
 using FluentAssertions;
 using Moq;
 using RealEstateApp.Core.Application.DTOs.Account;
+using RealEstateApp.Core.Application.Interfaces;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.Services;
@@ -108,6 +109,59 @@ namespace RealEstateApp.UnitTests.Services
 
             // Assert
             _accountServiceMock.Verify(a => a.ChangeUserStatusAsync("agent-1", false), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteAgentCascadeAsync_DebeEjecutarEliminacionDentroDeTransaccionAtomica()
+        {
+            // Arrange
+            var agentId = "agent-to-delete";
+            var agentUser = new AccountUserDto { Id = agentId, FirstName = "Carlos", LastName = "Mendoza" };
+            var properties = new List<Property>
+            {
+                new() { Id = 101, AgentId = agentId }
+            };
+
+            _accountServiceMock.Setup(a => a.GetUserByIdAsync(agentId))
+                .ReturnsAsync(agentUser);
+            _propertyRepoMock.Setup(r => r.GetByAgentIdAsync(agentId))
+                .ReturnsAsync(properties);
+            _propertyImageRepoMock.Setup(r => r.GetByPropertyIdAsync(101))
+                .ReturnsAsync(new List<PropertyImage>());
+            _favoriteRepoMock.Setup(r => r.GetByPropertyIdAsync(101))
+                .ReturnsAsync(new List<Favorite>());
+            _offerRepoMock.Setup(r => r.GetByPropertyIdAsync(101))
+                .ReturnsAsync(new List<Offer>());
+            _chatRepoMock.Setup(r => r.GetByPropertyIdAsync(101))
+                .ReturnsAsync(new List<Chat>());
+            _chatRepoMock.Setup(r => r.GetByUserIdAsync(agentId))
+                .ReturnsAsync(new List<Chat>());
+
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            unitOfWorkMock
+                .Setup(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default))
+                .Returns<Func<Task>, System.Threading.CancellationToken>(async (action, _) => await action());
+
+            var sutWithUow = new AgentService(
+                _propertyRepoMock.Object,
+                _accountServiceMock.Object,
+                _offerRepoMock.Object,
+                _chatRepoMock.Object,
+                _favoriteRepoMock.Object,
+                _propertyImageRepoMock.Object,
+                _fileStorageMock.Object,
+                _verificationRepoMock.Object,
+                _mapper,
+                unitOfWorkMock.Object
+            );
+
+            // Act
+            await sutWithUow.DeleteAgentCascadeAsync(agentId);
+
+            // Assert
+            unitOfWorkMock.Verify(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default), Times.Once);
+            _propertyRepoMock.Verify(r => r.DeleteRangeAsync(It.Is<IEnumerable<Property>>(list => list == properties)), Times.Once);
+            _accountServiceMock.Verify(a => a.DeleteUserAsync(agentId), Times.Once);
         }
     }
 }

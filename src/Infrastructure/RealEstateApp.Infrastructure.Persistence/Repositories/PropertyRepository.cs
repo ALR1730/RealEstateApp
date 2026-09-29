@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using RealEstateApp.Core.Application.DTOs.Dashboard;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
+using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
 
@@ -347,6 +349,43 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
             return await query
                 .Where(p => p.Latitude != 0 || p.Longitude != 0)
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Obtiene métricas consolidadas de propiedades mediante consultas agregadas directas en base de datos.
+        /// Evita la carga de entidades en memoria y el overhead de serialización/deserialización.
+        /// </summary>
+        public async Task<PropertyDashboardMetricsDto> GetDashboardMetricsAsync()
+        {
+            var statusCounts = await _dbContext.Set<Property>()
+                .AsNoTracking()
+                .GroupBy(p => p.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var available = statusCounts.FirstOrDefault(x => x.Status == PropertyStatus.Available)?.Count ?? 0;
+            var reserved = statusCounts.FirstOrDefault(x => x.Status == PropertyStatus.Reserved)?.Count ?? 0;
+            var sold = statusCounts.FirstOrDefault(x => x.Status == PropertyStatus.Sold)?.Count ?? 0;
+            var total = statusCounts.Sum(x => x.Count);
+
+            var typeCounts = await _dbContext.Set<Property>()
+                .AsNoTracking()
+                .GroupBy(p => p.PropertyType != null ? p.PropertyType.Name : "Sin Categoría")
+                .Select(g => new PropertyTypeCountDto
+                {
+                    TypeName = g.Key,
+                    Count = g.Count()
+                })
+                .ToListAsync();
+
+            return new PropertyDashboardMetricsDto
+            {
+                TotalAvailableProperties = available,
+                TotalReservedProperties = reserved,
+                TotalSoldProperties = sold,
+                TotalProperties = total,
+                PropertiesByType = typeCounts
+            };
         }
     }
 }

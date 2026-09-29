@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using RealEstateApp.Core.Application.DTOs.Account;
+using RealEstateApp.Core.Application.DTOs.Dashboard;
 using RealEstateApp.Core.Application.Helpers;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
@@ -320,7 +321,7 @@ namespace RealEstateApp.Core.Application.Services
             if (property == null)
                 throw new NotFoundException($"No se encontró la propiedad con ID {propertyId}");
 
-            property.AgentId = newAgentId;
+            property.ReassignAgent(newAgentId);
             await _propertyRepository.UpdateAsync(property);
         }
 
@@ -332,8 +333,7 @@ namespace RealEstateApp.Core.Application.Services
 
             if (property.IsFeatured && (!property.FeaturedUntil.HasValue || property.FeaturedUntil > DateTime.UtcNow))
             {
-                property.IsFeatured = false;
-                property.FeaturedUntil = null;
+                property.RemoveFeatured();
             }
             else
             {
@@ -346,8 +346,7 @@ namespace RealEstateApp.Core.Application.Services
                     }
                 }
 
-                property.IsFeatured = true;
-                property.FeaturedUntil = DateTime.UtcNow.AddDays(durationDays);
+                property.PromoteToFeatured(durationDays);
             }
 
             await _propertyRepository.UpdateAsync(property);
@@ -450,6 +449,14 @@ namespace RealEstateApp.Core.Application.Services
             {
                 _logger.LogWarning(ex, "Fallo no crítico al disparar alertas de búsquedas guardadas para la propiedad {PropertyId}", property.Id);
             }
+        }
+
+        /// <summary>
+        /// Obtiene métricas ejecutivas agregadas para el Dashboard delegando al repositorio para ejecución en base de datos.
+        /// </summary>
+        public async Task<PropertyDashboardMetricsDto> GetDashboardMetricsAsync()
+        {
+            return await _propertyRepository.GetDashboardMetricsAsync();
         }
 
         #endregion

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using RealEstateApp.Core.Application.DTOs.Dashboard;
 using RealEstateApp.Core.Application.ViewModels.Property;
 
 namespace RealEstateApp.Core.Application.Interfaces.Services
@@ -52,5 +53,10 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         /// Obtiene el historial de precios y análisis de tendencias de una propiedad.
         /// </summary>
         Task<List<PriceHistoryViewModel>> GetPriceHistoryAsync(int propertyId);
+
+        /// <summary>
+        /// Obtiene métricas ejecutivas agregadas para el Dashboard sin volcado de entidades a memoria.
+        /// </summary>
+        Task<PropertyDashboardMetricsDto> GetDashboardMetricsAsync();
     }
 }

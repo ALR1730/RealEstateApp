@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentAssertions;
 using Moq;
+using RealEstateApp.Core.Application.DTOs.Dashboard;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.Services;
@@ -496,6 +497,41 @@ namespace RealEstateApp.UnitTests.Services
             property.IsFeatured.Should().BeFalse();
             property.FeaturedUntil.Should().BeNull();
             _propertyRepositoryMock.Verify(r => r.UpdateAsync(property), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetDashboardMetricsAsync_DebeDelegarEnRepositorio_YRetornarMetricasAgregadas()
+        {
+            // Arrange
+            var expectedMetrics = new PropertyDashboardMetricsDto
+            {
+                TotalAvailableProperties = 15,
+                TotalReservedProperties = 3,
+                TotalSoldProperties = 7,
+                TotalProperties = 25,
+                PropertiesByType = new List<PropertyTypeCountDto>
+                {
+                    new() { TypeName = "Apartamento", Count = 15 },
+                    new() { TypeName = "Casa", Count = 10 }
+                }
+            };
+
+            _propertyRepositoryMock.Setup(r => r.GetDashboardMetricsAsync())
+                .ReturnsAsync(expectedMetrics);
+
+            // Act
+            var result = await _sut.GetDashboardMetricsAsync();
+
+            // Assert
+            result.Should().NotBeNull();
+            result.TotalAvailableProperties.Should().Be(15);
+            result.TotalReservedProperties.Should().Be(3);
+            result.TotalSoldProperties.Should().Be(7);
+            result.TotalProperties.Should().Be(25);
+            result.PropertiesByType.Should().HaveCount(2);
+
+            _propertyRepositoryMock.Verify(r => r.GetDashboardMetricsAsync(), Times.Once);
+            _propertyRepositoryMock.Verify(r => r.GetAllAsync(), Times.Never);
         }
 
         #endregion

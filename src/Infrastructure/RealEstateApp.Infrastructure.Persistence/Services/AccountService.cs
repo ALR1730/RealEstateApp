@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RealEstateApp.Core.Application.DTOs.Account;
+using RealEstateApp.Core.Application.DTOs.Dashboard;
 using RealEstateApp.Core.Application.Extensions;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Domain.Exceptions;
@@ -605,6 +606,28 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
 
             model.HasError = false;
             return model;
+        }
+
+        /// <summary>
+        /// Obtiene métricas consolidadas de usuarios por rol para el Dashboard.
+        /// Evita la carga de Claims, perfiles o entidades completas en memoria.
+        /// </summary>
+        public async Task<UserDashboardMetricsDto> GetUserDashboardMetricsAsync()
+        {
+            var agents = await _userManager.GetUsersInRoleAsync(Roles.Agent.ToString());
+            var activeAgents = agents.Count(a => a.IsActiveUser());
+            var inactiveAgents = agents.Count - activeAgents;
+
+            var clients = await _userManager.GetUsersInRoleAsync(Roles.Client.ToString());
+            var developers = await _userManager.GetUsersInRoleAsync(Roles.Developer.ToString());
+
+            return new UserDashboardMetricsDto
+            {
+                TotalActiveAgents = activeAgents,
+                TotalInactiveAgents = inactiveAgents,
+                TotalClients = clients.Count,
+                TotalDevelopers = developers.Count
+            };
         }
     }
 }
