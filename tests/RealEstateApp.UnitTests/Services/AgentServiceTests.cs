@@ -92,8 +92,8 @@ namespace RealEstateApp.UnitTests.Services
 
             // Assert
             result.Should().HaveCount(1);
-            result[0].AgentId.Should().Be("agent-1");
-            result[0].ActivePropertiesCount.Should().Be(2);
+            result[0].Id.Should().Be("agent-1");
+            result[0].PropertiesCount.Should().Be(2);
             result[0].IsVerified.Should().BeTrue();
         }
 

@@ -71,14 +71,14 @@ namespace RealEstateApp.UnitTests.Services
         }
 
         [Fact]
-        public async Task UpdateStageAsync_DebeModificarEtapaYFechaDeCierre_CuandoEsGanada()
+        public async Task MoveToStageAsync_DebeModificarEtapa_CuandoEtapaEsValida()
         {
             // Arrange
             var lead = new LeadPipeline
             {
                 Id = 5,
                 AgentId = "agent-1",
-                Stage = PipelineStage.Negotiation
+                Stage = PipelineStage.Offer
             };
 
             _leadRepoMock.Setup(r => r.GetByIdWithPropertyAsync(5))
@@ -88,27 +88,37 @@ namespace RealEstateApp.UnitTests.Services
                 .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _sut.UpdateStageAsync(5, PipelineStage.ClosedWon);
+            var result = await _sut.MoveToStageAsync(5, PipelineStage.Won);
 
             // Assert
             result.Should().NotBeNull();
-            lead.Stage.Should().Be(PipelineStage.ClosedWon);
-            lead.ClosedAt.Should().NotBeNull();
+            lead.Stage.Should().Be(PipelineStage.Won);
+            result.Stage.Should().Be(PipelineStage.Won);
             _leadRepoMock.Verify(r => r.UpdateAsync(lead), Times.Once);
         }
 
         [Fact]
-        public async Task UpdateStageAsync_DebeLanzarNotFoundException_CuandoLeadNoExiste()
+        public async Task MoveToStageAsync_DebeLanzarNotFoundException_CuandoLeadNoExiste()
         {
             // Arrange
             _leadRepoMock.Setup(r => r.GetByIdWithPropertyAsync(999))
                 .ReturnsAsync((LeadPipeline?)null);
 
             // Act
-            Func<Task> act = async () => await _sut.UpdateStageAsync(999, PipelineStage.Contacted);
+            Func<Task> act = async () => await _sut.MoveToStageAsync(999, PipelineStage.Contacted);
 
             // Assert
             await act.Should().ThrowAsync<NotFoundException>();
+        }
+
+        [Fact]
+        public async Task MoveToStageAsync_DebeLanzarValidationException_CuandoEtapaNoEsValida()
+        {
+            // Act
+            Func<Task> act = async () => await _sut.MoveToStageAsync(1, "EtapaInvalida");
+
+            // Assert
+            await act.Should().ThrowAsync<ValidationException>();
         }
 
         [Fact]
@@ -117,10 +127,10 @@ namespace RealEstateApp.UnitTests.Services
             // Arrange
             var leads = new List<LeadPipeline>
             {
-                new LeadPipeline { Id = 1, AgentId = "agent-1", Stage = PipelineStage.ClosedWon, EstimatedBudget = 100000m },
-                new LeadPipeline { Id = 2, AgentId = "agent-1", Stage = PipelineStage.ClosedLost, EstimatedBudget = 50000m },
+                new LeadPipeline { Id = 1, AgentId = "agent-1", Stage = PipelineStage.Won, EstimatedBudget = 100000m },
+                new LeadPipeline { Id = 2, AgentId = "agent-1", Stage = PipelineStage.Lost, EstimatedBudget = 50000m },
                 new LeadPipeline { Id = 3, AgentId = "agent-1", Stage = PipelineStage.NewLead, EstimatedBudget = 80000m },
-                new LeadPipeline { Id = 4, AgentId = "agent-1", Stage = PipelineStage.Negotiation, EstimatedBudget = 120000m }
+                new LeadPipeline { Id = 4, AgentId = "agent-1", Stage = PipelineStage.Offer, EstimatedBudget = 120000m }
             };
 
             _leadRepoMock.Setup(r => r.GetByAgentIdAsync("agent-1"))
@@ -131,11 +141,11 @@ namespace RealEstateApp.UnitTests.Services
 
             // Assert
             stats.TotalLeads.Should().Be(4);
-            stats.WonLeads.Should().Be(1);
-            stats.LostLeads.Should().Be(1);
-            stats.ActiveLeads.Should().Be(2);
-            stats.WonValue.Should().Be(100000m);
-            stats.PipelineValue.Should().Be(200000m);
+            stats.WonCount.Should().Be(1);
+            stats.LostCount.Should().Be(1);
+            stats.NewLeadCount.Should().Be(1);
+            stats.OfferCount.Should().Be(1);
+            stats.TotalPipelineValue.Should().Be(120000m);
             stats.ConversionRate.Should().Be(25.0m);
         }
     }
