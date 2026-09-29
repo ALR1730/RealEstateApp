@@ -85,34 +85,34 @@ export const ManageAllPropertiesPage: React.FC = () => {
   return (
     <div className="space-y-8 pb-16">
       
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            <Building2 className="w-7 h-7 text-brand-600" />
+          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Building2 className="w-7 h-7 text-brand-600 dark:text-brand-400" />
             Catálogo Global de Inmuebles
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Supervisión integral de todas las propiedades publicadas, reasignación de carteras y destacados.
           </p>
         </div>
 
         <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Buscar por código, tipo, agente..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500"
+            className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider">
+            <thead className="bg-slate-50 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-extrabold uppercase tracking-wider">
               <tr>
                 <th className="px-6 py-4">Código / Tipo</th>
                 <th className="px-6 py-4">Precio (RD$)</th>
@@ -122,20 +122,20 @@ export const ManageAllPropertiesPage: React.FC = () => {
                 <th className="px-6 py-4 text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filtered.map((prop) => (
-                <tr key={prop.id} className="hover:bg-slate-50/50">
+                <tr key={prop.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                   <td className="px-6 py-4">
-                    <span className="font-mono font-bold text-slate-500">#{prop.code}</span>
-                    <p className="font-bold text-slate-900">{prop.propertyTypeName} ({prop.saleTypeName})</p>
-                    <p className="text-[11px] text-slate-400">{prop.sector}</p>
+                    <span className="font-mono font-bold text-slate-500 dark:text-slate-400">#{prop.code}</span>
+                    <p className="font-bold text-slate-900 dark:text-white">{prop.propertyTypeName} ({prop.saleTypeName})</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500">{prop.sector}</p>
                   </td>
-                  <td className="px-6 py-4 font-mono font-extrabold text-slate-900">
+                  <td className="px-6 py-4 font-mono font-extrabold text-slate-900 dark:text-white">
                     {formatCurrencyRD(prop.price)}
                   </td>
                   <td className="px-6 py-4">
-                    <p className="font-bold text-slate-800">{prop.agentName || 'Sin Agente'}</p>
-                    <p className="text-[11px] text-slate-400">{prop.agentPhone}</p>
+                    <p className="font-bold text-slate-800 dark:text-slate-200">{prop.agentName || 'Sin Agente'}</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500">{prop.agentPhone}</p>
                   </td>
                   <td className="px-6 py-4">
                     <Badge status={prop.status} />
@@ -146,7 +146,7 @@ export const ManageAllPropertiesPage: React.FC = () => {
                       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all ${
                         prop.isFeatured
                           ? 'bg-amber-500 text-navy-950 shadow-xs'
-                          : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                          : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
                       }`}
                     >
                       <Sparkles className="w-3 h-3" />
@@ -156,7 +156,7 @@ export const ManageAllPropertiesPage: React.FC = () => {
                   <td className="px-6 py-4 text-right space-x-2">
                     <Link
                       to={`/property/${prop.id}`}
-                      className="p-1.5 inline-block text-brand-600 hover:bg-brand-50 rounded-lg"
+                      className="p-1.5 inline-block text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/40 rounded-lg"
                       title="Ver Ficha Pública"
                     >
                       <ExternalLink className="w-4 h-4" />
@@ -167,14 +167,14 @@ export const ManageAllPropertiesPage: React.FC = () => {
                         setTargetAgentId(prop.agentId);
                         setShowReassignModal(true);
                       }}
-                      className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg"
+                      className="p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
                       title="Reasignar Agente"
                     >
                       <UserCheck className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(prop.id)}
-                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg"
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg"
                       title="Eliminar Propiedad"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -190,21 +190,21 @@ export const ManageAllPropertiesPage: React.FC = () => {
       {/* Reassign Modal */}
       {showReassignModal && selectedProperty && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4">
-            <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
-              <UserCheck className="w-5 h-5 text-brand-600" />
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 border border-transparent dark:border-slate-800">
+            <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
+              <UserCheck className="w-5 h-5 text-brand-600 dark:text-brand-400" />
               Reasignar Propiedad #{selectedProperty.code}
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Selecciona el agente receptor para transferir la gestión de esta propiedad.
             </p>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nuevo Agente *</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Nuevo Agente *</label>
               <select
                 value={targetAgentId}
                 onChange={(e) => setTargetAgentId(e.target.value)}
-                className="w-full p-2.5 text-xs rounded-xl border border-slate-200"
+                className="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
               >
                 <option value="">Selecciona un agente...</option>
                 {agents.filter((a) => a.isActive).map((a) => (
@@ -218,7 +218,7 @@ export const ManageAllPropertiesPage: React.FC = () => {
             <div className="flex gap-2 justify-end pt-2">
               <button
                 onClick={() => setShowReassignModal(false)}
-                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold"
+                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-xs font-bold"
               >
                 Cancelar
               </button>

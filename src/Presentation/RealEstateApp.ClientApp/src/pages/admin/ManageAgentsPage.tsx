@@ -107,7 +107,7 @@ export const ManageAgentsPage: React.FC = () => {
               placeholder="Buscar agente..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-white"
+              className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-brand-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
             />
           </div>
         </div>
@@ -116,11 +116,11 @@ export const ManageAgentsPage: React.FC = () => {
       {isLoading ? (
         <Loader text="Cargando listado de agentes..." />
       ) : (
-        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 text-slate-700 font-extrabold uppercase tracking-wider border-b border-slate-200">
+                <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
                   <th className="py-3.5 px-4">Agente</th>
                   <th className="py-3.5 px-4">Contacto</th>
                   <th className="py-3.5 px-4">Propiedades</th>
@@ -128,9 +128,9 @@ export const ManageAgentsPage: React.FC = () => {
                   <th className="py-3.5 px-4 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {filtered.map((agent) => (
-                  <tr key={agent.id} className="hover:bg-slate-50/80 transition-colors">
+                  <tr key={agent.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-navy-800 to-slate-700 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
@@ -141,16 +141,16 @@ export const ManageAgentsPage: React.FC = () => {
                           )}
                         </div>
                         <div>
-                          <p className="font-bold text-slate-900">{agent.firstName} {agent.lastName}</p>
-                          <span className="text-[11px] text-slate-500 font-mono">@{agent.userName}</span>
+                          <p className="font-bold text-slate-900 dark:text-white">{agent.firstName} {agent.lastName}</p>
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">@{agent.userName}</span>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-slate-600">
-                      <p className="font-semibold text-slate-800">{agent.email}</p>
-                      <span className="text-[11px] text-slate-500">{agent.phone || 'Sin teléfono'}</span>
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
+                      <p className="font-semibold text-slate-800 dark:text-slate-200">{agent.email}</p>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">{agent.phone || 'Sin teléfono'}</span>
                     </td>
-                    <td className="py-3 px-4 font-mono font-bold text-slate-700 text-sm">
+                    <td className="py-3 px-4 font-mono font-bold text-slate-700 dark:text-slate-300 text-sm">
                       {agent.propertiesCount || 0}
                     </td>
                     <td className="py-3 px-4">
@@ -163,8 +163,8 @@ export const ManageAgentsPage: React.FC = () => {
                         onClick={() => handleToggleStatus(agent.id, agent.isActive)}
                         className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
                           agent.isActive
-                            ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
-                            : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                            ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800/50'
+                            : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800/50'
                         }`}
                         title={agent.isActive ? 'Inactivar Agente' : 'Activar Agente'}
                       >
@@ -175,7 +175,7 @@ export const ManageAgentsPage: React.FC = () => {
                       {/* Reassign Properties Button */}
                       <button
                         onClick={() => { setSourceAgent(agent); setReassignModalOpen(true); }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-royal-700 rounded-xl font-bold text-xs border border-indigo-200 transition-all"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-royal-700 dark:text-indigo-300 rounded-xl font-bold text-xs border border-indigo-200 dark:border-indigo-800/50 transition-all"
                         title="Reasignar Propiedades a otro Agente"
                       >
                         <ArrowRightLeft className="w-3.5 h-3.5" />
@@ -185,7 +185,7 @@ export const ManageAgentsPage: React.FC = () => {
                       {/* Delete Cascade Button */}
                       <button
                         onClick={() => handleDeleteAgent(agent.id)}
-                        className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
+                        className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
                         title="Eliminar en Cascada"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -207,20 +207,20 @@ export const ManageAgentsPage: React.FC = () => {
           title={`Reasignar Cartera de ${sourceAgent.firstName} ${sourceAgent.lastName}`}
         >
           <form onSubmit={handleReassignSubmit} className="space-y-4">
-            <div className="p-3.5 bg-indigo-50 rounded-2xl border border-indigo-100 text-xs text-royal-900 space-y-1">
+            <div className="p-3.5 bg-indigo-50 dark:bg-indigo-950/50 rounded-2xl border border-indigo-100 dark:border-indigo-800/60 text-xs text-royal-900 dark:text-indigo-200 space-y-1">
               <p className="font-bold">Agente Origen: {sourceAgent.firstName} {sourceAgent.lastName}</p>
-              <p className="text-royal-700">Inmuebles a transferir: <strong>{sourceAgent.propertiesCount || 0} propiedades</strong></p>
+              <p className="text-royal-700 dark:text-indigo-300">Inmuebles a transferir: <strong>{sourceAgent.propertiesCount || 0} propiedades</strong></p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                 Selecciona el Agente Destino *
               </label>
               <select
                 required
                 value={targetAgentId}
                 onChange={(e) => setTargetAgentId(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-white"
+                className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
               >
                 <option value="">Selecciona un agente activo...</option>
                 {agents
@@ -237,7 +237,7 @@ export const ManageAgentsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setReassignModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 Cancelar
               </button>
