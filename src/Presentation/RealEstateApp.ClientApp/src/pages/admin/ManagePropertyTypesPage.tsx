@@ -114,47 +114,49 @@ export const ManagePropertyTypesPage: React.FC = () => {
         <Loader text="Cargando tipos de propiedad..." />
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
-                <th className="py-3.5 px-4">Nombre</th>
-                <th className="py-3.5 px-4">Descripción</th>
-                <th className="py-3.5 px-4">Inmuebles Registrados</th>
-                <th className="py-3.5 px-4 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {types.map((t) => (
-                <tr key={t.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                  <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
-                    {t.name}
-                  </td>
-                  <td className="py-3 px-4 text-slate-600 dark:text-slate-300 max-w-sm truncate">
-                    {t.description || 'Sin descripción'}
-                  </td>
-                  <td className="py-3 px-4 font-mono font-bold text-brand-600 dark:text-brand-400">
-                    {t.propertiesCount !== undefined ? `${t.propertiesCount} inmuebles` : 'N/A'}
-                  </td>
-                  <td className="py-3 px-4 text-right space-x-1">
-                    <button
-                      onClick={() => handleOpenEdit(t)}
-                      className="p-2 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                      title="Editar"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleOpenDelete(t)}
-                      className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
-                      title="Eliminar"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                  <th className="py-3.5 px-4">Nombre</th>
+                  <th className="py-3.5 px-4">Descripción</th>
+                  <th className="py-3.5 px-4">Inmuebles Registrados</th>
+                  <th className="py-3.5 px-4 text-right">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {types.map((t) => (
+                  <tr key={t.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
+                      {t.name}
+                    </td>
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-300 max-w-sm truncate">
+                      {t.description || 'Sin descripción'}
+                    </td>
+                    <td className="py-3 px-4 font-mono font-bold text-brand-600 dark:text-brand-400">
+                      {t.propertiesCount !== undefined ? `${t.propertiesCount} inmuebles` : 'N/A'}
+                    </td>
+                    <td className="py-3 px-4 text-right space-x-1">
+                      <button
+                        onClick={() => handleOpenEdit(t)}
+                        className="p-2 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                        title="Editar"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleOpenDelete(t)}
+                        className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
+                        title="Eliminar"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
