@@ -270,21 +270,21 @@ export const PropertiesCatalogPage: React.FC = () => {
           {/* Active Filter Tags */}
           {activeFilters.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold text-slate-500">Filtros activos:</span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Filtros activos:</span>
               {activeFilters.map(([key, value]) => (
                 <span
                   key={key}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold bg-brand-50 text-brand-700 rounded-full border border-brand-200"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold bg-brand-50 dark:bg-brand-950/50 text-brand-700 dark:text-brand-300 rounded-full border border-brand-200 dark:border-brand-800"
                 >
                   {FILTER_LABELS[key] || key}: {typeof value === 'boolean' ? 'Sí' : String(value)}
-                  <button onClick={() => handleRemoveFilter(key as keyof FilterState)} className="hover:text-rose-600">
+                  <button onClick={() => handleRemoveFilter(key as keyof FilterState)} className="hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer">
                     <X className="w-3 h-3" />
                   </button>
                 </span>
               ))}
               <button
                 onClick={handleResetFilters}
-                className="text-[11px] font-bold text-rose-500 hover:text-rose-700 ml-1"
+                className="text-[11px] font-bold text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 ml-1 cursor-pointer"
               >
                 Limpiar todo
               </button>
@@ -292,9 +292,9 @@ export const PropertiesCatalogPage: React.FC = () => {
           )}
 
           {/* Controls Bar */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4 text-xs font-semibold text-slate-700">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-4 text-xs font-semibold text-slate-700 dark:text-slate-200">
             <div className="flex items-center gap-2">
-              <SlidersHorizontal className="w-4 h-4 text-brand-600" />
+              <SlidersHorizontal className="w-4 h-4 text-brand-600 dark:text-brand-400" />
               <span>Mostrando <strong>{sortedProperties.length}</strong> inmuebles</span>
             </div>
 
@@ -302,7 +302,7 @@ export const PropertiesCatalogPage: React.FC = () => {
               {isAuthenticated && isClient && (
                 <button
                   onClick={() => setShowSaveModal(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-brand-600 border border-brand-200 rounded-lg hover:bg-brand-50 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-800 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-950/40 transition-colors cursor-pointer"
                 >
                   <BookmarkPlus className="w-3.5 h-3.5" />
                   Guardar Búsqueda
@@ -314,7 +314,7 @@ export const PropertiesCatalogPage: React.FC = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-brand-500 bg-white"
+                  className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium focus:ring-2 focus:ring-brand-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white cursor-pointer"
                 >
                   <option value="featured">Destacadas Primero</option>
                   <option value="price-asc">Precio: Menor a Mayor</option>
@@ -324,16 +324,16 @@ export const PropertiesCatalogPage: React.FC = () => {
                 </select>
               </div>
 
-              <div className="flex border border-slate-200 rounded-lg overflow-hidden">
+              <div className="flex border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-1.5 ${viewMode === 'grid' ? 'bg-slate-100 text-brand-600' : 'text-slate-400 hover:text-slate-700'}`}
+                  className={`p-1.5 cursor-pointer ${viewMode === 'grid' ? 'bg-slate-100 dark:bg-slate-800 text-brand-600 dark:text-brand-400' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-1.5 ${viewMode === 'list' ? 'bg-slate-100 text-brand-600' : 'text-slate-400 hover:text-slate-700'}`}
+                  className={`p-1.5 cursor-pointer ${viewMode === 'list' ? 'bg-slate-100 dark:bg-slate-800 text-brand-600 dark:text-brand-400' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                 >
                   <List className="w-4 h-4" />
                 </button>
@@ -356,7 +356,7 @@ export const PropertiesCatalogPage: React.FC = () => {
               </p>
               <button
                 onClick={handleResetFilters}
-                className="px-5 py-2 bg-brand-600 text-white font-bold text-xs rounded-xl shadow-md"
+                className="px-5 py-2 bg-brand-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer"
               >
                 Limpiar Filtros
               </button>
@@ -377,36 +377,36 @@ export const PropertiesCatalogPage: React.FC = () => {
 
       {/* Save Search Modal */}
       {showSaveModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
-            <h3 className="text-base font-bold text-slate-900">Guardar Búsqueda</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 border border-slate-200 dark:border-slate-800">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Guardar Búsqueda</h3>
             <input
               type="text"
               placeholder="Nombre de la búsqueda"
               value={saveName}
               onChange={(e) => setSaveName(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+              className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
             />
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={saveAlerts}
                 onChange={(e) => setSaveAlerts(e.target.checked)}
-                className="w-4 h-4 rounded text-brand-600"
+                className="w-4 h-4 rounded text-brand-600 dark:border-slate-600"
               />
-              <span className="text-xs font-semibold text-slate-700">Recibir alertas por correo</span>
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Recibir alertas por correo</span>
             </label>
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => { setShowSaveModal(false); setSaveName(''); setSaveAlerts(false); }}
-                className="flex-1 px-4 py-2 text-xs font-bold text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50"
+                className="flex-1 px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSaveSearch}
                 disabled={!saveName.trim()}
-                className="flex-1 px-4 py-2 text-xs font-bold text-white bg-brand-600 rounded-xl hover:bg-brand-500 disabled:opacity-50"
+                className="flex-1 px-4 py-2 text-xs font-bold text-white bg-brand-600 rounded-xl hover:bg-brand-500 disabled:opacity-50 cursor-pointer"
               >
                 Guardar
               </button>
