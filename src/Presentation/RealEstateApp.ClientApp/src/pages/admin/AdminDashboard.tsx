@@ -89,46 +89,46 @@ export const AdminDashboard: React.FC = () => {
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-slate-800 text-brand-600 dark:text-brand-400 border border-transparent dark:border-slate-700 flex items-center justify-center font-bold">
             <Home className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-500 font-semibold uppercase">Inmuebles Disponibles</span>
-            <p className="text-2xl font-extrabold text-slate-900 font-mono mt-0.5">{kpis?.totalAvailableProperties || 0}</p>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Inmuebles Disponibles</span>
+            <p className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono mt-0.5">{kpis?.totalAvailableProperties || 0}</p>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 border border-transparent dark:border-slate-700 flex items-center justify-center font-bold">
             <CheckCircle className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-500 font-semibold uppercase">Inmuebles Vendidos</span>
-            <p className="text-2xl font-extrabold text-emerald-600 font-mono mt-0.5">{kpis?.totalSoldProperties || 0}</p>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Inmuebles Vendidos</span>
+            <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">{kpis?.totalSoldProperties || 0}</p>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-royal-600 flex items-center justify-center font-bold">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-slate-800 text-royal-600 dark:text-indigo-400 border border-transparent dark:border-slate-700 flex items-center justify-center font-bold">
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-500 font-semibold uppercase">Agentes Activos</span>
-            <p className="text-2xl font-extrabold text-royal-600 font-mono mt-0.5">
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Agentes Activos</span>
+            <p className="text-2xl font-extrabold text-royal-600 dark:text-indigo-400 font-mono mt-0.5">
               {kpis?.totalActiveAgents || 0}
-              <span className="text-xs text-slate-400 font-normal font-sans ml-1">({kpis?.totalInactiveAgents || 0} inactivos)</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500 font-normal font-sans ml-1">({kpis?.totalInactiveAgents || 0} inactivos)</span>
             </p>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-slate-800 text-amber-600 dark:text-amber-400 border border-transparent dark:border-slate-700 flex items-center justify-center font-bold">
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-500 font-semibold uppercase">Clientes Compradores</span>
-            <p className="text-2xl font-extrabold text-amber-600 font-mono mt-0.5">{kpis?.totalClients || 0}</p>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Clientes Compradores</span>
+            <p className="text-2xl font-extrabold text-amber-600 dark:text-amber-400 font-mono mt-0.5">{kpis?.totalClients || 0}</p>
           </div>
         </div>
       </div>
@@ -201,48 +201,48 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Quick Management Shortcuts */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-4">
-        <h3 className="font-extrabold text-base text-slate-900">
+      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+        <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
           Accesos Rápidos de Gobernanza
         </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Link
-              to="/admin/agents"
-              className="p-4 rounded-2xl bg-slate-50 hover:bg-brand-50 border border-slate-200 hover:border-brand-300 transition-all text-left group"
-            >
-              <Users className="w-5 h-5 text-brand-600 mb-2 group-hover:scale-110 transition-transform" />
-              <h4 className="font-bold text-xs text-slate-900">Gestión de Agentes</h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">Activar, inactivar y reasignar cartera</p>
-            </Link>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Link
+            to="/admin/agents"
+            className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-500/50 transition-all text-left group"
+          >
+            <Users className="w-5 h-5 text-brand-600 dark:text-brand-400 mb-2 group-hover:scale-110 transition-transform" />
+            <h4 className="font-bold text-xs text-slate-900 dark:text-white">Gestión de Agentes</h4>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Activar, inactivar y reasignar cartera</p>
+          </Link>
 
-            <Link
-              to="/admin/users"
-              className="p-4 rounded-2xl bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 transition-all text-left group"
-            >
-              <Code className="w-5 h-5 text-royal-600 mb-2 group-hover:scale-110 transition-transform" />
-              <h4 className="font-bold text-xs text-slate-900">Admins & Developers</h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">Crear credenciales y accesos REST</p>
-            </Link>
+          <Link
+            to="/admin/users"
+            className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-all text-left group"
+          >
+            <Code className="w-5 h-5 text-royal-600 dark:text-royal-400 mb-2 group-hover:scale-110 transition-transform" />
+            <h4 className="font-bold text-xs text-slate-900 dark:text-white">Admins & Developers</h4>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Crear credenciales y accesos REST</p>
+          </Link>
 
-            <Link
-              to="/admin/property-types"
-              className="p-4 rounded-2xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 transition-all text-left group"
-            >
-              <Building2 className="w-5 h-5 text-emerald-600 mb-2 group-hover:scale-110 transition-transform" />
-              <h4 className="font-bold text-xs text-slate-900">Tipos de Inmuebles</h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">Mantenimiento y conteo</p>
-            </Link>
+          <Link
+            to="/admin/property-types"
+            className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-500/50 transition-all text-left group"
+          >
+            <Building2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mb-2 group-hover:scale-110 transition-transform" />
+            <h4 className="font-bold text-xs text-slate-900 dark:text-white">Tipos de Inmuebles</h4>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Mantenimiento y conteo</p>
+          </Link>
 
-            <Link
-              to="/admin/improvements"
-              className="p-4 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 transition-all text-left group"
-            >
-              <Tag className="w-5 h-5 text-amber-600 mb-2 group-hover:scale-110 transition-transform" />
-              <h4 className="font-bold text-xs text-slate-900">Amenidades y Mejoras</h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">Catálogo de amenidades</p>
-            </Link>
-          </div>
+          <Link
+            to="/admin/improvements"
+            className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-500/50 transition-all text-left group"
+          >
+            <Tag className="w-5 h-5 text-amber-600 dark:text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
+            <h4 className="font-bold text-xs text-slate-900 dark:text-white">Amenidades y Mejoras</h4>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Catálogo de amenidades</p>
+          </Link>
         </div>
+      </div>
     </div>
   );
 };

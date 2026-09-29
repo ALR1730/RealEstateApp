@@ -169,56 +169,56 @@ export const AvmValuationPage: React.FC = () => {
         <div className="space-y-6">
           {/* Summary cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Precio Actual</span>
-              <p className="mt-2 text-xl font-extrabold font-mono text-slate-900">{formatCurrencyRD(valuation.currentPrice)}</p>
-              <p className="text-[11px] text-slate-500">{valuation.propertyName} · #{valuation.propertyCode}</p>
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">Precio Actual</span>
+              <p className="mt-2 text-xl font-extrabold font-mono text-slate-900 dark:text-white">{formatCurrencyRD(valuation.currentPrice)}</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">{valuation.propertyName} · #{valuation.propertyCode}</p>
             </div>
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Valor Estimado</span>
-              <p className="mt-2 text-xl font-extrabold font-mono text-emerald-600">{formatCurrencyRD(valuation.estimatedTotalPrice)}</p>
-              <p className="text-[11px] text-slate-500">≈ {formatCurrencyRD(valuation.estimatedPricePerSqm)}/m²</p>
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">Valor Estimado</span>
+              <p className="mt-2 text-xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400">{formatCurrencyRD(valuation.estimatedTotalPrice)}</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">≈ {formatCurrencyRD(valuation.estimatedPricePerSqm)}/m²</p>
             </div>
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Comparables</span>
-              <p className="mt-2 text-xl font-extrabold text-slate-900">{valuation.comparableCount}</p>
-              <p className="text-[11px] text-slate-500">Rango {formatCurrencyRD(valuation.minPricePerSqm)}–{formatCurrencyRD(valuation.maxPricePerSqm)}/m²</p>
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">Comparables</span>
+              <p className="mt-2 text-xl font-extrabold text-slate-900 dark:text-white">{valuation.comparableCount}</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Rango {formatCurrencyRD(valuation.minPricePerSqm)}–{formatCurrencyRD(valuation.maxPricePerSqm)}/m²</p>
             </div>
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Confianza</span>
-              <p className="mt-2 text-xl font-extrabold text-slate-900">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">Confianza</span>
+              <p className="mt-2 text-xl font-extrabold text-slate-900 dark:text-white">
                 {valuation.confidenceScore}
-                <span className="text-sm text-slate-400 font-bold">/100</span>
+                <span className="text-sm text-slate-400 dark:text-slate-500 font-bold">/100</span>
               </p>
-              <p className="text-[11px] text-slate-500">Evaluado el {new Date(valuation.calculatedAt).toLocaleString('es-DO')}</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Evaluado el {new Date(valuation.calculatedAt).toLocaleString('es-DO')}</p>
             </div>
           </div>
 
           {/* Rating + price difference */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-4">
             <div className="space-y-1">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Dictamen de la Valuación</span>
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Dictamen de la Valuación</span>
               <div className="mt-1">{renderRating()}</div>
             </div>
             <div className="text-right space-y-1">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Diferencia respecto al mercado</span>
-              <p className="text-lg font-extrabold font-mono text-emerald-600">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Diferencia respecto al mercado</span>
+              <p className="text-lg font-extrabold font-mono text-emerald-600 dark:text-emerald-400">
                 {formatCurrencyRD(Math.abs(valuation.priceDifference))}
               </p>
-              <p className="text-[11px] text-slate-500">Desviación estándar {formatCurrencyRD(valuation.standardDeviation)}/m² · Radio {valuation.searchRadiusKm} km</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Desviación estándar {formatCurrencyRD(valuation.standardDeviation)}/m² · Radio {valuation.searchRadiusKm} km</p>
             </div>
           </div>
 
           {/* Comparables table */}
-          <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
-            <div className="px-6 py-4 border-b border-slate-100">
-              <h2 className="font-extrabold text-slate-900">Propiedades Comparables</h2>
-              <p className="text-xs text-slate-500">{valuation.comparableCount} inmuebles similares encontrados en el radio de {valuation.searchRadiusKm} km</p>
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+              <h2 className="font-extrabold text-slate-900 dark:text-white">Propiedades Comparables</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{valuation.comparableCount} inmuebles similares encontrados en el radio de {valuation.searchRadiusKm} km</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-slate-50 text-slate-700 font-extrabold uppercase tracking-wider text-[11px]">
+                  <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider text-[11px]">
                     <th className="py-3 px-4 text-left">Propiedad</th>
                     <th className="py-3 px-4 text-left">Sector</th>
                     <th className="py-3 px-4 text-right">Precio</th>
@@ -227,22 +227,22 @@ export const AvmValuationPage: React.FC = () => {
                     <th className="py-3 px-4 text-right">Distancia</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {valuation.comparables.map((c) => (
-                    <tr key={c.propertyId} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={c.propertyId} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                       <td className="py-3 px-4">
-                        <Link to={`/property/${c.propertyId}`} className="font-bold text-slate-800 hover:text-brand-600">
+                        <Link to={`/property/${c.propertyId}`} className="font-bold text-slate-800 dark:text-slate-200 hover:text-brand-600 dark:hover:text-brand-400">
                           #{c.code} · {c.name}
                         </Link>
-                        <p className="text-[11px] text-slate-500">{c.rooms} hab · {c.bathrooms} baños</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">{c.rooms} hab · {c.bathrooms} baños</p>
                       </td>
-                      <td className="py-3 px-4 text-slate-600 flex items-center gap-1">
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-400 flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5 text-brand-500" /> {c.sector || c.municipalityName || '—'}
                       </td>
-                      <td className="py-3 px-4 text-right font-mono font-bold text-slate-900">{formatCurrencyRD(c.price)}</td>
-                      <td className="py-3 px-4 text-right text-slate-600">{c.sizeInMeters} m²</td>
-                      <td className="py-3 px-4 text-right font-mono font-semibold text-emerald-600">{formatCurrencyRD(c.pricePerSqm)}</td>
-                      <td className="py-3 px-4 text-right text-slate-600">{c.distanceKm.toFixed(2)} km</td>
+                      <td className="py-3 px-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatCurrencyRD(c.price)}</td>
+                      <td className="py-3 px-4 text-right text-slate-600 dark:text-slate-300">{c.sizeInMeters} m²</td>
+                      <td className="py-3 px-4 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrencyRD(c.pricePerSqm)}</td>
+                      <td className="py-3 px-4 text-right text-slate-600 dark:text-slate-300">{c.distanceKm.toFixed(2)} km</td>
                     </tr>
                   ))}
                 </tbody>
@@ -251,10 +251,10 @@ export const AvmValuationPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-3xl p-10 border border-slate-200 shadow-xs text-center space-y-2">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-10 border border-slate-200 dark:border-slate-800 shadow-xs text-center space-y-2">
           <Sparkles className="w-10 h-10 text-brand-300 mx-auto" />
-          <p className="text-sm font-bold text-slate-700">No hay una valuación guardada para esta propiedad todavía</p>
-          <p className="text-xs text-slate-500">Usa el botón «Calcular Valuación» para generar el dictamen AVM.</p>
+          <p className="text-sm font-bold text-slate-700 dark:text-slate-300">No hay una valuación guardada para esta propiedad todavía</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Usa el botón «Calcular Valuación» para generar el dictamen AVM.</p>
         </div>
       )}
     </div>

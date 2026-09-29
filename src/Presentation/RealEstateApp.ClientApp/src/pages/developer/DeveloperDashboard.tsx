@@ -102,37 +102,37 @@ export const DeveloperDashboard: React.FC = () => {
           <Link
             key={c.to}
             to={c.to}
-            className="group bg-white rounded-3xl border border-slate-200 p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all space-y-3"
+            className="group bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all space-y-3"
           >
             <div className={`w-11 h-11 rounded-2xl bg-gradient-to-tr ${c.accent} text-white flex items-center justify-center`}>
               <c.icon className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-sm font-extrabold text-slate-900 flex items-center gap-1">
+              <p className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1">
                 {c.title}
-                <ArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-brand-600 transition-colors" />
+                <ArrowUpRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors" />
               </p>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">{c.desc}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{c.desc}</p>
             </div>
             <div className="flex items-center justify-between text-[11px] font-bold">
-              <span className="text-slate-400">{c.count} registros</span>
-              <span className="text-brand-600">Gestionar CRUD</span>
+              <span className="text-slate-400 dark:text-slate-500">{c.count} registros</span>
+              <span className="text-brand-600 dark:text-brand-400">Gestionar CRUD</span>
             </div>
           </Link>
         ))}
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
-        <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
-          <FileJson className="w-5 h-5 text-royal-600" />
-          <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+        <div className="flex items-center gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
+          <FileJson className="w-5 h-5 text-royal-600 dark:text-royal-400" />
+          <h2 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
             Referencia rápida de la API
           </h2>
         </div>
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="text-[10px] uppercase tracking-wider text-slate-400 border-b border-slate-100">
+              <tr className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800">
                 <th className="py-2 pr-4">Método</th>
                 <th className="py-2 pr-4">Ruta</th>
                 <th className="py-2">Acceso</th>
@@ -140,19 +140,19 @@ export const DeveloperDashboard: React.FC = () => {
             </thead>
             <tbody>
               {endpoints.map((e) => (
-                <tr key={e.path + e.method} className="border-b border-slate-50 last:border-0">
+                <tr key={e.path + e.method} className="border-b border-slate-50 dark:border-slate-800/50 last:border-0">
                   <td className="py-2.5 pr-4">
                     <span className={`px-2 py-1 rounded-lg font-extrabold ${
                       e.method === 'GET'
-                        ? 'bg-sky-50 text-sky-700'
-                        : 'bg-amber-50 text-amber-700'
+                        ? 'bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300'
+                        : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
                     }`}>
                       {e.method}
                     </span>
                   </td>
-                  <td className="py-2.5 pr-4 font-mono text-slate-700">{e.path}</td>
+                  <td className="py-2.5 pr-4 font-mono text-slate-700 dark:text-slate-300">{e.path}</td>
                   <td className="py-2.5">
-                    <span className="inline-flex items-center gap-1 text-slate-500">
+                    <span className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400">
                       <Globe className="w-3.5 h-3.5" /> {e.roles}
                     </span>
                   </td>

@@ -199,30 +199,30 @@ export const ManageSubscriptionsPage: React.FC = () => {
 
       {/* KPI summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-1">
-          <span className="text-xs font-bold text-slate-400 uppercase">Planes Activos</span>
-          <p className="text-2xl font-extrabold font-mono text-emerald-600">{activeCount} / {plans.length}</p>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
+          <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Planes Activos</span>
+          <p className="text-2xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400">{activeCount} / {plans.length}</p>
         </div>
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-1">
-          <span className="text-xs font-bold text-slate-400 uppercase">Modelo de Ingresos</span>
-          <p className="text-2xl font-extrabold font-mono text-emerald-600">SaaS Recurrente</p>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
+          <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Modelo de Ingresos</span>
+          <p className="text-2xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400">SaaS Recurrente</p>
         </div>
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-1">
-          <span className="text-xs font-bold text-slate-400 uppercase">Moneda Base</span>
-          <p className="text-2xl font-extrabold font-mono text-brand-600">Pesos Dominicanos (RD$)</p>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
+          <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Moneda Base</span>
+          <p className="text-2xl font-extrabold font-mono text-brand-600 dark:text-brand-400">Pesos Dominicanos (RD$)</p>
         </div>
       </div>
 
       {/* Plan Editor */}
       {editorOpen && (
-        <div className="bg-white rounded-3xl border-2 border-brand-200 shadow-lg p-6 space-y-5">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-brand-200 dark:border-brand-800 shadow-lg p-6 space-y-5">
           <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-base text-slate-900">
+            <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
               {editingPlan ? `Editar Plan: ${editingPlan.name}` : 'Nuevo Plan de Suscripción'}
             </h3>
             <button
               onClick={() => setEditorOpen(false)}
-              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg"
+              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
               title="Cerrar"
             >
               <X className="w-4 h-4" />
@@ -343,10 +343,10 @@ export const ManageSubscriptionsPage: React.FC = () => {
       )}
 
       {/* Plans List Table */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider">
+            <thead className="bg-slate-50 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-extrabold uppercase tracking-wider">
               <tr>
                 <th className="px-6 py-4">Nombre del Plan</th>
                 <th className="px-6 py-4">Descripción</th>
@@ -358,24 +358,24 @@ export const ManageSubscriptionsPage: React.FC = () => {
                 <th className="px-6 py-4 text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {plans.map((plan) => (
-                <tr key={plan.id} className={`hover:bg-slate-50/50 ${!plan.isActive ? 'opacity-60' : ''}`}>
-                  <td className="px-6 py-4 font-bold text-slate-900 text-sm">
+                <tr key={plan.id} className={`hover:bg-slate-50/50 dark:hover:bg-slate-800/40 ${!plan.isActive ? 'opacity-60' : ''}`}>
+                  <td className="px-6 py-4 font-bold text-slate-900 dark:text-white text-sm">
                     {plan.name}
                   </td>
-                  <td className="px-6 py-4 text-slate-500 max-w-xs">
+                  <td className="px-6 py-4 text-slate-500 dark:text-slate-400 max-w-xs">
                     {plan.description}
                   </td>
-                  <td className="px-6 py-4 font-mono font-bold text-slate-900 text-sm">
+                  <td className="px-6 py-4 font-mono font-bold text-slate-900 dark:text-white text-sm">
                     {plan.monthlyPrice === 0 ? 'Gratuito' : formatCurrencyRD(plan.monthlyPrice)}
                   </td>
                   <td className="px-6 py-4 space-y-1">
-                    <span className="flex items-center gap-1 font-bold text-slate-700">
-                      <Home className="w-3 h-3 text-brand-600" />
+                    <span className="flex items-center gap-1 font-bold text-slate-700 dark:text-slate-300">
+                      <Home className="w-3 h-3 text-brand-600 dark:text-brand-400" />
                       Hasta {plan.maxActiveProperties ?? 3} activas
                     </span>
-                    <span className="flex items-center gap-1 font-bold text-amber-600">
+                    <span className="flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400">
                       <Star className="w-3 h-3" />
                       {plan.maxFeaturedProperties} destacadas
                     </span>

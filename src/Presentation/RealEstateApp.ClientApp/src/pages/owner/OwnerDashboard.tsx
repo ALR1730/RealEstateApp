@@ -104,8 +104,8 @@ export const OwnerDashboard: React.FC = () => {
               onClick={() => setFilter(f.value)}
               className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${
                 filter === f.value
-                  ? 'bg-navy-950 text-white border-navy-950'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                  ? 'bg-navy-950 text-white border-navy-950 dark:bg-amber-500 dark:text-navy-950 dark:border-amber-500'
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
               }`}
             >
               {f.label}
@@ -116,10 +116,10 @@ export const OwnerDashboard: React.FC = () => {
 
       {/* Properties List */}
       {properties.length === 0 ? (
-        <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-4">
-          <Home className="w-12 h-12 text-slate-300 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800">No tienes inmuebles directos activos</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800 space-y-4">
+          <Home className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto" />
+          <h3 className="text-base font-bold text-slate-800 dark:text-white">No tienes inmuebles directos activos</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
             Comienza a publicar tu propiedad residencial o comercial de forma directa para recibir ofertas.
           </p>
           <Link
@@ -130,15 +130,15 @@ export const OwnerDashboard: React.FC = () => {
           </Link>
         </div>
       ) : filteredProperties.length === 0 ? (
-        <div className="bg-white rounded-3xl p-10 text-center border border-slate-200">
-          <p className="text-xs text-slate-500">No hay inmuebles en este estado.</p>
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-10 text-center border border-slate-200 dark:border-slate-800">
+          <p className="text-xs text-slate-500 dark:text-slate-400">No hay inmuebles en este estado.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredProperties.map((prop) => (
-            <div key={prop.id} className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-xs">
+            <div key={prop.id} className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xs">
               {/* Image thumbnail */}
-              <div className="h-44 bg-slate-100 relative">
+              <div className="h-44 bg-slate-100 dark:bg-slate-800 relative">
                 {prop.images && prop.images.length > 0 ? (
                   <img
                     src={typeof prop.images[0] === 'string' ? prop.images[0] : prop.images[0].imageUrl}
@@ -146,7 +146,7 @@ export const OwnerDashboard: React.FC = () => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-300">
+                  <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
                     <Home className="w-10 h-10" />
                   </div>
                 )}
@@ -158,37 +158,37 @@ export const OwnerDashboard: React.FC = () => {
               <div className="p-6 space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="font-mono text-xs font-bold text-slate-500">#{prop.code}</span>
-                    <h3 className="font-bold text-base text-slate-900">{prop.name || `${prop.propertyTypeName} en ${prop.saleTypeName}`}</h3>
-                    <p className="text-sm font-extrabold font-mono text-emerald-600">{formatPrice(prop.price)}</p>
+                    <span className="font-mono text-xs font-bold text-slate-500 dark:text-slate-400">#{prop.code}</span>
+                    <h3 className="font-bold text-base text-slate-900 dark:text-white">{prop.name || `${prop.propertyTypeName} en ${prop.saleTypeName}`}</h3>
+                    <p className="text-sm font-extrabold font-mono text-emerald-600 dark:text-emerald-400">{formatPrice(prop.price)}</p>
                   </div>
                 </div>
 
                 {prop.provinceName && (
-                  <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5" />
                     {[prop.provinceName, prop.municipalityName, prop.sector].filter(Boolean).join(' · ')}
                   </p>
                 )}
 
-                <div className="flex items-center gap-4 text-[11px] font-semibold text-slate-600">
+                <div className="flex items-center gap-4 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
                   <span className="flex items-center gap-1">
-                    <BedDouble className="w-4 h-4 text-slate-400" /> {prop.bedrooms ?? prop.rooms ?? 0} Hab.
+                    <BedDouble className="w-4 h-4 text-slate-400 dark:text-slate-500" /> {prop.bedrooms ?? prop.rooms ?? 0} Hab.
                   </span>
                   <span className="flex items-center gap-1">
-                    <Bath className="w-4 h-4 text-slate-400" /> {prop.bathrooms} Baños
+                    <Bath className="w-4 h-4 text-slate-400 dark:text-slate-500" /> {prop.bathrooms} Baños
                   </span>
                   <span className="flex items-center gap-1">
-                    <Ruler className="w-4 h-4 text-slate-400" /> {prop.landSizeMeters ?? prop.sizeInMeters ?? 0} m²
+                    <Ruler className="w-4 h-4 text-slate-400 dark:text-slate-500" /> {prop.landSizeMeters ?? prop.sizeInMeters ?? 0} m²
                   </span>
                 </div>
 
-                <p className="text-xs text-slate-600 line-clamp-2">{prop.description}</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">{prop.description}</p>
 
-                <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
                   <Link
                     to={`/property/${prop.id}`}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-brand-600 hover:text-brand-700"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
                   >
                     <span>Ver Ficha Pública</span>
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -197,14 +197,14 @@ export const OwnerDashboard: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Link
                       to={`/owner/properties/edit/${prop.id}`}
-                      className="p-2 text-slate-500 hover:bg-brand-50 hover:text-brand-700 rounded-lg transition-colors"
+                      className="p-2 text-slate-500 dark:text-slate-400 hover:bg-brand-50 dark:hover:bg-slate-800 hover:text-brand-700 dark:hover:text-brand-300 rounded-lg transition-colors"
                       title="Editar Inmueble"
                     >
                       <Pencil className="w-4 h-4" />
                     </Link>
                     <button
                       onClick={() => handleDelete(prop.id)}
-                      className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                      className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
                       title="Retirar Inmueble"
                     >
                       <Trash2 className="w-4 h-4" />
