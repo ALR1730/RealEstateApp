@@ -104,19 +104,19 @@ export const CreateEditDeveloperPage: React.FC = () => {
   return (
     <div className="space-y-6">
       
-      <div className="flex items-center gap-4 pb-4 border-b border-slate-200">
+      <div className="flex items-center gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <button
           onClick={() => navigate('/admin/developers')}
-          className="p-2 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors"
+          className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            <Code className="w-6 h-6 text-royal-600" />
+          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Code className="w-6 h-6 text-royal-600 dark:text-royal-400" />
             {isEditing ? 'Editar Desarrollador' : 'Crear Nuevo Desarrollador'}
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             {isEditing
               ? 'Actualiza la información del desarrollador. Deja la contraseña vacía para no cambiarla.'
               : 'Registra una nueva cuenta de desarrollador para acceso a la API.'}
@@ -125,21 +125,21 @@ export const CreateEditDeveloperPage: React.FC = () => {
       </div>
 
       {success ? (
-        <div className="bg-white p-8 rounded-3xl border border-slate-200 text-center space-y-3 shadow-xl">
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 text-center space-y-3 shadow-xl">
           <CheckCircle2 className="w-14 h-14 text-emerald-500 mx-auto" />
-          <h3 className="text-xl font-bold text-slate-900">
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white">
             {isEditing ? '¡Desarrollador Actualizado!' : '¡Desarrollador Creado!'}
           </h3>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Redirigiendo al listado de desarrolladores...
           </p>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4 max-w-lg">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 max-w-lg">
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nombre *</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nombre *</label>
               <input
                 type="text"
                 name="firstName"
@@ -147,11 +147,11 @@ export const CreateEditDeveloperPage: React.FC = () => {
                 placeholder="José"
                 value={form.firstName}
                 onChange={handleChange}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Apellido *</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Apellido *</label>
               <input
                 type="text"
                 name="lastName"
@@ -159,13 +159,13 @@ export const CreateEditDeveloperPage: React.FC = () => {
                 placeholder="Pérez"
                 value={form.lastName}
                 onChange={handleChange}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nombre de Usuario *</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nombre de Usuario *</label>
             <input
               type="text"
               name="userName"
@@ -173,12 +173,12 @@ export const CreateEditDeveloperPage: React.FC = () => {
               placeholder="dev_jose"
               value={form.userName}
               onChange={handleChange}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Correo Electrónico *</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Correo Electrónico *</label>
             <input
               type="email"
               name="email"
@@ -186,13 +186,13 @@ export const CreateEditDeveloperPage: React.FC = () => {
               placeholder="dev@empresa.com"
               value={form.email}
               onChange={handleChange}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                 Contraseña {isEditing ? '(dejar vacío para no cambiar)' : '*'}
               </label>
               <input
@@ -202,11 +202,11 @@ export const CreateEditDeveloperPage: React.FC = () => {
                 placeholder="••••••••"
                 value={form.password}
                 onChange={handleChange}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                 Confirmar Contraseña {isEditing ? '(dejar vacío para no cambiar)' : '*'}
               </label>
               <input
@@ -216,15 +216,15 @@ export const CreateEditDeveloperPage: React.FC = () => {
                 placeholder="••••••••"
                 value={form.confirmPassword}
                 onChange={handleChange}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
               />
             </div>
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 p-3 bg-rose-50 rounded-xl border border-rose-200">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-              <p className="text-xs text-rose-600 font-semibold">{error}</p>
+            <div className="flex items-center gap-2 p-3 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-200 dark:border-rose-900/50">
+              <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+              <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold">{error}</p>
             </div>
           )}
 
@@ -232,14 +232,14 @@ export const CreateEditDeveloperPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/admin/developers')}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 bg-royal-600 hover:bg-royal-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md"
+              className="px-5 py-2 bg-royal-600 hover:bg-royal-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md cursor-pointer"
             >
               {isSubmitting
                 ? 'Guardando...'

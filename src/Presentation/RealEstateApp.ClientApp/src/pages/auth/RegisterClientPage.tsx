@@ -63,28 +63,28 @@ export const RegisterClientPage: React.FC = () => {
               <Building2 className="w-7 h-7" />
             </div>
           </Link>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Registro de Cliente Comprador
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Crea tu cuenta para guardar favoritos, solicitar citas presenciales y enviar ofertas en RD$.
           </p>
         </div>
 
         {success ? (
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 text-center space-y-3 shadow-xl animate-in zoom-in-95">
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 text-center space-y-3 shadow-xl animate-in zoom-in-95">
             <CheckCircle className="w-14 h-14 text-emerald-500 mx-auto" />
-            <h3 className="text-xl font-bold text-slate-900">¡Cuenta Creada Exitosamente!</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">¡Cuenta Creada Exitosamente!</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Redirigiendo a la pantalla de inicio de sesión...
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nombre</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nombre</label>
                 <input
                   type="text"
                   name="firstName"
@@ -92,12 +92,12 @@ export const RegisterClientPage: React.FC = () => {
                   placeholder="Juan"
                   value={form.firstName}
                   onChange={handleChange}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Apellido</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Apellido</label>
                 <input
                   type="text"
                   name="lastName"
@@ -105,14 +105,14 @@ export const RegisterClientPage: React.FC = () => {
                   placeholder="Pérez"
                   value={form.lastName}
                   onChange={handleChange}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Usuario</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Usuario</label>
                 <input
                   type="text"
                   name="userName"
@@ -120,12 +120,12 @@ export const RegisterClientPage: React.FC = () => {
                   placeholder="juanperez"
                   value={form.userName}
                   onChange={handleChange}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Teléfono</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Teléfono</label>
                 <input
                   type="tel"
                   name="phone"
@@ -133,13 +133,13 @@ export const RegisterClientPage: React.FC = () => {
                   placeholder="809-555-1234"
                   value={form.phone}
                   onChange={handleChange}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Correo Electrónico</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Correo Electrónico</label>
               <input
                 type="email"
                 name="email"
@@ -147,13 +147,13 @@ export const RegisterClientPage: React.FC = () => {
                 placeholder="juan.perez@correo.com"
                 value={form.email}
                 onChange={handleChange}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Contraseña</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Contraseña</label>
                 <input
                   type="password"
                   name="password"
@@ -161,12 +161,12 @@ export const RegisterClientPage: React.FC = () => {
                   placeholder="••••••••"
                   value={form.password}
                   onChange={handleChange}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Confirmar Contraseña</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Confirmar Contraseña</label>
                 <input
                   type="password"
                   name="confirmPassword"
@@ -174,13 +174,13 @@ export const RegisterClientPage: React.FC = () => {
                   placeholder="••••••••"
                   value={form.confirmPassword}
                   onChange={handleChange}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="p-3 bg-rose-50 rounded-xl border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-200 dark:border-rose-900/50 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -189,15 +189,15 @@ export const RegisterClientPage: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md shadow-brand-600/20 transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md shadow-brand-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
               <span>{isLoading ? 'Registrando...' : 'Crear Cuenta de Cliente'}</span>
             </button>
 
-            <div className="pt-2 text-center text-xs text-slate-500">
+            <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
               ¿Ya tienes cuenta?{' '}
-              <Link to="/login" className="font-bold text-brand-600 hover:underline">
+              <Link to="/login" className="font-bold text-brand-600 dark:text-brand-400 hover:underline">
                 Inicia Sesión aquí
               </Link>
             </div>
