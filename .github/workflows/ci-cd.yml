@@ -63,11 +63,12 @@ jobs:
     needs: [test-backend, test-frontend]
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
+    env:
+      RENDER_BACKEND_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
+      RENDER_FRONTEND_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
     steps:
       - name: Trigger Backend Render Deploy Hook
         if: env.RENDER_BACKEND_HOOK != ''
-        env:
-          RENDER_BACKEND_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
         run: |
           echo "Disparando deploy hook del backend en Render..."
           curl -X POST -s "$RENDER_BACKEND_HOOK" > /dev/null
@@ -75,8 +76,6 @@ jobs:
 
       - name: Trigger Frontend Render Deploy Hook
         if: env.RENDER_FRONTEND_HOOK != ''
-        env:
-          RENDER_FRONTEND_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
         run: |
           echo "Disparando deploy hook del frontend en Render..."
           curl -X POST -s "$RENDER_FRONTEND_HOOK" > /dev/null
