@@ -42,18 +42,18 @@ export const Modal: React.FC<ModalProps> = ({
 
       {/* Modal Dialog */}
       <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-        <div className={`relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all w-full ${maxWidth} p-6 sm:p-8 animate-in zoom-in-95 border border-slate-100`}>
+        <div className={`relative transform overflow-hidden rounded-3xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all w-full ${maxWidth} p-6 sm:p-8 animate-in zoom-in-95 border border-slate-100 dark:border-slate-800`}>
           
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+          <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
             {title && (
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                 {title}
               </h3>
             )}
             <button
               onClick={onClose}
-              className="rounded-xl p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors ml-auto"
+              className="rounded-xl p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ml-auto cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>

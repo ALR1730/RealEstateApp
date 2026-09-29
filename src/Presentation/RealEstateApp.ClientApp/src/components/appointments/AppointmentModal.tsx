@@ -77,20 +77,20 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           
-          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between text-xs">
+          <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-700 flex items-center justify-between text-xs">
             <div>
-              <span className="font-bold text-slate-800">Propiedad #{property.code}</span>
-              <p className="text-slate-500 truncate max-w-xs">{property.description}</p>
+              <span className="font-bold text-slate-800 dark:text-white">Propiedad #{property.code}</span>
+              <p className="text-slate-500 dark:text-slate-400 truncate max-w-xs">{property.description}</p>
             </div>
             <div className="text-right">
               <span className="text-[10px] text-slate-400 uppercase font-bold">Agente</span>
-              <p className="font-bold text-brand-600">{property.agentName || 'Agente Inmobiliario'}</p>
+              <p className="font-bold text-brand-600 dark:text-brand-400">{property.agentName || 'Agente Inmobiliario'}</p>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-brand-600" />
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
               Fecha de la Visita
             </label>
             <input
@@ -99,19 +99,19 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
               min={new Date().toISOString().split('T')[0]}
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-brand-600" />
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
               Horario Preferido
             </label>
             <select
               value={timeSlot}
               onChange={(e) => setTimeSlot(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
             >
               {timeSlots.map((ts) => (
                 <option key={ts} value={ts}>
@@ -122,7 +122,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               Notas Adicionales (Opcional)
             </label>
             <textarea
@@ -130,24 +130,24 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
               placeholder="Ej: Visita con acompañante, requerimiento de tour virtual previo..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
             />
           </div>
 
-          {error && <p className="text-xs text-rose-600 font-semibold">{error}</p>}
+          {error && <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold">{error}</p>}
 
           <div className="pt-3 flex justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+              className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 rounded-xl shadow-md shadow-brand-600/20 transition-all"
+              className="flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 rounded-xl shadow-md shadow-brand-600/20 transition-all cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
               <span>{isSubmitting ? 'Agendando...' : 'Solicitar Cita'}</span>
