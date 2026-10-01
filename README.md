@@ -5,6 +5,7 @@
 [![Moneda](https://img.shields.io/badge/Moneda-RD%24%20Pesos%20Dominicanos-blue.svg)]()
 [![Arquitectura](https://img.shields.io/badge/Arquitectura-Onion%20%2B%20SPA%20Desacoplada-orange.svg)]()
 [![Pruebas](https://img.shields.io/badge/Pruebas-xUnit%20%2B%20Vitest%20%28100%25%20Verdes%29-brightgreen.svg)]()
+[![Ficha Técnica](https://img.shields.io/badge/Especificación-Ficha%20Técnica%20Oficial-teal.svg)](FICHA_TECNICA.md)
 
 ---
 
