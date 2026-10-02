@@ -38,10 +38,20 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         /// </summary>
         [HttpGet("thread")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<ChatViewModel>))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GetThreadAsync([FromQuery] string clientId, [FromQuery] string agentId, [FromQuery] int? propertyId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            // Protección BOLA/IDOR (OWASP API1): solo los participantes del hilo pueden leerlo.
+            // Un usuario que no sea ni clientId ni agentId no tiene acceso a esta conversación.
+            var isParticipant = userId == clientId || userId == agentId;
+            var isAdminOrDeveloper = User.IsInRole("Admin") || User.IsInRole("Developer");
+            if (!isParticipant && !isAdminOrDeveloper)
+            {
+                return Forbid();
+            }
 
             var messages = await _chatService.GetChatThread(clientId, agentId, propertyId, userId);
             return Ok(messages);

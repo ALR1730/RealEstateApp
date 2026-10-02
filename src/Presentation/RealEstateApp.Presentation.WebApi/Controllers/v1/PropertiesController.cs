@@ -203,8 +203,22 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [HttpPost("{id:int}/toggle-featured")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ToggleFeaturedAsync(int id, [FromQuery] int durationDays = 30)
         {
+            // Protección IDOR (OWASP API1): un Agente solo puede destacar sus propias propiedades.
+            if (User.IsInRole("Agent"))
+            {
+                var property = await _propertyService.GetByIdViewModel(id);
+                if (property == null)
+                    return NotFound(new { hasError = true, error = $"No se encontró la propiedad con ID {id}." });
+
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (property.AgentId != currentUserId)
+                    return Forbid();
+            }
+
             try
             {
                 await _propertyService.ToggleFeaturedAsync(id, durationDays);
