@@ -55,14 +55,20 @@ namespace RealEstateApp.Core.Application.Services
 
             var rate = await ResolveCommissionRateAsync(property.AgentId);
 
+            // Usar el monto de cierre real: si existe una contraoferta aceptada, ese es el precio pactado.
+            // De lo contrario, usar el monto original ofertado por el cliente.
+            decimal finalSalePrice = (offer.CounterOfferAmount.HasValue && offer.CounterOfferAmount.Value > 0)
+                ? offer.CounterOfferAmount.Value
+                : offer.MontoOfertado;
+
             var commission = new Commission
             {
                 AgentId = property.AgentId,
                 PropertyId = property.Id,
                 OfferId = offer.Id,
-                SalePrice = offer.MontoOfertado,
+                SalePrice = finalSalePrice,
                 Rate = rate,
-                Amount = Math.Round(offer.MontoOfertado * rate / 100m, 2),
+                Amount = Math.Round(finalSalePrice * rate / 100m, 2),
                 Status = CommissionStatus.Pending
             };
 

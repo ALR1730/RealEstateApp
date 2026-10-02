@@ -150,10 +150,21 @@ namespace RealEstateApp.Core.Application.Services
             offer.Status = OfferStatus.Pending;
             await _offerRepository.UpdateAsync(offer);
 
-            // Aceptar la propuesta ejecutando la transacción atómica
-            await _offerRepository.AcceptOfferTransactionAsync(offerId);
-
-            await _commissionService.CreateForAcceptedOfferAsync(offerId);
+            // Envolver ambas operaciones en una transacción UoW para garantizar atomicidad ACID:
+            // si la creación de comisión falla, el estado de la oferta/propiedad hace rollback.
+            if (_unitOfWork != null)
+            {
+                await _unitOfWork.ExecuteTransactionAsync(async () =>
+                {
+                    await _offerRepository.AcceptOfferTransactionAsync(offerId);
+                    await _commissionService.CreateForAcceptedOfferAsync(offerId);
+                });
+            }
+            else
+            {
+                await _offerRepository.AcceptOfferTransactionAsync(offerId);
+                await _commissionService.CreateForAcceptedOfferAsync(offerId);
+            }
 
             await _userActivityService.LogActivityAsync(
                 clientUserId,

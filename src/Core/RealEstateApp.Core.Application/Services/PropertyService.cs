@@ -32,6 +32,7 @@ namespace RealEstateApp.Core.Application.Services
         private readonly ISubscriptionService _subscriptionService;
         private readonly IPropertyImageService _propertyImageService;
         private readonly IPropertyEnrichmentService _propertyEnrichmentService;
+        private readonly ICurrencyService? _currencyService;
         private readonly IMapper _mapper;
         private readonly ILogger<PropertyService> _logger;
 
@@ -50,6 +51,7 @@ namespace RealEstateApp.Core.Application.Services
             ISubscriptionService subscriptionService,
             IPropertyImageService propertyImageService,
             IPropertyEnrichmentService propertyEnrichmentService,
+            ICurrencyService currencyService,
             IMapper mapper,
             ILogger<PropertyService>? logger = null)
         {
@@ -62,6 +64,7 @@ namespace RealEstateApp.Core.Application.Services
             _subscriptionService = subscriptionService;
             _propertyImageService = propertyImageService;
             _propertyEnrichmentService = propertyEnrichmentService;
+            _currencyService = currencyService;
             _mapper = mapper;
             _logger = logger ?? NullLogger<PropertyService>.Instance;
         }
@@ -92,6 +95,7 @@ namespace RealEstateApp.Core.Application.Services
                 subscriptionService,
                 new PropertyImageService(propertyImageRepository, fileStorageService),
                 new PropertyEnrichmentService(currencyService, accountService, priceHistoryRepository),
+                currencyService,
                 mapper,
                 logger)
         {
@@ -172,6 +176,14 @@ namespace RealEstateApp.Core.Application.Services
             var property = _mapper.Map<Property>(vm);
             property.Name = vm.Name;
 
+            // Sincronizar PriceInDOP usando el método de dominio ChangePrice para garantizar
+            // que propiedades en USD queden con PriceInDOP > 0 y sean indexadas por el AVM.
+            if (_currencyService != null)
+            {
+                var exchangeRate = await _currencyService.GetExchangeRateAsync();
+                property.ChangePrice(vm.Price, vm.Currency, exchangeRate);
+            }
+
             var propertyType = await _propertyTypeRepository.GetByIdAsync(vm.PropertyTypeId);
             string prefix = PropertyCodeGenerator.GetPropertyTypePrefix(propertyType?.Name);
 
@@ -213,8 +225,6 @@ namespace RealEstateApp.Core.Application.Services
             var priceChanged = oldPrice != vm.Price || !string.Equals(oldCurrency, newCurrency, StringComparison.OrdinalIgnoreCase);
 
             property.Name = vm.Name;
-            property.Price = vm.Price;
-            property.Currency = newCurrency;
             property.Rooms = vm.Rooms;
             property.Bathrooms = vm.Bathrooms;
             property.SizeInMeters = vm.SizeInMeters;
@@ -235,6 +245,20 @@ namespace RealEstateApp.Core.Application.Services
             property.FullAddress = vm.FullAddress;
             property.IsFeatured = vm.IsFeatured;
             property.FeaturedUntil = vm.FeaturedUntil;
+
+            // Invocar ChangePrice para mantener Price, Currency y PriceInDOP siempre sincronizados.
+            // Esto es crítico: sin este llamado, propiedades en USD quedan con PriceInDOP = 0
+            // y son silenciosamente descartadas por el AVM en sus cálculos de avalúo.
+            if (_currencyService != null)
+            {
+                var exchangeRate = await _currencyService.GetExchangeRateAsync();
+                property.ChangePrice(vm.Price, newCurrency, exchangeRate);
+            }
+            else
+            {
+                // Fallback sin tasa dinámica — usa tasa por defecto del dominio
+                property.ChangePrice(vm.Price, newCurrency);
+            }
 
             await _propertyRepository.UpdateAsync(property);
 

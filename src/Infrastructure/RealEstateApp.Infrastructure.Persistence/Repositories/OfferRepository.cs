@@ -94,9 +94,13 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 property.Status = PropertyStatus.Sold;
             }
 
-            // 3. Rechazar en cascada todas las demás ofertas pendientes de esa propiedad
+            // 3. Rechazar en cascada todas las demás ofertas pendientes O en contraoferta de esa propiedad.
+            //    Las contraofertas activas también deben rechazarse: no puede quedar ninguna oferta
+            //    activa sobre un inmueble que ya fue vendido.
             var otherOffers = await _dbContext.Set<Offer>()
-                .Where(o => o.PropertyId == offer.PropertyId && o.Id != offerId && o.Status == RealEstateApp.Core.Domain.Enums.OfferStatus.Pending)
+                .Where(o => o.PropertyId == offer.PropertyId && o.Id != offerId &&
+                            (o.Status == RealEstateApp.Core.Domain.Enums.OfferStatus.Pending ||
+                             o.Status == RealEstateApp.Core.Domain.Enums.OfferStatus.CounterOffered))
                 .ToListAsync();
 
             foreach (var otherOffer in otherOffers)

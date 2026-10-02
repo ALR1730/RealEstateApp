@@ -248,5 +248,56 @@ namespace RealEstateApp.UnitTests.Services
             _offerRepositoryMock.Verify(r => r.AcceptOfferTransactionAsync(offerId), Times.Once);
             _commissionServiceMock.Verify(c => c.CreateForAcceptedOfferAsync(offerId), Times.Once);
         }
+
+        /// <summary>
+        /// Tarea 1.5 / Hallazgo 1.3: AcceptCounterOffer debe envolver las operaciones críticas
+        /// en una transacción UoW para garantizar atomicidad ACID. Si la comisión falla,
+        /// el estado de la oferta y la propiedad no debe quedar comprometido.
+        /// </summary>
+        [Fact]
+        public async Task AcceptCounterOffer_DebeEjecutarseEnTransaccionUoW_CuandoSeAceptaContraoferta()
+        {
+            // Arrange
+            int offerId = 55;
+            var offer = new Offer
+            {
+                Id = offerId,
+                ClienteId = "client-001",
+                Status = OfferStatus.CounterOffered,
+                CounterOfferAmount = 5_500_000m
+            };
+
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            unitOfWorkMock
+                .Setup(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default))
+                .Returns<Func<Task>, System.Threading.CancellationToken>(async (action, _) => await action());
+
+            _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId)).ReturnsAsync(offer);
+
+            var sutWithUow = new OfferService(
+                _offerRepositoryMock.Object,
+                _propertyRepositoryMock.Object,
+                _userActivityServiceMock.Object,
+                _commissionServiceMock.Object,
+                _mapper,
+                unitOfWorkMock.Object
+            );
+
+            // Act
+            await sutWithUow.AcceptCounterOffer(offerId, "client-001");
+
+            // Assert: la transacción UoW debe envolver AcceptOfferTransaction + CreateForAcceptedOffer
+            unitOfWorkMock.Verify(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default), Times.Once,
+                "Las operaciones de cierre deben ejecutarse dentro de una transacción UoW para garantizar atomicidad ACID");
+            _offerRepositoryMock.Verify(r => r.AcceptOfferTransactionAsync(offerId), Times.Once);
+            _commissionServiceMock.Verify(c => c.CreateForAcceptedOfferAsync(offerId), Times.Once);
+            _userActivityServiceMock.Verify(u => u.LogActivityAsync(
+                "client-001",
+                "Contra-Oferta Aceptada",
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()
+            ), Times.Once);
+        }
     }
 }

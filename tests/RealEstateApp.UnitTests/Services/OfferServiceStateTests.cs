@@ -135,5 +135,78 @@ namespace RealEstateApp.UnitTests.Services
         {
             _dbContext.Dispose();
         }
+
+        /// <summary>
+        /// Tarea 1.5 / Hallazgo 1.4: La cascada de rechazo debe incluir ofertas en estado CounterOffered.
+        /// Antes del fix, las contraofertas activas quedaban hu\u00e9rfanas en propiedades ya vendidas.
+        /// </summary>
+        [Fact]
+        public async Task AcceptOffer_DebeRechazarOfertasYContraofertasPendientes_AlCerrarVenta()
+        {
+            // Arrange \u2014 Estado inicial real en BD (InMemory)
+            var property = new Property
+            {
+                Name = "Casa con Piscina",
+                Code = "CAS303",
+                Price = 8_000_000m,
+                PriceInDOP = 8_000_000m,
+                Currency = CurrencyConstants.DOP,
+                Status = PropertyStatus.Available,
+                AgentId = "agent-X"
+            };
+            await _dbContext.Properties.AddAsync(property);
+            await _dbContext.SaveChangesAsync();
+
+            // Oferta ganadora (Pending) \u2014 la que vamos a aceptar
+            var winningOffer = new Offer
+            {
+                PropertyId = property.Id,
+                ClienteId = "client-winner",
+                MontoOfertado = 7_800_000m,
+                Status = OfferStatus.Pending,
+                FechaOferta = DateTime.UtcNow
+            };
+
+            // Oferta competidora Pending \u2014 debe ser rechazada
+            var pendingOffer = new Offer
+            {
+                PropertyId = property.Id,
+                ClienteId = "client-pending",
+                MontoOfertado = 7_500_000m,
+                Status = OfferStatus.Pending,
+                FechaOferta = DateTime.UtcNow
+            };
+
+            // CONTRAOFERTA activa \u2014 debe ser rechazada tambi\u00e9n (esto era el bug)
+            var counterOffer = new Offer
+            {
+                PropertyId = property.Id,
+                ClienteId = "client-counter",
+                MontoOfertado = 7_200_000m,
+                CounterOfferAmount = 7_600_000m,
+                Status = OfferStatus.CounterOffered, // <-- Estaba quedando hu\u00e9rfana antes del fix
+                FechaOferta = DateTime.UtcNow
+            };
+
+            await _dbContext.Offers.AddRangeAsync(winningOffer, pendingOffer, counterOffer);
+            await _dbContext.SaveChangesAsync();
+
+            // Act
+            await _sut.AcceptOffer(winningOffer.Id);
+
+            // Assert \u2014 Estado observable real en BD
+            var winnerInDb = await _dbContext.Offers.FindAsync(winningOffer.Id);
+            winnerInDb!.Status.Should().Be(OfferStatus.Accepted, "la oferta ganadora debe quedar Accepted");
+
+            var pendingInDb = await _dbContext.Offers.FindAsync(pendingOffer.Id);
+            pendingInDb!.Status.Should().Be(OfferStatus.Rejected, "las ofertas Pending de la misma propiedad deben ser rechazadas");
+
+            var counterInDb = await _dbContext.Offers.FindAsync(counterOffer.Id);
+            counterInDb!.Status.Should().Be(OfferStatus.Rejected,
+                "las contraofertas (CounterOffered) activas tambi\u00e9n deben ser rechazadas en cascada al cerrar la venta");
+
+            var propertyInDb = await _dbContext.Properties.FindAsync(property.Id);
+            propertyInDb!.Status.Should().Be(PropertyStatus.Sold, "la propiedad debe quedar marcada como Vendida");
+        }
     }
 }

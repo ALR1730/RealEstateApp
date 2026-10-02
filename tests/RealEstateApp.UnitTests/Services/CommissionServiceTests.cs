@@ -178,5 +178,85 @@ namespace RealEstateApp.UnitTests.Services
             summary.PendingCount.Should().Be(1);
             summary.PendingAmount.Should().Be(60_000m);
         }
+
+        /// <summary>
+        /// Tarea 1.1 — Hallazgo CRÍTICO: La comisión debe calcularse sobre el precio final pactado.
+        /// Cuando el agente emite una contraoferta y el cliente la acepta, el precio real de cierre
+        /// es CounterOfferAmount, no MontoOfertado.
+        /// </summary>
+        [Fact]
+        public async Task CreateForAcceptedOfferAsync_DebeCalcularComisionSobreMontoContraoferta_CuandoOfertaTieneContraofertaAceptada()
+        {
+            // Arrange
+            // Cliente ofertó RD$ 5,000,000. Agente contraofertó RD$ 5,500,000. Cliente aceptó.
+            // El precio de cierre REAL es RD$ 5,500,000 (CounterOfferAmount).
+            var offer = new Offer
+            {
+                Id = 99,
+                PropertyId = 7,
+                MontoOfertado = 5_000_000m,       // Oferta original del cliente
+                CounterOfferAmount = 5_500_000m   // Contraoferta del agente (precio REAL de cierre)
+            };
+            var property = new Property { Id = 7, AgentId = "agent-A" };
+
+            _offerRepoMock.Setup(r => r.GetByIdAsync(99)).ReturnsAsync(offer);
+            _propertyRepoMock.Setup(r => r.GetByIdAsync(7)).ReturnsAsync(property);
+            _commissionRepoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Commission>());
+            _subscriptionServiceMock
+                .Setup(s => s.GetCurrentSubscriptionByAgentIdAsync("agent-A"))
+                .ReturnsAsync((AgentSubscriptionViewModel?)null); // Usará tasa default
+            _commissionRepoMock
+                .Setup(r => r.AddAsync(It.IsAny<Commission>()))
+                .ReturnsAsync((Commission c) => c);
+
+            // Act
+            await _sut.CreateForAcceptedOfferAsync(99);
+
+            // Assert — La comisión DEBE estar calculada sobre 5,500,000 (no sobre 5,000,000)
+            var expectedBase = 5_500_000m;
+            var expectedAmount = Math.Round(expectedBase * CommissionConstants.DefaultRate / 100m, 2);
+
+            _commissionRepoMock.Verify(r => r.AddAsync(It.Is<Commission>(c =>
+                c.SalePrice == expectedBase &&
+                c.Amount == expectedAmount
+            )), Times.Once, "La comisión debe reflejar el precio de contraoferta aceptada, no el monto original");
+        }
+
+        /// <summary>
+        /// Tarea 1.1 — Caso base: cuando NO hay contraoferta, la comisión usa MontoOfertado normalmente.
+        /// </summary>
+        [Fact]
+        public async Task CreateForAcceptedOfferAsync_DebeUsarMontoOfertado_CuandoNoExisteContraoferta()
+        {
+            // Arrange
+            var offer = new Offer
+            {
+                Id = 100,
+                PropertyId = 8,
+                MontoOfertado = 3_000_000m,
+                CounterOfferAmount = null // Sin contraoferta — flujo normal
+            };
+            var property = new Property { Id = 8, AgentId = "agent-B" };
+
+            _offerRepoMock.Setup(r => r.GetByIdAsync(100)).ReturnsAsync(offer);
+            _propertyRepoMock.Setup(r => r.GetByIdAsync(8)).ReturnsAsync(property);
+            _commissionRepoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Commission>());
+            _subscriptionServiceMock
+                .Setup(s => s.GetCurrentSubscriptionByAgentIdAsync("agent-B"))
+                .ReturnsAsync((AgentSubscriptionViewModel?)null);
+            _commissionRepoMock
+                .Setup(r => r.AddAsync(It.IsAny<Commission>()))
+                .ReturnsAsync((Commission c) => c);
+
+            // Act
+            await _sut.CreateForAcceptedOfferAsync(100);
+
+            // Assert — Sin contraoferta, debe usar MontoOfertado
+            var expectedAmount = Math.Round(3_000_000m * CommissionConstants.DefaultRate / 100m, 2);
+            _commissionRepoMock.Verify(r => r.AddAsync(It.Is<Commission>(c =>
+                c.SalePrice == 3_000_000m &&
+                c.Amount == expectedAmount
+            )), Times.Once, "Sin contraoferta activa, la comisión debe calcularse sobre MontoOfertado");
+        }
     }
 }

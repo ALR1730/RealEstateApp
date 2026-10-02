@@ -243,6 +243,103 @@ namespace RealEstateApp.UnitTests.Services
             _priceHistoryRepositoryMock.Verify(r => r.AddAsync(It.IsAny<PropertyPriceHistory>()), Times.Never);
         }
 
+        /// <summary>
+        /// Tarea 1.5 / Hallazgo 1.2 (CR\u00cdTICO): Al agregar una propiedad en USD,
+        /// PriceInDOP debe ser calculado con la tasa de cambio real, no quedar en 0.
+        /// Sin este fix, el AVM silenciosamente descarta propiedades USD de los avalúos.
+        /// </summary>
+        [Fact]
+        public async Task Add_DebeCalcularPriceInDOPCorrectamente_CuandoMonedaEsUSD()
+        {
+            // Arrange
+            const decimal precioUSD = 250_000m;
+            const decimal tasaCambio = 60.0m; // configurada en el mock del constructor
+            const decimal precioEsperadoDOP = precioUSD * tasaCambio; // = 15,000,000 DOP
+
+            var vm = new SavePropertyViewModel
+            {
+                Name = "Villa en USD",
+                Price = precioUSD,
+                Currency = CurrencyConstants.USD,
+                PropertyTypeId = 1,
+                SaleTypeId = 1,
+                AgentId = "agent-usd"
+            };
+
+            _propertyTypeRepositoryMock.Setup(r => r.GetByIdAsync(1))
+                .ReturnsAsync(new PropertyType { Id = 1, Name = "Villa" });
+            _propertyRepositoryMock.Setup(r => r.GetByAgentIdAsync(It.IsAny<string>()))
+                .ReturnsAsync(new List<Property>());
+
+            Property? capturedProperty = null;
+            _propertyRepositoryMock.Setup(r => r.AddAsync(It.IsAny<Property>()))
+                .Callback<Property>(p => capturedProperty = p)
+                .ReturnsAsync((Property p) => { p.Id = 20; return p; });
+            _priceHistoryRepositoryMock.Setup(r => r.AddAsync(It.IsAny<PropertyPriceHistory>()))
+                .ReturnsAsync((PropertyPriceHistory h) => h);
+
+            // Act
+            await _sut.Add(vm);
+
+            // Assert \u2014 PriceInDOP debe estar calculado correctamente, no ser 0
+            capturedProperty.Should().NotBeNull();
+            capturedProperty!.Price.Should().Be(precioUSD, "el precio en USD no debe cambiar");
+            capturedProperty.Currency.Should().Be(CurrencyConstants.USD);
+            capturedProperty.PriceInDOP.Should().Be(precioEsperadoDOP,
+                "PriceInDOP debe ser USD * tasa de cambio para que el AVM pueda indexar la propiedad");
+        }
+
+        /// <summary>
+        /// Tarea 1.5 / Hallazgo 1.2: Al actualizar precio o moneda de una propiedad,
+        /// PriceInDOP tambi\u00e9n debe actualizarse para reflejar el nuevo valor en pesos dominicanos.
+        /// </summary>
+        [Fact]
+        public async Task Update_DebeActualizarPriceInDOP_CuandoPrecioOCurrencyCambian()
+        {
+            // Arrange
+            int propertyId = 15;
+            const decimal tasaCambio = 60.0m; // mock del constructor
+            var existingProperty = new Property
+            {
+                Id = propertyId,
+                Name = "Casa de Lujo",
+                Price = 200_000m,
+                Currency = CurrencyConstants.USD,
+                PriceInDOP = 12_000_000m, // Tasa anterior simulada
+                AgentId = "agent-usd"
+            };
+
+            // Nuevo precio: mismo USD, la tasa del mock siempre devuelve 60
+            var updateVm = new SavePropertyViewModel
+            {
+                Id = propertyId,
+                Name = "Casa de Lujo",
+                Price = 220_000m, // Aumento de precio
+                Currency = CurrencyConstants.USD,
+                AgentId = "agent-usd"
+            };
+
+            _propertyRepositoryMock.Setup(r => r.GetByIdAsync(propertyId))
+                .ReturnsAsync(existingProperty);
+            _priceHistoryRepositoryMock.Setup(r => r.AddAsync(It.IsAny<PropertyPriceHistory>()))
+                .ReturnsAsync((PropertyPriceHistory h) => h);
+
+            Property? capturedProperty = null;
+            _propertyRepositoryMock.Setup(r => r.UpdateAsync(It.IsAny<Property>()))
+                .Callback<Property>(p => capturedProperty = p)
+                .Returns(Task.CompletedTask);
+
+            // Act
+            await _sut.Update(updateVm, propertyId);
+
+            // Assert
+            capturedProperty.Should().NotBeNull();
+            capturedProperty!.Price.Should().Be(220_000m);
+            capturedProperty.PriceInDOP.Should().Be(220_000m * tasaCambio,
+                "PriceInDOP debe recalcularse autom\u00e1ticamente al cambiar el precio USD");
+        }
+
+
         [Fact]
         public async Task GetByIdViewModel_ShouldCalculatePriceDropMetrics_WhenPropertyHasPriceReduction()
         {
