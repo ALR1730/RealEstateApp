@@ -6,6 +6,7 @@ import { PropertyCard } from '../../components/properties/PropertyCard';
 import { MortgageCalculator } from '../../components/simulator/MortgageCalculator';
 import { Loader } from '../../components/common/Loader';
 import { AiSearchBar } from '../../components/properties/AiSearchBar';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   Search, 
   Sparkles, 
@@ -19,6 +20,7 @@ import {
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
   const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([]);
   const [saleTypes, setSaleTypes] = useState<SaleType[]>([]);
@@ -110,15 +112,18 @@ export const HomePage: React.FC = () => {
           
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-extrabold uppercase tracking-widest backdrop-blur-xs">
             <Sparkles className="w-4 h-4 text-brand-400 animate-spin-slow" />
-            Ecosistema Inmobiliario de Alto Rendimiento en RD$
+            {t('home.badge', 'Ecosistema Inmobiliario de Alto Rendimiento en RD$')}
           </div>
 
           <div className="space-y-4 max-w-3xl">
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.15]">
-              Encuentra, Negocia y Cierra tu Inmueble Soñado en <span className="bg-gradient-to-r from-emerald-400 via-brand-400 to-teal-300 bg-clip-text text-transparent">República Dominicana</span>
+              {t('home.title', 'Encuentra, Negocia y Cierra tu Inmueble Soñado en')}{' '}
+              <span className="bg-gradient-to-r from-emerald-400 via-brand-400 to-teal-300 bg-clip-text text-transparent">
+                {t('home.country', 'República Dominicana')}
+              </span>
             </h1>
             <p className="text-sm sm:text-lg text-slate-300 font-normal leading-relaxed">
-              Catálogo verificado con transacciones garantizadas, simulación hipotecaria en cuotas fijas bajo el sistema francés y cierre atómico de ofertas.
+              {t('home.subtitle', 'Catálogo verificado con transacciones garantizadas, simulación hipotecaria en cuotas fijas bajo el sistema francés y cierre atómico de ofertas.')}
             </p>
           </div>
 
@@ -134,7 +139,7 @@ export const HomePage: React.FC = () => {
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-teal-300 animate-spin-slow" />
-              <span>Búsqueda Inteligente con IA (NLP)</span>
+              <span>{t('home.searchAi', 'Búsqueda Inteligente con IA (NLP)')}</span>
             </button>
             <button
               type="button"
@@ -146,7 +151,7 @@ export const HomePage: React.FC = () => {
               }`}
             >
               <Search className="w-3.5 h-3.5" />
-              <span>Búsqueda Estándar</span>
+              <span>{t('home.searchQuick', 'Búsqueda Rápida')}</span>
             </button>
           </div>
 
@@ -165,14 +170,14 @@ export const HomePage: React.FC = () => {
               {/* Field 1: Property Type */}
               <div>
                 <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
-                  Tipo de Propiedad
+                  {t('home.typeLabel', 'Tipo de Propiedad')}
                 </label>
                 <select
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)}
                   className="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 text-white rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                 >
-                  <option value="">Todos los tipos</option>
+                  <option value="">{t('home.allTypes', 'Todos los tipos')}</option>
                   {propertyTypes.map((pt) => (
                     <option key={pt.id} value={pt.id}>
                       {pt.name}
@@ -184,14 +189,14 @@ export const HomePage: React.FC = () => {
               {/* Field 2: Sale Type */}
               <div>
                 <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
-                  Modalidad
+                  {t('home.saleLabel', 'Modalidad')}
                 </label>
                 <select
                   value={selectedSaleType}
                   onChange={(e) => setSelectedSaleType(e.target.value)}
                   className="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 text-white rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                 >
-                  <option value="">Cualquier modalidad</option>
+                  <option value="">{t('home.allSales', 'Todas las modalidades')}</option>
                   {saleTypes.map((st) => (
                     <option key={st.id} value={st.id}>
                       {st.name}
@@ -203,11 +208,11 @@ export const HomePage: React.FC = () => {
               {/* Field 3: Code / Keyword */}
               <div>
                 <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
-                  Código o Sector
+                  {t('home.codeLabel', 'Código o Sector')}
                 </label>
                 <input
                   type="text"
-                  placeholder="Ej: 104928, Piantini..."
+                  placeholder={t('home.codePlaceholder', 'Ej: 104928, Piantini...')}
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   className="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 text-white placeholder-slate-400 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
@@ -221,7 +226,7 @@ export const HomePage: React.FC = () => {
                   className="w-full h-[42px] bg-brand-600 hover:bg-brand-500 text-white font-extrabold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand-600/30 transition-all cursor-pointer"
                 >
                   <Search className="w-4 h-4" />
-                  Buscar Inmuebles
+                  {t('home.exploreBtn', 'Buscar Inmuebles')}
                 </button>
               </div>
             </form>
@@ -247,26 +252,26 @@ export const HomePage: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 text-brand-600 font-extrabold text-xs tracking-wider uppercase mb-1">
               <Flame className="w-4 h-4" />
-              Oportunidades Destacadas
+              {t('home.featuredTitle', 'Oportunidades Destacadas')}
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Propiedades Disponibles en RD$
+              {t('home.featuredSubtitle', 'Propiedades Disponibles en RD$')}
             </h2>
           </div>
           <Link
             to="/catalog"
             className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 group"
           >
-            <span>Ver todo el catálogo</span>
+            <span>{t('home.viewAll', 'Ver todo el catálogo')}</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
         {isLoading ? (
-          <Loader text="Cargando propiedades destacadas..." />
+          <Loader text={t('common.loading', 'Cargando propiedades destacadas...')} />
         ) : featuredProperties.length === 0 ? (
           <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400">
-            No hay propiedades registradas aún. Inicia sesión como Agente para publicar la primera.
+            {t('catalog.noResults', 'No hay propiedades registradas aún.')}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -282,13 +287,13 @@ export const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="text-brand-400 text-xs font-extrabold tracking-widest uppercase">
-              ¿Por qué RealEstateApp?
+              {t('home.whyTitle', '¿Por qué RealEstateApp?')}
             </span>
             <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-              Innovación Transaccional para la Industria Inmobiliaria
+              {t('home.whySubtitle', 'Innovación Transaccional para la Industria Inmobiliaria')}
             </h2>
             <p className="text-sm sm:text-base text-slate-400">
-              Diseñado desde cero para resolver las ineficiencias del mercado tradicional dominicano.
+              {t('home.subtitle', 'Diseñado desde cero para resolver las ineficiencias del mercado tradicional dominicano.')}
             </p>
           </div>
 
@@ -299,9 +304,9 @@ export const HomePage: React.FC = () => {
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
                 <TrendingUp className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-white">Regla Atómica de Cierre</h3>
+              <h3 className="text-lg font-bold text-white">{t('home.why2Title', 'Regla Atómica de Cierre')}</h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Al aceptar una propuesta económica, el inmueble se marca instantáneamente como Vendido, rechazando automáticamente ofertas pendientes en cascada.
+                {t('home.why2Desc', 'Al aceptar una propuesta económica, el inmueble se marca instantáneamente como Vendido, rechazando automáticamente ofertas pendientes en cascada.')}
               </p>
             </div>
 
@@ -310,9 +315,9 @@ export const HomePage: React.FC = () => {
               <div className="w-12 h-12 rounded-2xl bg-brand-500/20 text-brand-400 flex items-center justify-center font-bold">
                 <Calculator className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-white">Simulador Hipotecario Francés</h3>
+              <h3 className="text-lg font-bold text-white">{t('home.why1Title', 'Simulador Hipotecario Francés')}</h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Cálculo instantáneo de cuota mensual en Pesos Dominicanos (RD$), tabla de amortización completa y descarga de desglose en PDF antes de ofertar.
+                {t('home.why1Desc', 'Cálculo instantáneo de cuota mensual en Pesos Dominicanos (RD$), tabla de amortización completa y descarga de desglose en PDF antes de ofertar.')}
               </p>
             </div>
 
@@ -321,9 +326,9 @@ export const HomePage: React.FC = () => {
               <div className="w-12 h-12 rounded-2xl bg-royal-500/20 text-indigo-400 flex items-center justify-center font-bold">
                 <Users className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-white">Comunicación Directa & Citas</h3>
+              <h3 className="text-lg font-bold text-white">{t('home.why3Title', 'Comunicación Directa & Citas')}</h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Mensajería en tiempo real por propiedad entre cliente y agente, agendamiento de visitas presenciales y trazabilidad sin fuga de prospectos.
+                {t('home.why3Desc', 'Mensajería en tiempo real por propiedad entre cliente y agente, agendamiento de visitas presenciales y trazabilidad sin fuga de prospectos.')}
               </p>
             </div>
           </div>
@@ -344,11 +349,11 @@ export const HomePage: React.FC = () => {
                 Fuerza de Ventas Verificada
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
-                Nuestros Corredores Inmobiliarios
+                {t('home.agentsTitle', 'Nuestros Corredores Inmobiliarios')}
               </h2>
             </div>
             <Link to="/agents" className="text-xs sm:text-sm font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 flex items-center gap-1">
-              <span>Ver todos</span>
+              <span>{t('home.viewAgents', 'Ver todos')}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -386,10 +391,10 @@ export const HomePage: React.FC = () => {
         <div className="bg-gradient-to-r from-brand-600 to-emerald-700 rounded-3xl sm:rounded-[2.5rem] p-8 sm:p-14 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
           <div className="space-y-3 text-center md:text-left max-w-xl">
             <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              ¿Listo para publicar tus propiedades o encontrar tu próximo hogar?
+              {t('home.ctaTitle', '¿Listo para publicar tus propiedades o encontrar tu próximo hogar?')}
             </h3>
             <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed">
-              Crea tu cuenta gratuita hoy mismo o contacta a nuestros asesores inmobiliarios certificados.
+              {t('home.ctaSubtitle', 'Crea tu cuenta gratuita hoy mismo o contacta a nuestros asesores inmobiliarios certificados.')}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -397,13 +402,13 @@ export const HomePage: React.FC = () => {
               to="/register"
               className="px-6 py-3 bg-white text-slate-900 hover:bg-slate-100 font-extrabold text-xs sm:text-sm rounded-xl shadow-lg transition-all"
             >
-              Crear Cuenta de Cliente
+              {t('home.ctaStart', 'Crear Cuenta de Cliente')}
             </Link>
             <Link
               to="/register-agent"
               className="px-6 py-3 bg-emerald-900 hover:bg-emerald-950 text-white font-extrabold text-xs sm:text-sm rounded-xl transition-all"
             >
-              Registro como Agente
+              {t('home.ctaContact', 'Registro como Agente')}
             </Link>
           </div>
         </div>

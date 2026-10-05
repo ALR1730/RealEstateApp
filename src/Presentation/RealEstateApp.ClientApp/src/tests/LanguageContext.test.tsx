@@ -59,6 +59,35 @@ describe('LanguageContext (F-13)', () => {
     expect(result.current.t('property.viewDetails')).toBe('View Details');
   });
 
+  it('traduce namespaces extendidos (home, sidebar, filter, status, mortgage, ai) en ES y EN', () => {
+    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <LanguageProvider>{children}</LanguageProvider>
+    );
+
+    const { result } = renderHook(() => useLanguage(), { wrapper });
+
+    // Spanish assertions
+    expect(result.current.t('home.featuredTitle')).toBe('Propiedades Destacadas');
+    expect(result.current.t('sidebar.properties')).toBe('Mis Propiedades');
+    expect(result.current.t('filter.title')).toBe('Filtros Avanzados');
+    expect(result.current.t('status.available')).toBe('Disponible');
+    expect(result.current.t('mortgage.title')).toBe('Simulador Hipotecario (RD$)');
+    expect(result.current.t('ai.button')).toBe('Buscar con IA');
+
+    // Switch to English
+    act(() => {
+      result.current.setLanguage('en');
+    });
+
+    expect(result.current.t('home.featuredTitle')).toBe('Featured Properties');
+    expect(result.current.t('sidebar.properties')).toBe('My Properties');
+    expect(result.current.t('filter.title')).toBe('Advanced Filters');
+    expect(result.current.t('status.available')).toBe('Available');
+    expect(result.current.t('mortgage.title')).toBe('Mortgage Simulator (RD$)');
+    expect(result.current.t('ai.button')).toBe('Search with AI');
+    expect(document.documentElement.lang).toBe('en');
+  });
+
   it('t retorna la clave o el fallback si la traducción no existe', () => {
     const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
       <LanguageProvider>{children}</LanguageProvider>

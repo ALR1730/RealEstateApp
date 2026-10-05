@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { formatCurrencyRD, calculateFrenchAmortization } from '../../utils/formatters';
 import { AmortizationTable } from './AmortizationTable';
 import { Calculator, DollarSign, Percent, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface MortgageCalculatorProps {
   initialPrice?: number;
@@ -10,6 +11,7 @@ interface MortgageCalculatorProps {
 export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({
   initialPrice = 5000000,
 }) => {
+  const { t } = useLanguage();
   const [price, setPrice] = useState<number>(initialPrice);
   const [downPaymentPercent, setDownPaymentPercent] = useState<number>(20);
   const [rate, setRate] = useState<number>(11.5);
@@ -35,15 +37,15 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({
           </div>
           <div>
             <h3 className="font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white">
-              Simulador Hipotecario (RD$)
+              {t('mortgage.title', 'Simulador Hipotecario (RD$)')}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Sistema Francés de Amortización con cuota fija mensual en Pesos Dominicanos.
+              {t('mortgage.subtitle', 'Sistema Francés de Amortización con cuota fija mensual en Pesos Dominicanos.')}
             </p>
           </div>
         </div>
         <span className="hidden sm:inline-block px-3 py-1 bg-brand-50 dark:bg-slate-800 text-brand-700 dark:text-brand-400 text-xs font-extrabold rounded-full border border-brand-200/60 dark:border-slate-700">
-          República Dominicana
+          {t('home.country', 'República Dominicana')}
         </span>
       </div>
 
@@ -53,7 +55,7 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({
         {/* Precio de la Propiedad */}
         <div className="space-y-2">
           <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
-            <span>Precio del Inmueble</span>
+            <span>{t('mortgage.propertyPrice', 'Precio del Inmueble')}</span>
             <span className="text-brand-600 dark:text-brand-400 font-mono">{formatCurrencyRD(price)}</span>
           </div>
           <input
@@ -79,7 +81,7 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({
         {/* Pago Inicial / Enganche (%) */}
         <div className="space-y-2">
           <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
-            <span>Inicial ({downPaymentPercent}%)</span>
+            <span>{t('mortgage.downPayment', 'Inicial')} ({downPaymentPercent}%)</span>
             <span className="text-emerald-600 dark:text-emerald-400 font-mono">{formatCurrencyRD(downPaymentAmount)}</span>
           </div>
           <input
@@ -111,7 +113,7 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({
         {/* Tasa de Interés Anual */}
         <div className="space-y-2">
           <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
-            <span>Tasa de Interés Anual</span>
+            <span>{t('mortgage.interestRate', 'Tasa de Interés Anual')}</span>
             <span className="text-royal-600 dark:text-royal-400 font-mono">{rate}%</span>
           </div>
           <input
@@ -138,8 +140,8 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({
         {/* Plazo en Años */}
         <div className="space-y-2">
           <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
-            <span>Plazo del Préstamo</span>
-            <span className="text-navy-900 dark:text-slate-200 font-mono">{years} Años ({years * 12} meses)</span>
+            <span>{t('mortgage.loanTerm', 'Plazo del Préstamo')}</span>
+            <span className="text-navy-900 dark:text-slate-200 font-mono">{years} {t('mortgage.years', 'Años')} ({years * 12} {t('mortgage.months', 'meses')})</span>
           </div>
           <input
             type="range"
@@ -161,7 +163,7 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({
                     : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
-                {y}a
+                {y}{t('mortgage.yearsAbbr', 'a')}
               </button>
             ))}
           </div>
@@ -171,35 +173,35 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({
       {/* Result Cards Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-5 bg-gradient-to-br from-slate-900 to-navy-900 rounded-2xl text-white shadow-lg border border-transparent dark:border-slate-800">
         <div>
-          <span className="text-xs text-slate-400 font-medium">Cuota Fija Mensual</span>
+          <span className="text-xs text-slate-400 font-medium">{t('mortgage.fixedInstallment', 'Cuota Fija Mensual')}</span>
           <p className="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono mt-1">
             {formatCurrencyRD(simulation.monthlyInstallment)}
           </p>
-          <span className="text-[10px] text-slate-400">Por {simulation.totalMonths} meses</span>
+          <span className="text-[10px] text-slate-400">{t('mortgage.forMonths', 'Por')} {simulation.totalMonths} {t('mortgage.months', 'meses')}</span>
         </div>
 
         <div>
-          <span className="text-xs text-slate-400 font-medium">Capital a Financiar</span>
+          <span className="text-xs text-slate-400 font-medium">{t('mortgage.capitalToFinance', 'Capital a Financiar')}</span>
           <p className="text-lg font-bold text-white font-mono mt-1">
             {formatCurrencyRD(simulation.loanAmount)}
           </p>
-          <span className="text-[10px] text-slate-400">80% del valor total</span>
+          <span className="text-[10px] text-slate-400">{100 - downPaymentPercent}% del valor total</span>
         </div>
 
         <div>
-          <span className="text-xs text-slate-400 font-medium">Intereses Totales</span>
+          <span className="text-xs text-slate-400 font-medium">{t('mortgage.totalInterest', 'Intereses Totales')}</span>
           <p className="text-lg font-bold text-amber-400 font-mono mt-1">
             {formatCurrencyRD(simulation.totalInterest)}
           </p>
-          <span className="text-[10px] text-slate-400">Costo financiero acumulado</span>
+          <span className="text-[10px] text-slate-400">{t('mortgage.financialCost', 'Costo financiero acumulado')}</span>
         </div>
 
         <div>
-          <span className="text-xs text-slate-400 font-medium">Costo Total del Crédito</span>
+          <span className="text-xs text-slate-400 font-medium">{t('mortgage.totalCost', 'Costo Total del Crédito')}</span>
           <p className="text-lg font-bold text-sky-400 font-mono mt-1">
             {formatCurrencyRD(simulation.totalCost)}
           </p>
-          <span className="text-[10px] text-slate-400">Capital + Intereses</span>
+          <span className="text-[10px] text-slate-400">{t('mortgage.capitalPlusInterest', 'Capital + Intereses')}</span>
         </div>
       </div>
 
@@ -210,7 +212,7 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({
           className="flex items-center gap-2 px-6 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold transition-all"
         >
           <FileText className="w-4 h-4 text-brand-600 dark:text-brand-400" />
-          <span>{showTable ? 'Ocultar Tabla de Amortización' : 'Ver Tabla de Amortización Completa'}</span>
+          <span>{showTable ? t('mortgage.hideTable', 'Ocultar Tabla de Amortización') : t('mortgage.fullSchedule', 'Ver Tabla de Amortización Completa')}</span>
           {showTable ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
       </div>

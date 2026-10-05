@@ -4,6 +4,7 @@ import { Property } from '../../types';
 import { useCurrency } from '../../context/CurrencyContext';
 import { Badge } from '../common/Badge';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { CompareCheckbox } from './CompareCheckbox';
 import { favoritesService } from '../../api/services';
 import { 
@@ -30,6 +31,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 }) => {
   const { isAuthenticated, isClient } = useAuth();
   const { formatPrice } = useCurrency();
+  const { t } = useLanguage();
   const [isFavorite, setIsFavorite] = useState(isFavoriteInitial);
   const [isTogglingFav, setIsTogglingFav] = useState(false);
 
@@ -87,7 +89,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             {property.isFeatured && (
               <span className="inline-flex items-center gap-1 bg-amber-500 text-white font-extrabold text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm">
                 <Sparkles className="w-3 h-3" />
-                Destacada
+                {t('property.featured', 'Destacada')}
               </span>
             )}
           </div>
@@ -161,15 +163,15 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           <div className="grid grid-cols-3 gap-2 py-2 border-y border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold">
             <div className="flex items-center gap-1.5">
               <Bed className="w-4 h-4 text-slate-400" />
-              <span>{property.bedrooms ?? property.rooms ?? 0} hab</span>
+              <span>{property.bedrooms ?? property.rooms ?? 0} {t('property.rooms', 'hab')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Bath className="w-4 h-4 text-slate-400" />
-              <span>{property.bathrooms} baños</span>
+              <span>{property.bathrooms} {t('property.bathrooms', 'baños')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Maximize2 className="w-4 h-4 text-slate-400" />
-              <span>{property.landSizeMeters ?? property.sizeInMeters ?? 0} m²</span>
+              <span>{property.landSizeMeters ?? property.sizeInMeters ?? 0} {t('property.size', 'm²')}</span>
             </div>
           </div>
         </div>
@@ -193,7 +195,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             to={`/property/${property.id}`}
             className="inline-flex items-center gap-1 text-xs font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 group/link"
           >
-            <span>Ver Detalle</span>
+            <span>{t('property.viewDetails', 'Ver Detalle')}</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover/link:translate-x-1 transition-transform" />
           </Link>
         </div>

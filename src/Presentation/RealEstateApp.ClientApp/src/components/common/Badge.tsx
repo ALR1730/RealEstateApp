@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface BadgeProps {
   status?: string;
@@ -8,6 +9,7 @@ interface BadgeProps {
 }
 
 export const Badge: React.FC<BadgeProps> = ({ status, children, variant, size = 'sm' }) => {
+  const { t } = useLanguage();
   let v = variant;
   let text = children || status;
 
@@ -15,35 +17,67 @@ export const Badge: React.FC<BadgeProps> = ({ status, children, variant, size = 
     switch (status.toLowerCase()) {
       case 'available':
       case 'disponible':
+        v = 'success';
+        text = children || t('status.available', 'Disponible');
+        break;
       case 'accepted':
       case 'aceptada':
+        v = 'success';
+        text = children || t('status.accepted', 'Aceptada');
+        break;
       case 'confirmed':
       case 'confirmada':
+        v = 'success';
+        text = children || t('status.confirmed', 'Confirmada');
+        break;
+      case 'completed':
+      case 'completada':
+        v = 'success';
+        text = children || t('status.completed', 'Completada');
+        break;
       case 'active':
       case 'activo':
+        v = 'success';
+        text = children || (status.toLowerCase() === 'activo' || status.toLowerCase() === 'active' ? t('common.yes', 'Activo') : status);
+        break;
       case 'paid':
       case 'pagada':
         v = 'success';
-        text = text || (status === 'Available' ? 'Disponible' : status);
+        text = children || status;
         break;
       case 'reserved':
       case 'reservada':
+        v = 'warning';
+        text = children || t('status.reserved', 'Reservada');
+        break;
       case 'pending':
       case 'pendiente':
+        v = 'warning';
+        text = children || t('status.pending', 'Pendiente');
+        break;
       case 'counteroffered':
         v = 'warning';
-        text = text || (status === 'Reserved' ? 'Reservada' : status);
+        text = children || status;
         break;
       case 'sold':
       case 'vendida':
+        v = 'danger';
+        text = children || t('status.sold', 'Vendida');
+        break;
       case 'rejected':
       case 'rechazada':
+        v = 'danger';
+        text = children || t('status.rejected', 'Rechazada');
+        break;
       case 'cancelled':
       case 'cancelada':
+        v = 'danger';
+        text = children || t('status.cancelled', 'Cancelada');
+        break;
       case 'inactive':
       case 'inactivo':
         v = 'danger';
-        text = text || (status === 'Sold' ? 'Vendida' : status);
+        text = children || (status.toLowerCase() === 'inactivo' || status.toLowerCase() === 'inactive' ? t('common.no', 'Inactivo') : status);
         break;
       default:
         v = 'neutral';
