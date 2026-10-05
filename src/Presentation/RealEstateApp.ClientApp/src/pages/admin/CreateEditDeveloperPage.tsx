@@ -10,8 +10,10 @@ import {
   CheckCircle2, 
   AlertCircle 
 } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const CreateEditDeveloperPage: React.FC = () => {
+  const { t } = useLanguage();
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id);
   const navigate = useNavigate();
@@ -93,14 +95,14 @@ export const CreateEditDeveloperPage: React.FC = () => {
       }, 1500);
     } catch (err: unknown) {
       console.error("Error saving developer:", err);
-      setError(getApiErrorMessage(err, "Error al guardar el desarrollador."));
+      setError(getApiErrorMessage(err, t('admin.common.error', "Error al guardar el desarrollador.")));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   if (isLoading) {
-    return <Loader text="Cargando datos del desarrollador..." />;
+    return <Loader text={t('admin.devs.loadingData', "Cargando datos del desarrollador...")} />;
   }
 
   return (
@@ -116,12 +118,12 @@ export const CreateEditDeveloperPage: React.FC = () => {
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <Code className="w-6 h-6 text-royal-600 dark:text-royal-400" />
-            {isEditing ? 'Editar Desarrollador' : 'Crear Nuevo Desarrollador'}
+            {isEditing ? t('admin.devs.editTitle', 'Editar Desarrollador') : t('admin.devs.createTitle', 'Crear Nuevo Desarrollador')}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             {isEditing
-              ? 'Actualiza la información del desarrollador. Deja la contraseña vacía para no cambiarla.'
-              : 'Registra una nueva cuenta de desarrollador para acceso a la API.'}
+              ? t('admin.devs.editSubtitle', 'Actualiza la información del desarrollador. Deja la contraseña vacía para no cambiarla.')
+              : t('admin.devs.createSubtitle', 'Registra una nueva cuenta de desarrollador para acceso a la API.')}
           </p>
         </div>
       </div>
@@ -130,10 +132,10 @@ export const CreateEditDeveloperPage: React.FC = () => {
         <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 text-center space-y-3 shadow-xl">
           <CheckCircle2 className="w-14 h-14 text-emerald-500 mx-auto" />
           <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-            {isEditing ? '¡Desarrollador Actualizado!' : '¡Desarrollador Creado!'}
+            {isEditing ? t('admin.devs.updatedSuccess', '¡Desarrollador Actualizado!') : t('admin.devs.createdSuccess', '¡Desarrollador Creado!')}
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Redirigiendo al listado de desarrolladores...
+            {t('admin.devs.redirecting', "Redirigiendo al listado de desarrolladores...")}
           </p>
         </div>
       ) : (
@@ -141,7 +143,7 @@ export const CreateEditDeveloperPage: React.FC = () => {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nombre *</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{t('admin.admins.firstName', "Nombre")} *</label>
               <input
                 type="text"
                 name="firstName"
@@ -153,7 +155,7 @@ export const CreateEditDeveloperPage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Apellido *</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{t('admin.admins.lastName', "Apellido")} *</label>
               <input
                 type="text"
                 name="lastName"
@@ -167,7 +169,7 @@ export const CreateEditDeveloperPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nombre de Usuario *</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{t('admin.admins.userName', "Nombre de Usuario")} *</label>
             <input
               type="text"
               name="userName"
@@ -180,7 +182,7 @@ export const CreateEditDeveloperPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Correo Electrónico *</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{t('admin.admins.email', "Correo Electrónico")} *</label>
             <input
               type="email"
               name="email"
@@ -195,7 +197,7 @@ export const CreateEditDeveloperPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                Contraseña {isEditing ? '(dejar vacío para no cambiar)' : '*'}
+                {t('admin.admins.password', "Contraseña")} {isEditing ? '(dejar vacío para no cambiar)' : '*'}
               </label>
               <input
                 type="password"
@@ -209,7 +211,7 @@ export const CreateEditDeveloperPage: React.FC = () => {
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                Confirmar Contraseña {isEditing ? '(dejar vacío para no cambiar)' : '*'}
+                {t('admin.admins.confirmPassword', "Confirmar Contraseña")} {isEditing ? '(dejar vacío para no cambiar)' : '*'}
               </label>
               <input
                 type="password"
@@ -236,7 +238,7 @@ export const CreateEditDeveloperPage: React.FC = () => {
               onClick={() => navigate('/admin/developers')}
               className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
             >
-              Cancelar
+              {t('admin.common.cancel', "Cancelar")}
             </button>
             <button
               type="submit"
@@ -244,10 +246,10 @@ export const CreateEditDeveloperPage: React.FC = () => {
               className="px-5 py-2 bg-royal-600 hover:bg-royal-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md cursor-pointer"
             >
               {isSubmitting
-                ? 'Guardando...'
+                ? t('admin.devs.saving', 'Guardando...')
                 : isEditing
-                  ? 'Actualizar Desarrollador'
-                  : 'Crear Desarrollador'}
+                  ? t('admin.devs.btnUpdate', 'Actualizar Desarrollador')
+                  : t('admin.devs.btnCreate', 'Crear Desarrollador')}
             </button>
           </div>
         </form>

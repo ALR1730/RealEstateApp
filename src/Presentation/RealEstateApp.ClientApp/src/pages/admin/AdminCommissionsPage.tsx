@@ -5,8 +5,10 @@ import { formatCurrencyRD, formatDate } from '../../utils/formatters';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
 import { Wallet, CheckCircle2, RefreshCw } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const AdminCommissionsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState<number | null>(null);
@@ -37,14 +39,14 @@ export const AdminCommissionsPage: React.FC = () => {
   }, []);
 
   const handleMarkAsPaid = async (id: number) => {
-    if (!window.confirm("¿Marcar esta comisión como PAGADA?")) return;
+    if (!window.confirm(t('admin.commissions.confirmMarkPaid', "¿Marcar esta comisión como PAGADA?"))) return;
     try {
       setIsUpdating(id);
       await commissionsService.markAsPaid(id);
       await loadAll();
     } catch (err) {
       console.error("Error marking commission as paid:", err);
-      alert("Error al actualizar la comisión.");
+      alert(t('admin.common.error', "Error al actualizar la comisión."));
     } finally {
       setIsUpdating(null);
     }
@@ -64,7 +66,7 @@ export const AdminCommissionsPage: React.FC = () => {
     { paid: 0, pending: 0, paidCount: 0, pendingCount: 0 }
   );
 
-  if (isLoading) return <Loader text="Cargando comisiones..." />;
+  if (isLoading) return <Loader text={t('admin.commissions.loading', "Cargando comisiones...")} />;
 
   return (
     <div className="space-y-6">
@@ -72,10 +74,10 @@ export const AdminCommissionsPage: React.FC = () => {
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <Wallet className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-            Gestión de Comisiones
+            {t('admin.commissions.title', "Gestión de Comisiones")}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Comisiones de agentes generadas por ventas cerradas. Aquí puedes marcarlas como pagadas.
+            {t('admin.commissions.subtitle', "Comisiones de agentes generadas por ventas cerradas. Aquí puedes marcarlas como pagadas.")}
           </p>
         </div>
         <button
@@ -83,35 +85,35 @@ export const AdminCommissionsPage: React.FC = () => {
           className="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-bold text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          Refrescar
+          {t('admin.commissions.refresh', "Refrescar")}
         </button>
       </div>
 
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
-          <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Por Pagar</span>
+          <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">{t('admin.commissions.pendingPay', "Por Pagar")}</span>
           <p className="text-xl font-extrabold font-mono text-amber-600 dark:text-amber-400">{formatCurrencyRD(totals.pending)}</p>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{totals.pendingCount} comisiones pendientes</p>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{totals.pendingCount} {t('admin.commissions.pendingCount', "comisiones pendientes")}</p>
         </div>
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
-          <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Pagadas</span>
+          <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">{t('admin.commissions.paid', "Pagadas")}</span>
           <p className="text-xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400">{formatCurrencyRD(totals.paid)}</p>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{totals.paidCount} comisiones pagadas</p>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{totals.paidCount} {t('admin.commissions.paidCount', "comisiones pagadas")}</p>
         </div>
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
-          <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Total Generado</span>
+          <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">{t('admin.commissions.totalGenerated', "Total Generado")}</span>
           <p className="text-xl font-extrabold font-mono text-slate-900 dark:text-white">{formatCurrencyRD(totals.paid + totals.pending)}</p>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{commissions.length} transacciones</p>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{commissions.length} {t('admin.commissions.transactions', "transacciones")}</p>
         </div>
       </div>
 
       {commissions.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800 space-y-2">
           <Wallet className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">Sin comisiones registradas</h3>
+          <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">{t('admin.commissions.emptyTitle', "Sin comisiones registradas")}</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-            Las comisiones se generan automáticamente cuando un agente acepta una oferta de compra.
+            {t('admin.commissions.emptyDesc', "Las comisiones se generan automáticamente cuando un agente acepta una oferta de compra.")}
           </p>
         </div>
       ) : (
@@ -120,14 +122,14 @@ export const AdminCommissionsPage: React.FC = () => {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
-                  <th className="py-3.5 px-4">Agente</th>
-                  <th className="py-3.5 px-4">Propiedad</th>
-                  <th className="py-3.5 px-4">Precio Venta</th>
-                  <th className="py-3.5 px-4">Tasa</th>
-                  <th className="py-3.5 px-4">Comisión</th>
-                  <th className="py-3.5 px-4">Fecha</th>
-                  <th className="py-3.5 px-4">Estado</th>
-                  <th className="py-3.5 px-4 text-right">Acción</th>
+                  <th className="py-3.5 px-4">{t('admin.commissions.colAgent', "Agente")}</th>
+                  <th className="py-3.5 px-4">{t('admin.commissions.colProperty', "Propiedad")}</th>
+                  <th className="py-3.5 px-4">{t('admin.commissions.colSalePrice', "Precio Venta")}</th>
+                  <th className="py-3.5 px-4">{t('admin.commissions.colRate', "Tasa")}</th>
+                  <th className="py-3.5 px-4">{t('admin.commissions.colCommission', "Comisión")}</th>
+                  <th className="py-3.5 px-4">{t('admin.commissions.colDate', "Fecha")}</th>
+                  <th className="py-3.5 px-4">{t('admin.commissions.colStatus', "Estado")}</th>
+                  <th className="py-3.5 px-4 text-right">{t('admin.commissions.colAction', "Acción")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -153,10 +155,10 @@ export const AdminCommissionsPage: React.FC = () => {
                           className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl font-bold text-[11px] transition-all"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          {isUpdating === c.id ? 'Procesando...' : 'Marcar Pagada'}
+                          {isUpdating === c.id ? t('admin.common.loading', 'Procesando...') : t('admin.commissions.markPaid', 'Marcar Pagada')}
                         </button>
                       ) : (
-                        <span className="text-[11px] font-bold text-slate-300 dark:text-slate-600 uppercase tracking-wider">Completada</span>
+                        <span className="text-[11px] font-bold text-slate-300 dark:text-slate-600 uppercase tracking-wider">{t('admin.commissions.completed', "Completada")}</span>
                       )}
                     </td>
                   </tr>

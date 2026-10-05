@@ -23,6 +23,6 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         /// <summary>
         /// Obtiene una lista de sugerencias de búsqueda guiadas para la interfaz gráfica.
         /// </summary>
-        List<string> GetPromptSuggestions();
+        List<string> GetPromptSuggestions(string? lang = "es");
     }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Sparkles, Loader2, X, Bot, CheckCircle2 } from 'lucide-react';
 import { aiSearchService } from '../../api/services';
 import { AiSearchInterpretation, FilterState } from '../../types';
@@ -13,13 +13,6 @@ interface AiSearchBarProps {
   autoFocus?: boolean;
 }
 
-const DEFAULT_SUGGESTIONS = [
-  'Apartamento de 3 habitaciones en Bella Vista por menos de RD$ 8M',
-  'Villa en Punta Cana con piscina y tour virtual',
-  'Casa en Santiago de 4 habitaciones con patio',
-  'Penthouse en Piantini con terraza y ascensor',
-];
-
 export const AiSearchBar: React.FC<AiSearchBarProps> = ({
   onSearchComplete,
   onApplyFilters,
@@ -27,10 +20,19 @@ export const AiSearchBar: React.FC<AiSearchBarProps> = ({
   placeholder,
   autoFocus = false,
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [query, setQuery] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
+
+  const defaultSuggestions = useMemo(() => [
+    t('ai.suggestion1', 'Apartamento de 3 habitaciones en Bella Vista por menos de RD$ 8M'),
+    t('ai.suggestion2', 'Villa en Punta Cana con piscina y tour virtual'),
+    t('ai.suggestion3', 'Casa en Santiago de 4 habitaciones con patio'),
+    t('ai.suggestion4', 'Penthouse en Piantini con terraza y ascensor'),
+    t('ai.suggestion5', 'Apartamento en alquiler con 2 baños y gimnasio por menos de 45 mil pesos'),
+  ], [t]);
+
+  const [suggestions, setSuggestions] = useState<string[]>(defaultSuggestions);
   const [activeResult, setActiveResult] = useState<AiSearchInterpretation | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const resolvedPlaceholder = placeholder || t('ai.placeholder', "Escribe libremente: Ej. 'Apartamento de 3 habitaciones en Bella Vista con balcón por menos de 8M'...");
@@ -38,19 +40,23 @@ export const AiSearchBar: React.FC<AiSearchBarProps> = ({
   useEffect(() => {
     let isMounted = true;
     aiSearchService
-      .getSuggestions()
+      .getSuggestions(language)
       .then((items) => {
         if (isMounted && items && items.length > 0) {
           setSuggestions(items);
+        } else if (isMounted) {
+          setSuggestions(defaultSuggestions);
         }
       })
       .catch(() => {
-        // Fallback a sugerencias por defecto
+        if (isMounted) {
+          setSuggestions(defaultSuggestions);
+        }
       });
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [language, defaultSuggestions]);
 
   const handleExecuteSearch = async (textToSearch: string) => {
     const targetText = textToSearch.trim();

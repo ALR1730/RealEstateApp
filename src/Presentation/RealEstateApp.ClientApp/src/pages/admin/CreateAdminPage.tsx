@@ -8,8 +8,10 @@ import {
   CheckCircle2, 
   AlertCircle 
 } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const CreateAdminPage: React.FC = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -32,7 +34,7 @@ export const CreateAdminPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.password !== form.confirmPassword) {
-      setError("Las contraseñas no coinciden.");
+      setError(t('admin.admins.passwordMismatch', "Las contraseñas no coinciden."));
       return;
     }
 
@@ -54,7 +56,7 @@ export const CreateAdminPage: React.FC = () => {
       }, 1500);
     } catch (err: unknown) {
       console.error("Error creating admin:", err);
-      setError(getApiErrorMessage(err, "Error al crear el administrador."));
+      setError(getApiErrorMessage(err, t('admin.common.error', "Error al crear el administrador.")));
     } finally {
       setIsSubmitting(false);
     }
@@ -73,10 +75,10 @@ export const CreateAdminPage: React.FC = () => {
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <ShieldCheck className="w-6 h-6 text-royal-600 dark:text-royal-400" />
-            Crear Nuevo Administrador
+            {t('admin.admins.createTitle', "Crear Nuevo Administrador")}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Registra una nueva cuenta de administrador para el panel de control.
+            {t('admin.admins.createSubtitle', "Registra una nueva cuenta de administrador para el panel de control.")}
           </p>
         </div>
       </div>
@@ -84,9 +86,9 @@ export const CreateAdminPage: React.FC = () => {
       {success ? (
         <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 text-center space-y-3 shadow-xl">
           <CheckCircle2 className="w-14 h-14 text-emerald-500 mx-auto" />
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white">¡Administrador Creado!</h3>
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white">{t('admin.admins.createdSuccess', "¡Administrador Creado!")}</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Redirigiendo al listado de administradores...
+            {t('admin.admins.redirecting', "Redirigiendo al listado de administradores...")}
           </p>
         </div>
       ) : (
@@ -94,7 +96,7 @@ export const CreateAdminPage: React.FC = () => {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nombre *</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{t('admin.admins.firstName', "Nombre")} *</label>
               <input
                 type="text"
                 name="firstName"
@@ -106,7 +108,7 @@ export const CreateAdminPage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Apellido *</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{t('admin.admins.lastName', "Apellido")} *</label>
               <input
                 type="text"
                 name="lastName"
@@ -120,7 +122,7 @@ export const CreateAdminPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nombre de Usuario *</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{t('admin.admins.userName', "Nombre de Usuario")} *</label>
             <input
               type="text"
               name="userName"
@@ -133,7 +135,7 @@ export const CreateAdminPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Correo Electrónico *</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{t('admin.admins.email', "Correo Electrónico")} *</label>
             <input
               type="email"
               name="email"
@@ -146,7 +148,7 @@ export const CreateAdminPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Contraseña *</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{t('admin.admins.password', "Contraseña")} *</label>
             <input
               type="password"
               name="password"
@@ -159,7 +161,7 @@ export const CreateAdminPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Confirmar Contraseña *</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{t('admin.admins.confirmPassword', "Confirmar Contraseña")} *</label>
             <input
               type="password"
               name="confirmPassword"
@@ -184,14 +186,14 @@ export const CreateAdminPage: React.FC = () => {
               onClick={() => navigate('/admin/admins')}
               className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
             >
-              Cancelar
+              {t('admin.common.cancel', "Cancelar")}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
               className="px-5 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-brand-600 dark:hover:bg-brand-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md cursor-pointer"
             >
-              {isSubmitting ? 'Creando...' : 'Crear Administrador'}
+              {isSubmitting ? t('admin.admins.creating', 'Creando...') : t('admin.admins.btnCreate', 'Crear Administrador')}
             </button>
           </div>
         </form>

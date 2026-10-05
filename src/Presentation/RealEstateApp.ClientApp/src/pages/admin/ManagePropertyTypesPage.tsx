@@ -5,8 +5,10 @@ import { Loader } from '../../components/common/Loader';
 import { Modal } from '../../components/common/Modal';
 import { getApiErrorMessage } from '../../utils/formatters';
 import { Building2, Plus, Edit2, Trash2 } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const ManagePropertyTypesPage: React.FC = () => {
+  const { t } = useLanguage();
   const [types, setTypes] = useState<PropertyType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -64,7 +66,7 @@ export const ManagePropertyTypesPage: React.FC = () => {
       loadTypes();
     } catch (err: unknown) {
       console.error("Error deleting property type:", err);
-      setDeleteError(getApiErrorMessage(err, "No se puede eliminar este tipo de propiedad porque tiene inmuebles asociados."));
+      setDeleteError(getApiErrorMessage(err, t('admin.propType.deleteErrorFallback', "No se puede eliminar este tipo de propiedad porque tiene inmuebles asociados.")));
     } finally {
       setIsDeleting(false);
     }
@@ -95,10 +97,10 @@ export const ManagePropertyTypesPage: React.FC = () => {
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <Building2 className="w-6 h-6 text-brand-600 dark:text-brand-400" />
-            Mantenimiento de Tipos de Propiedad
+            {t('admin.propType.title', 'Mantenimiento de Tipos de Propiedad')}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Gestión del catálogo de categorías de inmuebles (Apartamentos, Casas, Villas, etc.).
+            {t('admin.propType.subtitle', 'Gestión del catálogo de categorías de inmuebles (Apartamentos, Casas, Villas, etc.).')}
           </p>
         </div>
 
@@ -107,48 +109,48 @@ export const ManagePropertyTypesPage: React.FC = () => {
           className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md transition-all"
         >
           <Plus className="w-4 h-4" />
-          <span>Nuevo Tipo</span>
+          <span>{t('admin.propType.new', 'Nuevo Tipo')}</span>
         </button>
       </div>
 
       {isLoading ? (
-        <Loader text="Cargando tipos de propiedad..." />
+        <Loader text={t('admin.propType.loading', 'Cargando tipos de propiedad...')} />
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
-                  <th className="py-3.5 px-4">Nombre</th>
-                  <th className="py-3.5 px-4">Descripción</th>
-                  <th className="py-3.5 px-4">Inmuebles Registrados</th>
-                  <th className="py-3.5 px-4 text-right">Acciones</th>
+                  <th className="py-3.5 px-4">{t('admin.propType.colName', 'Nombre')}</th>
+                  <th className="py-3.5 px-4">{t('admin.propType.colDesc', 'Descripción')}</th>
+                  <th className="py-3.5 px-4">{t('admin.propType.colRegistered', 'Inmuebles Registrados')}</th>
+                  <th className="py-3.5 px-4 text-right">{t('admin.common.actions', 'Acciones')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {types.map((t) => (
-                  <tr key={t.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                {types.map((pt) => (
+                  <tr key={pt.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                     <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
-                      {t.name}
+                      {pt.name}
                     </td>
                     <td className="py-3 px-4 text-slate-600 dark:text-slate-300 max-w-sm truncate">
-                      {t.description || 'Sin descripción'}
+                      {pt.description || t('admin.propType.noDesc', 'Sin descripción')}
                     </td>
                     <td className="py-3 px-4 font-mono font-bold text-brand-600 dark:text-brand-400">
-                      {t.propertiesCount !== undefined ? `${t.propertiesCount} inmuebles` : 'N/A'}
+                      {pt.propertiesCount !== undefined ? `${pt.propertiesCount} ${t('admin.propType.propertiesCount', 'inmuebles')}` : 'N/A'}
                     </td>
                     <td className="py-3 px-4 text-right space-x-1">
                       <button
-                        onClick={() => handleOpenEdit(t)}
+                        onClick={() => handleOpenEdit(pt)}
                         className="p-2 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                        title="Editar"
+                        title={t('admin.common.edit', 'Editar')}
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleOpenDelete(t)}
+                        onClick={() => handleOpenDelete(pt)}
                         className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
-                        title="Eliminar"
+                        title={t('admin.common.delete', 'Eliminar')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -165,15 +167,15 @@ export const ManagePropertyTypesPage: React.FC = () => {
         <Modal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          title={editingType ? 'Editar Tipo de Propiedad' : 'Crear Nuevo Tipo de Propiedad'}
+          title={editingType ? t('admin.propType.editTitle', 'Editar Tipo de Propiedad') : t('admin.propType.createTitle', 'Crear Nuevo Tipo de Propiedad')}
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Nombre *</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">{t('admin.propType.nameLabel', 'Nombre *')}</label>
               <input
                 type="text"
                 required
-                placeholder="Ej: Apartamento, Villa, Penthouse..."
+                placeholder={t('admin.propType.namePlaceholder', 'Ej: Apartamento, Villa, Penthouse...')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500"
@@ -181,10 +183,10 @@ export const ManagePropertyTypesPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Descripción</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">{t('admin.propType.descLabel', 'Descripción')}</label>
               <textarea
                 rows={3}
-                placeholder="Descripción general de este tipo de inmueble..."
+                placeholder={t('admin.propType.descPlaceholder', 'Descripción general de este tipo de inmueble...')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500"
@@ -197,14 +199,14 @@ export const ManagePropertyTypesPage: React.FC = () => {
                 onClick={() => setModalOpen(false)}
                 className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
-                Cancelar
+                {t('admin.common.cancel', 'Cancelar')}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !name.trim()}
                 className="px-5 py-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md"
               >
-                {isSubmitting ? 'Guardando...' : 'Guardar Tipo'}
+                {isSubmitting ? t('admin.common.saving', 'Guardando...') : t('admin.propType.save', 'Guardar Tipo')}
               </button>
             </div>
           </form>
@@ -215,11 +217,11 @@ export const ManagePropertyTypesPage: React.FC = () => {
         <Modal
           isOpen={!!deleteConfirmType}
           onClose={() => { setDeleteConfirmType(null); setDeleteError(null); }}
-          title="Confirmar Eliminación"
+          title={t('admin.propType.deleteTitle', 'Confirmar Eliminación')}
         >
           <div className="space-y-4">
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              ¿Estás seguro de que deseas eliminar el tipo de propiedad <strong className="text-slate-900 dark:text-white font-bold">{deleteConfirmType.name}</strong>? Esta acción no se puede deshacer.
+              {t('admin.propType.deletePrompt', '¿Estás seguro de que deseas eliminar el tipo de propiedad')} <strong className="text-slate-900 dark:text-white font-bold">{deleteConfirmType.name}</strong>? {t('admin.propType.deleteWarning', 'Esta acción no se puede deshacer.')}
             </p>
 
             {deleteError && (
@@ -234,7 +236,7 @@ export const ManagePropertyTypesPage: React.FC = () => {
                 onClick={() => { setDeleteConfirmType(null); setDeleteError(null); }}
                 className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
-                Cancelar
+                {t('admin.common.cancel', 'Cancelar')}
               </button>
               <button
                 type="button"
@@ -242,7 +244,7 @@ export const ManagePropertyTypesPage: React.FC = () => {
                 onClick={handleConfirmDelete}
                 className="px-5 py-2 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md"
               >
-                {isDeleting ? 'Eliminando...' : 'Eliminar Definitivamente'}
+                {isDeleting ? t('admin.propType.deleting', 'Eliminando...') : t('admin.propType.deleteDefinitely', 'Eliminar Definitivamente')}
               </button>
             </div>
           </div>

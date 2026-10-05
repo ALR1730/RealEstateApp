@@ -3,8 +3,10 @@ import { verificationsService } from '../../api/services';
 import { AgentVerification } from '../../types';
 import { Loader } from '../../components/common/Loader';
 import { ShieldCheck, Eye, AlertCircle } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const ManageVerificationsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [verifications, setVerifications] = useState<AgentVerification[]>([]);
   const [selectedKyc, setSelectedKyc] = useState<AgentVerification | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -35,7 +37,7 @@ export const ManageVerificationsPage: React.FC = () => {
   }, [refreshKey]);
 
   const handleApprove = async (id: number) => {
-    if (!window.confirm("¿Aprobar esta verificación KYC y otorgar la insignia de Agente Verificado?")) return;
+    if (!window.confirm(t('admin.verif.confirmApprove', "¿Aprobar esta verificación KYC y otorgar la insignia de Agente Verificado?"))) return;
     try {
       setIsProcessing(true);
       await verificationsService.approve(id);
@@ -62,7 +64,7 @@ export const ManageVerificationsPage: React.FC = () => {
     }
   };
 
-  if (isLoading) return <Loader text="Cargando solicitudes de verificación KYC..." />;
+  if (isLoading) return <Loader text={t('admin.verif.loading', "Cargando solicitudes de verificación KYC...")} />;
 
   const filtered = verifications.filter((v) => {
     if (filterStatus === 'All') return true;
@@ -78,10 +80,10 @@ export const ManageVerificationsPage: React.FC = () => {
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <ShieldCheck className="w-7 h-7 text-brand-600 dark:text-brand-400" />
-            Validación de Identidad KYC de Agentes
+            {t('admin.verif.title', "Validación de Identidad KYC de Agentes")}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Revisa las cédulas oficiales y otorga la insignia de Agente Verificado a los corredores aprobados.
+            {t('admin.verif.subtitle', "Revisa las cédulas oficiales y otorga la insignia de Agente Verificado a los corredores aprobados.")}
           </p>
         </div>
 
@@ -94,7 +96,7 @@ export const ManageVerificationsPage: React.FC = () => {
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
             }`}
           >
-            Todos ({verifications.length})
+            {t('admin.verif.all', "Todos")} ({verifications.length})
           </button>
           <button
             onClick={() => setFilterStatus('Pending')}
@@ -104,7 +106,7 @@ export const ManageVerificationsPage: React.FC = () => {
                 : 'bg-amber-50 text-amber-800 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-900/50'
             }`}
           >
-            Pendientes ({verifications.filter((v) => v.status === 'Pending' || v.status === 'Pendiente').length})
+            {t('admin.verif.pending', "Pendientes")} ({verifications.filter((v) => v.status === 'Pending' || v.status === 'Pendiente').length})
           </button>
           <button
             onClick={() => setFilterStatus('Approved')}
@@ -114,7 +116,7 @@ export const ManageVerificationsPage: React.FC = () => {
                 : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/50'
             }`}
           >
-            Aprobados ({verifications.filter((v) => v.status === 'Approved' || v.status === 'Aprobado').length})
+            {t('admin.verif.approved', "Aprobados")} ({verifications.filter((v) => v.status === 'Approved' || v.status === 'Aprobado').length})
           </button>
         </div>
       </div>
@@ -122,7 +124,7 @@ export const ManageVerificationsPage: React.FC = () => {
       {/* Verifications Table */}
       {filtered.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800">
-          <p className="text-xs font-bold text-slate-500 dark:text-slate-400">No hay solicitudes en este estado.</p>
+          <p className="text-xs font-bold text-slate-500 dark:text-slate-400">{t('admin.verif.noRequests', "No hay solicitudes en este estado.")}</p>
         </div>
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
@@ -130,18 +132,18 @@ export const ManageVerificationsPage: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-extrabold uppercase tracking-wider">
                 <tr>
-                  <th className="px-6 py-4">Agente</th>
-                  <th className="px-6 py-4">Cédula Oficial</th>
-                  <th className="px-6 py-4">Documentos</th>
-                  <th className="px-6 py-4">Estado</th>
-                  <th className="px-6 py-4 text-right">Acciones</th>
+                  <th className="px-6 py-4">{t('admin.verif.colAgent', "Agente")}</th>
+                  <th className="px-6 py-4">{t('admin.verif.colId', "Cédula Oficial")}</th>
+                  <th className="px-6 py-4">{t('admin.verif.colDocs', "Documentos")}</th>
+                  <th className="px-6 py-4">{t('admin.verif.colStatus', "Estado")}</th>
+                  <th className="px-6 py-4 text-right">{t('admin.verif.colActions', "Acciones")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {filtered.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                     <td className="px-6 py-4">
-                      <p className="font-bold text-slate-900 dark:text-white">{item.agentName || 'Agente'}</p>
+                      <p className="font-bold text-slate-900 dark:text-white">{item.agentName || t('admin.verif.colAgent', 'Agente')}</p>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400">{item.agentEmail}</p>
                     </td>
                     <td className="px-6 py-4 font-mono font-bold text-slate-700 dark:text-slate-300">
@@ -156,7 +158,7 @@ export const ManageVerificationsPage: React.FC = () => {
                         className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg font-bold text-[11px] transition-colors"
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        <span>Ver Cédula Front/Back</span>
+                        <span>{t('admin.verif.viewDocs', "Ver Cédula Front/Back")}</span>
                       </button>
                     </td>
                     <td className="px-6 py-4">
@@ -169,9 +171,9 @@ export const ManageVerificationsPage: React.FC = () => {
                             : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/60'
                         }`}
                       >
-                        {(item.status === 'Approved' || item.status === 'Aprobado') && 'Aprobado'}
-                        {(item.status === 'Pending' || item.status === 'Pendiente') && 'Pendiente de Revisión'}
-                        {(item.status === 'Rejected' || item.status === 'Rechazado') && 'Rechazado'}
+                        {(item.status === 'Approved' || item.status === 'Aprobado') && t('admin.verif.statusApproved', 'Aprobado')}
+                        {(item.status === 'Pending' || item.status === 'Pendiente') && t('admin.verif.statusPending', 'Pendiente de Revisión')}
+                        {(item.status === 'Rejected' || item.status === 'Rechazado') && t('admin.verif.statusRejected', 'Rechazado')}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right space-x-2">
@@ -182,7 +184,7 @@ export const ManageVerificationsPage: React.FC = () => {
                             disabled={isProcessing}
                             className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-sm"
                           >
-                            Aprobar
+                            {t('admin.verif.btnApprove', "Aprobar")}
                           </button>
                           <button
                             onClick={() => {
@@ -192,7 +194,7 @@ export const ManageVerificationsPage: React.FC = () => {
                             disabled={isProcessing}
                             className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-sm"
                           >
-                            Rechazar
+                            {t('admin.verif.btnReject', "Rechazar")}
                           </button>
                         </>
                       )}
@@ -211,30 +213,30 @@ export const ManageVerificationsPage: React.FC = () => {
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl space-y-6 border border-transparent dark:border-slate-800">
             <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
               <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                Documentos KYC: {selectedKyc.agentName} (Cédula {selectedKyc.cedula})
+                {t('admin.verif.modalDocTitle', "Documentos KYC")}: {selectedKyc.agentName} ({t('admin.verif.colId', "Cédula")} {selectedKyc.cedula})
               </h3>
               <button onClick={() => setShowDocModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold">✕</button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Lado Frontal</span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">{t('admin.verif.frontSide', "Lado Frontal")}</span>
                 <div className="aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800">
                   {selectedKyc.cedulaFrontImageUrl ? (
                     <img src={selectedKyc.cedulaFrontImageUrl} alt="Front" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold">Sin foto frontal</div>
+                    <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold">{t('admin.verif.noFrontPhoto', "Sin foto frontal")}</div>
                   )}
                 </div>
               </div>
 
               <div className="space-y-1">
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Lado Posterior</span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">{t('admin.verif.backSide', "Lado Posterior")}</span>
                 <div className="aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800">
                   {selectedKyc.cedulaBackImageUrl ? (
                     <img src={selectedKyc.cedulaBackImageUrl} alt="Back" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold">Sin foto posterior</div>
+                    <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold">{t('admin.verif.noBackPhoto', "Sin foto posterior")}</div>
                   )}
                 </div>
               </div>
@@ -245,7 +247,7 @@ export const ManageVerificationsPage: React.FC = () => {
                 onClick={() => setShowDocModal(false)}
                 className="px-5 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition-colors"
               >
-                Cerrar Visor
+                {t('admin.verif.closeViewer', "Cerrar Visor")}
               </button>
             </div>
           </div>
@@ -258,15 +260,15 @@ export const ManageVerificationsPage: React.FC = () => {
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 border border-transparent dark:border-slate-800">
             <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-rose-600" />
-              Rechazar Verificación de Agente
+              {t('admin.verif.rejectTitle', "Rechazar Verificación de Agente")}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Indica la razón por la cual no se aprobó el documento para que el agente pueda corregirlo.
+              {t('admin.verif.rejectDesc', "Indica la razón por la cual no se aprobó el documento para que el agente pueda corregirlo.")}
             </p>
             <textarea
               rows={3}
               required
-              placeholder="Ej: La imagen posterior es borrosa y el número de cédula no coincide..."
+              placeholder={t('admin.verif.rejectPlaceholder', "Ej: La imagen posterior es borrosa y el número de cédula no coincide...")}
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               className="w-full p-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500"
@@ -276,14 +278,14 @@ export const ManageVerificationsPage: React.FC = () => {
                 onClick={() => setShowRejectModal(false)}
                 className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-xs font-bold"
               >
-                Cancelar
+                {t('admin.verif.cancel', "Cancelar")}
               </button>
               <button
                 onClick={handleRejectConfirm}
                 disabled={isProcessing || !rejectionReason.trim()}
                 className="px-5 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold disabled:opacity-50"
               >
-                {isProcessing ? 'Procesando...' : 'Confirmar Rechazo'}
+                {isProcessing ? t('admin.common.loading', 'Procesando...') : t('admin.verif.confirmReject', "Confirmar Rechazo")}
               </button>
             </div>
           </div>

@@ -77,9 +77,9 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [HttpGet("suggestions")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AiSearchSuggestionsDto))]
-        public IActionResult GetSuggestions()
+        public IActionResult GetSuggestions([FromQuery] string? lang = "es")
         {
-            var suggestions = _aiSearchService.GetPromptSuggestions();
+            var suggestions = _aiSearchService.GetPromptSuggestions(lang);
             return Ok(new AiSearchSuggestionsDto { Suggestions = suggestions });
         }
     }

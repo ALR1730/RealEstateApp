@@ -6,8 +6,10 @@ import { Modal } from '../../components/common/Modal';
 import { User } from '../../types';
 import { getApiErrorMessage } from '../../utils/formatters';
 import { Shield, Code, UserPlus } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const ManageUsersPage: React.FC = () => {
+  const { t } = useLanguage();
   const [admins, setAdmins] = useState<User[]>([]);
   const [developers, setDevelopers] = useState<User[]>([]);
   const [activeTab, setActiveTab] = useState<'admins' | 'developers'>('admins');
@@ -68,7 +70,7 @@ export const ManageUsersPage: React.FC = () => {
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.password !== form.confirmPassword) {
-      setError("Las contraseñas no coinciden.");
+      setError(t('admin.users.passwordMismatch', "Las contraseñas no coinciden."));
       return;
     }
 
@@ -83,10 +85,10 @@ export const ManageUsersPage: React.FC = () => {
       setCreateModalOpen(false);
       setForm({ firstName: '', lastName: '', email: '', userName: '', password: '', confirmPassword: '', phone: '' });
       await loadUsers();
-      alert(`Usuario ${createRole} creado exitosamente.`);
+      alert(`Usuario ${createRole} ${t('admin.users.createSuccess', 'creado exitosamente.')}`);
     } catch (err: unknown) {
       console.error("Error creating user:", err);
-      setError(getApiErrorMessage(err, "Error al registrar usuario."));
+      setError(getApiErrorMessage(err, t('admin.users.createError', "Error al registrar usuario.")));
     } finally {
       setIsSubmitting(false);
     }
@@ -99,10 +101,10 @@ export const ManageUsersPage: React.FC = () => {
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <Shield className="w-6 h-6 text-royal-600 dark:text-indigo-400" />
-            Administradores & Desarrolladores API
+            {t('admin.users.title', 'Administradores & Desarrolladores API')}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Gestión de credenciales de gobierno del sistema y accesos técnicos para consumo REST.
+            {t('admin.users.subtitle', 'Gestión de credenciales de gobierno del sistema y accesos técnicos para consumo REST.')}
           </p>
         </div>
 
@@ -112,14 +114,14 @@ export const ManageUsersPage: React.FC = () => {
             className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white font-bold text-xs rounded-xl shadow-md transition-all"
           >
             <UserPlus className="w-4 h-4" />
-            <span>Nuevo Admin</span>
+            <span>{t('admin.users.newAdmin', 'Nuevo Admin')}</span>
           </button>
           <button
             onClick={() => { setCreateRole('Developer'); setCreateModalOpen(true); }}
             className="flex items-center gap-1.5 px-4 py-2 bg-royal-600 hover:bg-royal-700 text-white font-bold text-xs rounded-xl shadow-md transition-all"
           >
             <Code className="w-4 h-4" />
-            <span>Nuevo Developer</span>
+            <span>{t('admin.users.newDev', 'Nuevo Developer')}</span>
           </button>
         </div>
       </div>
@@ -134,7 +136,7 @@ export const ManageUsersPage: React.FC = () => {
               : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
         >
-          Administradores ({admins.length})
+          {t('admin.users.adminsTab', 'Administradores')} ({admins.length})
         </button>
         <button
           onClick={() => setActiveTab('developers')}
@@ -144,23 +146,23 @@ export const ManageUsersPage: React.FC = () => {
               : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
         >
-          Desarrolladores Web API ({developers.length})
+          {t('admin.users.devsTab', 'Desarrolladores Web API')} ({developers.length})
         </button>
       </div>
 
       {isLoading ? (
-        <Loader text="Cargando usuarios del sistema..." />
+        <Loader text={t('admin.users.loading', 'Cargando usuarios del sistema...')} />
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
-                  <th className="py-3.5 px-4">Usuario</th>
-                  <th className="py-3.5 px-4">Correo</th>
-                  <th className="py-3.5 px-4">Teléfono</th>
-                  <th className="py-3.5 px-4">Estado</th>
-                  <th className="py-3.5 px-4 text-right">Acción</th>
+                  <th className="py-3.5 px-4">{t('admin.users.colUser', 'Usuario')}</th>
+                  <th className="py-3.5 px-4">{t('admin.users.colEmail', 'Correo')}</th>
+                  <th className="py-3.5 px-4">{t('admin.users.colPhone', 'Teléfono')}</th>
+                  <th className="py-3.5 px-4">{t('admin.users.colStatus', 'Estado')}</th>
+                  <th className="py-3.5 px-4 text-right">{t('admin.users.colAction', 'Acción')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -187,7 +189,7 @@ export const ManageUsersPage: React.FC = () => {
                             : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800/50'
                         }`}
                       >
-                        {u.isActive ? 'Inactivar' : 'Activar'}
+                        {u.isActive ? t('admin.agents.deactivate', 'Inactivar') : t('admin.agents.activate', 'Activar')}
                       </button>
                     </td>
                   </tr>
@@ -203,12 +205,12 @@ export const ManageUsersPage: React.FC = () => {
         <Modal
           isOpen={createModalOpen}
           onClose={() => setCreateModalOpen(false)}
-          title={`Crear Nuevo Usuario ${createRole}`}
+          title={`${t('admin.users.modalCreateTitle', 'Crear Nuevo Usuario')} ${createRole}`}
         >
           <form onSubmit={handleCreateSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Nombre</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">{t('admin.users.firstName', 'Nombre')}</label>
                 <input
                   type="text"
                   required
@@ -218,7 +220,7 @@ export const ManageUsersPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Apellido</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">{t('admin.users.lastName', 'Apellido')}</label>
                 <input
                   type="text"
                   required
@@ -231,7 +233,7 @@ export const ManageUsersPage: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Usuario</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">{t('admin.users.userName', 'Usuario')}</label>
                 <input
                   type="text"
                   required
@@ -241,7 +243,7 @@ export const ManageUsersPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Teléfono</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">{t('admin.users.phone', 'Teléfono')}</label>
                 <input
                   type="tel"
                   value={form.phone}
@@ -252,7 +254,7 @@ export const ManageUsersPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Correo Electrónico</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">{t('admin.users.email', 'Correo Electrónico')}</label>
               <input
                 type="email"
                 required
@@ -264,7 +266,7 @@ export const ManageUsersPage: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Contraseña</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">{t('admin.users.password', 'Contraseña')}</label>
                 <input
                   type="password"
                   required
@@ -274,7 +276,7 @@ export const ManageUsersPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Confirmar</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">{t('admin.users.confirmPassword', 'Confirmar')}</label>
                 <input
                   type="password"
                   required
@@ -293,14 +295,14 @@ export const ManageUsersPage: React.FC = () => {
                 onClick={() => setCreateModalOpen(false)}
                 className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
-                Cancelar
+                {t('admin.common.cancel', 'Cancelar')}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
                 className="px-5 py-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md"
               >
-                {isSubmitting ? 'Registrando...' : 'Crear Usuario'}
+                {isSubmitting ? t('admin.users.creating', 'Registrando...') : t('admin.users.createUser', 'Crear Usuario')}
               </button>
             </div>
           </form>

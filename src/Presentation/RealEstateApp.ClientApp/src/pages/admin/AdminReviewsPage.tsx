@@ -5,8 +5,10 @@ import { formatDate } from '../../utils/formatters';
 import { StarRating } from '../../components/common/StarRating';
 import { Loader } from '../../components/common/Loader';
 import { Star } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const AdminReviewsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -28,7 +30,7 @@ export const AdminReviewsPage: React.FC = () => {
     ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
     : 0;
 
-  if (isLoading) return <Loader text="Cargando reseñas de agentes..." />;
+  if (isLoading) return <Loader text={t('admin.reviews.loading', "Cargando reseñas de agentes...")} />;
 
   return (
     <div className="space-y-6">
@@ -36,24 +38,26 @@ export const AdminReviewsPage: React.FC = () => {
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <Star className="w-6 h-6 text-amber-500" />
-            Reseñas de Agentes
+            {t('admin.reviews.title', "Reseñas de Agentes")}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Calificaciones y comentarios de clientes tras completar transacciones.
+            {t('admin.reviews.subtitle', "Calificaciones y comentarios de clientes tras completar transacciones.")}
           </p>
         </div>
         <div className="flex items-center gap-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 px-4 py-2.5 shadow-xs">
           <StarRating value={average} size="sm" showValue />
-          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{reviews.length} reseñas</span>
+          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+            {reviews.length} {t('admin.reviews.countSuffix', "reseñas")}
+          </span>
         </div>
       </div>
 
       {reviews.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800 space-y-2">
           <Star className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800 dark:text-white">Aún no hay reseñas registradas</h3>
+          <h3 className="text-base font-bold text-slate-800 dark:text-white">{t('admin.reviews.emptyTitle', "Aún no hay reseñas registradas")}</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-            Cuando los clientes califiquen a sus agentes tras una compra, aparecerán aquí.
+            {t('admin.reviews.emptyDesc', "Cuando los clientes califiquen a sus agentes tras una compra, aparecerán aquí.")}
           </p>
         </div>
       ) : (
@@ -62,11 +66,11 @@ export const AdminReviewsPage: React.FC = () => {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
-                  <th className="py-3.5 px-4">Cliente</th>
-                  <th className="py-3.5 px-4">Propiedad</th>
-                  <th className="py-3.5 px-4">Calificación</th>
-                  <th className="py-3.5 px-4">Comentario</th>
-                  <th className="py-3.5 px-4">Fecha</th>
+                  <th className="py-3.5 px-4">{t('admin.reviews.colClient', "Cliente")}</th>
+                  <th className="py-3.5 px-4">{t('admin.reviews.colProperty', "Propiedad")}</th>
+                  <th className="py-3.5 px-4">{t('admin.reviews.colRating', "Calificación")}</th>
+                  <th className="py-3.5 px-4">{t('admin.reviews.colComment', "Comentario")}</th>
+                  <th className="py-3.5 px-4">{t('admin.reviews.colDate', "Fecha")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">

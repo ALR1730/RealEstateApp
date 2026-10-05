@@ -4,6 +4,7 @@ import { PropertyDocument } from '../../types';
 import { formatDate } from '../../utils/formatters';
 import { Loader } from '../../components/common/Loader';
 import { FileText, Trash2, Download, Image as ImageIcon, RefreshCw, Building2 } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 function formatSize(bytes: number): string {
   if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -12,6 +13,7 @@ function formatSize(bytes: number): string {
 }
 
 export const AdminDocumentsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [documents, setDocuments] = useState<PropertyDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -41,17 +43,17 @@ export const AdminDocumentsPage: React.FC = () => {
   }, []);
 
   const handleDelete = async (doc: PropertyDocument) => {
-    if (!window.confirm(`¿Eliminar "${doc.originalFileName}"? Esta acción no se puede deshacer.`)) return;
+    if (!window.confirm(`¿Eliminar "${doc.originalFileName}"? ${t('admin.docs.confirmDelete', 'Esta acción no se puede deshacer.')}`)) return;
     try {
       await documentsService.remove(doc.id);
       await loadAll();
     } catch (err) {
       console.error("Error deleting document:", err);
-      alert("Error al eliminar el documento.");
+      alert(t('admin.common.error', "Error al eliminar el documento."));
     }
   };
 
-  if (isLoading) return <Loader text="Cargando documentos legales..." />;
+  if (isLoading) return <Loader text={t('admin.docs.loading', "Cargando documentos legales...")} />;
 
   return (
     <div className="space-y-6">
@@ -59,10 +61,10 @@ export const AdminDocumentsPage: React.FC = () => {
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <FileText className="w-6 h-6 text-brand-600 dark:text-brand-400" />
-            Documentos Legales por Propiedad
+            {t('admin.docs.title', "Documentos Legales por Propiedad")}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Registro central de títulos, contratos y certificaciones subidos por los agentes.
+            {t('admin.docs.subtitle', "Registro central de títulos, contratos y certificaciones subidos por los agentes.")}
           </p>
         </div>
         <button
@@ -70,14 +72,16 @@ export const AdminDocumentsPage: React.FC = () => {
           className="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-bold text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          Refrescar
+          {t('admin.docs.refresh', "Refrescar")}
         </button>
-      </div>      {documents.length === 0 ? (
+      </div>
+
+      {documents.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800 space-y-3">
           <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800 dark:text-white">Sin documentos registrados</h3>
+          <h3 className="text-base font-bold text-slate-800 dark:text-white">{t('admin.docs.emptyTitle', "Sin documentos registrados")}</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-            Los agentes pueden subir la documentación legal de sus propiedades desde el portal del agente.
+            {t('admin.docs.emptyDesc', "Los agentes pueden subir la documentación legal de sus propiedades desde el portal del agente.")}
           </p>
         </div>
       ) : (
@@ -86,13 +90,13 @@ export const AdminDocumentsPage: React.FC = () => {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
-                  <th className="py-3.5 px-4">Vista Previa</th>
-                  <th className="py-3.5 px-4">Archivo</th>
-                  <th className="py-3.5 px-4">Propiedad</th>
-                  <th className="py-3.5 px-4">Tipo</th>
-                  <th className="py-3.5 px-4">Subido Por</th>
-                  <th className="py-3.5 px-4">Fecha</th>
-                  <th className="py-3.5 px-4 text-right">Acciones</th>
+                  <th className="py-3.5 px-4">{t('admin.docs.colPreview', "Vista Previa")}</th>
+                  <th className="py-3.5 px-4">{t('admin.docs.colFile', "Archivo")}</th>
+                  <th className="py-3.5 px-4">{t('admin.docs.colProperty', "Propiedad")}</th>
+                  <th className="py-3.5 px-4">{t('admin.docs.colType', "Tipo")}</th>
+                  <th className="py-3.5 px-4">{t('admin.docs.colUploadedBy', "Subido Por")}</th>
+                  <th className="py-3.5 px-4">{t('admin.docs.colDate', "Fecha")}</th>
+                  <th className="py-3.5 px-4 text-right">{t('admin.docs.colActions', "Acciones")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -134,14 +138,14 @@ export const AdminDocumentsPage: React.FC = () => {
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex p-2 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                        title="Abrir Documento"
+                        title={t('admin.docs.openDoc', "Abrir Documento")}
                       >
                         <Download className="w-4 h-4" />
                       </a>
                       <button
                         onClick={() => handleDelete(doc)}
                         className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
-                        title="Eliminar Documento"
+                        title={t('admin.docs.deleteDoc', "Eliminar Documento")}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

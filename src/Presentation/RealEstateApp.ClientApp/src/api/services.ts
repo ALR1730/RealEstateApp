@@ -856,8 +856,9 @@ export const aiSearchService = {
     return res.data;
   },
 
-  getSuggestions: async (): Promise<string[]> => {
-    const res = await apiClient.get<AiSearchSuggestions>('/aisearch/suggestions');
+  getSuggestions: async (lang?: string): Promise<string[]> => {
+    const url = lang ? `/aisearch/suggestions?lang=${encodeURIComponent(lang)}` : '/aisearch/suggestions';
+    const res = await apiClient.get<AiSearchSuggestions>(url);
     return res.data?.suggestions || [];
   }
 };

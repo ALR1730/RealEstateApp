@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { getApiErrorMessage } from '../../utils/formatters';
 import { Building2, LogIn, Key, Mail, ShieldAlert, Sparkles, User, UserCheck, Code } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +24,7 @@ export const LoginPage: React.FC = () => {
       const res = await login(email, password);
 
       if (res.hasError) {
-        setError(res.error || 'Credenciales inválidas.');
+        setError(res.error || t('login.invalidCredentials', 'Credenciales inválidas.'));
         return;
       }
 
@@ -35,7 +37,7 @@ export const LoginPage: React.FC = () => {
       else navigate('/client');
     } catch (err: unknown) {
       console.error("Login error:", err);
-      setError(getApiErrorMessage(err, 'Error al conectar con el servidor.'));
+      setError(getApiErrorMessage(err, t('login.serverError', 'Error al conectar con el servidor.')));
     } finally {
       setIsLoading(false);
     }
@@ -59,10 +61,10 @@ export const LoginPage: React.FC = () => {
             </div>
           </Link>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Iniciar Sesión
+            {t('login.title', 'Iniciar Sesión')}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Ingresa tus credenciales para acceder a la plataforma inmobiliaria.
+            {t('login.subtitle', 'Ingresa tus credenciales para acceder a la plataforma inmobiliaria.')}
           </p>
         </div>
 
@@ -71,9 +73,9 @@ export const LoginPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-brand-400 flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5" />
-              Acceso Rápido para Demostración
+              {t('login.demoTitle', 'Acceso Rápido para Demostración')}
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">1 Clic</span>
+            <span className="text-[10px] text-slate-400 font-mono">{t('login.oneClick', '1 Clic')}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
@@ -84,7 +86,7 @@ export const LoginPage: React.FC = () => {
             >
               <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <div className="truncate">
-                <p className="font-bold text-[11px] text-white">Administrador</p>
+                <p className="font-bold text-[11px] text-white">{t('login.roleAdmin', 'Administrador')}</p>
                 <p className="text-[9px] text-slate-300 font-mono">admin@realestate.com</p>
               </div>
             </button>
@@ -96,7 +98,7 @@ export const LoginPage: React.FC = () => {
             >
               <Building2 className="w-4 h-4 text-sky-400 shrink-0" />
               <div className="truncate">
-                <p className="font-bold text-[11px] text-white">Agente</p>
+                <p className="font-bold text-[11px] text-white">{t('login.roleAgent', 'Agente')}</p>
                 <p className="text-[9px] text-slate-300 font-mono">agent@realestate.com</p>
               </div>
             </button>
@@ -108,7 +110,7 @@ export const LoginPage: React.FC = () => {
             >
               <User className="w-4 h-4 text-amber-400 shrink-0" />
               <div className="truncate">
-                <p className="font-bold text-[11px] text-white">Cliente Comprador</p>
+                <p className="font-bold text-[11px] text-white">{t('login.roleClient', 'Cliente Comprador')}</p>
                 <p className="text-[9px] text-slate-300 font-mono">client@realestate.com</p>
               </div>
             </button>
@@ -120,7 +122,7 @@ export const LoginPage: React.FC = () => {
             >
               <Code className="w-4 h-4 text-purple-400 shrink-0" />
               <div className="truncate">
-                <p className="font-bold text-[11px] text-white">Desarrollador</p>
+                <p className="font-bold text-[11px] text-white">{t('login.roleDev', 'Desarrollador')}</p>
                 <p className="text-[9px] text-slate-300 font-mono">developer@realestate.com</p>
               </div>
             </button>
@@ -133,12 +135,12 @@ export const LoginPage: React.FC = () => {
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
               <Mail className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
-              Correo Electrónico
+              {t('login.email', 'Correo Electrónico')}
             </label>
             <input
               type="email"
               required
-              placeholder="ejemplo@realestate.com"
+              placeholder={t('login.emailPlaceholder', 'ejemplo@realestate.com')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white"
@@ -149,10 +151,10 @@ export const LoginPage: React.FC = () => {
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                 <Key className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
-                Contraseña
+                {t('login.password', 'Contraseña')}
               </label>
               <Link to="/forgot-password" className="text-[11px] font-semibold text-brand-600 dark:text-brand-400 hover:underline">
-                ¿Olvidaste tu contraseña?
+                {t('login.forgotPassword', '¿Olvidaste tu contraseña?')}
               </Link>
             </div>
             <input
@@ -178,20 +180,20 @@ export const LoginPage: React.FC = () => {
             className="w-full py-3 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md shadow-brand-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <LogIn className="w-4 h-4" />
-            <span>{isLoading ? 'Iniciando sesión...' : 'Entrar a la Plataforma'}</span>
+            <span>{isLoading ? t('login.submitting', 'Iniciando sesión...') : t('login.submit', 'Entrar a la Plataforma')}</span>
           </button>
 
           <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400 space-y-1">
             <p>
-              ¿No tienes una cuenta aún?{' '}
+              {t('login.noAccount', '¿No tienes una cuenta aún?')}{' '}
               <Link to="/register" className="font-bold text-brand-600 dark:text-brand-400 hover:underline">
-                Regístrate como Cliente
+                {t('login.registerClient', 'Regístrate como Cliente')}
               </Link>
             </p>
             <p>
-              ¿Eres agente inmobiliario?{' '}
+              {t('login.isAgent', '¿Eres agente inmobiliario?')}{' '}
               <Link to="/register-agent" className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-                Únete como Corredor
+                {t('login.registerAgent', 'Únete como Corredor')}
               </Link>
             </p>
           </div>

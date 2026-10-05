@@ -130,8 +130,20 @@ namespace RealEstateApp.Core.Application.Services
             };
         }
 
-        public List<string> GetPromptSuggestions()
+        public List<string> GetPromptSuggestions(string? lang = "es")
         {
+            if (string.Equals(lang, "en", StringComparison.OrdinalIgnoreCase))
+            {
+                return new List<string>
+                {
+                    "3 bedroom apartment in Bella Vista under RD$ 8M",
+                    "Villa in Punta Cana with pool and virtual tour",
+                    "4 bedroom house in Santiago with yard",
+                    "Penthouse in Piantini with terrace and elevator",
+                    "Apartment for rent with 2 bathrooms and gym under 45k"
+                };
+            }
+
             return new List<string>
             {
                 "Apartamento de 3 habitaciones en Bella Vista con balcón por menos de RD$ 8M",
@@ -151,14 +163,14 @@ namespace RealEstateApp.Core.Application.Services
             AiExtractedEntitiesDto entities,
             ref int signals)
         {
-            // Sinónimos comunes
+            // Sinónimos comunes (Español e Inglés)
             var synonyms = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
             {
-                ["Apartamento"] = new[] { "apartamento", "apartamentos", "apto", "aptos", "departamento", "departamentos", "penthouse", "estudio", "loft" },
-                ["Casa"] = new[] { "casa", "casas", "residencia", "residencias", "townhouse", "vivienda" },
+                ["Apartamento"] = new[] { "apartamento", "apartamentos", "apto", "aptos", "departamento", "departamentos", "penthouse", "estudio", "loft", "apartment", "apartments", "condo", "condos", "studio" },
+                ["Casa"] = new[] { "casa", "casas", "residencia", "residencias", "townhouse", "vivienda", "house", "houses", "home", "homes" },
                 ["Villa"] = new[] { "villa", "villas", "quinta", "chalet" },
-                ["Solar"] = new[] { "solar", "solares", "terreno", "terrenos", "parcela", "lote" },
-                ["Comercial"] = new[] { "local", "locales", "oficina", "oficinas", "nave", "comercial", "edificio" }
+                ["Solar"] = new[] { "solar", "solares", "terreno", "terrenos", "parcela", "lote", "lot", "lots", "land" },
+                ["Comercial"] = new[] { "local", "locales", "oficina", "oficinas", "nave", "comercial", "edificio", "office", "offices", "commercial" }
             };
 
             foreach (var type in types)
@@ -202,7 +214,7 @@ namespace RealEstateApp.Core.Application.Services
             AiExtractedEntitiesDto entities,
             ref int signals)
         {
-            if (Regex.IsMatch(text, @"\b(alquiler|renta|alquilar|en renta|arrendar)\b"))
+            if (Regex.IsMatch(text, @"\b(alquiler|renta|alquilar|en renta|arrendar|rent|rental|for rent|lease)\b", RegexOptions.IgnoreCase))
             {
                 var rentType = saleTypes.FirstOrDefault(s => s.Name.Contains("Alquiler", StringComparison.OrdinalIgnoreCase) || s.Name.Contains("Renta", StringComparison.OrdinalIgnoreCase));
                 if (rentType != null)
@@ -214,7 +226,7 @@ namespace RealEstateApp.Core.Application.Services
                 }
             }
 
-            if (Regex.IsMatch(text, @"\b(venta|comprar|en venta|adquirir|compra)\b"))
+            if (Regex.IsMatch(text, @"\b(venta|comprar|en venta|adquirir|compra|sale|buy|for sale|purchase)\b", RegexOptions.IgnoreCase))
             {
                 var saleType = saleTypes.FirstOrDefault(s => s.Name.Contains("Venta", StringComparison.OrdinalIgnoreCase));
                 if (saleType != null)
@@ -232,8 +244,8 @@ namespace RealEstateApp.Core.Application.Services
             AiExtractedEntitiesDto entities,
             ref int signals)
         {
-            // Patrón numérico: "3 habitaciones", "3 habs", "3 hab", "3 cuartos", "3 dormitorios"
-            var numMatch = Regex.Match(text, @"\b(?:con\s+)?(\d+)\s*(?:\+|\s*o\s*m[aá]s)?\s*(?:habitaci[oó]n(?:es)?|hab(?:s)?|cuartos?|dormitorios?)\b");
+            // Patrón numérico: "3 habitaciones", "3 habs", "3 bedrooms", "3 beds"
+            var numMatch = Regex.Match(text, @"\b(?:con\s+|with\s+)?(\d+)\s*(?:\+|\s*o\s*m[aá]s|\s*or\s*more)?\s*(?:habitaci[oó]n(?:es)?|hab(?:s)?|cuartos?|dormitorios?|bedrooms?|beds?|rooms?)\b", RegexOptions.IgnoreCase);
             if (numMatch.Success && int.TryParse(numMatch.Groups[1].Value, out int rooms))
             {
                 filter.MinRooms = rooms;
@@ -242,16 +254,20 @@ namespace RealEstateApp.Core.Application.Services
                 return;
             }
 
-            // Patrón en palabras: "dos habitaciones", "tres cuartos", etc.
+            // Patrón en palabras: "dos habitaciones", "three bedrooms", etc.
             var wordDict = new Dictionary<string, int>
             {
-                ["un"] = 1, ["una"] = 1, ["uno"] = 1,
-                ["dos"] = 2, ["tres"] = 3, ["cuatro"] = 4, ["cinco"] = 5, ["seis"] = 6
+                ["un"] = 1, ["una"] = 1, ["uno"] = 1, ["one"] = 1,
+                ["dos"] = 2, ["two"] = 2,
+                ["tres"] = 3, ["three"] = 3,
+                ["cuatro"] = 4, ["four"] = 4,
+                ["cinco"] = 5, ["five"] = 5,
+                ["seis"] = 6, ["six"] = 6
             };
 
             foreach (var kvp in wordDict)
             {
-                if (Regex.IsMatch(text, $@"\b{kvp.Key}\s+(?:habitaci[oó]n(?:es)?|hab(?:s)?|cuartos?|dormitorios?)\b"))
+                if (Regex.IsMatch(text, $@"\b{kvp.Key}\s+(?:habitaci[oó]n(?:es)?|hab(?:s)?|cuartos?|dormitorios?|bedrooms?|beds?|rooms?)\b", RegexOptions.IgnoreCase))
                 {
                     filter.MinRooms = kvp.Value;
                     entities.MinRooms = kvp.Value;
@@ -267,8 +283,8 @@ namespace RealEstateApp.Core.Application.Services
             AiExtractedEntitiesDto entities,
             ref int signals)
         {
-            // Patrón numérico: "2 baños", "2 banos", "1 baño"
-            var numMatch = Regex.Match(text, @"\b(?:con\s+)?(\d+)\s*(?:\+|\s*o\s*m[aá]s)?\s*ba[ñn]os?\b");
+            // Patrón numérico: "2 baños", "2 banos", "2 bathrooms", "2 baths"
+            var numMatch = Regex.Match(text, @"\b(?:con\s+|with\s+)?(\d+)\s*(?:\+|\s*o\s*m[aá]s|\s*or\s*more)?\s*(?:ba[ñn]os?|bathrooms?|baths?)\b", RegexOptions.IgnoreCase);
             if (numMatch.Success && int.TryParse(numMatch.Groups[1].Value, out int bathrooms))
             {
                 filter.MinBathrooms = bathrooms;
@@ -279,12 +295,15 @@ namespace RealEstateApp.Core.Application.Services
 
             var wordDict = new Dictionary<string, int>
             {
-                ["un"] = 1, ["uno"] = 1, ["dos"] = 2, ["tres"] = 3, ["cuatro"] = 4
+                ["un"] = 1, ["uno"] = 1, ["one"] = 1,
+                ["dos"] = 2, ["two"] = 2,
+                ["tres"] = 3, ["three"] = 3,
+                ["cuatro"] = 4, ["four"] = 4
             };
 
             foreach (var kvp in wordDict)
             {
-                if (Regex.IsMatch(text, $@"\b{kvp.Key}\s+ba[ñn]os?\b"))
+                if (Regex.IsMatch(text, $@"\b{kvp.Key}\s+(?:ba[ñn]os?|bathrooms?|baths?)\b", RegexOptions.IgnoreCase))
                 {
                     filter.MinBathrooms = kvp.Value;
                     entities.MinBathrooms = kvp.Value;
@@ -300,8 +319,8 @@ namespace RealEstateApp.Core.Application.Services
             AiExtractedEntitiesDto entities,
             ref int signals)
         {
-            // Rango "entre X y Y"
-            var rangeMatch = Regex.Match(text, @"\bentre\s+(?:rd\$|\$)?\s*([0-9.,]+)\s*(millones?|mil|m|k)?\s+y\s+(?:rd\$|\$)?\s*([0-9.,]+)\s*(millones?|mil|m|k)?\b");
+            // Rango "entre X y Y" / "between X and Y"
+            var rangeMatch = Regex.Match(text, @"\b(?:entre|between)\s+(?:rd\$|\$)?\s*([0-9.,]+)\s*(millones?|mil|million|millions|m|k)?\s+(?:y|and)\s+(?:rd\$|\$)?\s*([0-9.,]+)\s*(millones?|mil|million|millions|m|k)?\b", RegexOptions.IgnoreCase);
             if (rangeMatch.Success)
             {
                 decimal? p1 = ParsePriceNumber(rangeMatch.Groups[1].Value, rangeMatch.Groups[2].Value);
@@ -317,8 +336,8 @@ namespace RealEstateApp.Core.Application.Services
                 }
             }
 
-            // Precio máximo: "menos de", "hasta", "máximo", "menor a", "por debajo de"
-            var maxMatch = Regex.Match(text, @"\b(?:menos\s+de|hasta|m[aá]ximo(?:\s+de)?|por\s+debajo\s+de|menor\s+a)\s+(?:rd\$|\$)?\s*([0-9.,]+)\s*(millones?|mil|m|k)?\b");
+            // Precio máximo: "menos de", "hasta", "máximo", "under", "below", "less than", "up to", "max"
+            var maxMatch = Regex.Match(text, @"\b(?:menos\s+de|hasta|m[aá]ximo(?:\s+de)?|por\s+debajo\s+de|menor\s+a|under|below|less\s+than|up\s+to|max(?:\s+of)?)\s+(?:rd\$|\$)?\s*([0-9.,]+)\s*(millones?|mil|million|millions|m|k)?\b", RegexOptions.IgnoreCase);
             if (maxMatch.Success)
             {
                 decimal? max = ParsePriceNumber(maxMatch.Groups[1].Value, maxMatch.Groups[2].Value);
@@ -331,8 +350,8 @@ namespace RealEstateApp.Core.Application.Services
                 }
             }
 
-            // Precio mínimo: "más de", "desde", "mínimo", "mayor a", "a partir de"
-            var minMatch = Regex.Match(text, @"\b(?:m[aá]s\s+de|desde|m[ií]nimo(?:\s+de)?|mayor\s+a|a\s+partir\s+de)\s+(?:rd\$|\$)?\s*([0-9.,]+)\s*(millones?|mil|m|k)?\b");
+            // Precio mínimo: "más de", "desde", "mínimo", "over", "above", "more than", "starting at", "from", "min"
+            var minMatch = Regex.Match(text, @"\b(?:m[aá]s\s+de|desde|m[ií]nimo(?:\s+de)?|mayor\s+a|a\s+partir\s+de|more\s+than|over|above|from|starting\s+at|min(?:\s+of)?)\s+(?:rd\$|\$)?\s*([0-9.,]+)\s*(millones?|mil|million|millions|m|k)?\b", RegexOptions.IgnoreCase);
             if (minMatch.Success)
             {
                 decimal? min = ParsePriceNumber(minMatch.Groups[1].Value, minMatch.Groups[2].Value);
@@ -354,11 +373,11 @@ namespace RealEstateApp.Core.Application.Services
                 return null;
 
             var unit = unitStr?.Trim().ToLowerInvariant();
-            if (unit is "millon" or "millones" or "m")
+            if (unit is "millon" or "millones" or "million" or "millions" or "m")
             {
                 return val * 1_000_000m;
             }
-            if (unit is "mil" or "k")
+            if (unit is "mil" or "thousand" or "k")
             {
                 return val * 1_000m;
             }
@@ -425,15 +444,15 @@ namespace RealEstateApp.Core.Application.Services
 
             var synonyms = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
             {
-                ["Balcón"] = new[] { "balcon", "balcones", "terraza" },
-                ["Piscina"] = new[] { "piscina", "alberca", "pileta" },
-                ["Gimnasio"] = new[] { "gimnasio", "gym" },
-                ["Ascensor"] = new[] { "ascensor", "elevador" },
-                ["Planta Eléctrica"] = new[] { "planta", "planta electrica", "generador" },
-                ["Seguridad"] = new[] { "seguridad", "vigilancia", "guardian" },
-                ["Jacuzzi"] = new[] { "jacuzzi", "hidromasaje" },
-                ["Parqueo"] = new[] { "parqueo", "parqueos", "estacionamiento", "garaje", "cochera" },
-                ["Patio"] = new[] { "patio", "jardin", "patio trasero" }
+                ["Balcón"] = new[] { "balcon", "balcones", "terraza", "balcony", "terrace" },
+                ["Piscina"] = new[] { "piscina", "alberca", "pileta", "pool", "swimming pool" },
+                ["Gimnasio"] = new[] { "gimnasio", "gym", "fitness" },
+                ["Ascensor"] = new[] { "ascensor", "elevador", "elevator", "lift" },
+                ["Planta Eléctrica"] = new[] { "planta", "planta electrica", "generador", "generator", "power plant" },
+                ["Seguridad"] = new[] { "seguridad", "vigilancia", "guardian", "security", "guard" },
+                ["Jacuzzi"] = new[] { "jacuzzi", "hidromasaje", "hot tub" },
+                ["Parqueo"] = new[] { "parqueo", "parqueos", "estacionamiento", "garaje", "cochera", "parking", "garage" },
+                ["Patio"] = new[] { "patio", "jardin", "patio trasero", "yard", "backyard", "garden" }
             };
 
             foreach (var imp in improvements)

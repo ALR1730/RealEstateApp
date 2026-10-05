@@ -298,7 +298,7 @@ export const Sidebar: React.FC = () => {
                 </NavLink>
 
                 <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-3 pt-3 pb-1">
-                  {t('sidebar.portalAdmin', 'Mantenimientos Núcleo')}
+                  {t('sidebar.coreMaintenance', 'Mantenimientos Núcleo')}
                 </div>
                 <NavLink to="/admin/property-types" className={navClass}>
                   <Building className="w-4 h-4" />

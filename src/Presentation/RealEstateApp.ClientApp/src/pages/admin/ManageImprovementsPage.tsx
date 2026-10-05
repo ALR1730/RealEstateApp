@@ -4,8 +4,10 @@ import { Improvement } from '../../types';
 import { Loader } from '../../components/common/Loader';
 import { Modal } from '../../components/common/Modal';
 import { Sparkles, Plus, Edit2, Trash2 } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const ManageImprovementsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [improvements, setImprovements] = useState<Improvement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -45,7 +47,7 @@ export const ManageImprovementsPage: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("¿Seguro que deseas eliminar esta amenidad?")) return;
+    if (!window.confirm(t('admin.improvement.deleteConfirm', "¿Seguro que deseas eliminar esta amenidad?"))) return;
     try {
       await catalogsService.deleteImprovement(id);
       loadImprovements();
@@ -79,10 +81,10 @@ export const ManageImprovementsPage: React.FC = () => {
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-brand-600 dark:text-brand-400" />
-            Mantenimiento de Amenidades y Mejoras
+            {t('admin.improvement.title', 'Mantenimiento de Amenidades y Mejoras')}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Catálogo de características diferenciales (Piscina, Gimnasio, Planta Eléctrica, Seguridad 24/7, etc.).
+            {t('admin.improvement.subtitle', 'Catálogo de características diferenciales (Piscina, Gimnasio, Planta Eléctrica, Seguridad 24/7, etc.).')}
           </p>
         </div>
 
@@ -91,21 +93,21 @@ export const ManageImprovementsPage: React.FC = () => {
           className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md transition-all"
         >
           <Plus className="w-4 h-4" />
-          <span>Nueva Amenidad</span>
+          <span>{t('admin.improvement.new', 'Nueva Amenidad')}</span>
         </button>
       </div>
 
       {isLoading ? (
-        <Loader text="Cargando catálogo de amenidades..." />
+        <Loader text={t('admin.improvement.loading', 'Cargando catálogo de amenidades...')} />
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
-                  <th className="py-3.5 px-4">Amenidad / Mejora</th>
-                  <th className="py-3.5 px-4">Descripción</th>
-                  <th className="py-3.5 px-4 text-right">Acciones</th>
+                  <th className="py-3.5 px-4">{t('admin.improvement.colName', 'Amenidad / Mejora')}</th>
+                  <th className="py-3.5 px-4">{t('admin.propType.colDesc', 'Descripción')}</th>
+                  <th className="py-3.5 px-4 text-right">{t('admin.common.actions', 'Acciones')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -115,20 +117,20 @@ export const ManageImprovementsPage: React.FC = () => {
                       {imp.name}
                     </td>
                     <td className="py-3 px-4 text-slate-600 dark:text-slate-300 max-w-sm truncate">
-                      {imp.description || 'Sin descripción'}
+                      {imp.description || t('admin.propType.noDesc', 'Sin descripción')}
                     </td>
                     <td className="py-3 px-4 text-right space-x-1">
                       <button
                         onClick={() => handleOpenEdit(imp)}
                         className="p-2 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                        title="Editar"
+                        title={t('admin.common.edit', 'Editar')}
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(imp.id)}
                         className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
-                        title="Eliminar"
+                        title={t('admin.common.delete', 'Eliminar')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -145,15 +147,15 @@ export const ManageImprovementsPage: React.FC = () => {
         <Modal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          title={editingImp ? 'Editar Amenidad' : 'Crear Nueva Amenidad'}
+          title={editingImp ? t('admin.improvement.editTitle', 'Editar Amenidad') : t('admin.improvement.createTitle', 'Crear Nueva Amenidad')}
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Nombre *</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">{t('admin.propType.nameLabel', 'Nombre *')}</label>
               <input
                 type="text"
                 required
-                placeholder="Ej: Piscina Infinity, Gimnasio, Ascensor..."
+                placeholder={t('admin.improvement.namePlaceholder', 'Ej: Piscina Infinity, Gimnasio, Ascensor...')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500"
@@ -161,10 +163,10 @@ export const ManageImprovementsPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Descripción</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">{t('admin.propType.descLabel', 'Descripción')}</label>
               <textarea
                 rows={3}
-                placeholder="Descripción de la mejora o amenidad..."
+                placeholder={t('admin.improvement.descPlaceholder', 'Descripción de la mejora o amenidad...')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500"
@@ -177,14 +179,14 @@ export const ManageImprovementsPage: React.FC = () => {
                 onClick={() => setModalOpen(false)}
                 className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
-                Cancelar
+                {t('admin.common.cancel', 'Cancelar')}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !name.trim()}
                 className="px-5 py-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md"
               >
-                {isSubmitting ? 'Guardando...' : 'Guardar Amenidad'}
+                {isSubmitting ? t('admin.common.saving', 'Guardando...') : t('admin.improvement.save', 'Guardar Amenidad')}
               </button>
             </div>
           </form>
