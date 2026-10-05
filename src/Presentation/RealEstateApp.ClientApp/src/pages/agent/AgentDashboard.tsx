@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { propertiesService, offersService, appointmentsService, commissionsService } from '../../api/services';
 import { Property, Offer, Appointment, CommissionSummary } from '../../types';
 import { formatDate } from '../../utils/formatters';
@@ -36,6 +37,7 @@ import {
 export const AgentDashboard: React.FC = () => {
   const { user } = useAuth();
   const { formatPrice } = useCurrency();
+  const { t } = useLanguage();
   const [properties, setProperties] = useState<Property[]>([]);
   const [receivedOffers, setReceivedOffers] = useState<Offer[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -55,6 +57,16 @@ export const AgentDashboard: React.FC = () => {
       { id: 4, text: 'Generar valuación AVM para nueva captación en Santo Domingo', completed: false, priority: 'media' },
     ];
   });
+
+  const getTaskLabel = (task: { id: number; text: string }) => {
+    switch (task.id) {
+      case 1: return t('agent.dash.task1', task.text);
+      case 2: return t('agent.dash.task2', task.text);
+      case 3: return t('agent.dash.task3', task.text);
+      case 4: return t('agent.dash.task4', task.text);
+      default: return task.text;
+    }
+  };
 
   const toggleTask = (id: number) => {
     const updated = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
@@ -86,7 +98,7 @@ export const AgentDashboard: React.FC = () => {
   }, []);
 
   if (isLoading) {
-    return <Loader text="Cargando tu panel de agente..." />;
+    return <Loader text={t('agent.dash.loading', 'Cargando tu panel de agente...')} />;
   }
 
   const availableCount = properties.filter((p) => p.status === 'Available' || p.status === 'Disponible').length;
@@ -101,13 +113,13 @@ export const AgentDashboard: React.FC = () => {
         <div>
           <span className="text-emerald-400 text-xs font-extrabold uppercase tracking-widest flex items-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5" />
-            Panel de Agente Inmobiliario
+            {t('agent.dash.badge', 'Panel de Agente Inmobiliario')}
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-1">
-            Bienvenido, {user?.userName}
+            {t('agent.dash.welcome', 'Bienvenido')}, {user?.userName}
           </h1>
           <p className="text-xs text-slate-300 mt-1">
-            Gestiona tus inmuebles asignados, negocia propuestas económicas y atiende solicitudes de visita con conversión de moneda automática.
+            {t('agent.dash.subtitle', 'Gestiona tus inmuebles asignados, negocia propuestas económicas y atiende solicitudes de visita con conversión de moneda automática.')}
           </p>
         </div>
 
@@ -116,7 +128,7 @@ export const AgentDashboard: React.FC = () => {
           className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2"
         >
           <PlusCircle className="w-4 h-4" />
-          <span>Publicar Inmueble</span>
+          <span>{t('agent.dash.publishBtn', 'Publicar Inmueble')}</span>
         </Link>
       </div>
 
@@ -127,7 +139,7 @@ export const AgentDashboard: React.FC = () => {
             <Home className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Propiedades Activas</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">{t('agent.dash.activeProps', 'Propiedades Activas')}</span>
             <p className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono mt-0.5">{availableCount}</p>
           </div>
         </div>
@@ -137,7 +149,7 @@ export const AgentDashboard: React.FC = () => {
             <CheckCircle className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Ventas Cerradas</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">{t('agent.dash.closedSales', 'Ventas Cerradas')}</span>
             <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">{soldCount}</p>
           </div>
         </div>
@@ -147,7 +159,7 @@ export const AgentDashboard: React.FC = () => {
             <Tag className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Ofertas Pendientes</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">{t('agent.dash.pendingOffers', 'Ofertas Pendientes')}</span>
             <p className="text-2xl font-extrabold text-amber-600 dark:text-amber-400 font-mono mt-0.5">{pendingOffersCount}</p>
           </div>
         </div>
@@ -157,7 +169,7 @@ export const AgentDashboard: React.FC = () => {
             <Calendar className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Citas Agendadas</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">{t('agent.dash.scheduledAppts', 'Citas Agendadas')}</span>
             <p className="text-2xl font-extrabold text-royal-600 dark:text-indigo-400 font-mono mt-0.5">{appointments.length}</p>
           </div>
         </div>
@@ -168,15 +180,15 @@ export const AgentDashboard: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
           <div>
             <span className="text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400 tracking-wider">
-              Gestión Operativa de Corretaje
+              {t('agent.dash.dailyTasksTag', 'Gestión Operativa de Corretaje')}
             </span>
             <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
               <CheckSquare className="w-5 h-5 text-emerald-600" />
-              Tareas & Seguimientos Diarios
+              {t('agent.dash.dailyTasksTitle', 'Tareas & Seguimientos Diarios')}
             </h2>
           </div>
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-            {tasks.filter(t => t.completed).length} de {tasks.length} completadas
+            {tasks.filter(t => t.completed).length} de {tasks.length} {t('agent.dash.dailyTasksProgress', 'completadas')}
           </span>
         </div>
 
@@ -198,7 +210,7 @@ export const AgentDashboard: React.FC = () => {
                   <Square className="w-4 h-4 text-slate-400 shrink-0" />
                 )}
                 <span className={`text-xs font-semibold ${task.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200'}`}>
-                  {task.text}
+                  {getTaskLabel(task)}
                 </span>
               </div>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0 ${
@@ -206,7 +218,7 @@ export const AgentDashboard: React.FC = () => {
                   ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
                   : 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
               }`}>
-                {task.priority}
+                {task.priority === 'alta' ? t('agent.dash.priorityHigh', 'alta') : t('agent.dash.priorityMedium', 'media')}
               </span>
             </div>
           ))}
@@ -217,7 +229,7 @@ export const AgentDashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1">
           <ChartCard
-            title="Mis Comisiones"
+            title={t('agent.dash.chartCommissions', 'Mis Comisiones')}
             subtitle={commissionSummary ? formatPrice(commissionSummary.totalAmount) : '—'}
             icon={<Wallet className="w-5 h-5 text-emerald-600" />}
           >
@@ -226,8 +238,8 @@ export const AgentDashboard: React.FC = () => {
                 <PieChart>
                   <Pie
                     data={[
-                      { name: 'Pendientes', value: commissionSummary?.pendingAmount || 0 },
-                      { name: 'Pagadas', value: commissionSummary?.paidAmount || 0 },
+                      { name: t('agent.dash.pending', 'Pendientes'), value: commissionSummary?.pendingAmount || 0 },
+                      { name: t('agent.dash.paid', 'Pagadas'), value: commissionSummary?.paidAmount || 0 },
                     ]}
                     dataKey="value"
                     nameKey="name"
@@ -246,7 +258,7 @@ export const AgentDashboard: React.FC = () => {
               </ResponsiveContainer>
             ) : (
               <p className="text-xs text-slate-400 py-10 text-center">
-                Aún no se han generado comisiones por ventas cerradas.
+                {t('agent.dash.chartCommissionsEmpty', 'Aún no se han generado comisiones por ventas cerradas.')}
               </p>
             )}
           </ChartCard>
@@ -254,8 +266,8 @@ export const AgentDashboard: React.FC = () => {
 
         <div className="lg:col-span-2">
           <ChartCard
-            title="Citas por Estado"
-            subtitle={`${appointments.length} visitas`}
+            title={t('agent.dash.chartAppts', 'Citas por Estado')}
+            subtitle={`${appointments.length} ${t('agent.dash.chartApptsVisits', 'visitas')}`}
             icon={<Calendar className="w-5 h-5 text-royal-600" />}
           >
             {appointments.length > 0 ? (
@@ -263,19 +275,19 @@ export const AgentDashboard: React.FC = () => {
                 <BarChart
                   data={[
                     {
-                      name: 'Pendiente',
+                      name: t('agent.dash.pending', 'Pendiente'),
                       Cantidad: appointments.filter((a) => (a.status as string) === 'Pending' || (a.status as string) === 'Pendiente').length,
                     },
                     {
-                      name: 'Confirmada',
+                      name: t('agent.dash.confirmed', 'Confirmada'),
                       Cantidad: appointments.filter((a) => (a.status as string) === 'Confirmed' || (a.status as string) === 'Confirmada').length,
                     },
                     {
-                      name: 'Completada',
+                      name: t('agent.dash.completed', 'Completada'),
                       Cantidad: appointments.filter((a) => (a.status as string) === 'Completed' || (a.status as string) === 'Completada').length,
                     },
                     {
-                      name: 'Cancelada',
+                      name: t('agent.dash.cancelled', 'Cancelada'),
                       Cantidad: appointments.filter((a) => (a.status as string) === 'Cancelled' || (a.status as string) === 'Cancelada').length,
                     },
                   ]}
@@ -290,7 +302,7 @@ export const AgentDashboard: React.FC = () => {
               </ResponsiveContainer>
             ) : (
               <p className="text-xs text-slate-400 py-10 text-center">
-                No tienes citas agendadas todavía.
+                {t('agent.dash.chartApptsEmpty', 'No tienes citas agendadas todavía.')}
               </p>
             )}
           </ChartCard>
@@ -305,23 +317,23 @@ export const AgentDashboard: React.FC = () => {
           <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
             <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
               <Tag className="w-4 h-4 text-emerald-600" />
-              Ofertas Recibidas en tus Inmuebles
+              {t('agent.dash.recentsOffers', 'Ofertas Recibidas en tus Inmuebles')}
             </h3>
             <Link to="/agent/offers" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-              Gestionar Todas
+              {t('agent.dash.manageAll', 'Gestionar Todas')}
             </Link>
           </div>
 
           {receivedOffers.length === 0 ? (
-            <p className="text-xs text-slate-400 dark:text-slate-500 py-6 text-center">No hay ofertas recibidas pendientes de revisión.</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 py-6 text-center">{t('agent.dash.noOffers', 'No hay ofertas recibidas pendientes de revisión.')}</p>
           ) : (
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
               {receivedOffers.slice(0, 4).map((offer) => (
                 <div key={offer.id} className="py-3 flex items-center justify-between gap-2">
                   <div>
-                    <span className="font-bold text-xs text-slate-800 dark:text-slate-200">Propiedad #{offer.propertyCode || offer.propertyId}</span>
+                    <span className="font-bold text-xs text-slate-800 dark:text-slate-200">{t('agent.dash.propertyNumber', 'Propiedad')} #{offer.propertyCode || offer.propertyId}</span>
                     <p className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                      {formatPrice(offer.amount)} • Por {offer.clientName || 'Cliente'}
+                      {formatPrice(offer.amount)} • {t('agent.dash.byClient', 'Por')} {offer.clientName || t('agent.dash.clientDefault', 'Cliente')}
                     </p>
                   </div>
                   <Badge status={offer.status} />
@@ -336,21 +348,21 @@ export const AgentDashboard: React.FC = () => {
           <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
             <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
               <Calendar className="w-4 h-4 text-royal-600 dark:text-indigo-400" />
-              Solicitudes de Visitas
+              {t('agent.dash.recentsAppts', 'Solicitudes de Visitas')}
             </h3>
             <Link to="/agent/appointments" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-              Ver Calendario
+              {t('agent.dash.viewCalendar', 'Ver Calendario')}
             </Link>
           </div>
 
           {appointments.length === 0 ? (
-            <p className="text-xs text-slate-400 dark:text-slate-500 py-6 text-center">No tienes solicitudes de visitas pendientes.</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 py-6 text-center">{t('agent.dash.noAppts', 'No tienes solicitudes de visitas pendientes.')}</p>
           ) : (
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
               {appointments.slice(0, 4).map((appt) => (
                 <div key={appt.id} className="py-3 flex items-center justify-between gap-2">
                   <div>
-                    <span className="font-bold text-xs text-slate-800 dark:text-slate-200">Propiedad #{appt.propertyCode || appt.propertyId}</span>
+                    <span className="font-bold text-xs text-slate-800 dark:text-slate-200">{t('agent.dash.propertyNumber', 'Propiedad')} #{appt.propertyCode || appt.propertyId}</span>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">
                       {formatDate(appt.date)} • {appt.timeSlot}
                     </p>

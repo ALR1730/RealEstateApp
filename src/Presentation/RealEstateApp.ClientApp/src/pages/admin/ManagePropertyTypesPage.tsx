@@ -7,8 +7,23 @@ import { getApiErrorMessage } from '../../utils/formatters';
 import { Building2, Plus, Edit2, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
+function getPropertyTypeName(name: string, language: string): string {
+  if (language !== 'en' || !name) return name;
+  const n = name.toLowerCase().trim();
+  if (n === 'apartamento') return 'Apartment';
+  if (n === 'casa') return 'House';
+  if (n === 'villa') return 'Villa';
+  if (n === 'penthouse') return 'Penthouse';
+  if (n === 'solar' || n === 'terreno') return 'Land / Lot';
+  if (n === 'local comercial' || n === 'comercial') return 'Commercial Property';
+  if (n === 'edificio') return 'Building';
+  if (n === 'oficina') return 'Office';
+  if (n === 'finca') return 'Farm / Ranch';
+  return name;
+}
+
 export const ManagePropertyTypesPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [types, setTypes] = useState<PropertyType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -17,6 +32,7 @@ export const ManagePropertyTypesPage: React.FC = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const [deleteConfirmType, setDeleteConfirmType] = useState<PropertyType | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -41,6 +57,7 @@ export const ManagePropertyTypesPage: React.FC = () => {
     setEditingType(null);
     setName('');
     setDescription('');
+    setSaveError(null);
     setModalOpen(true);
   };
 
@@ -48,6 +65,7 @@ export const ManagePropertyTypesPage: React.FC = () => {
     setEditingType(pt);
     setName(pt.name);
     setDescription(pt.description || '');
+    setSaveError(null);
     setModalOpen(true);
   };
 
@@ -76,6 +94,7 @@ export const ManagePropertyTypesPage: React.FC = () => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
+      setSaveError(null);
       if (editingType) {
         await catalogsService.updatePropertyType(editingType.id, { name, description });
       } else {
@@ -83,8 +102,9 @@ export const ManagePropertyTypesPage: React.FC = () => {
       }
       setModalOpen(false);
       loadTypes();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error saving property type:", err);
+      setSaveError(getApiErrorMessage(err, t('admin.propType.saveError', 'Error al guardar el tipo de propiedad.')));
     } finally {
       setIsSubmitting(false);
     }
@@ -115,6 +135,16 @@ export const ManagePropertyTypesPage: React.FC = () => {
 
       {isLoading ? (
         <Loader text={t('admin.propType.loading', 'Cargando tipos de propiedad...')} />
+      ) : types.length === 0 ? (
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800 space-y-3">
+          <Building2 className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto" />
+          <h3 className="text-base font-bold text-slate-800 dark:text-white">
+            {t('admin.propType.emptyTitle', 'Sin tipos de propiedad')}
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+            {t('admin.propType.emptyDesc', 'No hay tipos de propiedad registrados en el catálogo. Comienza creando uno nuevo.')}
+          </p>
+        </div>
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
@@ -131,13 +161,20 @@ export const ManagePropertyTypesPage: React.FC = () => {
                 {types.map((pt) => (
                   <tr key={pt.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                     <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
-                      {pt.name}
+                      {language === 'en' ? getPropertyTypeName(pt.name, language) : pt.name}
+                      {language === 'en' && getPropertyTypeName(pt.name, language) !== pt.name && (
+                        <span className="block text-[10px] text-slate-400 font-normal">
+                          {t('admin.propType.originalName', 'Original')}: {pt.name}
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 px-4 text-slate-600 dark:text-slate-300 max-w-sm truncate">
                       {pt.description || t('admin.propType.noDesc', 'Sin descripción')}
                     </td>
                     <td className="py-3 px-4 font-mono font-bold text-brand-600 dark:text-brand-400">
-                      {pt.propertiesCount !== undefined ? `${pt.propertiesCount} ${t('admin.propType.propertiesCount', 'inmuebles')}` : 'N/A'}
+                      {pt.propertiesCount !== undefined
+                        ? `${pt.propertiesCount} ${pt.propertiesCount === 1 ? t('admin.propType.propertyCountSingle', 'inmueble') : t('admin.propType.propertiesCount', 'inmuebles')}`
+                        : 'N/A'}
                     </td>
                     <td className="py-3 px-4 text-right space-x-1">
                       <button
@@ -192,6 +229,12 @@ export const ManagePropertyTypesPage: React.FC = () => {
                 className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500"
               />
             </div>
+
+            {saveError && (
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-xl text-rose-700 dark:text-rose-300 text-xs font-semibold">
+                {saveError}
+              </div>
+            )}
 
             <div className="pt-3 flex justify-end gap-2">
               <button

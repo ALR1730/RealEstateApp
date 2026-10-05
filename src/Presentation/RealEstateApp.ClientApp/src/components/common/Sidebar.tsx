@@ -278,15 +278,15 @@ export const Sidebar: React.FC = () => {
                 </NavLink>
                 <NavLink to="/admin/reviews" className={navClass}>
                   <Star className="w-4 h-4" />
-                  {t('sidebar.reviews', 'Reseñas de Agentes')}
+                  {t('sidebar.adminReviews', 'Reseñas de Agentes')}
                 </NavLink>
                 <NavLink to="/admin/commissions" className={navClass}>
                   <Wallet className="w-4 h-4" />
-                  {t('sidebar.commissions', 'Comisiones por Venta')}
+                  {t('sidebar.adminCommissions', 'Comisiones por Venta')}
                 </NavLink>
                 <NavLink to="/admin/documents" className={navClass}>
                   <FileText className="w-4 h-4" />
-                  {t('sidebar.documents', 'Documentos Legales')}
+                  {t('sidebar.adminDocuments', 'Documentos Legales')}
                 </NavLink>
                 <NavLink to="/admin/agents" className={navClass}>
                   <UserCheck className="w-4 h-4" />

@@ -43,7 +43,7 @@ export const Badge: React.FC<BadgeProps> = ({ status, children, variant, size = 
       case 'paid':
       case 'pagada':
         v = 'success';
-        text = children || status;
+        text = children || t('status.paid', 'Pagada');
         break;
       case 'reserved':
       case 'reservada':
@@ -56,8 +56,9 @@ export const Badge: React.FC<BadgeProps> = ({ status, children, variant, size = 
         text = children || t('status.pending', 'Pendiente');
         break;
       case 'counteroffered':
+      case 'contraofertada':
         v = 'warning';
-        text = children || status;
+        text = children || t('status.counteroffered', 'Contraofertada');
         break;
       case 'sold':
       case 'vendida':

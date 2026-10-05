@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { propertiesService } from '../../api/services';
 import { Property } from '../../types';
 import { useCurrency } from '../../context/CurrencyContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
 import { Home, PlusCircle, Trash2, ExternalLink, Image as ImageIcon, FileText } from 'lucide-react';
 
 export const MyPropertiesPage: React.FC = () => {
   const { formatPrice } = useCurrency();
+  const { t } = useLanguage();
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -33,13 +35,13 @@ export const MyPropertiesPage: React.FC = () => {
   }, [refreshKey]);
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("¿Seguro que deseas eliminar esta propiedad? Esta acción no se puede deshacer.")) return;
+    if (!window.confirm(t('agent.myProps.deleteConfirm', '¿Seguro que deseas eliminar esta propiedad? Esta acción no se puede deshacer.'))) return;
     try {
       await propertiesService.delete(id);
       setRefreshKey((k) => k + 1);
     } catch (err) {
       console.error("Error deleting property:", err);
-      alert("Error al eliminar la propiedad.");
+      alert(t('agent.myProps.deleteError', 'Error al eliminar la propiedad.'));
     }
   };
 
@@ -50,10 +52,10 @@ export const MyPropertiesPage: React.FC = () => {
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <Home className="w-6 h-6 text-brand-600 dark:text-brand-400" />
-            Mis Propiedades Publicadas
+            {t('agent.myProps.title', 'Mis Propiedades Publicadas')}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Administra tu portafolio, edita detalles y sube hasta 15 fotografías por inmueble.
+            {t('agent.myProps.subtitle', 'Administra tu portafolio, edita detalles y sube hasta 15 fotografías por inmueble.')}
           </p>
         </div>
 
@@ -62,24 +64,24 @@ export const MyPropertiesPage: React.FC = () => {
           className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all"
         >
           <PlusCircle className="w-4 h-4" />
-          <span>Publicar Nuevo Inmueble</span>
+          <span>{t('agent.myProps.publishBtn', 'Publicar Nuevo Inmueble')}</span>
         </Link>
       </div>
 
       {isLoading ? (
-        <Loader text="Cargando tu portafolio de propiedades..." />
+        <Loader text={t('agent.myProps.loading', 'Cargando tu portafolio de propiedades...')} />
       ) : properties.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800 space-y-4">
           <Home className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800 dark:text-white">No tienes propiedades publicadas aún</h3>
+          <h3 className="text-base font-bold text-slate-800 dark:text-white">{t('agent.myProps.emptyTitle', 'No tienes propiedades publicadas aún')}</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-            Comienza a publicar inmuebles residenciales o comerciales para recibir ofertas y solicitudes de visitas.
+            {t('agent.myProps.emptySubtitle', 'Comienza a publicar inmuebles residenciales o comerciales para recibir ofertas y solicitudes de visitas.')}
           </p>
           <Link
             to="/agent/properties/create"
             className="inline-block px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md"
           >
-            Publicar Inmueble Ahora
+            {t('agent.myProps.emptyBtn', 'Publicar Inmueble Ahora')}
           </Link>
         </div>
       ) : (
@@ -88,12 +90,12 @@ export const MyPropertiesPage: React.FC = () => {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
-                  <th className="py-3.5 px-4">Inmueble</th>
-                  <th className="py-3.5 px-4">Tipo / Venta</th>
-                  <th className="py-3.5 px-4">Precio (RD$)</th>
-                  <th className="py-3.5 px-4">Características</th>
-                  <th className="py-3.5 px-4">Estado</th>
-                  <th className="py-3.5 px-4 text-right">Acciones</th>
+                  <th className="py-3.5 px-4">{t('agent.myProps.colProperty', 'Inmueble')}</th>
+                  <th className="py-3.5 px-4">{t('agent.myProps.colTypeSale', 'Tipo / Venta')}</th>
+                  <th className="py-3.5 px-4">{t('agent.myProps.colPrice', 'Precio (RD$)')}</th>
+                  <th className="py-3.5 px-4">{t('agent.myProps.colFeatures', 'Características')}</th>
+                  <th className="py-3.5 px-4">{t('agent.myProps.colStatus', 'Estado')}</th>
+                  <th className="py-3.5 px-4 text-right">{t('agent.myProps.colActions', 'Acciones')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -124,7 +126,7 @@ export const MyPropertiesPage: React.FC = () => {
                       {formatPrice(prop.price)}
                     </td>
                     <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
-                      {prop.bedrooms ?? prop.rooms ?? 0} hab • {prop.bathrooms} bñ • {prop.landSizeMeters ?? prop.sizeInMeters ?? 0} m²
+                      {prop.bedrooms ?? prop.rooms ?? 0} {t('agent.myProps.hab', 'hab')} • {prop.bathrooms} {t('agent.myProps.bth', 'bñ')} • {prop.landSizeMeters ?? prop.sizeInMeters ?? 0} m²
                     </td>
                     <td className="py-3 px-4">
                       <Badge status={prop.status} />
@@ -133,21 +135,21 @@ export const MyPropertiesPage: React.FC = () => {
                       <Link
                         to={`/property/${prop.id}`}
                         className="inline-block p-2 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                        title="Ver en Catálogo"
+                        title={t('agent.myProps.viewCatalog', 'Ver en Catálogo')}
                       >
                         <ExternalLink className="w-4 h-4" />
                       </Link>
                       <Link
                         to={`/agent/documents/${prop.id}`}
                         className="inline-block p-2 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                        title="Documentos Legales"
+                        title={t('agent.myProps.legalDocs', 'Documentos Legales')}
                       >
                         <FileText className="w-4 h-4" />
                       </Link>
                       <button
                         onClick={() => handleDelete(prop.id)}
                         className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
-                        title="Eliminar Inmueble"
+                        title={t('agent.myProps.deleteProp', 'Eliminar Inmueble')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

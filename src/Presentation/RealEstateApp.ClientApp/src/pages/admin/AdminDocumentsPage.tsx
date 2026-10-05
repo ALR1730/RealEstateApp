@@ -12,8 +12,32 @@ function formatSize(bytes: number): string {
   return `${bytes} B`;
 }
 
+function getDocTypeLabel(type: string, t: (k: string, f?: string) => string): string {
+  if (!type) return '';
+  const normalized = type.toLowerCase().trim();
+  if (normalized === 'título de propiedad' || normalized === 'titulo de propiedad' || normalized === 'property title') {
+    return t('docType.title', 'Título de propiedad');
+  }
+  if (normalized === 'contrato de compra-venta' || normalized === 'contrato de compraventa' || normalized === 'sales contract') {
+    return t('docType.salesContract', 'Contrato de compra-venta');
+  }
+  if (normalized === 'contrato de alquiler' || normalized === 'lease agreement') {
+    return t('docType.leaseAgreement', 'Contrato de alquiler');
+  }
+  if (normalized === 'carta de pre-aprobación' || normalized === 'carta de pre-aprobacion' || normalized === 'pre-approval letter') {
+    return t('docType.preApproval', 'Carta de pre-aprobación');
+  }
+  if (normalized === 'certificación de registro' || normalized === 'certificacion de registro' || normalized === 'registry certification') {
+    return t('docType.registryCert', 'Certificación de registro');
+  }
+  if (normalized === 'otro' || normalized === 'other') {
+    return t('docType.other', 'Otro');
+  }
+  return type;
+}
+
 export const AdminDocumentsPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [documents, setDocuments] = useState<PropertyDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,13 +67,15 @@ export const AdminDocumentsPage: React.FC = () => {
   }, []);
 
   const handleDelete = async (doc: PropertyDocument) => {
-    if (!window.confirm(`¿Eliminar "${doc.originalFileName}"? ${t('admin.docs.confirmDelete', 'Esta acción no se puede deshacer.')}`)) return;
+    const confirmPattern = t('admin.docs.deleteConfirmSpecific', '¿Eliminar "{name}"? Esta acción no se puede deshacer.');
+    const confirmMsg = confirmPattern.replace('{name}', doc.originalFileName);
+    if (!window.confirm(confirmMsg)) return;
     try {
       await documentsService.remove(doc.id);
       await loadAll();
     } catch (err) {
       console.error("Error deleting document:", err);
-      alert(t('admin.common.error', "Error al eliminar el documento."));
+      alert(t('admin.docs.errorDeleting', "Error al eliminar el documento."));
     }
   };
 
@@ -127,11 +153,11 @@ export const AdminDocumentsPage: React.FC = () => {
                     </td>
                     <td className="py-3 px-4">
                       <span className="inline-flex items-center px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-lg text-[10px]">
-                        {doc.documentType}
+                        {getDocTypeLabel(doc.documentType, t)}
                       </span>
                     </td>
                     <td className="py-3 px-4 font-semibold text-slate-600 dark:text-slate-300">{doc.uploadedByName || doc.uploadedBy}</td>
-                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium">{formatDate(doc.uploadedAt)}</td>
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium">{formatDate(doc.uploadedAt, language === 'en' ? 'en-US' : 'es-DO')}</td>
                     <td className="py-3 px-4 text-right space-x-1">
                       <a
                         href={doc.fileUrl}

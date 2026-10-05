@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { subscriptionsService } from '../../api/services';
 import { SubscriptionPlan, AgentSubscription } from '../../types';
 import { useCurrency } from '../../context/CurrencyContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Loader } from '../../components/common/Loader';
 import { getApiErrorMessage } from '../../utils/formatters';
 import { Award, Check, Zap, Sparkles, CreditCard, Lock } from 'lucide-react';
 
 export const AgentSubscriptionPage: React.FC = () => {
+  const { t } = useLanguage();
   const { formatPrice } = useCurrency();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [currentSub, setCurrentSub] = useState<AgentSubscription | null>(null);
@@ -81,19 +83,19 @@ export const AgentSubscriptionPage: React.FC = () => {
 
     const cleanCard = cardNumber.replace(/\s/g, '');
     if (cleanCard.length < 15) {
-      setCardError("Ingresa un número de tarjeta válido (15-16 dígitos).");
+      setCardError(t('agent.subs.valCardNumber', "Ingresa un número de tarjeta válido (15-16 dígitos)."));
       return;
     }
     if (cardExpiry.length < 5) {
-      setCardError("Ingresa una fecha de expiración válida (MM/AA).");
+      setCardError(t('agent.subs.valExpiry', "Ingresa una fecha de expiración válida (MM/AA)."));
       return;
     }
     if (cardCvc.length < 3) {
-      setCardError("Ingresa un código CVC válido.");
+      setCardError(t('agent.subs.valCvc', "Ingresa un código CVC válido."));
       return;
     }
     if (!cardHolder.trim()) {
-      setCardError("Ingresa el nombre del titular como figura en la tarjeta.");
+      setCardError(t('agent.subs.valHolder', "Ingresa el nombre del titular como figura en la tarjeta."));
       return;
     }
 
@@ -102,7 +104,7 @@ export const AgentSubscriptionPage: React.FC = () => {
       setCardError(null);
       const mockPaymentToken = `tok_cardnet_${cleanCard.slice(-4)}_${Date.now()}`;
       await subscriptionsService.upgrade(selectedPlanId, mockPaymentToken);
-      setSuccessMsg("¡Plan actualizado y activado exitosamente! Tu límite de inmuebles destacados ha sido ampliado.");
+      setSuccessMsg(t('agent.subs.upgradeSuccess', "¡Plan actualizado y activado exitosamente! Tu límite de inmuebles destacados ha sido ampliado."));
       setShowCheckoutModal(false);
       setRefreshKey((k) => k + 1);
     } catch (err: unknown) {
@@ -113,7 +115,7 @@ export const AgentSubscriptionPage: React.FC = () => {
     }
   };
 
-  if (isLoading) return <Loader text="Cargando planes de membresía..." />;
+  if (isLoading) return <Loader text={t('agent.subs.loading', "Cargando planes de membresía...")} />;
 
   const selectedPlan = plans.find((p) => p.id === selectedPlanId);
 
@@ -122,28 +124,28 @@ export const AgentSubscriptionPage: React.FC = () => {
       
       <div className="text-center max-w-2xl mx-auto space-y-2">
         <span className="text-xs font-extrabold uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-slate-800 border dark:border-slate-700 px-3 py-1 rounded-full">
-          Planes y Membresías
+          {t('agent.subs.badge', "Planes y Membresías")}
         </span>
         <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          Impulsa tus Ventas Inmobiliarias
+          {t('agent.subs.title', "Impulsa tus Ventas Inmobiliarias")}
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-          Elige el plan ideal para destacar más propiedades, recibir clientes prioritarios y maximizar tus cierres.
+          {t('agent.subs.subtitle', "Elige el plan ideal para destacar más propiedades, recibir clientes prioritarios y maximizar tus cierres.")}
         </p>
       </div>
 
       {currentSub && (
         <div className="bg-gradient-to-r from-brand-900 to-navy-950 text-white p-6 rounded-3xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border dark:border-slate-800">
           <div>
-            <span className="text-xs text-brand-200 font-bold uppercase tracking-wider">Tu Plan Activo</span>
-            <h3 className="text-xl font-extrabold text-white mt-0.5">{currentSub.planName || 'Plan Gratuito'}</h3>
+            <span className="text-xs text-brand-200 font-bold uppercase tracking-wider">{t('agent.subs.activePlan', "Tu Plan Activo")}</span>
+            <h3 className="text-xl font-extrabold text-white mt-0.5">{currentSub.planName || t('agent.subs.free', 'Plan Gratuito')}</h3>
             <p className="text-xs text-slate-300 mt-1">
-              Destacados permitidos: <strong>{currentSub.maxFeaturedProperties || 0} inmuebles</strong> | Vence: {new Date(currentSub.endDate).toLocaleDateString()}
+              {t('agent.subs.featuredAllowed', 'Destacados permitidos:')} <strong>{currentSub.maxFeaturedProperties || 0} {t('agent.subs.properties', 'inmuebles')}</strong> | {t('agent.subs.expires', 'Vence:')} {new Date(currentSub.endDate).toLocaleDateString()}
             </p>
           </div>
           <span className="px-3.5 py-1.5 bg-emerald-500 text-white font-extrabold text-xs rounded-full shadow-sm flex items-center gap-1.5">
             <Award className="w-4 h-4" />
-            <span>Membresía Activa</span>
+            <span>{t('agent.subs.activeMembership', "Membresía Activa")}</span>
           </span>
         </div>
       )}
@@ -172,7 +174,7 @@ export const AgentSubscriptionPage: React.FC = () => {
               {isPro && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-navy-950 font-extrabold text-[10px] tracking-wider uppercase px-3 py-1 rounded-full shadow-md flex items-center gap-1">
                   <Sparkles className="w-3 h-3" />
-                  <span>Más Popular</span>
+                  <span>{t('agent.subs.mostPopular', "Más Popular")}</span>
                 </div>
               )}
 
@@ -184,30 +186,30 @@ export const AgentSubscriptionPage: React.FC = () => {
 
                 <div className="pt-2">
                   <span className="text-3xl font-extrabold font-mono tracking-tight">
-                    {plan.monthlyPrice === 0 ? 'Gratis' : formatPrice(plan.monthlyPrice)}
+                    {plan.monthlyPrice === 0 ? t('agent.subs.free', 'Gratis') : formatPrice(plan.monthlyPrice)}
                   </span>
                   {plan.monthlyPrice > 0 && (
-                    <span className={`text-xs font-medium ml-1.5 ${isPro ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'}`}>/mes</span>
+                    <span className={`text-xs font-medium ml-1.5 ${isPro ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'}`}>{t('agent.subs.perMonth', '/mes')}</span>
                   )}
                 </div>
 
                 <div className="space-y-2.5 pt-4 border-t border-slate-100/20 text-xs">
                   <div className="flex items-center gap-2 font-bold">
                     <Check className={`w-4 h-4 ${isPro ? 'text-amber-400' : 'text-brand-600'}`} />
-                    <span>Hasta {plan.maxFeaturedProperties} inmuebles destacados</span>
+                    <span>{t('agent.subs.upToFeatured', 'Hasta {count} inmuebles destacados').replace('{count}', String(plan.maxFeaturedProperties))}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className={`w-4 h-4 ${isPro ? 'text-amber-400' : 'text-brand-600'}`} />
-                    <span>Insignia de Corredor Certificado</span>
+                    <span>{t('agent.subs.badgeCertified', "Insignia de Corredor Certificado")}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className={`w-4 h-4 ${isPro ? 'text-amber-400' : 'text-brand-600'}`} />
-                    <span>Chat SignalR y mensajería directa</span>
+                    <span>{t('agent.subs.chatDirect', "Chat SignalR y mensajería directa")}</span>
                   </div>
                   {isPro && (
                     <div className="flex items-center gap-2 font-semibold text-amber-300">
                       <Zap className="w-4 h-4 text-amber-400" />
-                      <span>Prioridad en resultados de búsqueda</span>
+                      <span>{t('agent.subs.searchPriority', "Prioridad en resultados de búsqueda")}</span>
                     </div>
                   )}
                 </div>
@@ -219,7 +221,7 @@ export const AgentSubscriptionPage: React.FC = () => {
                     disabled
                     className="w-full py-2.5 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl font-bold text-xs cursor-default"
                   >
-                    Plan Actual
+                    {t('agent.subs.currentPlan', "Plan Actual")}
                   </button>
                 ) : (
                   <button
@@ -230,7 +232,7 @@ export const AgentSubscriptionPage: React.FC = () => {
                         : 'bg-brand-600 hover:bg-brand-700 text-white'
                     }`}
                   >
-                    {plan.monthlyPrice === 0 ? 'Seleccionar Plan' : 'Mejorar a este Plan'}
+                    {plan.monthlyPrice === 0 ? t('agent.subs.selectPlan', 'Seleccionar Plan') : t('agent.subs.upgradePlan', 'Mejorar a este Plan')}
                   </button>
                 )}
               </div>
@@ -246,7 +248,7 @@ export const AgentSubscriptionPage: React.FC = () => {
             <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
               <h3 className="font-extrabold text-lg text-slate-900 dark:text-white flex items-center gap-2">
                 <CreditCard className="w-5 h-5 text-brand-600 dark:text-brand-400" />
-                Pasarela de Pago Segura
+                {t('agent.subs.checkoutTitle', "Pasarela de Pago Segura")}
               </h3>
               <button
                 onClick={() => setShowCheckoutModal(false)}
@@ -258,16 +260,16 @@ export const AgentSubscriptionPage: React.FC = () => {
 
             <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl space-y-2 border border-slate-200 dark:border-slate-700">
               <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300">
-                <span>Plan seleccionado:</span>
+                <span>{t('agent.subs.selectedPlan', "Plan seleccionado:")}</span>
                 <strong className="text-slate-900 dark:text-white">{selectedPlan.name}</strong>
               </div>
               <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300">
-                <span>Inmuebles destacados:</span>
+                <span>{t('agent.subs.featuredProps', "Inmuebles destacados:")}</span>
                 <strong className="text-slate-900 dark:text-white">{selectedPlan.maxFeaturedProperties}</strong>
               </div>
               <div className="flex justify-between text-sm font-extrabold pt-2 border-t border-slate-200 dark:border-slate-700 text-brand-600 dark:text-brand-400">
-                <span>Total mensual:</span>
-                <span className="font-mono">{formatPrice(selectedPlan.monthlyPrice)} / mes</span>
+                <span>{t('agent.subs.monthlyTotal', "Total mensual:")}</span>
+                <span className="font-mono">{formatPrice(selectedPlan.monthlyPrice)} {t('agent.subs.perMonth', '/mes')}</span>
               </div>
             </div>
 
@@ -275,12 +277,12 @@ export const AgentSubscriptionPage: React.FC = () => {
             <form onSubmit={handleConfirmUpgrade} className="space-y-3">
               <div>
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                  Titular de la Tarjeta
+                  {t('agent.subs.cardHolder', "Titular de la Tarjeta")}
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ej. Juan Pérez"
+                  placeholder={t('agent.subs.cardHolderPlaceholder', "Ej. Juan Pérez")}
                   value={cardHolder}
                   onChange={(e) => setCardHolder(e.target.value)}
                   className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
@@ -289,7 +291,7 @@ export const AgentSubscriptionPage: React.FC = () => {
 
               <div>
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                  Número de Tarjeta (Visa, Mastercard)
+                  {t('agent.subs.cardNumber', "Número de Tarjeta (Visa, Mastercard)")}
                 </label>
                 <input
                   type="text"
@@ -304,7 +306,7 @@ export const AgentSubscriptionPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                    Vencimiento (MM/AA)
+                    {t('agent.subs.expiry', "Vencimiento (MM/AA)")}
                   </label>
                   <input
                     type="text"
@@ -317,7 +319,7 @@ export const AgentSubscriptionPage: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                    CVC / CVV
+                    {t('agent.subs.cvc', "CVC / CVV")}
                   </label>
                   <input
                     type="password"
@@ -339,7 +341,7 @@ export const AgentSubscriptionPage: React.FC = () => {
 
               <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-2">
                 <Lock className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Simulación de pasarela segura CardNet / Azul (RD$).</span>
+                <span>{t('agent.subs.secureGatewayNotice', "Simulación de pasarela segura CardNet / Azul (RD$).")}</span>
               </div>
 
               <div className="flex gap-2 pt-2">
@@ -348,14 +350,14 @@ export const AgentSubscriptionPage: React.FC = () => {
                   onClick={() => setShowCheckoutModal(false)}
                   className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-colors"
                 >
-                  Cancelar
+                  {t('agent.subs.cancel', "Cancelar")}
                 </button>
                 <button
                   type="submit"
                   disabled={isUpgrading}
                   className="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-extrabold shadow-md transition-all flex items-center justify-center gap-1.5"
                 >
-                  {isUpgrading ? 'Procesando Pago...' : 'Pagar y Activar'}
+                  {isUpgrading ? t('agent.subs.processingPayment', 'Procesando Pago...') : t('agent.subs.payAndActivate', 'Pagar y Activar')}
                 </button>
               </div>
             </form>

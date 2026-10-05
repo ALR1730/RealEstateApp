@@ -17,13 +17,13 @@ export function formatCurrencyRD(amount: number | null | undefined): string {
 }
 
 /**
- * Formatea una fecha ISO o string a formato legible en español.
+ * Formatea una fecha ISO o string a formato legible según el locale especificado (por defecto es-DO).
  */
-export function formatDate(dateString?: string): string {
+export function formatDate(dateString?: string, locale: string = 'es-DO'): string {
   if (!dateString) return '';
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return dateString;
-  return new Intl.DateTimeFormat('es-DO', {
+  return new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',

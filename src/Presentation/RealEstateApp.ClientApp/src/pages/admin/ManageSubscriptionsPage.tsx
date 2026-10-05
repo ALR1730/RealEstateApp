@@ -120,6 +120,35 @@ export const ManageSubscriptionsPage: React.FC = () => {
     }
   };
 
+  const getPlanDisplayName = (plan: SubscriptionPlan) => {
+    const lower = plan.name.toLowerCase();
+    if (lower.includes('gratuito') || lower.includes('starter')) {
+      return t('admin.subs.planStarter', plan.name);
+    }
+    if (lower.includes('profesional') || lower.includes('pro')) {
+      return t('admin.subs.planPro', plan.name);
+    }
+    if (lower.includes('inmobiliaria') || lower.includes('premium') || lower.includes('brokerage')) {
+      return t('admin.subs.planAgency', plan.name);
+    }
+    return plan.name;
+  };
+
+  const getPlanDisplayDesc = (plan: SubscriptionPlan) => {
+    if (!plan.description) return '';
+    const desc = plan.description;
+    if (desc.includes('comenzando') || desc.includes('esporádica')) {
+      return t('admin.subs.planStarterDesc', desc);
+    }
+    if (desc.includes('agentes activos') || desc.includes('mayor visibilidad')) {
+      return t('admin.subs.planProDesc', desc);
+    }
+    if (desc.includes('firmas inmobiliarias') || desc.includes('top producers')) {
+      return t('admin.subs.planAgencyDesc', desc);
+    }
+    return desc;
+  };
+
   const toggleActive = async (plan: SubscriptionPlan) => {
     try {
       setIsSaving(true);
@@ -127,21 +156,21 @@ export const ManageSubscriptionsPage: React.FC = () => {
       await loadPlans();
     } catch (err) {
       console.error("Error toggling plan:", err);
-      alert(t('admin.common.error', "Error al cambiar el estado del plan."));
+      alert(t('admin.subs.errorToggling', "Error al cambiar el estado del plan."));
     } finally {
       setIsSaving(false);
     }
   };
 
   const deletePlan = async (plan: SubscriptionPlan) => {
-    if (!confirm(t('admin.subs.deleteConfirm', `¿Eliminar el plan "${plan.name}"?`))) return;
+    if (!confirm(t('admin.subs.deletePlanConfirm', `¿Eliminar el plan "{0}"? Esta acción no se puede deshacer.`).replace('{0}', getPlanDisplayName(plan)))) return;
     try {
       setIsSaving(true);
       await subscriptionsService.deletePlan(plan.id);
       await loadPlans();
     } catch (err: unknown) {
       console.error("Error deleting plan:", err);
-      alert(getApiErrorMessage(err, "No se pudo eliminar el plan."));
+      alert(getApiErrorMessage(err, t('admin.subs.errorDeleting', "No se pudo eliminar el plan.")));
     } finally {
       setIsSaving(false);
     }
@@ -155,7 +184,7 @@ export const ManageSubscriptionsPage: React.FC = () => {
   const saveCommission = async (planId: number) => {
     const value = parseFloat(editingValue);
     if (isNaN(value) || value < 0 || value > 100) {
-      alert("Ingresa un porcentaje entre 0 y 100.");
+      alert(t('admin.subs.valCommission', "Ingresa un porcentaje entre 0 y 100."));
       return;
     }
     try {
@@ -165,7 +194,7 @@ export const ManageSubscriptionsPage: React.FC = () => {
       await loadPlans();
     } catch (err) {
       console.error("Error updating commission:", err);
-      alert(t('admin.common.error', "Error al actualizar el porcentaje de comisión."));
+      alert(t('admin.subs.errorUpdatingCommission', "Error al actualizar el porcentaje de comisión."));
     } finally {
       setIsSaving(false);
     }
@@ -219,12 +248,12 @@ export const ManageSubscriptionsPage: React.FC = () => {
         <div className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-brand-200 dark:border-brand-800 shadow-lg p-6 space-y-5">
           <div className="flex items-center justify-between">
             <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-              {editingPlan ? `${t('admin.subs.editPlan', 'Editar Plan')}: ${editingPlan.name}` : t('admin.subs.newPlanModal', 'Nuevo Plan de Suscripción')}
+              {editingPlan ? `${t('admin.subs.editPlan', 'Editar Plan')}: ${getPlanDisplayName(editingPlan)}` : t('admin.subs.newPlanModal', 'Nuevo Plan de Suscripción')}
             </h3>
             <button
               onClick={() => setEditorOpen(false)}
               className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
-              title={t('admin.subs.cancel', "Cerrar")}
+              title={t('admin.subs.close', "Cerrar")}
             >
               <X className="w-4 h-4" />
             </button>
@@ -237,7 +266,7 @@ export const ManageSubscriptionsPage: React.FC = () => {
                 type="text"
                 value={form.name}
                 onChange={(e) => handleField('name', e.target.value)}
-                placeholder="Ej. Profesional (Pro)"
+                placeholder={t('admin.subs.planNamePlaceholder', "Ej. Profesional (Pro)")}
                 className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
             </div>
@@ -289,6 +318,7 @@ export const ManageSubscriptionsPage: React.FC = () => {
               <textarea
                 value={form.description}
                 onChange={(e) => handleField('description', e.target.value)}
+                placeholder={t('admin.subs.descPlaceholder', "Descripción de beneficios y alcance del plan...")}
                 rows={2}
                 className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
@@ -363,10 +393,10 @@ export const ManageSubscriptionsPage: React.FC = () => {
               {plans.map((plan) => (
                 <tr key={plan.id} className={`hover:bg-slate-50/50 dark:hover:bg-slate-800/40 ${!plan.isActive ? 'opacity-60' : ''}`}>
                   <td className="px-6 py-4 font-bold text-slate-900 dark:text-white text-sm">
-                    {plan.name}
+                    {getPlanDisplayName(plan)}
                   </td>
                   <td className="px-6 py-4 text-slate-500 dark:text-slate-400 max-w-xs">
-                    {plan.description}
+                    {getPlanDisplayDesc(plan)}
                   </td>
                   <td className="px-6 py-4 font-mono font-bold text-slate-900 dark:text-white text-sm">
                     {plan.monthlyPrice === 0 ? t('admin.subs.free', 'Gratuito') : formatCurrencyRD(plan.monthlyPrice)}
@@ -374,11 +404,11 @@ export const ManageSubscriptionsPage: React.FC = () => {
                   <td className="px-6 py-4 space-y-1">
                     <span className="flex items-center gap-1 font-bold text-slate-700 dark:text-slate-300">
                       <Home className="w-3 h-3 text-brand-600 dark:text-brand-400" />
-                      {t('admin.subs.upToActive', `Hasta ${plan.maxActiveProperties ?? 3} activas`).replace('{0}', String(plan.maxActiveProperties ?? 3))}
+                      {t('admin.subs.upToActive', 'Hasta {0} activas').replace('{0}', String(plan.maxActiveProperties ?? 3))}
                     </span>
                     <span className="flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400">
                       <Star className="w-3 h-3" />
-                      {t('admin.subs.featuredCount', `${plan.maxFeaturedProperties} destacadas`).replace('{0}', String(plan.maxFeaturedProperties))}
+                      {t('admin.subs.featuredCount', '{0} destacadas').replace('{0}', String(plan.maxFeaturedProperties))}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -399,7 +429,7 @@ export const ManageSubscriptionsPage: React.FC = () => {
                           onClick={() => saveCommission(plan.id)}
                           disabled={isSaving}
                           className="p-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg transition-colors"
-                          title={t('admin.subs.saveChanges', "Guardar comisión")}
+                          title={t('admin.subs.saveCommission', "Guardar comisión")}
                         >
                           <Save className="w-3.5 h-3.5" />
                         </button>
@@ -408,7 +438,7 @@ export const ManageSubscriptionsPage: React.FC = () => {
                       <button
                         onClick={() => startEditCommission(plan)}
                         className="inline-flex items-center gap-1 font-mono font-extrabold text-brand-700 bg-brand-50 border border-brand-100 px-2.5 py-1 rounded-lg hover:ring-1 hover:ring-brand-400 transition-all"
-                        title={t('admin.subs.salesCommission', "Editar comisión")}
+                        title={t('admin.subs.editCommission', "Editar comisión")}
                       >
                         <Percent className="w-3 h-3" />
                         {(plan.commissionPercentage ?? 5.0).toFixed(2)}%
@@ -429,7 +459,7 @@ export const ManageSubscriptionsPage: React.FC = () => {
                     )}
                     {plan.allowsVideo && (
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-royal-700 bg-indigo-50 px-2 py-0.5 rounded-md">
-                        <Video className="w-3 h-3" /> {t('admin.subs.video', "Video")}
+                        <Video className="w-3 h-3" /> {t('admin.subs.video', "Videos")}
                       </span>
                     )}
                   </td>
@@ -461,7 +491,7 @@ export const ManageSubscriptionsPage: React.FC = () => {
                             ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'
                             : 'text-emerald-600 hover:bg-emerald-50'
                         }`}
-                        title={plan.isActive ? t('admin.admins.deactivate', 'Desactivar plan') : t('admin.admins.activate', 'Activar plan')}
+                        title={plan.isActive ? t('admin.subs.deactivatePlan', 'Desactivar plan') : t('admin.subs.activatePlan', 'Activar plan')}
                       >
                         <Power className="w-4 h-4" />
                       </button>
@@ -469,7 +499,7 @@ export const ManageSubscriptionsPage: React.FC = () => {
                         onClick={() => deletePlan(plan)}
                         disabled={isSaving}
                         className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-50"
-                        title={t('admin.common.delete', "Eliminar plan")}
+                        title={t('admin.subs.deletePlan', "Eliminar plan")}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

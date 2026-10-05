@@ -7,6 +7,7 @@ import { EventClickArg } from '@fullcalendar/core';
 import esLocale from '@fullcalendar/core/locales/es';
 import { appointmentsService } from '../../api/services';
 import { Appointment } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 import { Loader } from '../../components/common/Loader';
 import { AppointmentCard } from '../../components/appointments/AppointmentCard';
 import { getApiErrorMessage } from '../../utils/formatters';
@@ -69,6 +70,7 @@ function toCalendarEvents(appointments: Appointment[]): CalendarEvent[] {
 }
 
 export const AgentAppointmentsPage: React.FC = () => {
+  const { language, t } = useLanguage();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
@@ -91,7 +93,7 @@ export const AgentAppointmentsPage: React.FC = () => {
 
   const handleConfirm = async (id: number) => {
     try {
-      await appointmentsService.confirmAppointment(id, "Cita confirmada por el agente.");
+      await appointmentsService.confirmAppointment(id, t('agent.appts.confirmNote', "Cita confirmada por el agente."));
       setSelected(null);
       loadAppointments();
     } catch (err: unknown) {
@@ -100,9 +102,9 @@ export const AgentAppointmentsPage: React.FC = () => {
   };
 
   const handleCancel = async (id: number) => {
-    if (!window.confirm("¿Seguro que deseas cancelar esta cita?")) return;
+    if (!window.confirm(t('agent.appts.cancelConfirm', "¿Seguro que deseas cancelar esta cita?"))) return;
     try {
-      await appointmentsService.cancelAppointment(id, "Cancelada por el agente.");
+      await appointmentsService.cancelAppointment(id, t('agent.appts.cancelNote', "Cancelada por el agente."));
       setSelected(null);
       loadAppointments();
     } catch (err: unknown) {
@@ -112,7 +114,7 @@ export const AgentAppointmentsPage: React.FC = () => {
 
   const handleComplete = async (id: number) => {
     try {
-      await appointmentsService.completeAppointment(id, "Cita completada por el agente.");
+      await appointmentsService.completeAppointment(id, t('agent.appts.completeNote', "Cita completada por el agente."));
       setSelected(null);
       loadAppointments();
     } catch (err: unknown) {
@@ -132,10 +134,10 @@ export const AgentAppointmentsPage: React.FC = () => {
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
             <Calendar className="w-6 h-6 text-royal-600" />
-            Gestión de Citas y Visitas Recibidas
+            {t('agent.appts.title', 'Gestión de Citas y Visitas Recibidas')}
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Visualiza en calendario y gestiona las visitas solicitadas por los clientes compradores.
+            {t('agent.appts.subtitle', 'Visualiza en calendario y gestiona las visitas solicitadas por los clientes compradores.')}
           </p>
         </div>
         <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-xs">
@@ -146,7 +148,7 @@ export const AgentAppointmentsPage: React.FC = () => {
             }`}
           >
             <CalendarDays className="w-3.5 h-3.5" />
-            Calendario
+            {t('agent.appts.tabCalendar', 'Calendario')}
           </button>
           <button
             onClick={() => { setView('list'); setSelected(null); }}
@@ -155,19 +157,19 @@ export const AgentAppointmentsPage: React.FC = () => {
             }`}
           >
             <ListChecks className="w-3.5 h-3.5" />
-            Lista
+            {t('agent.appts.tabList', 'Lista')}
           </button>
         </div>
       </div>
 
       {isLoading ? (
-        <Loader text="Consultando tus citas asignadas..." />
+        <Loader text={t('agent.appts.loading', "Consultando tus citas asignadas...")} />
       ) : appointments.length === 0 ? (
         <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-4">
           <Calendar className="w-12 h-12 text-slate-300 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800">No tienes visitas programadas</h3>
+          <h3 className="text-base font-bold text-slate-800">{t('agent.appts.emptyTitle', 'No tienes visitas programadas')}</h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto">
-            Las solicitudes de visita que agenden los clientes en tus propiedades se listarán aquí.
+            {t('agent.appts.emptySubtitle', 'Las solicitudes de visita que agenden los clientes en tus propiedades se listarán aquí.')}
           </p>
         </div>
       ) : (
@@ -177,17 +179,17 @@ export const AgentAppointmentsPage: React.FC = () => {
               <FullCalendar
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView="dayGridMonth"
-                locale={esLocale}
+                locale={language === 'en' ? undefined : esLocale}
                 headerToolbar={{
                   left: 'prev,next today',
                   center: 'title',
                   right: 'dayGridMonth,timeGridWeek,timeGridDay',
                 }}
                 buttonText={{
-                  today: 'Hoy',
-                  month: 'Mes',
-                  week: 'Semana',
-                  day: 'Día',
+                  today: t('agent.appts.today', 'Hoy'),
+                  month: t('agent.appts.month', 'Mes'),
+                  week: t('agent.appts.week', 'Semana'),
+                  day: t('agent.appts.day', 'Día'),
                 }}
                 height="auto"
                 events={events}
@@ -203,11 +205,11 @@ export const AgentAppointmentsPage: React.FC = () => {
               {selected && (
                 <div className="mt-5 border-t border-slate-200 pt-5">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-bold text-slate-800">Detalle de la visita seleccionada</h3>
+                    <h3 className="text-sm font-bold text-slate-800">{t('agent.appts.selectedDetail', 'Detalle de la visita seleccionada')}</h3>
                     <button
                       onClick={() => setSelected(null)}
                       className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                      title="Cerrar"
+                      title={t('agent.appts.close', 'Cerrar')}
                     >
                       <X className="w-4 h-4" />
                     </button>

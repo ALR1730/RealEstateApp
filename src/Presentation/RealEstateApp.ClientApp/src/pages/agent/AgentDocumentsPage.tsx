@@ -4,6 +4,7 @@ import { documentsService, propertiesService } from '../../api/services';
 import { PropertyDocument, Property, DOCUMENT_TYPES } from '../../types';
 import { formatDate, getApiErrorMessage } from '../../utils/formatters';
 import { Loader } from '../../components/common/Loader';
+import { useLanguage } from '../../context/LanguageContext';
 import { FileText, Upload, Trash2, ArrowLeft, File, Download, Image as ImageIcon, Building2 } from 'lucide-react';
 
 function formatSize(bytes: number): string {
@@ -13,6 +14,7 @@ function formatSize(bytes: number): string {
 }
 
 export const AgentDocumentsPage: React.FC = () => {
+  const { t } = useLanguage();
   const { propertyId } = useParams<{ propertyId: string }>();
   const pid = Number(propertyId);
 
@@ -55,7 +57,7 @@ export const AgentDocumentsPage: React.FC = () => {
 
   const handleUpload = async () => {
     if (!file) {
-      alert("Selecciona un archivo para subir.");
+      alert(t('agent.docs.selectFileAlert', "Selecciona un archivo para subir."));
       return;
     }
     try {
@@ -72,7 +74,7 @@ export const AgentDocumentsPage: React.FC = () => {
   };
 
   const handleDelete = async (doc: PropertyDocument) => {
-    if (!window.confirm(`¿Eliminar "${doc.originalFileName}"? Esta acción no se puede deshacer.`)) return;
+    if (!window.confirm(`${t('agent.docs.deleteConfirm', '¿Eliminar este documento? Esta acción no se puede deshacer.')} (${doc.originalFileName})`)) return;
     try {
       await documentsService.remove(doc.id);
       await loadAll();
@@ -82,7 +84,7 @@ export const AgentDocumentsPage: React.FC = () => {
     }
   };
 
-  if (isLoading) return <Loader text="Cargando documentos de la propiedad..." />;
+  if (isLoading) return <Loader text={t('agent.docs.loading', "Cargando documentos de la propiedad...")} />;
 
   return (
     <div className="space-y-6">
@@ -93,20 +95,20 @@ export const AgentDocumentsPage: React.FC = () => {
             className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 mb-2 transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Volver a Mis Propiedades
+            {t('agent.docs.backToProperties', "Volver a Mis Propiedades")}
           </Link>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <FileText className="w-6 h-6 text-brand-600 dark:text-brand-400" />
-            Documentos Legales
+            {t('agent.docs.title', "Documentos Legales")}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             {property ? (
               <>
                 <Building2 className="inline w-3.5 h-3.5 mr-1" />
-                {property.name || 'Inmueble'} · <span className="font-mono">#{property.code}</span>
+                {property.name || t('agent.avm.property', 'Inmueble')} · <span className="font-mono">#{property.code}</span>
               </>
             ) : (
-              `Inmueble #${pid}`
+              `${t('agent.avm.property', 'Inmueble')} #${pid}`
             )}
           </p>
         </div>
@@ -116,33 +118,33 @@ export const AgentDocumentsPage: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs p-6 space-y-4">
         <h3 className="text-sm font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
           <Upload className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          Subir Nueva Documentación
+          {t('agent.docs.uploadTitle', "Subir Nueva Documentación")}
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
-              Tipo de Documento
+              {t('agent.docs.docType', "Tipo de Documento")}
             </label>
             <select
               value={documentType}
               onChange={(e) => setDocumentType(e.target.value)}
               className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 focus:outline-none"
             >
-              {DOCUMENT_TYPES.map((t) => (
-                <option key={t} value={t}>{t}</option>
+              {DOCUMENT_TYPES.map((tVal) => (
+                <option key={tVal} value={tVal}>{tVal}</option>
               ))}
             </select>
           </div>
           <div className="sm:col-span-2">
             <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
-              Archivo (PDF, imagen u otro · máx 10 MB)
+              {t('agent.docs.fileLabel', "Archivo (PDF, imagen u otro · máx 10 MB)")}
             </label>
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1">
                 <label className="flex-1 cursor-pointer flex items-center gap-2 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/60 hover:border-brand-300 dark:hover:border-brand-500 px-4 py-2.5 transition-colors">
                   <File className="w-4 h-4 text-slate-400 shrink-0" />
                   <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 truncate">
-                    {file ? file.name : 'Elegir archivo...'}
+                    {file ? file.name : t('agent.docs.chooseFile', 'Elegir archivo...')}
                   </span>
                   <input
                     type="file"
@@ -157,7 +159,7 @@ export const AgentDocumentsPage: React.FC = () => {
                 className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-xs shadow-md transition-all"
               >
                 <Upload className="w-4 h-4" />
-                {isUploading ? 'Subiendo...' : 'Subir Documento'}
+                {isUploading ? t('agent.docs.uploading', 'Subiendo...') : t('agent.docs.btnUpload', 'Subir Documento')}
               </button>
             </div>
           </div>
@@ -168,9 +170,9 @@ export const AgentDocumentsPage: React.FC = () => {
       {documents.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800 space-y-2">
           <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800 dark:text-white">Sin documentos registrados</h3>
+          <h3 className="text-base font-bold text-slate-800 dark:text-white">{t('agent.docs.emptyTitle', "Sin documentos registrados")}</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-            Sube títulos de propiedad, contratos, certificaciones o cartas de pre-aprobación para tener el expediente completo.
+            {t('agent.docs.emptySubtitle', "Sube títulos de propiedad, contratos, certificaciones o cartas de pre-aprobación para tener el expediente completo.")}
           </p>
         </div>
       ) : (
@@ -179,12 +181,12 @@ export const AgentDocumentsPage: React.FC = () => {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
-                  <th className="py-3.5 px-4">Vista Previa</th>
-                  <th className="py-3.5 px-4">Archivo</th>
-                  <th className="py-3.5 px-4">Tipo</th>
-                  <th className="py-3.5 px-4">Tamaño</th>
-                  <th className="py-3.5 px-4">Subido el</th>
-                  <th className="py-3.5 px-4 text-right">Acciones</th>
+                  <th className="py-3.5 px-4">{t('agent.docs.colPreview', "Vista Previa")}</th>
+                  <th className="py-3.5 px-4">{t('agent.docs.colFile', "Archivo")}</th>
+                  <th className="py-3.5 px-4">{t('agent.docs.colType', "Tipo")}</th>
+                  <th className="py-3.5 px-4">{t('agent.docs.colSize', "Tamaño")}</th>
+                  <th className="py-3.5 px-4">{t('agent.docs.colUploaded', "Subido el")}</th>
+                  <th className="py-3.5 px-4 text-right">{t('agent.docs.colActions', "Acciones")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -220,14 +222,14 @@ export const AgentDocumentsPage: React.FC = () => {
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex p-2 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                        title="Abrir Documento"
+                        title={t('agent.docs.openDoc', "Abrir Documento")}
                       >
                         <Download className="w-4 h-4" />
                       </a>
                       <button
                         onClick={() => handleDelete(doc)}
                         className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
-                        title="Eliminar Documento"
+                        title={t('agent.docs.deleteDoc', "Eliminar Documento")}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

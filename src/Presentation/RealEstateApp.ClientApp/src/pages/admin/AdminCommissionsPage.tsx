@@ -8,7 +8,7 @@ import { Wallet, CheckCircle2, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 export const AdminCommissionsPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState<number | null>(null);
@@ -46,7 +46,7 @@ export const AdminCommissionsPage: React.FC = () => {
       await loadAll();
     } catch (err) {
       console.error("Error marking commission as paid:", err);
-      alert(t('admin.common.error', "Error al actualizar la comisión."));
+      alert(t('admin.commissions.errorUpdating', "Error al actualizar la comisión."));
     } finally {
       setIsUpdating(null);
     }
@@ -94,17 +94,23 @@ export const AdminCommissionsPage: React.FC = () => {
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
           <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">{t('admin.commissions.pendingPay', "Por Pagar")}</span>
           <p className="text-xl font-extrabold font-mono text-amber-600 dark:text-amber-400">{formatCurrencyRD(totals.pending)}</p>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{totals.pendingCount} {t('admin.commissions.pendingCount', "comisiones pendientes")}</p>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
+            {totals.pendingCount} {totals.pendingCount === 1 ? t('admin.commissions.pendingCountSingle', "comisión pendiente") : t('admin.commissions.pendingCount', "comisiones pendientes")}
+          </p>
         </div>
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
           <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">{t('admin.commissions.paid', "Pagadas")}</span>
           <p className="text-xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400">{formatCurrencyRD(totals.paid)}</p>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{totals.paidCount} {t('admin.commissions.paidCount', "comisiones pagadas")}</p>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
+            {totals.paidCount} {totals.paidCount === 1 ? t('admin.commissions.paidCountSingle', "comisión pagada") : t('admin.commissions.paidCount', "comisiones pagadas")}
+          </p>
         </div>
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
           <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">{t('admin.commissions.totalGenerated', "Total Generado")}</span>
           <p className="text-xl font-extrabold font-mono text-slate-900 dark:text-white">{formatCurrencyRD(totals.paid + totals.pending)}</p>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{commissions.length} {t('admin.commissions.transactions', "transacciones")}</p>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
+            {commissions.length} {commissions.length === 1 ? t('admin.commissions.transactionSingle', "transacción") : t('admin.commissions.transactions', "transacciones")}
+          </p>
         </div>
       </div>
 
@@ -143,7 +149,7 @@ export const AdminCommissionsPage: React.FC = () => {
                     <td className="py-3 px-4 font-mono font-bold text-slate-800 dark:text-slate-200">{formatCurrencyRD(c.salePrice)}</td>
                     <td className="py-3 px-4 font-mono font-bold text-brand-600 dark:text-brand-400">{c.rate.toFixed(2)}%</td>
                     <td className="py-3 px-4 font-mono font-bold text-emerald-600 dark:text-emerald-400">{formatCurrencyRD(c.amount)}</td>
-                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium">{formatDate(c.created)}</td>
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium">{formatDate(c.created, language === 'en' ? 'en-US' : 'es-DO')}</td>
                     <td className="py-3 px-4">
                       <Badge status={c.status} />
                     </td>

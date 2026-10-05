@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { authService } from '../../api/services';
 import { Loader } from '../../components/common/Loader';
 import { User, Camera, Save, CheckCircle, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 export const AgentProfilePage: React.FC = () => {
+  const { t } = useLanguage();
   const { user, refreshProfile } = useAuth();
   const [form, setForm] = useState({
     firstName: '',
@@ -68,14 +70,14 @@ export const AgentProfilePage: React.FC = () => {
     } catch (err: unknown) {
       console.error("Error updating agent profile:", err);
       const apiError = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
-      setError(apiError || "Error al actualizar perfil.");
+      setError(apiError || t('common.error', "Error al actualizar perfil."));
     } finally {
       setIsSaving(false);
     }
   };
 
   if (isLoading) {
-    return <Loader text="Cargando perfil de agente..." />;
+    return <Loader text={t('agent.profile.loading', "Cargando perfil de agente...")} />;
   }
 
   return (
@@ -83,10 +85,10 @@ export const AgentProfilePage: React.FC = () => {
       <div className="pb-4 border-b border-slate-200 dark:border-slate-800">
         <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
           <User className="w-6 h-6 text-brand-600 dark:text-brand-400" />
-          Mi Perfil Profesional de Agente
+          {t('agent.profile.title', "Mi Perfil Profesional de Agente")}
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          Tus datos y fotografía serán visibles para todos los compradores en las fichas técnicas de tus propiedades.
+          {t('agent.profile.subtitle', "Tus datos y fotografía serán visibles para todos los compradores en las fichas técnicas de tus propiedades.")}
         </p>
       </div>
 
@@ -111,14 +113,14 @@ export const AgentProfilePage: React.FC = () => {
             <p className="text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
             <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
               <ShieldCheck className="w-3 h-3" />
-              Corredor Inmobiliario Autorizado
+              {t('agent.profile.authorizedBroker', "Corredor Inmobiliario Autorizado")}
             </span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nombre</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{t('agent.profile.firstName', "Nombre")}</label>
             <input
               type="text"
               required
@@ -129,7 +131,7 @@ export const AgentProfilePage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Apellido</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{t('agent.profile.lastName', "Apellido")}</label>
             <input
               type="text"
               required
@@ -141,7 +143,7 @@ export const AgentProfilePage: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Teléfono Directo de Contacto</label>
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{t('agent.profile.phone', "Teléfono Directo de Contacto")}</label>
           <input
             type="tel"
             required
@@ -155,7 +157,7 @@ export const AgentProfilePage: React.FC = () => {
         {success && (
           <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800/60 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
             <CheckCircle className="w-4 h-4 shrink-0" />
-            <span>Perfil de agente actualizado exitosamente.</span>
+            <span>{t('agent.profile.successMsg', "Perfil de agente actualizado exitosamente.")}</span>
           </div>
         )}
 
@@ -173,7 +175,7 @@ export const AgentProfilePage: React.FC = () => {
             className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all"
           >
             <Save className="w-4 h-4" />
-            <span>{isSaving ? 'Guardando...' : 'Guardar Datos Profesionales'}</span>
+            <span>{isSaving ? t('agent.profile.saving', 'Guardando...') : t('agent.profile.saveBtn', 'Guardar Datos Profesionales')}</span>
           </button>
         </div>
       </form>

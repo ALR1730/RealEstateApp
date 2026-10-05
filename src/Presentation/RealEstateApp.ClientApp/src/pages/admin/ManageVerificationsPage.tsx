@@ -83,7 +83,7 @@ export const ManageVerificationsPage: React.FC = () => {
             {t('admin.verif.title', "Validación de Identidad KYC de Agentes")}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            {t('admin.verif.subtitle', "Revisa las cédulas oficiales y otorga la insignia de Agente Verificado a los corredores aprobados.")}
+            {t('admin.verif.subtitle', "Revisa los documentos de identidad y otorga la insignia de Agente Verificado a los corredores aprobados.")}
           </p>
         </div>
 
@@ -133,7 +133,7 @@ export const ManageVerificationsPage: React.FC = () => {
               <thead className="bg-slate-50 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-extrabold uppercase tracking-wider">
                 <tr>
                   <th className="px-6 py-4">{t('admin.verif.colAgent', "Agente")}</th>
-                  <th className="px-6 py-4">{t('admin.verif.colId', "Cédula Oficial")}</th>
+                  <th className="px-6 py-4">{t('admin.verif.colId', "Documento de Identidad")}</th>
                   <th className="px-6 py-4">{t('admin.verif.colDocs', "Documentos")}</th>
                   <th className="px-6 py-4">{t('admin.verif.colStatus', "Estado")}</th>
                   <th className="px-6 py-4 text-right">{t('admin.verif.colActions', "Acciones")}</th>
@@ -158,7 +158,7 @@ export const ManageVerificationsPage: React.FC = () => {
                         className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg font-bold text-[11px] transition-colors"
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        <span>{t('admin.verif.viewDocs', "Ver Cédula Front/Back")}</span>
+                        <span>{t('admin.verif.viewDocs', "Ver Documento Front/Back")}</span>
                       </button>
                     </td>
                     <td className="px-6 py-4">
@@ -213,7 +213,7 @@ export const ManageVerificationsPage: React.FC = () => {
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl space-y-6 border border-transparent dark:border-slate-800">
             <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
               <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                {t('admin.verif.modalDocTitle', "Documentos KYC")}: {selectedKyc.agentName} ({t('admin.verif.colId', "Cédula")} {selectedKyc.cedula})
+                {t('admin.verif.modalDocTitle', "Documentos KYC")}: {selectedKyc.agentName} ({t('admin.verif.colId', "Documento de Identidad")} {selectedKyc.cedula})
               </h3>
               <button onClick={() => setShowDocModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold">✕</button>
             </div>
@@ -268,7 +268,7 @@ export const ManageVerificationsPage: React.FC = () => {
             <textarea
               rows={3}
               required
-              placeholder={t('admin.verif.rejectPlaceholder', "Ej: La imagen posterior es borrosa y el número de cédula no coincide...")}
+              placeholder={t('admin.verif.rejectPlaceholder', "Ej: La imagen posterior es borrosa y el número de documento no coincide...")}
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               className="w-full p-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500"

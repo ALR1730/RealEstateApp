@@ -8,7 +8,7 @@ import { Star } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 export const AdminReviewsPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,7 +47,7 @@ export const AdminReviewsPage: React.FC = () => {
         <div className="flex items-center gap-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 px-4 py-2.5 shadow-xs">
           <StarRating value={average} size="sm" showValue />
           <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-            {reviews.length} {t('admin.reviews.countSuffix', "reseñas")}
+            {reviews.length} {reviews.length === 1 ? t('admin.reviews.reviewSingle', "reseña") : t('admin.reviews.countSuffix', "reseñas")}
           </span>
         </div>
       </div>
@@ -87,8 +87,8 @@ export const AdminReviewsPage: React.FC = () => {
                     <td className="py-3 px-4">
                       <StarRating value={r.rating} size="sm" />
                     </td>
-                    <td className="py-3 px-4 text-slate-600 dark:text-slate-300 max-w-md">{r.comment || '—'}</td>
-                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium">{formatDate(r.created)}</td>
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-300 max-w-md">{r.comment || t('admin.reviews.noComment', '—')}</td>
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium">{formatDate(r.created, language === 'en' ? 'en-US' : 'es-DO')}</td>
                   </tr>
                 ))}
               </tbody>
