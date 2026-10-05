@@ -32,17 +32,20 @@ export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({ child
     localStorage.setItem(STORAGE_KEY, JSON.stringify(compareIds));
   }, [compareIds]);
 
+  const compareIdsKey = compareIds.join(',');
+
   useEffect(() => {
     let active = true;
     const rehydrate = async () => {
-      if (compareIds.length === 0) {
+      if (!compareIdsKey) {
         setCompareProperties([]);
         return;
       }
       try {
         const all = await propertiesService.getAll();
         if (!active) return;
-        const found = all.filter((p) => compareIds.includes(p.id));
+        const currentIds = compareIdsKey.split(',').map(Number);
+        const found = all.filter((p) => currentIds.includes(p.id));
         setCompareProperties(found);
       } catch {
         if (active) setCompareProperties([]);
@@ -52,7 +55,7 @@ export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => {
       active = false;
     };
-  }, [compareIds.length]);
+  }, [compareIdsKey]);
 
   const addToCompare = useCallback((property: Property) => {
     setCompareIds((prev) => {

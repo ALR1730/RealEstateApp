@@ -3,7 +3,8 @@ import { catalogsService } from '../../api/services';
 import { PropertyType } from '../../types';
 import { Loader } from '../../components/common/Loader';
 import { Modal } from '../../components/common/Modal';
-import { Building2, Plus, Edit2, Trash2, Home } from 'lucide-react';
+import { getApiErrorMessage } from '../../utils/formatters';
+import { Building2, Plus, Edit2, Trash2 } from 'lucide-react';
 
 export const ManagePropertyTypesPage: React.FC = () => {
   const [types, setTypes] = useState<PropertyType[]>([]);
@@ -61,9 +62,9 @@ export const ManagePropertyTypesPage: React.FC = () => {
       await catalogsService.deletePropertyType(deleteConfirmType.id);
       setDeleteConfirmType(null);
       loadTypes();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error deleting property type:", err);
-      setDeleteError(err.response?.data?.error || "No se puede eliminar este tipo de propiedad porque tiene inmuebles asociados.");
+      setDeleteError(getApiErrorMessage(err, "No se puede eliminar este tipo de propiedad porque tiene inmuebles asociados."));
     } finally {
       setIsDeleting(false);
     }

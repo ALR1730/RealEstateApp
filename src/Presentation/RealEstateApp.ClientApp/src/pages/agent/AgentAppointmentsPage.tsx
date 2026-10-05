@@ -3,11 +3,13 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { EventClickArg } from '@fullcalendar/core';
 import esLocale from '@fullcalendar/core/locales/es';
 import { appointmentsService } from '../../api/services';
 import { Appointment } from '../../types';
 import { Loader } from '../../components/common/Loader';
 import { AppointmentCard } from '../../components/appointments/AppointmentCard';
+import { getApiErrorMessage } from '../../utils/formatters';
 import { Calendar, CalendarDays, ListChecks, X } from 'lucide-react';
 
 interface CalendarEvent {
@@ -92,8 +94,8 @@ export const AgentAppointmentsPage: React.FC = () => {
       await appointmentsService.confirmAppointment(id, "Cita confirmada por el agente.");
       setSelected(null);
       loadAppointments();
-    } catch (err) {
-      console.error("Error confirming appointment:", err);
+    } catch (err: unknown) {
+      console.error("Error confirming appointment:", getApiErrorMessage(err));
     }
   };
 
@@ -103,22 +105,22 @@ export const AgentAppointmentsPage: React.FC = () => {
       await appointmentsService.cancelAppointment(id, "Cancelada por el agente.");
       setSelected(null);
       loadAppointments();
-    } catch (err) {
-      console.error("Error cancelling appointment:", err);
+    } catch (err: unknown) {
+      console.error("Error cancelling appointment:", getApiErrorMessage(err));
     }
   };
 
   const handleComplete = async (id: number) => {
     try {
-      await appointmentsService.confirmAppointment(id, "Cita completada por el agente.");
+      await appointmentsService.completeAppointment(id, "Cita completada por el agente.");
       setSelected(null);
       loadAppointments();
-    } catch (err) {
-      console.error("Error completing appointment:", err);
+    } catch (err: unknown) {
+      console.error("Error completing appointment:", getApiErrorMessage(err));
     }
   };
 
-  const handleEventClick = (arg: any) => {
+  const handleEventClick = (arg: EventClickArg) => {
     setSelected(arg.event.extendedProps.appointment as Appointment);
   };
 

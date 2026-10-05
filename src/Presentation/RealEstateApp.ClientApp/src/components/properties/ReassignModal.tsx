@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../common/Modal';
 import { adminService } from '../../api/services';
+import { User } from '../../types';
 import { UserCheck } from 'lucide-react';
+
+interface AgentUser extends User {
+  isActive?: boolean;
+}
 
 interface ReassignModalProps {
   isOpen: boolean;
@@ -14,11 +19,11 @@ interface ReassignModalProps {
 export const ReassignModal: React.FC<ReassignModalProps> = ({
   isOpen,
   onClose,
-  propertyId,
+  propertyId: _propertyId,
   propertyCode,
   onSuccess,
 }) => {
-  const [agents, setAgents] = useState<any[]>([]);
+  const [agents, setAgents] = useState<AgentUser[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,7 +32,7 @@ export const ReassignModal: React.FC<ReassignModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       adminService.getAgents().then((data) => {
-        setAgents(data.filter((a: any) => a.isActive !== false));
+        setAgents((data || []).filter((a: AgentUser) => a.isActive !== false));
         setIsLoading(false);
       }).catch(() => setIsLoading(false));
     }

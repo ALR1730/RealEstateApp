@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Property } from '../../types';
 import { appointmentsService } from '../../api/services';
+import { getApiErrorMessage } from '../../utils/formatters';
 import { Modal } from '../common/Modal';
 import { Calendar, Clock, CheckCircle, Send } from 'lucide-react';
 
@@ -56,9 +57,9 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
         onClose();
         setSuccess(false);
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error booking appointment:", err);
-      setError(err.response?.data?.error || "No se pudo agendar la cita. Intente de nuevo.");
+      setError(getApiErrorMessage(err, "No se pudo agendar la cita. Intente de nuevo."));
     } finally {
       setIsSubmitting(false);
     }

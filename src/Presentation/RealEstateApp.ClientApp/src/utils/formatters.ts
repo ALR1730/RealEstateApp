@@ -85,3 +85,84 @@ export function calculateFrenchAmortization(
     schedule,
   };
 }
+
+/**
+ * Extrae de forma segura el mensaje de error de una respuesta de API (Axios),
+ * soportando ProblemDetails (RFC 7807), diccionarios de validación de ASP.NET Core,
+ * excepciones estándar de JavaScript y fallbacks personalizados.
+ */
+export function getApiErrorMessage(error: unknown, fallback: string = 'Ha ocurrido un error inesperado'): string {
+  if (!error) return fallback;
+
+  if (typeof error === 'string') {
+    const trimmed = error.trim();
+    return trimmed.length > 0 ? trimmed : fallback;
+  }
+
+  if (typeof error === 'object') {
+    const err = error as Record<string, unknown>;
+    const response = err.response as Record<string, unknown> | undefined;
+    const responseData = response?.data;
+
+    if (responseData !== undefined && responseData !== null) {
+      if (typeof responseData === 'string' && responseData.trim().length > 0) {
+        return responseData.trim();
+      }
+
+      if (typeof responseData === 'object') {
+        const dataObj = responseData as Record<string, unknown>;
+
+        // 1. data.error
+        if (typeof dataObj.error === 'string' && dataObj.error.trim().length > 0) {
+          return dataObj.error.trim();
+        }
+
+        // 2. data.message
+        if (typeof dataObj.message === 'string' && dataObj.message.trim().length > 0) {
+          return dataObj.message.trim();
+        }
+
+        // 3. data.title (ProblemDetails RFC 7807)
+        if (typeof dataObj.title === 'string' && dataObj.title.trim().length > 0) {
+          return dataObj.title.trim();
+        }
+
+        // 4. data.errors (ASP.NET Core validation dictionary o array de strings)
+        if (dataObj.errors) {
+          if (Array.isArray(dataObj.errors) && dataObj.errors.length > 0) {
+            const list = dataObj.errors
+              .filter((e: unknown): e is string => typeof e === 'string' && e.trim().length > 0)
+              .map((e: string) => e.trim());
+            if (list.length > 0) return list.join(', ');
+          } else if (typeof dataObj.errors === 'object') {
+            const errorsDict = dataObj.errors as Record<string, unknown>;
+            const messages: string[] = [];
+            for (const key of Object.keys(errorsDict)) {
+              const val = errorsDict[key];
+              if (Array.isArray(val)) {
+                for (const subVal of val) {
+                  if (typeof subVal === 'string' && subVal.trim().length > 0) {
+                    messages.push(subVal.trim());
+                  }
+                }
+              } else if (typeof val === 'string' && val.trim().length > 0) {
+                messages.push(val.trim());
+              }
+            }
+            if (messages.length > 0) {
+              return messages.join(', ');
+            }
+          }
+        }
+      }
+    }
+
+    // 5. err.message (Error estándar o AxiosError)
+    if (typeof err.message === 'string' && err.message.trim().length > 0) {
+      return err.message.trim();
+    }
+  }
+
+  return fallback;
+}
+

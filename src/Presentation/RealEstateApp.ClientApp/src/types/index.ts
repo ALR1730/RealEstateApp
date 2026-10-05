@@ -30,10 +30,13 @@ export interface User {
   email: string;
   roles: string[];
   isVerified?: boolean;
+  isActive?: boolean;
   jwToken?: string;
   firstName?: string;
   lastName?: string;
+  fullName?: string;
   phone?: string;
+  phoneNumber?: string;
   photoUrl?: string;
   propertiesCount?: number;
 }

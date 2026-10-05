@@ -308,6 +308,13 @@ export const appointmentsService = {
       headers: { 'Content-Type': 'application/json' }
     });
     return res.data;
+  },
+
+  completeAppointment: async (id: number, notes?: string): Promise<any> => {
+    const res = await apiClient.patch(`/appointments/${id}/complete`, notes || null, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return res.data;
   }
 };
 

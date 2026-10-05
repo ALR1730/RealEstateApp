@@ -33,7 +33,6 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ history })
           {sortedHistory.map((entry, index) => {
             const isIncrease = entry.percentageChange > 0;
             const isDecrease = entry.percentageChange < 0;
-            const isNeutral = entry.percentageChange === 0;
 
             return (
               <div key={entry.id} className="relative flex gap-4">

@@ -225,7 +225,7 @@ export const PropertiesCatalogPage: React.FC = () => {
     ([k, v]) => v !== undefined && v !== '' && v !== null && v !== false && !['userLat', 'userLng'].includes(k)
   );
 
-  const getFilterDisplayValue = (key: string, value: any): string => {
+  const getFilterDisplayValue = (key: string, value: unknown): string => {
     if (typeof value === 'boolean') return '';
     if (key === 'propertyTypeId') {
       const pt = propertyTypes.find((t) => t.id === Number(value));

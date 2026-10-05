@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { catalogsService } from '../../api/services';
 import { SaleType } from '../../types';
+import { getApiErrorMessage } from '../../utils/formatters';
 import { Loader } from '../../components/common/Loader';
 import { Modal } from '../../components/common/Modal';
 import { Layers, Plus, Edit2, Trash2 } from 'lucide-react';
@@ -49,9 +50,9 @@ export const ManageSaleTypesPage: React.FC = () => {
     try {
       await catalogsService.deleteSaleType(id);
       loadTypes();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error deleting sale type:", err);
-      alert(err.response?.data?.error || "No se puede eliminar: tiene propiedades asociadas.");
+      alert(getApiErrorMessage(err, "No se puede eliminar: tiene propiedades asociadas."));
     }
   };
 

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Property } from '../../types';
 import { offersService } from '../../api/services';
-import { formatCurrencyRD } from '../../utils/formatters';
+import { formatCurrencyRD, getApiErrorMessage } from '../../utils/formatters';
 import { Modal } from '../common/Modal';
-import { Tag, DollarSign, Send, ShieldAlert, CheckCircle } from 'lucide-react';
+import { DollarSign, Send, ShieldAlert, CheckCircle } from 'lucide-react';
 
 interface OfferModalProps {
   isOpen: boolean;
@@ -46,9 +46,9 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         onClose();
         setSuccessMessage(null);
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error making offer:", err);
-      setErrorMessage(err.response?.data?.error || "Ocurrió un error al enviar la oferta. Intente de nuevo.");
+      setErrorMessage(getApiErrorMessage(err, "Ocurrió un error al enviar la oferta. Intente de nuevo."));
     } finally {
       setIsSubmitting(false);
     }

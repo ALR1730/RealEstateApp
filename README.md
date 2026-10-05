@@ -19,18 +19,25 @@ La plataforma cuenta con una arquitectura moderna desacoplada compuesta por un *
 
 ## 💡 Ventajas de Negocio y Reglas Críticas
 
-### 🎯 1. Regla Atómica de Cierre de Ventas en Cascada
-- **Cierre Garantizado:** Al aceptar una propuesta económica, el sistema cambia instantáneamente el estado del inmueble a **"Vendida"**, rechazando automáticamente en cascada las demás ofertas pendientes y bloqueando nuevas solicitudes.
+### 🎯 1. Regla Atómica de Cierre de Ventas en Cascada y Consistencia ACID
+- **Cierre Garantizado (Unit of Work):** Al aceptar una oferta o contraoferta, el sistema actualiza en una única transacción atómica el inmueble a **"Vendida"**, rechaza en cascada las demás ofertas y contraofertas pendientes, registra la comisión sobre el precio real pactado y emite la traza de auditoría.
 - **Acceso Exclusivo al Comprador:** El comprador que cierra la negociación conserva acceso exclusivo a la propiedad para continuar la comunicación con su agente.
 
-### 💰 2. Simulador Hipotecario Profesional en Pesos Dominicanos (RD$)
+### 🛡️ 2. Seguridad Ofensiva y Protección OWASP API Top 10
+- **Mitigación BOLA/IDOR:** Validación de identidad a nivel de dominio en endpoints de mensajería privada (`ChatsController`) y control de propiedades (`PropertiesController`), evitando accesos horizontales no autorizados.
+- **Triple Barrera en Subida de Archivos:** Filtro estricto con validación de tamaño (≤ 10MB), lista blanca de extensiones permitidas y comprobación criptográfica de magic bytes de cabecera binaria contra spoofing de tipo MIME.
+
+### 💰 3. Simulador Hipotecario Profesional en Pesos Dominicanos (RD$)
 - **Sistema de Amortización Francés:** Cálculo interactivo de cuota mensual fija en RD$ con desglose de inicial, capital financiado e intereses acumulados.
 - **Visualización y Descarga:** Generación de tabla amortizada año por año con soporte de impresión y exportación en PDF.
 
-### 💬 3. Chat Bidireccional en Tiempo Real (SignalR / WebSockets)
+### 💬 4. Chat Bidireccional en Tiempo Real (SignalR / WebSockets)
 - Cada propiedad cuenta con su propio hilo de mensajería directa entre el cliente interesado y el agente asignado, con notificaciones instantáneas de mensajes nuevos.
 
-### 📊 4. Cuadro de Mando Ejecutivo (Dashboard KPIs)
+### 📅 5. Gestión de Citas y Ciclo de Vida Completo
+- Control de visitas presenciales con estados (*Programada, Confirmada, Cancelada, Completada*), permitiendo a los corredores registrar retroalimentación y notas de visita post-encuentro.
+
+### 📊 6. Cuadro de Mando Ejecutivo (Dashboard KPIs)
 - Métricas consolidadas en tiempo real: Inmuebles disponibles, reservados y vendidos; fuerza de ventas activa/inactiva y clientes registrados.
 - Herramienta directiva para reasignación masiva de cartera entre agentes con un solo clic.
 

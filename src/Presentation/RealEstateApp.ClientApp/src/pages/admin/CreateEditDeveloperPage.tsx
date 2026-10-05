@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { adminService } from '../../api/services';
+import { User } from '../../types';
+import { getApiErrorMessage } from '../../utils/formatters';
 import { Loader } from '../../components/common/Loader';
 import { 
   Code, 
@@ -34,7 +36,7 @@ export const CreateEditDeveloperPage: React.FC = () => {
         try {
           setIsLoading(true);
           const developers = await adminService.getDevelopers();
-          const dev = developers.find((d: any) => d.id === id);
+          const dev = developers.find((d: User) => d.id === id);
           if (dev) {
             setForm({
               firstName: '',
@@ -45,8 +47,8 @@ export const CreateEditDeveloperPage: React.FC = () => {
               confirmPassword: '',
             });
           }
-        } catch (err) {
-          console.error("Error loading developer:", err);
+        } catch (err: unknown) {
+          console.error("Error loading developer:", getApiErrorMessage(err));
         } finally {
           setIsLoading(false);
         }
@@ -66,7 +68,7 @@ export const CreateEditDeveloperPage: React.FC = () => {
       setError(null);
 
       if (isEditing && id) {
-        const payload: any = {
+        const payload: { userName: string; email: string; password?: string } = {
           userName: form.userName,
           email: form.email,
         };
@@ -89,9 +91,9 @@ export const CreateEditDeveloperPage: React.FC = () => {
       setTimeout(() => {
         navigate('/admin/developers');
       }, 1500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error saving developer:", err);
-      setError(err.response?.data?.error || "Error al guardar el desarrollador.");
+      setError(getApiErrorMessage(err, "Error al guardar el desarrollador."));
     } finally {
       setIsSubmitting(false);
     }

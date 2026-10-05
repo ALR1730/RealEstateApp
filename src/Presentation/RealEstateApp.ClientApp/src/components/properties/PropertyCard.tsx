@@ -65,8 +65,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     }
   };
 
-  const isSold = property.status === 'Sold' || property.status === 'Vendida';
-
   return (
     <div className="group relative bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-300 flex flex-col">
       

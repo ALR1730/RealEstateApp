@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { offersService } from '../../api/services';
 import { Offer } from '../../types';
 import { useCurrency } from '../../context/CurrencyContext';
-import { formatDate } from '../../utils/formatters';
+import { formatDate, getApiErrorMessage } from '../../utils/formatters';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
 import { Tag, Check, X, ShieldAlert, AlertTriangle, ArrowLeftRight } from 'lucide-react';
@@ -23,8 +23,8 @@ export const ReceivedOffersPage: React.FC = () => {
       try {
         const data = await offersService.getReceivedOffers();
         if (isMounted) setOffers(data || []);
-      } catch (err) {
-        console.error("Error loading agent offers:", err);
+      } catch (err: unknown) {
+        console.error("Error loading agent offers:", getApiErrorMessage(err));
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -46,8 +46,7 @@ export const ReceivedOffersPage: React.FC = () => {
       alert("¡Oferta aceptada exitosamente! La propiedad ha sido marcada como VENDIDA y las demás ofertas competidoras fueron rechazadas automáticamente.");
     } catch (err: unknown) {
       console.error("Error accepting offer:", err);
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      alert(msg || "Error al aceptar oferta.");
+      alert(getApiErrorMessage(err, "Error al aceptar oferta."));
     } finally {
       setIsProcessing(false);
     }
@@ -60,8 +59,7 @@ export const ReceivedOffersPage: React.FC = () => {
       setRefreshKey((k) => k + 1);
     } catch (err: unknown) {
       console.error("Error rejecting offer:", err);
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      alert(msg || "Error al rechazar la oferta.");
+      alert(getApiErrorMessage(err, "Error al rechazar la oferta."));
     }
   };
 

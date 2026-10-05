@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PropertyType, SaleType, Improvement, Province, FilterState } from '../../types';
+import { PropertyType, SaleType, Improvement, Province, FilterState, User } from '../../types';
 import { catalogsService, provincesService, agentsService } from '../../api/services';
 import { Search, Filter, RotateCcw, Building2, Tag, DollarSign, Bed, Bath, MapPin, Maximize2, ShieldCheck, Banknote, Eye, Wrench, Navigation } from 'lucide-react';
 
@@ -21,7 +21,7 @@ export const PropertyFilter: React.FC<PropertyFilterProps> = ({
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [municipalities, setMunicipalities] = useState<{ id: number; name: string }[]>([]);
   const [improvements, setImprovements] = useState<Improvement[]>([]);
-  const [agents, setAgents] = useState<any[]>([]);
+  const [agents, setAgents] = useState<User[]>([]);
   const [selectedProvinceId, setSelectedProvinceId] = useState<number | undefined>(filters.provinceId);
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export const PropertyFilter: React.FC<PropertyFilterProps> = ({
 
   const resolvedMunicipalities = selectedProvinceId ? municipalities : [];
 
-  const handleChange = (field: keyof FilterState, value: any) => {
+  const handleChange = (field: keyof FilterState, value: unknown) => {
     onChange({
       ...filters,
       [field]: value === '' || value === null || value === false ? undefined : value,

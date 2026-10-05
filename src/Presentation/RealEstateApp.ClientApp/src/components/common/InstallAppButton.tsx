@@ -12,7 +12,7 @@ export const InstallAppButton: React.FC = () => {
 
   useEffect(() => {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) && !(window as any).MSStream;
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) && !('MSStream' in window);
     if (isStandalone || isIos) return;
 
     const onPrompt = (e: Event) => {

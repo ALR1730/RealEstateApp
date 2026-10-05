@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Search, Loader2, ArrowRight, X, Bot, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Loader2, X, Bot, CheckCircle2 } from 'lucide-react';
 import { aiSearchService } from '../../api/services';
-import { AiSearchInterpretation } from '../../types';
+import { AiSearchInterpretation, FilterState } from '../../types';
+import { getApiErrorMessage } from '../../utils/formatters';
 
 interface AiSearchBarProps {
   onSearchComplete?: (result: AiSearchInterpretation) => void;
-  onApplyFilters?: (filter: Record<string, any>) => void;
+  onApplyFilters?: (filter: Partial<FilterState> | Record<string, unknown>) => void;
   variant?: 'hero' | 'catalog';
   placeholder?: string;
   autoFocus?: boolean;
@@ -66,8 +67,8 @@ export const AiSearchBar: React.FC<AiSearchBarProps> = ({
       if (onApplyFilters && result.parsedFilter) {
         onApplyFilters(result.parsedFilter);
       }
-    } catch (err: any) {
-      console.error('Error al procesar búsqueda con IA:', err);
+    } catch (err: unknown) {
+      console.error('Error al procesar búsqueda con IA:', getApiErrorMessage(err));
       setErrorMsg('No se pudo procesar la consulta. Intenta reformularla.');
     } finally {
       setIsProcessing(false);

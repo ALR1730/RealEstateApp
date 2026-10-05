@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { offersService } from '../../api/services';
-import { formatCurrencyRD } from '../../utils/formatters';
+import { formatCurrencyRD, getApiErrorMessage } from '../../utils/formatters';
 import { Modal } from '../common/Modal';
 import { DollarSign, Send, ArrowLeftRight, CheckCircle } from 'lucide-react';
 
@@ -45,9 +45,9 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
         setAmount(originalAmount);
         setMessage('');
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error sending counter offer:", err);
-      setErrorMessage(err.response?.data?.error || "Ocurrió un error al enviar la contraoferta. Intente de nuevo.");
+      setErrorMessage(getApiErrorMessage(err, "Ocurrió un error al enviar la contraoferta. Intente de nuevo."));
     } finally {
       setIsSubmitting(false);
     }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { propertiesService, adminService } from '../../api/services';
 import { Property, User } from '../../types';
-import { formatCurrencyRD } from '../../utils/formatters';
+import { formatCurrencyRD, getApiErrorMessage } from '../../utils/formatters';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
 import { Building2, UserCheck, Trash2, Sparkles, Search, ExternalLink } from 'lucide-react';
@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 
 export const ManageAllPropertiesPage: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
-  const [agents, setAgents] = useState<any[]>([]);
+  const [agents, setAgents] = useState<User[]>([]);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [targetAgentId, setTargetAgentId] = useState('');
   const [showReassignModal, setShowReassignModal] = useState(false);
@@ -25,8 +25,8 @@ export const ManageAllPropertiesPage: React.FC = () => {
       ]);
       setProperties(propsData || []);
       setAgents(agentsData || []);
-    } catch (err) {
-      console.error("Error loading all properties:", err);
+    } catch (err: unknown) {
+      console.error("Error loading all properties:", getApiErrorMessage(err));
     } finally {
       setIsLoading(false);
     }

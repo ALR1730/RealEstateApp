@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { adminService } from '../../api/services';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
+import { User } from '../../types';
+import { getApiErrorMessage } from '../../utils/formatters';
 import { 
   ShieldCheck, 
   CheckCircle, 
@@ -11,9 +13,13 @@ import {
   Search 
 } from 'lucide-react';
 
+interface AdminUser extends User {
+  isActive?: boolean;
+}
+
 export const ManageAdminsPage: React.FC = () => {
   const navigate = useNavigate();
-  const [admins, setAdmins] = useState<any[]>([]);
+  const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
 
@@ -21,8 +27,8 @@ export const ManageAdminsPage: React.FC = () => {
     try {
       const data = await adminService.getAdmins();
       setAdmins(data || []);
-    } catch (err) {
-      console.error("Error loading admins:", err);
+    } catch (err: unknown) {
+      console.error("Error loading admins:", getApiErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
@@ -36,8 +42,8 @@ export const ManageAdminsPage: React.FC = () => {
     try {
       await adminService.toggleAdminStatus(userId, !currentStatus);
       loadAdmins();
-    } catch (err) {
-      console.error("Error toggling admin status:", err);
+    } catch (err: unknown) {
+      console.error("Error toggling admin status:", getApiErrorMessage(err));
     }
   };
 

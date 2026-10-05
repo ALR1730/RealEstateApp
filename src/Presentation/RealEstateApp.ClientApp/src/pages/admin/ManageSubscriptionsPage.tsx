@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { subscriptionsService } from '../../api/services';
 import { SubscriptionPlan, SubscriptionPlanInput } from '../../types';
-import { formatCurrencyRD } from '../../utils/formatters';
+import { formatCurrencyRD, getApiErrorMessage } from '../../utils/formatters';
 import { Loader } from '../../components/common/Loader';
 import {
   Award,
@@ -137,10 +137,9 @@ export const ManageSubscriptionsPage: React.FC = () => {
       setIsSaving(true);
       await subscriptionsService.deletePlan(plan.id);
       await loadPlans();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error deleting plan:", err);
-      const detail = err?.response?.data?.error;
-      alert(detail || "No se pudo eliminar el plan.");
+      alert(getApiErrorMessage(err, "No se pudo eliminar el plan."));
     } finally {
       setIsSaving(false);
     }

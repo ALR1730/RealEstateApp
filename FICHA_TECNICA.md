@@ -54,8 +54,9 @@
 * **Calendarios:** **FullCalendar 6.1.21** (`@fullcalendar/react`, daygrid, timegrid, interaction) para gestión de citas inmobiliarias.
 
 ### 2.3 Testing y Aseguramiento de Calidad (QA)
-* **Backend:** **xUnit 2.9.2** + **Moq 4.20.72** + **FluentAssertions 6.12.2** + **Coverlet Collector 6.0.2** (79+ pruebas unitarias de servicios, controladores, filtros y mapeos con 100% de éxito).
-* **Frontend:** **Vitest 4.1.11** + **React Testing Library 16.1.0** + `@testing-library/jest-dom 6.6.3` (26 pruebas unitarias de utilidades, contextos y componentes en verde).
+* **Backend:** **xUnit 2.9.2** + **Moq 4.20.72** + **FluentAssertions 6.12.2** + **Coverlet Collector 6.0.2** (Suite de pruebas unitarias de servicios, controladores, filtros y mapeos con 100% de éxito bajo patrón AAA).
+* **Frontend:** **Vitest 4.1.11** + **React Testing Library 16.1.0** + `@testing-library/jest-dom 6.6.3` (87 pruebas unitarias en 11 suites pasando 100% en verde sin errores de JSDOM).
+* **Manejo de Errores Estandarizado:** Helper universal `getApiErrorMessage` desacoplado y compatible con especificación **RFC 7807 (ProblemDetails)** y validaciones ASP.NET Core.
 * **Matrices de Aceptación E2E:** 141 aserciones de integración determinística multi-rol validadas contra API real.
 
 ---
@@ -252,7 +253,7 @@ npm install
 # Validar tipado y empaquetar bundle para producción
 npm run build
 
-# Ejecutar pruebas unitarias (26 tests Vitest)
+# Ejecutar pruebas unitarias (87 tests Vitest en 11 suites)
 npm run test
 
 # Iniciar servidor de desarrollo en localhost:5173

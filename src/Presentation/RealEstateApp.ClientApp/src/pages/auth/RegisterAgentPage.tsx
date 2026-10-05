@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../api/services';
+import { getApiErrorMessage } from '../../utils/formatters';
 import { Building2, UserPlus, CheckCircle, ShieldAlert } from 'lucide-react';
 
 export const RegisterAgentPage: React.FC = () => {
@@ -44,9 +45,9 @@ export const RegisterAgentPage: React.FC = () => {
       setTimeout(() => {
         navigate('/login');
       }, 2500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Register agent error:", err);
-      setError(err.response?.data?.error || "Error al conectar con el servidor.");
+      setError(getApiErrorMessage(err, "Error al conectar con el servidor."));
     } finally {
       setIsLoading(false);
     }

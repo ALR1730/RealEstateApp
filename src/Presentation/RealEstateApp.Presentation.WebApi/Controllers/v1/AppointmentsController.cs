@@ -97,5 +97,20 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             await _appointmentService.CancelAppointmentAsync(id, userId, reason);
             return Ok(new { success = true, message = "Cita cancelada." });
         }
+
+        /// <summary>
+        /// Marca una cita como realizada / completada (Agente).
+        /// </summary>
+        [Authorize(Roles = "Agent")]
+        [HttpPatch("{id:int}/complete")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> CompleteAppointmentAsync(int id, [FromBody] string? notes)
+        {
+            var agentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(agentId)) return Unauthorized();
+
+            await _appointmentService.CompleteAppointmentAsync(id, agentId, notes);
+            return Ok(new { success = true, message = "Cita marcada como completada exitosamente." });
+        }
     }
 }

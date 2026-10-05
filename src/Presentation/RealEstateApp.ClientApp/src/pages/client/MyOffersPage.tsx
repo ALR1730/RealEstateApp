@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { offersService, reviewsService } from '../../api/services';
 import { Offer } from '../../types';
 import { useCurrency } from '../../context/CurrencyContext';
-import { formatDate } from '../../utils/formatters';
+import { formatDate, getApiErrorMessage } from '../../utils/formatters';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
 import { StarRating } from '../../components/common/StarRating';
@@ -29,8 +29,8 @@ export const MyOffersPage: React.FC = () => {
       try {
         const data = await offersService.getMyOffers();
         if (isMounted) setOffers(data || []);
-      } catch (err) {
-        console.error("Error loading client offers:", err);
+      } catch (err: unknown) {
+        console.error("Error loading client offers:", getApiErrorMessage(err));
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -66,8 +66,7 @@ export const MyOffersPage: React.FC = () => {
       setRefreshKey((k) => k + 1);
       alert("¡Contraoferta aceptada exitosamente! Has cerrado la negociación.");
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      alert(msg || "Error al aceptar contraoferta.");
+      alert(getApiErrorMessage(err, "Error al aceptar contraoferta."));
     } finally {
       setIsProcessing(false);
     }
@@ -80,8 +79,7 @@ export const MyOffersPage: React.FC = () => {
       await offersService.rejectCounterOffer(offerId);
       setRefreshKey((k) => k + 1);
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      alert(msg || "Error al rechazar contraoferta.");
+      alert(getApiErrorMessage(err, "Error al rechazar contraoferta."));
     } finally {
       setIsProcessing(false);
     }
@@ -106,8 +104,7 @@ export const MyOffersPage: React.FC = () => {
       alert("¡Gracias! Tu reseña ha sido registrada exitosamente.");
       setReviewOffer(null);
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      alert(msg || "Error al enviar la reseña.");
+      alert(getApiErrorMessage(err, "Error al enviar la reseña."));
     } finally {
       setIsReviewSubmitting(false);
     }

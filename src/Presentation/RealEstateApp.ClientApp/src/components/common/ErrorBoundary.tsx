@@ -124,9 +124,11 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // eslint-disable-next-line no-console
     console.group(`[ErrorBoundary] ${classifyError(error).toUpperCase()}`);
     console.error("Error:", error.message);
     console.error("Componente:", errorInfo.componentStack);
+    // eslint-disable-next-line no-console
     console.groupEnd();
   }
 

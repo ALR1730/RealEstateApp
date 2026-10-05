@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { formatCurrencyRD, calculateFrenchAmortization } from '../../utils/formatters';
 import { AmortizationTable } from './AmortizationTable';
-import { Calculator, DollarSign, Calendar, Percent, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calculator, DollarSign, Percent, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface MortgageCalculatorProps {
   initialPrice?: number;

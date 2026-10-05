@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authService } from '../../api/services';
+import { getApiErrorMessage } from '../../utils/formatters';
 import { KeyRound, ArrowLeft, Mail, CheckCircle2 } from 'lucide-react';
 
 export const ForgotPasswordPage: React.FC = () => {
@@ -18,9 +19,9 @@ export const ForgotPasswordPage: React.FC = () => {
       setError(null);
       await authService.forgotPassword(email);
       setIsSubmitted(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error sending reset password link:", err);
-      setError(err.response?.data?.error || "Error al solicitar restablecimiento de contraseña.");
+      setError(getApiErrorMessage(err, "Error al solicitar restablecimiento de contraseña."));
     } finally {
       setIsSubmitting(false);
     }

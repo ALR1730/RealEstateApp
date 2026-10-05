@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChatMessage } from '../../types';
 import { chatsService } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
-import { Send, MessageSquare, Loader2, User } from 'lucide-react';
+import { getApiErrorMessage } from '../../utils/formatters';
+import { Send, MessageSquare, Loader2 } from 'lucide-react';
 
 interface ChatBoxProps {
   propertyId?: number;
@@ -26,7 +27,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     if (!user) return;
     try {
       const isClientRole = user.roles?.includes('Client');
@@ -35,22 +36,30 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
 
       const data = await chatsService.getThread(clientId, agentId, propertyId);
       setMessages(data || []);
-    } catch (err) {
-      console.error("Error loading chat messages:", err);
+    } catch (err: unknown) {
+      console.error("Error loading chat messages:", getApiErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, recipientId, propertyId]);
 
   useEffect(() => {
-    Promise.resolve().then(() => loadMessages()).catch(console.error);
-  }, [propertyId, recipientId]);
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        loadMessages();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [loadMessages]);
 
   useEffect(() => {
     if (chatHubConnection && propertyId) {
       chatHubConnection.invoke('JoinThread', propertyId, recipientId).catch(console.error);
 
-      const handleReceive = (payload: any) => {
+      const handleReceive = (payload: { propertyId?: number; senderId?: string; recipientId?: string; messageContent?: string; sentAt?: string; sentAtFormatted?: string }) => {
         if (payload.propertyId === propertyId) {
           const newMsg: ChatMessage = {
             id: Date.now(),

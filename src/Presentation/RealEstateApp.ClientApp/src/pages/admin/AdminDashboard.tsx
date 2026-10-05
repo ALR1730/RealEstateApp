@@ -11,7 +11,6 @@ import {
   CheckCircle, 
   Users, 
   ShieldCheck, 
-  TrendingUp, 
   Tag, 
   Code
 } from 'lucide-react';

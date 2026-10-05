@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminService } from '../../api/services';
+import { getApiErrorMessage } from '../../utils/formatters';
 import { 
   ShieldCheck, 
   ArrowLeft, 
@@ -51,9 +52,9 @@ export const CreateAdminPage: React.FC = () => {
       setTimeout(() => {
         navigate('/admin/admins');
       }, 1500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error creating admin:", err);
-      setError(err.response?.data?.error || "Error al crear el administrador.");
+      setError(getApiErrorMessage(err, "Error al crear el administrador."));
     } finally {
       setIsSubmitting(false);
     }

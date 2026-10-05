@@ -3,11 +3,13 @@ import { adminService } from '../../api/services';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
 import { Modal } from '../../components/common/Modal';
-import { Shield, Code, UserPlus, CheckCircle, XCircle, Key, Mail, User } from 'lucide-react';
+import { User } from '../../types';
+import { getApiErrorMessage } from '../../utils/formatters';
+import { Shield, Code, UserPlus } from 'lucide-react';
 
 export const ManageUsersPage: React.FC = () => {
-  const [admins, setAdmins] = useState<any[]>([]);
-  const [developers, setDevelopers] = useState<any[]>([]);
+  const [admins, setAdmins] = useState<User[]>([]);
+  const [developers, setDevelopers] = useState<User[]>([]);
   const [activeTab, setActiveTab] = useState<'admins' | 'developers'>('admins');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -82,9 +84,9 @@ export const ManageUsersPage: React.FC = () => {
       setForm({ firstName: '', lastName: '', email: '', userName: '', password: '', confirmPassword: '', phone: '' });
       await loadUsers();
       alert(`Usuario ${createRole} creado exitosamente.`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error creating user:", err);
-      setError(err.response?.data?.error || "Error al registrar usuario.");
+      setError(getApiErrorMessage(err, "Error al registrar usuario."));
     } finally {
       setIsSubmitting(false);
     }

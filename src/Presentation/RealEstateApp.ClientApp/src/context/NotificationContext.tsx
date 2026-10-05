@@ -33,7 +33,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     tokenRef.current = token;
   }, [token]);
 
-  const handleReceiveNotification = useCallback((data: any) => {
+  const handleReceiveNotification = useCallback((data: { title?: string; message?: string; type?: 'info' | 'success' | 'warning' | 'error'; timestamp?: string }) => {
     const newItem: NotificationItem = {
       id: Math.random().toString(),
       title: data.title || 'Notificación',
@@ -44,7 +44,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setNotifications((prev) => [newItem, ...prev]);
   }, []);
 
-  const handleNewChatMessage = useCallback((data: any) => {
+  const handleNewChatMessage = useCallback((data: { messageContent?: string; sentAtFormatted?: string }) => {
     const newItem: NotificationItem = {
       id: Math.random().toString(),
       title: 'Nuevo Mensaje en Chat',
@@ -57,17 +57,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   useEffect(() => {
     if (!isAuthenticated || !token) {
-      const stopConnections = async () => {
-        if (notificationHubConnection) {
-          await notificationHubConnection.stop();
-          setNotificationHubConnection(null);
-        }
-        if (chatHubConnection) {
-          await chatHubConnection.stop();
-          setChatHubConnection(null);
-        }
-      };
-      stopConnections();
       return;
     }
 
@@ -99,13 +88,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     ]).then(() => {
       setNotificationHubConnection(notificationConn);
       setChatHubConnection(chatConn);
-    }).catch((err) => {
+    }).catch((err: Error) => {
       console.warn("SignalR connection warning:", err.message);
     });
 
     return () => {
       notificationConn.stop();
       chatConn.stop();
+      setNotificationHubConnection(null);
+      setChatHubConnection(null);
     };
   }, [isAuthenticated, token, handleReceiveNotification, handleNewChatMessage]);
 

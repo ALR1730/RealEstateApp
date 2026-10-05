@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { getApiErrorMessage } from '../../utils/formatters';
 import { Building2, LogIn, Key, Mail, ShieldAlert, Sparkles, User, UserCheck, Code } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
@@ -32,10 +33,9 @@ export const LoginPage: React.FC = () => {
       else if (roles.includes('Developer')) navigate('/developer');
       else if (roles.includes('Owner')) navigate('/owner');
       else navigate('/client');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
-      const serverMessage = err.response?.data?.error || err.response?.data?.message || (typeof err.response?.data === 'string' ? err.response.data : null);
-      setError(serverMessage || 'Error al conectar con el servidor.');
+      setError(getApiErrorMessage(err, 'Error al conectar con el servidor.'));
     } finally {
       setIsLoading(false);
     }

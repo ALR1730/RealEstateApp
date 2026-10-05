@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { adminService } from '../../api/services';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
+import { User } from '../../types';
+import { getApiErrorMessage } from '../../utils/formatters';
 import { 
   Code, 
   CheckCircle, 
@@ -12,9 +14,13 @@ import {
   Search 
 } from 'lucide-react';
 
+interface DevUser extends User {
+  isActive?: boolean;
+}
+
 export const ManageDevelopersPage: React.FC = () => {
   const navigate = useNavigate();
-  const [developers, setDevelopers] = useState<any[]>([]);
+  const [developers, setDevelopers] = useState<DevUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
 
@@ -22,8 +28,8 @@ export const ManageDevelopersPage: React.FC = () => {
     try {
       const data = await adminService.getDevelopers();
       setDevelopers(data || []);
-    } catch (err) {
-      console.error("Error loading developers:", err);
+    } catch (err: unknown) {
+      console.error("Error loading developers:", getApiErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
@@ -37,8 +43,8 @@ export const ManageDevelopersPage: React.FC = () => {
     try {
       await adminService.toggleDeveloperStatus(userId, !currentStatus);
       loadDevelopers();
-    } catch (err) {
-      console.error("Error toggling developer status:", err);
+    } catch (err: unknown) {
+      console.error("Error toggling developer status:", getApiErrorMessage(err));
     }
   };
 

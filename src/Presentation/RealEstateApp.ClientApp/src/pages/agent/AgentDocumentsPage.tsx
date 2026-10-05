@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { documentsService, propertiesService } from '../../api/services';
-import { PropertyDocument, DOCUMENT_TYPES } from '../../types';
-import { formatDate } from '../../utils/formatters';
+import { PropertyDocument, Property, DOCUMENT_TYPES } from '../../types';
+import { formatDate, getApiErrorMessage } from '../../utils/formatters';
 import { Loader } from '../../components/common/Loader';
 import { FileText, Upload, Trash2, ArrowLeft, File, Download, Image as ImageIcon, Building2 } from 'lucide-react';
 
@@ -17,14 +17,14 @@ export const AgentDocumentsPage: React.FC = () => {
   const pid = Number(propertyId);
 
   const [documents, setDocuments] = useState<PropertyDocument[]>([]);
-  const [property, setProperty] = useState<any | null>(null);
+  const [property, setProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const [documentType, setDocumentType] = useState<string>(DOCUMENT_TYPES[0]);
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const loadAll = async () => {
+  const loadAll = useCallback(async () => {
     try {
       const [docs, propData] = await Promise.all([
         documentsService.getByProperty(pid),
@@ -32,18 +32,26 @@ export const AgentDocumentsPage: React.FC = () => {
       ]);
       setDocuments(docs || []);
       if (propData && propData.length) {
-        setProperty(propData.find((p: any) => p.id === pid) || null);
+        setProperty(propData.find((p: Property) => p.id === pid) || null);
       }
-    } catch (err) {
-      console.error("Error loading documents:", err);
+    } catch (err: unknown) {
+      console.error("Error loading documents:", getApiErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [pid]);
 
   useEffect(() => {
-    Promise.resolve().then(() => loadAll()).catch(console.error);
-  }, [pid]);
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        loadAll();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [loadAll]);
 
   const handleUpload = async () => {
     if (!file) {
@@ -55,9 +63,9 @@ export const AgentDocumentsPage: React.FC = () => {
       await documentsService.upload(pid, documentType, file);
       setFile(null);
       await loadAll();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error uploading document:", err);
-      alert(err.response?.data?.error || "Error al subir el documento.");
+      alert(getApiErrorMessage(err, "Error al subir el documento."));
     } finally {
       setIsUploading(false);
     }
@@ -68,9 +76,9 @@ export const AgentDocumentsPage: React.FC = () => {
     try {
       await documentsService.remove(doc.id);
       await loadAll();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error deleting document:", err);
-      alert(err.response?.data?.error || "Error al eliminar el documento.");
+      alert(getApiErrorMessage(err, "Error al eliminar el documento."));
     }
   };
 

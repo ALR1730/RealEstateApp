@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrencyRD, formatDate, calculateFrenchAmortization } from '../utils/formatters';
+import { formatCurrencyRD, formatDate, calculateFrenchAmortization, getApiErrorMessage } from '../utils/formatters';
 
 describe('Formatters & Utilities', () => {
   it('formatCurrencyRD formats amounts in Dominican Pesos RD$', () => {
@@ -27,4 +27,59 @@ describe('Formatters & Utilities', () => {
     expect(sim.monthlyInstallment).toBeGreaterThan(40000);
     expect(sim.schedule).toHaveLength(240);
   });
+
+  describe('getApiErrorMessage', () => {
+    it('returns default fallback when error is null or undefined', () => {
+      expect(getApiErrorMessage(null)).toBe('Ha ocurrido un error inesperado');
+      expect(getApiErrorMessage(undefined, 'Custom fallback')).toBe('Custom fallback');
+    });
+
+    it('returns error directly if it is a non-empty string', () => {
+      expect(getApiErrorMessage('Error directo del servidor')).toBe('Error directo del servidor');
+      expect(getApiErrorMessage('   ')).toBe('Ha ocurrido un error inesperado');
+    });
+
+    it('extracts data.error if present', () => {
+      const err = { response: { data: { error: 'Acceso denegado' } } };
+      expect(getApiErrorMessage(err)).toBe('Acceso denegado');
+    });
+
+    it('extracts data.message if present', () => {
+      const err = { response: { data: { message: 'Propiedad no encontrada' } } };
+      expect(getApiErrorMessage(err)).toBe('Propiedad no encontrada');
+    });
+
+    it('extracts data.title if ProblemDetails RFC 7807', () => {
+      const err = { response: { data: { title: 'One or more validation errors occurred.' } } };
+      expect(getApiErrorMessage(err)).toBe('One or more validation errors occurred.');
+    });
+
+    it('extracts validation errors array or dictionary', () => {
+      const errArray = { response: { data: { errors: ['El precio debe ser positivo', 'La descripción es obligatoria'] } } };
+      expect(getApiErrorMessage(errArray)).toBe('El precio debe ser positivo, La descripción es obligatoria');
+
+      const errDict = {
+        response: {
+          data: {
+            errors: {
+              Price: ['El precio es inválido'],
+              Title: ['El título es requerido'],
+            },
+          },
+        },
+      };
+      expect(getApiErrorMessage(errDict)).toBe('El precio es inválido, El título es requerido');
+    });
+
+    it('falls back to error.message when response.data is absent', () => {
+      const err = new Error('Network Error');
+      expect(getApiErrorMessage(err)).toBe('Network Error');
+    });
+
+    it('returns fallback if object has no recognizable error message', () => {
+      expect(getApiErrorMessage({})).toBe('Ha ocurrido un error inesperado');
+      expect(getApiErrorMessage({ response: { data: {} } }, 'Falló la petición')).toBe('Falló la petición');
+    });
+  });
 });
+

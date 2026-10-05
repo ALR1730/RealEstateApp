@@ -3,6 +3,7 @@ import { subscriptionsService } from '../../api/services';
 import { SubscriptionPlan, AgentSubscription } from '../../types';
 import { useCurrency } from '../../context/CurrencyContext';
 import { Loader } from '../../components/common/Loader';
+import { getApiErrorMessage } from '../../utils/formatters';
 import { Award, Check, Zap, Sparkles, CreditCard, Lock } from 'lucide-react';
 
 export const AgentSubscriptionPage: React.FC = () => {
@@ -106,8 +107,7 @@ export const AgentSubscriptionPage: React.FC = () => {
       setRefreshKey((k) => k + 1);
     } catch (err: unknown) {
       console.error("Error upgrading plan:", err);
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setCardError(msg || "Error al procesar el pago con la pasarela.");
+      setCardError(getApiErrorMessage(err, "Error al procesar el pago con la pasarela."));
     } finally {
       setIsUpgrading(false);
     }

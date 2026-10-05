@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PropertyImage } from '../../types';
-import { X, ChevronLeft, ChevronRight, Maximize } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface GalleryModalProps {
   isOpen: boolean;

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle, XCircle, ArrowLeft, Loader2, MailX } from 'lucide-react';
 import { authService } from '../../api/services';
+import { getApiErrorMessage } from '../../utils/formatters';
 
 type ConfirmState = 'loading' | 'success' | 'error' | 'missing';
 
@@ -26,9 +27,9 @@ export const ConfirmEmailPage: React.FC = () => {
           setMessage(res?.message || 'Tu correo electrónico ha sido confirmado exitosamente.');
           setState('success');
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (active) {
-          setMessage(err.response?.data?.error || err.response?.data?.message || 'No se pudo confirmar tu correo electrónico.');
+          setMessage(getApiErrorMessage(err, 'No se pudo confirmar tu correo electrónico.'));
           setState('error');
         }
       }

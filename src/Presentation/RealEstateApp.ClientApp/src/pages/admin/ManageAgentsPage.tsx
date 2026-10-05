@@ -3,25 +3,29 @@ import { adminService } from '../../api/services';
 import { Badge } from '../../components/common/Badge';
 import { Loader } from '../../components/common/Loader';
 import { Modal } from '../../components/common/Modal';
+import { getApiErrorMessage } from '../../utils/formatters';
+import { User } from '../../types';
 import { 
   Users, 
   CheckCircle, 
   XCircle, 
   Trash2, 
   ArrowRightLeft, 
-  ShieldCheck, 
-  Search,
-  AlertTriangle
+  Search
 } from 'lucide-react';
 
+interface AgentUser extends User {
+  isActive?: boolean;
+}
+
 export const ManageAgentsPage: React.FC = () => {
-  const [agents, setAgents] = useState<any[]>([]);
+  const [agents, setAgents] = useState<AgentUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
 
   // Reassignment Modal State
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
-  const [sourceAgent, setSourceAgent] = useState<any>(null);
+  const [sourceAgent, setSourceAgent] = useState<AgentUser | null>(null);
   const [targetAgentId, setTargetAgentId] = useState('');
   const [isReassigning, setIsReassigning] = useState(false);
 
@@ -29,8 +33,8 @@ export const ManageAgentsPage: React.FC = () => {
     try {
       const data = await adminService.getAgents();
       setAgents(data || []);
-    } catch (err) {
-      console.error("Error loading agents:", err);
+    } catch (err: unknown) {
+      console.error("Error loading agents:", getApiErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
@@ -71,9 +75,9 @@ export const ManageAgentsPage: React.FC = () => {
       setTargetAgentId('');
       await loadAgents();
       alert("¡Cartera de propiedades reasignada exitosamente!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error reassigning properties:", err);
-      alert(err.response?.data?.error || "Error al reasignar cartera.");
+      alert(getApiErrorMessage(err, "Error al reasignar cartera."));
     } finally {
       setIsReassigning(false);
     }

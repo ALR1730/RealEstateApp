@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AmortizationScheduleItem } from '../../types';
 import { formatCurrencyRD } from '../../utils/formatters';
-import { Printer, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Printer, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface AmortizationTableProps {
   schedule: AmortizationScheduleItem[];
