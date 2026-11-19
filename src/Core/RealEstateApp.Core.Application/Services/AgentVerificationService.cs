@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using RealEstateApp.Core.Application.DTOs.Account;
+using RealEstateApp.Core.Application.DTOs.Common;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Agent;
@@ -187,7 +187,7 @@ namespace RealEstateApp.Core.Application.Services
             }
         }
 
-        private async Task<string?> ValidateAndUploadVerificationImageAsync(IFormFile? file, string? currentUrl)
+        private async Task<string?> ValidateAndUploadVerificationImageAsync(FileUploadDto? file, string? currentUrl)
         {
             if (file == null || file.Length <= 0)
             {
@@ -199,7 +199,7 @@ namespace RealEstateApp.Core.Application.Services
                 throw new ValidationException("La imagen de verificación no puede superar los 5 MB.");
             }
 
-            using var stream = file.OpenReadStream();
+            using var stream = file.Content;
             await _fileValidationService.ValidateAsync(stream, file.FileName, file.ContentType, FileUploadPolicy.VerificationImage);
             if (stream.CanSeek)
             {

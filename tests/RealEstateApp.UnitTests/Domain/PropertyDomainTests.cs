@@ -60,7 +60,8 @@ namespace RealEstateApp.UnitTests.Domain
         public void MarkAsAvailable_DebeLanzarDomainException_CuandoPropiedadYaFueVendida()
         {
             // Arrange
-            var property = new Property { Status = PropertyStatus.Sold };
+            var property = new Property();
+            property.MarkAsSold();
 
             // Act
             Action act = () => property.MarkAsAvailable();
@@ -74,7 +75,8 @@ namespace RealEstateApp.UnitTests.Domain
         public void MarkAsReserved_DebeLanzarDomainException_CuandoPropiedadYaFueVendida()
         {
             // Arrange
-            var property = new Property { Status = PropertyStatus.Sold };
+            var property = new Property();
+            property.MarkAsSold();
 
             // Act
             Action act = () => property.MarkAsReserved();
@@ -88,7 +90,7 @@ namespace RealEstateApp.UnitTests.Domain
         public void MarkAsReserved_DebeCambiarEstadoAReservada_CuandoPropiedadEstaDisponible()
         {
             // Arrange
-            var property = new Property { Status = PropertyStatus.Available };
+            var property = new Property();
 
             // Act
             property.MarkAsReserved();
@@ -101,7 +103,7 @@ namespace RealEstateApp.UnitTests.Domain
         public void MarkAsSold_DebeCambiarEstadoAVendida_CuandoPropiedadEstaDisponible()
         {
             // Arrange
-            var property = new Property { Status = PropertyStatus.Available };
+            var property = new Property();
 
             // Act
             property.MarkAsSold();

@@ -194,9 +194,9 @@ namespace RealEstateApp.UnitTests.Services
             {
                 Id = 99,
                 PropertyId = 7,
-                MontoOfertado = 5_000_000m,       // Oferta original del cliente
-                CounterOfferAmount = 5_500_000m   // Contraoferta del agente (precio REAL de cierre)
+                MontoOfertado = 5_000_000m        // Oferta original del cliente
             };
+            offer.MakeCounterOffer(5_500_000m, "Contraoferta del agente");
             var property = new Property { Id = 7, AgentId = "agent-A" };
 
             _offerRepoMock.Setup(r => r.GetByIdAsync(99)).ReturnsAsync(offer);
@@ -233,8 +233,7 @@ namespace RealEstateApp.UnitTests.Services
             {
                 Id = 100,
                 PropertyId = 8,
-                MontoOfertado = 3_000_000m,
-                CounterOfferAmount = null // Sin contraoferta — flujo normal
+                MontoOfertado = 3_000_000m
             };
             var property = new Property { Id = 8, AgentId = "agent-B" };
 

@@ -122,7 +122,12 @@ export function getApiErrorMessage(error: unknown, fallback: string = 'Ha ocurri
           return dataObj.message.trim();
         }
 
-        // 3. data.title (ProblemDetails RFC 7807)
+        // 3. data.detail (ProblemDetails RFC 7807)
+        if (typeof dataObj.detail === 'string' && dataObj.detail.trim().length > 0) {
+          return dataObj.detail.trim();
+        }
+
+        // 4. data.title (ProblemDetails RFC 7807)
         if (typeof dataObj.title === 'string' && dataObj.title.trim().length > 0) {
           return dataObj.title.trim();
         }

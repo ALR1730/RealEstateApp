@@ -8,12 +8,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.DTOs.Dashboard;
-using RealEstateApp.Core.Application.Extensions;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Account;
 using RealEstateApp.Core.Application.ViewModels.Agent;
 using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Enums;
+using RealEstateApp.Infrastructure.Persistence.Extensions;
 
 namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 {
@@ -82,15 +82,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ToggleAgentStatusAsync(string agentId, [FromBody] bool isActive)
         {
-            try
-            {
-                await _agentService.ChangeStatusAsync(agentId, isActive);
-                return Ok(new { success = true, message = $"Agente {(isActive ? "activado" : "inactivado")} exitosamente." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            await _agentService.ChangeStatusAsync(agentId, isActive);
+            return Ok(new { success = true, message = $"Agente {(isActive ? "activado" : "inactivado")} exitosamente." });
         }
 
         /// <summary>
@@ -100,19 +93,12 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ReassignPropertiesAsync([FromQuery] string sourceAgentId, [FromQuery] string targetAgentId)
         {
-            try
+            var properties = await _propertyService.GetByAgentId(sourceAgentId);
+            foreach (var prop in properties)
             {
-                var properties = await _propertyService.GetByAgentId(sourceAgentId);
-                foreach (var prop in properties)
-                {
-                    await _propertyService.ReassignAgent(prop.Id, targetAgentId);
-                }
-                return Ok(new { success = true, message = $"Se reasignaron {properties.Count} propiedades exitosamente." });
+                await _propertyService.ReassignAgent(prop.Id, targetAgentId);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            return Ok(new { success = true, message = $"Se reasignaron {properties.Count} propiedades exitosamente." });
         }
 
         /// <summary>
@@ -122,15 +108,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> DeleteAgentAsync(string agentId)
         {
-            try
-            {
-                await _agentService.DeleteAgentCascadeAsync(agentId);
-                return Ok(new { success = true, message = "El agente y sus registros asociados fueron eliminados en cascada." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            await _agentService.DeleteAgentCascadeAsync(agentId);
+            return Ok(new { success = true, message = "El agente y sus registros asociados fueron eliminados en cascada." });
         }
 
         /// <summary>
@@ -160,15 +139,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ToggleAdminStatusAsync(string userId, [FromBody] bool isActive)
         {
-            try
-            {
-                await _accountService.ChangeUserStatusAsync(userId, isActive);
-                return Ok(new { success = true, message = $"Administrador {(isActive ? "activado" : "inactivado")} exitosamente." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            await _accountService.ChangeUserStatusAsync(userId, isActive);
+            return Ok(new { success = true, message = $"Administrador {(isActive ? "activado" : "inactivado")} exitosamente." });
         }
 
         /// <summary>
@@ -198,15 +170,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ToggleDeveloperStatusAsync(string userId, [FromBody] bool isActive)
         {
-            try
-            {
-                await _accountService.ChangeUserStatusAsync(userId, isActive);
-                return Ok(new { success = true, message = $"Desarrollador {(isActive ? "activado" : "inactivado")} exitosamente." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            await _accountService.ChangeUserStatusAsync(userId, isActive);
+            return Ok(new { success = true, message = $"Desarrollador {(isActive ? "activado" : "inactivado")} exitosamente." });
         }
 
         /// <summary>

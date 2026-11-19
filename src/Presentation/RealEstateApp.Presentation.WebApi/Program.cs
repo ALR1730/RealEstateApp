@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RealEstateApp.Core.Application;
-using RealEstateApp.Core.Domain.Settings;
 using RealEstateApp.Infrastructure.Persistence;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
 using RealEstateApp.Infrastructure.Persistence.Seeds;
@@ -292,6 +291,7 @@ try
         app.UseHsts();
     }
 
+    app.UseMiddleware<RealEstateApp.Presentation.WebApi.Middleware.GlobalExceptionMiddleware>();
     app.UseStaticFiles();
 
     app.UseRouting();

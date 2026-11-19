@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using RealEstateApp.Core.Application.Interfaces;
@@ -24,7 +23,7 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IUserActivityService _userActivityService;
         private readonly ICommissionService _commissionService;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork? _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public OfferService(
             IOfferRepository offerRepository,
@@ -32,14 +31,14 @@ namespace RealEstateApp.Core.Application.Services
             IUserActivityService userActivityService,
             ICommissionService commissionService,
             IMapper mapper,
-            IUnitOfWork? unitOfWork = null)
+            IUnitOfWork unitOfWork)
         {
-            _offerRepository = offerRepository;
-            _propertyRepository = propertyRepository;
-            _userActivityService = userActivityService;
-            _commissionService = commissionService;
-            _mapper = mapper;
-            _unitOfWork = unitOfWork;
+            _offerRepository = offerRepository ?? throw new ArgumentNullException(nameof(offerRepository));
+            _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
+            _userActivityService = userActivityService ?? throw new ArgumentNullException(nameof(userActivityService));
+            _commissionService = commissionService ?? throw new ArgumentNullException(nameof(commissionService));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public async Task<List<OfferViewModel>> GetAllViewModel()
@@ -68,7 +67,6 @@ namespace RealEstateApp.Core.Application.Services
 
         public async Task<SaveOfferViewModel> Add(SaveOfferViewModel vm, string clienteId)
         {
-            // Verificar que la propiedad existe y está disponible
             var property = await _propertyRepository.GetByIdAsync(vm.PropertyId);
             if (property == null)
                 throw new NotFoundException("La propiedad no existe");
@@ -79,7 +77,7 @@ namespace RealEstateApp.Core.Application.Services
             var offer = _mapper.Map<Offer>(vm);
             offer.ClienteId = clienteId;
             offer.FechaOferta = DateTime.UtcNow;
-            offer.Status = OfferStatus.Pending;
+            offer.SetOfferAmount(vm.MontoOfertado);
 
             await _offerRepository.AddAsync(offer);
 
@@ -95,19 +93,11 @@ namespace RealEstateApp.Core.Application.Services
 
             await ValidateAgentOwnsOfferPropertyAsync(offer, agentUserId);
 
-            if (_unitOfWork != null)
+            await _unitOfWork.ExecuteTransactionAsync(async () =>
             {
-                await _unitOfWork.ExecuteTransactionAsync(async () =>
-                {
-                    await _offerRepository.AcceptOfferTransactionAsync(offerId);
-                    await _commissionService.CreateForAcceptedOfferAsync(offerId);
-                });
-            }
-            else
-            {
-                await _offerRepository.AcceptOfferTransactionAsync(offerId);
-                await _commissionService.CreateForAcceptedOfferAsync(offerId);
-            }
+                offer.Accept();
+                await FinalizeAcceptedOfferAsync(offer);
+            });
         }
 
         public async Task RejectOffer(int offerId, string agentUserId)
@@ -143,19 +133,6 @@ namespace RealEstateApp.Core.Application.Services
             );
         }
 
-        private async Task ValidateAgentOwnsOfferPropertyAsync(Offer offer, string agentUserId)
-        {
-            if (string.IsNullOrWhiteSpace(agentUserId))
-                throw new ValidationException("No tiene permisos para gestionar ofertas de esta propiedad.");
-
-            var ownerAgentId = await _propertyRepository.GetAgentIdByPropertyIdAsync(offer.PropertyId);
-            if (ownerAgentId == null)
-                throw new NotFoundException("La propiedad asociada a la oferta no existe.");
-
-            if (ownerAgentId != agentUserId)
-                throw new ValidationException("No tiene permisos para gestionar ofertas de esta propiedad.");
-        }
-
         public async Task AcceptCounterOffer(int offerId, string clientUserId)
         {
             var offer = await _offerRepository.GetByIdAsync(offerId);
@@ -168,26 +145,11 @@ namespace RealEstateApp.Core.Application.Services
             if (offer.Status != OfferStatus.CounterOffered)
                 throw new ValidationException("Esta oferta no tiene una contra-oferta pendiente de aceptación");
 
-            // La aceptación atómica sólo opera sobre ofertas Pending:
-            // al aceptar una contra-oferta el cliente la convierte en oferta firme antes de ejecutar la transacción.
-            offer.Status = OfferStatus.Pending;
-            await _offerRepository.UpdateAsync(offer);
-
-            // Envolver ambas operaciones en una transacción UoW para garantizar atomicidad ACID:
-            // si la creación de comisión falla, el estado de la oferta/propiedad hace rollback.
-            if (_unitOfWork != null)
+            await _unitOfWork.ExecuteTransactionAsync(async () =>
             {
-                await _unitOfWork.ExecuteTransactionAsync(async () =>
-                {
-                    await _offerRepository.AcceptOfferTransactionAsync(offerId);
-                    await _commissionService.CreateForAcceptedOfferAsync(offerId);
-                });
-            }
-            else
-            {
-                await _offerRepository.AcceptOfferTransactionAsync(offerId);
-                await _commissionService.CreateForAcceptedOfferAsync(offerId);
-            }
+                offer.AcceptCounterOffer(clientUserId);
+                await FinalizeAcceptedOfferAsync(offer);
+            });
 
             await _userActivityService.LogActivityAsync(
                 clientUserId,
@@ -210,16 +172,57 @@ namespace RealEstateApp.Core.Application.Services
             if (offer.Status != OfferStatus.CounterOffered)
                 throw new ValidationException("Esta oferta no tiene una contra-oferta pendiente de resolución");
 
-            offer.Status = OfferStatus.Rejected;
+            offer.RejectCounterOffer(clientUserId);
             await _offerRepository.UpdateAsync(offer);
 
             await _userActivityService.LogActivityAsync(
                 clientUserId,
                 "Contra-Oferta Rechazada",
-                $"Rechazó la contra-oferta propuesta por el agente",
+                "Rechazó la contra-oferta propuesta por el agente",
                 "bi-x-circle-fill text-danger",
                 "/Offers/MyOffers"
             );
+        }
+
+        private async Task FinalizeAcceptedOfferAsync(Offer acceptedOffer)
+        {
+            await _offerRepository.UpdateAsync(acceptedOffer);
+
+            var property = await _propertyRepository.FindByIdAsync(acceptedOffer.PropertyId);
+            if (property != null)
+            {
+                property.MarkAsSold();
+                await _propertyRepository.UpdateAsync(property);
+            }
+
+            var competingOffers = await _offerRepository.GetActiveCompetingOffersAsync(
+                acceptedOffer.PropertyId,
+                acceptedOffer.Id);
+
+            if (competingOffers.Count > 0)
+            {
+                foreach (var otherOffer in competingOffers)
+                {
+                    otherOffer.RejectOnPropertySold();
+                }
+
+                await _offerRepository.UpdateRangeAsync(competingOffers);
+            }
+
+            await _commissionService.CreateForAcceptedOfferAsync(acceptedOffer.Id);
+        }
+
+        private async Task ValidateAgentOwnsOfferPropertyAsync(Offer offer, string agentUserId)
+        {
+            if (string.IsNullOrWhiteSpace(agentUserId))
+                throw new ValidationException("No tiene permisos para gestionar ofertas de esta propiedad.");
+
+            var ownerAgentId = await _propertyRepository.GetAgentIdByPropertyIdAsync(offer.PropertyId);
+            if (ownerAgentId == null)
+                throw new NotFoundException("La propiedad asociada a la oferta no existe.");
+
+            if (ownerAgentId != agentUserId)
+                throw new ValidationException("No tiene permisos para gestionar ofertas de esta propiedad.");
         }
     }
 }

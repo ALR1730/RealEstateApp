@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
+using System.Text.Json.Serialization;
+using RealEstateApp.Core.Application.DTOs.Common;
 
 namespace RealEstateApp.Core.Application.ViewModels.Property
 {
@@ -136,7 +137,8 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         /// Se permiten hasta 15 imágenes por propiedad.
         /// </summary>
         [Display(Name = "Imágenes del Inmueble (máx. 15)")]
-        public List<IFormFile>? Files { get; set; }
+        [JsonIgnore]
+        public List<FileUploadDto>? Files { get; set; }
 
         /// <summary>
         /// IDs de mejoras seleccionadas (checkbox múltiple).

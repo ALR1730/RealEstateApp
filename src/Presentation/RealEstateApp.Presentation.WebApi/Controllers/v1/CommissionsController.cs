@@ -1,23 +1,18 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.Interfaces.Services;
-using RealEstateApp.Core.Domain.Exceptions;
 
 namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 {
     public class CommissionsController : BaseApiController
     {
         private readonly ICommissionService _commissionService;
-        private readonly UserManager<IdentityUser> _userManager;
 
-        public CommissionsController(
-            ICommissionService commissionService,
-            UserManager<IdentityUser> userManager)
+        public CommissionsController(ICommissionService commissionService)
         {
             _commissionService = commissionService;
-            _userManager = userManager;
         }
 
         /// <summary>
@@ -28,7 +23,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetMyCommissions()
         {
-            var agentId = _userManager.GetUserId(User);
+            var agentId = CurrentUserId;
             if (string.IsNullOrEmpty(agentId)) return Unauthorized();
 
             var commissions = await _commissionService.GetByAgentAsync(agentId);
@@ -43,7 +38,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetMySummary()
         {
-            var agentId = _userManager.GetUserId(User);
+            var agentId = CurrentUserId;
             if (string.IsNullOrEmpty(agentId)) return Unauthorized();
 
             var summary = await _commissionService.GetAgentSummaryAsync(agentId);
@@ -72,15 +67,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> MarkAsPaid(int commissionId)
         {
-            try
-            {
-                await _commissionService.MarkAsPaidAsync(commissionId);
-                return Ok(new { success = true, message = "Comisión marcada como pagada." });
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new { hasError = true, error = ex.Message });
-            }
+            await _commissionService.MarkAsPaidAsync(commissionId);
+            return Ok(new { success = true, message = "Comisión marcada como pagada." });
         }
     }
 }

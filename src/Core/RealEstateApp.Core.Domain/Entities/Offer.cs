@@ -8,16 +8,16 @@ namespace RealEstateApp.Core.Domain.Entities
     public class Offer : AuditableBaseEntity
     {
         public decimal MontoOfertado { get; set; }
-        public OfferStatus Status { get; set; } = OfferStatus.Pending;
+        public OfferStatus Status { get; private set; } = OfferStatus.Pending;
         public string ClienteId { get; set; } = string.Empty;
         public DateTime FechaOferta { get; set; } = DateTime.UtcNow;
         public string? PreApprovalLetterUrl { get; set; }
         public string? Notes { get; set; }
 
         // Campos de Contra-Oferta (Ítem 2.1)
-        public decimal? CounterOfferAmount { get; set; }
-        public string? CounterOfferMessage { get; set; }
-        public DateTime? CounterOfferDate { get; set; }
+        public decimal? CounterOfferAmount { get; private set; }
+        public string? CounterOfferMessage { get; private set; }
+        public DateTime? CounterOfferDate { get; private set; }
 
         public int PropertyId { get; set; }
         public Property? Property { get; set; }
@@ -95,6 +95,36 @@ namespace RealEstateApp.Core.Domain.Entities
             }
 
             Status = OfferStatus.Accepted;
+        }
+
+        /// <summary>
+        /// Permite al cliente comprador rechazar formalmente una contra-oferta activa.
+        /// </summary>
+        public void RejectCounterOffer(string clientUserId)
+        {
+            if (Status != OfferStatus.CounterOffered)
+            {
+                throw new DomainException("Esta oferta no tiene una contra-oferta pendiente de resolución.");
+            }
+            if (ClienteId != clientUserId)
+            {
+                throw new DomainException("No tiene permisos para modificar esta oferta.");
+            }
+
+            Status = OfferStatus.Rejected;
+        }
+
+        /// <summary>
+        /// Rechaza en cascada una oferta o contraoferta activa al venderse la propiedad.
+        /// </summary>
+        public void RejectOnPropertySold()
+        {
+            if (Status != OfferStatus.Pending && Status != OfferStatus.CounterOffered)
+            {
+                throw new DomainException($"No se puede rechazar por venta cerrada una oferta en estado: {Status}");
+            }
+
+            Status = OfferStatus.Rejected;
         }
 
         #endregion

@@ -1,10 +1,9 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.Interfaces.Services;
-using RealEstateApp.Core.Application.ViewModels.Agent;
+using RealEstateApp.Presentation.WebApi.Models.Requests;
 
 namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 {
@@ -12,14 +11,10 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
     public class VerificationsController : BaseApiController
     {
         private readonly IAgentVerificationService _verificationService;
-        private readonly UserManager<IdentityUser> _userManager;
 
-        public VerificationsController(
-            IAgentVerificationService verificationService,
-            UserManager<IdentityUser> userManager)
+        public VerificationsController(IAgentVerificationService verificationService)
         {
             _verificationService = verificationService;
-            _userManager = userManager;
         }
 
         /// <summary>
@@ -42,7 +37,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetMyStatus()
         {
-            var userId = _userManager.GetUserId(User);
+            var userId = CurrentUserId;
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
             var status = await _verificationService.GetByAgentIdAsync(userId);
@@ -57,12 +52,12 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Submit([FromForm] AgentVerificationViewModel vm)
+        public async Task<IActionResult> Submit([FromForm] SubmitVerificationFormRequest request)
         {
-            var userId = _userManager.GetUserId(User);
+            var userId = CurrentUserId;
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            vm.AgentId = userId;
+            var vm = request.ToViewModel(userId);
             var success = await _verificationService.SubmitVerificationAsync(vm);
             if (!success)
             {
@@ -81,7 +76,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Approve(int id)
         {
-            var adminId = _userManager.GetUserId(User) ?? "Admin";
+            var adminId = CurrentUserId ?? "Admin";
             var success = await _verificationService.ReviewVerificationAsync(id, true, null, adminId);
             if (!success)
             {
@@ -105,7 +100,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return BadRequest(new { hasError = true, error = "Debe indicar el motivo del rechazo." });
             }
 
-            var adminId = _userManager.GetUserId(User) ?? "Admin";
+            var adminId = CurrentUserId ?? "Admin";
             var success = await _verificationService.ReviewVerificationAsync(id, false, request.Reason, adminId);
             if (!success)
             {

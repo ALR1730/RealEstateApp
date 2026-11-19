@@ -1,8 +1,6 @@
-using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Subscription;
@@ -12,14 +10,10 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
     public class SubscriptionsController : BaseApiController
     {
         private readonly ISubscriptionService _subscriptionService;
-        private readonly UserManager<IdentityUser> _userManager;
 
-        public SubscriptionsController(
-            ISubscriptionService subscriptionService,
-            UserManager<IdentityUser> userManager)
+        public SubscriptionsController(ISubscriptionService subscriptionService)
         {
             _subscriptionService = subscriptionService;
-            _userManager = userManager;
         }
 
         /// <summary>
@@ -42,7 +36,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetMySubscription()
         {
-            var userId = _userManager.GetUserId(User);
+            var userId = CurrentUserId;
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
             var current = await _subscriptionService.GetCurrentSubscriptionByAgentIdAsync(userId);
@@ -58,7 +52,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Upgrade([FromBody] UpgradeSubscriptionRequest request)
         {
-            var userId = _userManager.GetUserId(User);
+            var userId = CurrentUserId;
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
             if (request.PlanId <= 0)

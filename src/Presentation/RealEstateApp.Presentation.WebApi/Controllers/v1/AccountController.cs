@@ -9,6 +9,7 @@ using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Account;
 using RealEstateApp.Core.Domain.Enums;
+using RealEstateApp.Presentation.WebApi.Models.Requests;
 
 namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 {
@@ -171,15 +172,15 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EditProfileViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> UpdateProfileAsync([FromForm] EditProfileViewModel model)
+        public async Task<IActionResult> UpdateProfileAsync([FromForm] EditProfileFormRequest request)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = CurrentUserId;
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();
             }
 
-            model.Id = userId;
+            var model = request.ToViewModel(userId);
             var result = await _accountService.UpdateProfileAsync(model);
 
             if (result.HasError)

@@ -62,7 +62,6 @@ namespace RealEstateApp.UnitTests.Services
                 Price = 5000000m,
                 PriceInDOP = 5000000m,
                 Currency = CurrencyConstants.DOP,
-                Status = PropertyStatus.Available,
                 AgentId = "agent-owner"
             };
             await _dbContext.Properties.AddAsync(property);
@@ -75,7 +74,6 @@ namespace RealEstateApp.UnitTests.Services
                 Price = 3000000m,
                 PriceInDOP = 3000000m,
                 Currency = CurrencyConstants.DOP,
-                Status = PropertyStatus.Available,
                 AgentId = "agent-owner"
             };
             await _dbContext.Properties.AddAsync(otherProperty);
@@ -87,7 +85,6 @@ namespace RealEstateApp.UnitTests.Services
                 PropertyId = property.Id,
                 ClienteId = "client-winner",
                 MontoOfertado = 4800000m,
-                Status = OfferStatus.Pending,
                 FechaOferta = DateTime.UtcNow
             };
 
@@ -97,7 +94,6 @@ namespace RealEstateApp.UnitTests.Services
                 PropertyId = property.Id,
                 ClienteId = "client-loser",
                 MontoOfertado = 4700000m,
-                Status = OfferStatus.Pending,
                 FechaOferta = DateTime.UtcNow
             };
 
@@ -107,7 +103,6 @@ namespace RealEstateApp.UnitTests.Services
                 PropertyId = otherProperty.Id,
                 ClienteId = "client-other",
                 MontoOfertado = 2900000m,
-                Status = OfferStatus.Pending,
                 FechaOferta = DateTime.UtcNow
             };
 
@@ -151,7 +146,6 @@ namespace RealEstateApp.UnitTests.Services
                 Price = 8_000_000m,
                 PriceInDOP = 8_000_000m,
                 Currency = CurrencyConstants.DOP,
-                Status = PropertyStatus.Available,
                 AgentId = "agent-X"
             };
             await _dbContext.Properties.AddAsync(property);
@@ -163,7 +157,6 @@ namespace RealEstateApp.UnitTests.Services
                 PropertyId = property.Id,
                 ClienteId = "client-winner",
                 MontoOfertado = 7_800_000m,
-                Status = OfferStatus.Pending,
                 FechaOferta = DateTime.UtcNow
             };
 
@@ -173,7 +166,6 @@ namespace RealEstateApp.UnitTests.Services
                 PropertyId = property.Id,
                 ClienteId = "client-pending",
                 MontoOfertado = 7_500_000m,
-                Status = OfferStatus.Pending,
                 FechaOferta = DateTime.UtcNow
             };
 
@@ -183,10 +175,9 @@ namespace RealEstateApp.UnitTests.Services
                 PropertyId = property.Id,
                 ClienteId = "client-counter",
                 MontoOfertado = 7_200_000m,
-                CounterOfferAmount = 7_600_000m,
-                Status = OfferStatus.CounterOffered, // <-- Estaba quedando hu\u00e9rfana antes del fix
                 FechaOferta = DateTime.UtcNow
             };
+            counterOffer.MakeCounterOffer(7_600_000m, null);
 
             await _dbContext.Offers.AddRangeAsync(winningOffer, pendingOffer, counterOffer);
             await _dbContext.SaveChangesAsync();

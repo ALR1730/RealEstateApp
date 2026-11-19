@@ -58,7 +58,6 @@ namespace RealEstateApp.UnitTests.Services
                 Price = 6_000_000m,
                 PriceInDOP = 6_000_000m,
                 Currency = CurrencyConstants.DOP,
-                Status = PropertyStatus.Available,
                 AgentId = ownerAgentId
             };
             await _dbContext.Properties.AddAsync(property);
@@ -69,7 +68,6 @@ namespace RealEstateApp.UnitTests.Services
                 PropertyId = property.Id,
                 ClienteId = "client-buyer",
                 MontoOfertado = 5_500_000m,
-                Status = OfferStatus.Pending,
                 FechaOferta = DateTime.UtcNow
             };
             await _dbContext.Offers.AddAsync(offer);

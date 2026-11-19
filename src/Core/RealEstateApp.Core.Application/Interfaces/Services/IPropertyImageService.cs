@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using RealEstateApp.Core.Application.DTOs.Common;
 using RealEstateApp.Core.Domain.Entities;
 
 namespace RealEstateApp.Core.Application.Interfaces.Services
@@ -10,7 +10,7 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
     /// </summary>
     public interface IPropertyImageService
     {
-        Task<List<PropertyImage>> SaveImagesAsync(int propertyId, IReadOnlyList<IFormFile>? files, int maxImages = 15);
+        Task<List<PropertyImage>> SaveImagesAsync(int propertyId, IReadOnlyList<FileUploadDto>? files, int maxImages = 15);
         Task DeletePhysicalImagesAsync(IEnumerable<PropertyImage>? images);
         Task DeleteImageByIdAsync(int imageId);
     }

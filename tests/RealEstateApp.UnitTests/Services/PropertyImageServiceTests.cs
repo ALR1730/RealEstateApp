@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
 using Moq;
+using RealEstateApp.Core.Application.DTOs.Common;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.Services;
@@ -29,17 +29,17 @@ namespace RealEstateApp.UnitTests.Services
             _sut = new PropertyImageService(_imageRepoMock.Object, _storageMock.Object);
         }
 
-        /// <summary>
-        /// Crea un mock de IFormFile con nombre, MIME type y contenido binario específicos.
-        /// </summary>
-        private static Mock<IFormFile> CreateFileMock(string fileName, string contentType, byte[] content)
+        private static FileUploadDto CreateFileDto(
+            string fileName,
+            string contentType,
+            byte[] content,
+            long? overrideLength = null)
         {
-            var fileMock = new Mock<IFormFile>();
-            fileMock.Setup(f => f.Length).Returns(content.Length);
-            fileMock.Setup(f => f.FileName).Returns(fileName);
-            fileMock.Setup(f => f.ContentType).Returns(contentType);
-            fileMock.Setup(f => f.OpenReadStream()).Returns(() => new MemoryStream(content));
-            return fileMock;
+            return new FileUploadDto(
+                new MemoryStream(content),
+                fileName,
+                contentType,
+                overrideLength ?? content.Length);
         }
 
         [Fact]
@@ -57,8 +57,8 @@ namespace RealEstateApp.UnitTests.Services
             _storageMock.Setup(s => s.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), "properties"))
                 .ReturnsAsync("/uploads/img2.jpg");
 
-            var fileMock = CreateFileMock("photo.jpg", "image/jpeg", JpegHeader);
-            var files = new List<IFormFile> { fileMock.Object };
+            using var fileDto = CreateFileDto("photo.jpg", "image/jpeg", JpegHeader);
+            var files = new List<FileUploadDto> { fileDto };
 
             // Act
             var saved = await _sut.SaveImagesAsync(10, files, maxImages: 15);
@@ -99,8 +99,8 @@ namespace RealEstateApp.UnitTests.Services
             var pdfHeader = new byte[] { 0x25, 0x50, 0x44, 0x46 }; // %PDF
             _imageRepoMock.Setup(r => r.GetByPropertyIdAsync(1)).ReturnsAsync(new List<PropertyImage>());
 
-            var fileMock = CreateFileMock("factura.pdf", "application/pdf", pdfHeader);
-            var files = new List<IFormFile> { fileMock.Object };
+            using var fileDto = CreateFileDto("factura.pdf", "application/pdf", pdfHeader);
+            var files = new List<FileUploadDto> { fileDto };
 
             // Act
             var saved = await _sut.SaveImagesAsync(1, files);
@@ -121,8 +121,8 @@ namespace RealEstateApp.UnitTests.Services
             var exeHeader = new byte[] { 0x4D, 0x5A, 0x90, 0x00 }; // MZ header
             _imageRepoMock.Setup(r => r.GetByPropertyIdAsync(2)).ReturnsAsync(new List<PropertyImage>());
 
-            var fileMock = CreateFileMock("malware.jpg", "image/jpeg", exeHeader);
-            var files = new List<IFormFile> { fileMock.Object };
+            using var fileDto = CreateFileDto("malware.jpg", "image/jpeg", exeHeader);
+            var files = new List<FileUploadDto> { fileDto };
 
             // Act
             var saved = await _sut.SaveImagesAsync(2, files);
@@ -144,8 +144,8 @@ namespace RealEstateApp.UnitTests.Services
             _storageMock.Setup(s => s.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), "properties"))
                 .ReturnsAsync("/uploads/plano.png");
 
-            var fileMock = CreateFileMock("plano.png", "image/png", PngHeader);
-            var files = new List<IFormFile> { fileMock.Object };
+            using var fileDto = CreateFileDto("plano.png", "image/png", PngHeader);
+            var files = new List<FileUploadDto> { fileDto };
 
             // Act
             var saved = await _sut.SaveImagesAsync(3, files);
@@ -166,13 +166,8 @@ namespace RealEstateApp.UnitTests.Services
             const long oneMB = 1024 * 1024;
             _imageRepoMock.Setup(r => r.GetByPropertyIdAsync(4)).ReturnsAsync(new List<PropertyImage>());
 
-            var fileMock = new Mock<IFormFile>();
-            fileMock.Setup(f => f.Length).Returns(11 * oneMB);
-            fileMock.Setup(f => f.ContentType).Returns("image/jpeg");
-            fileMock.Setup(f => f.FileName).Returns("foto_gigante.jpg");
-            fileMock.Setup(f => f.OpenReadStream()).Returns(() => new MemoryStream(JpegHeader));
-
-            var files = new List<IFormFile> { fileMock.Object };
+            using var fileDto = CreateFileDto("foto_gigante.jpg", "image/jpeg", JpegHeader, overrideLength: 11 * oneMB);
+            var files = new List<FileUploadDto> { fileDto };
 
             // Act
             var saved = await _sut.SaveImagesAsync(4, files);

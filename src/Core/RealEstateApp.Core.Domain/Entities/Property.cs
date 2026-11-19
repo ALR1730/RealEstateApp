@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using RealEstateApp.Core.Domain.Common;
 using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Exceptions;
+using RealEstateApp.Core.Domain.ValueObjects;
 
 namespace RealEstateApp.Core.Domain.Entities
 {
@@ -17,7 +19,7 @@ namespace RealEstateApp.Core.Domain.Entities
         public decimal SizeInMeters { get; set; }
         public string Description { get; set; } = string.Empty;
         public string AgentId { get; set; } = string.Empty;
-        public string Status { get; set; } = PropertyStatus.Available;
+        public string Status { get; private set; } = PropertyStatus.Available;
 
         // Nuevos campos de mejoras funcionales V2
         public double Latitude { get; set; }
@@ -31,7 +33,7 @@ namespace RealEstateApp.Core.Domain.Entities
 
         // Listados Destacados (Featured)
         public bool IsFeatured { get; set; } = false;
-        public System.DateTime? FeaturedUntil { get; set; }
+        public DateTime? FeaturedUntil { get; set; }
 
         // Ubicación administrativa en República Dominicana
         public int? ProvinceId { get; set; }
@@ -61,6 +63,18 @@ namespace RealEstateApp.Core.Domain.Entities
 
         #region Domain Behaviors & Invariants
 
+        public void AssignCode(PropertyCode code)
+        {
+            if (code is null)
+            {
+                throw new DomainException("El código de la propiedad es obligatorio.");
+            }
+
+            Code = code.Value;
+        }
+
+        public void AssignToAgent(string agentId) => ReassignAgent(agentId);
+
         /// <summary>
         /// Modifica el precio de la propiedad asegurando que sea mayor a cero y sincronizando el precio en DOP.
         /// </summary>
@@ -80,7 +94,7 @@ namespace RealEstateApp.Core.Domain.Entities
 
             var rate = customUsdRate ?? CurrencyConstants.DefaultUsdToDopRate;
 
-            if (string.Equals(Currency, CurrencyConstants.USD, System.StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(Currency, CurrencyConstants.USD, StringComparison.OrdinalIgnoreCase))
             {
                 PriceInDOP = newPrice * rate;
             }
@@ -133,7 +147,7 @@ namespace RealEstateApp.Core.Domain.Entities
             }
 
             IsFeatured = true;
-            FeaturedUntil = System.DateTime.UtcNow.AddDays(durationDays);
+            FeaturedUntil = DateTime.UtcNow.AddDays(durationDays);
         }
 
         /// <summary>

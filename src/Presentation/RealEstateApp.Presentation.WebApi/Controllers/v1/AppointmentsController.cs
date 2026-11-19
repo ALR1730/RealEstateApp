@@ -58,15 +58,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return BadRequest(ModelState);
             }
 
-            try
-            {
-                var created = await _appointmentService.RequestAppointmentAsync(model, clientId);
-                return Ok(created);
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            var created = await _appointmentService.RequestAppointmentAsync(model, clientId);
+            return Ok(created);
         }
 
         /// <summary>

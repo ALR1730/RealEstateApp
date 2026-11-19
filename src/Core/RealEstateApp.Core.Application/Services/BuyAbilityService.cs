@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using RealEstateApp.Core.Application.Interfaces;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.BuyAbility;
@@ -16,15 +17,18 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IBuyAbilityEvaluationRepository _evaluationRepository;
         private readonly ICurrencyService _currencyService;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
 
         public BuyAbilityService(
             IBuyAbilityEvaluationRepository evaluationRepository,
             ICurrencyService currencyService,
-            IMapper mapper)
+            IMapper mapper,
+            IUnitOfWork unitOfWork)
         {
-            _evaluationRepository = evaluationRepository;
-            _currencyService = currencyService;
-            _mapper = mapper;
+            _evaluationRepository = evaluationRepository ?? throw new ArgumentNullException(nameof(evaluationRepository));
+            _currencyService = currencyService ?? throw new ArgumentNullException(nameof(currencyService));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public async Task<BuyAbilityResultDto> EvaluateAsync(string clientId, BuyAbilityRequestDto request)
@@ -41,8 +45,6 @@ namespace RealEstateApp.Core.Application.Services
             var evaluationResult = DetermineEvaluationResult(dti, request.AvailableDownPayment);
             var observations = GenerateObservations(dti, creditScore, evaluationResult, maxPropertyPrice, annualRate, termYears);
             var currency = request.Currency ?? "DOP";
-
-            await DeactivatePreviousEvaluationsAsync(clientId);
 
             var evaluation = new BuyAbilityEvaluation
             {
@@ -65,7 +67,12 @@ namespace RealEstateApp.Core.Application.Services
                 IsActive = true
             };
 
-            var saved = await _evaluationRepository.AddAsync(evaluation);
+            BuyAbilityEvaluation saved = null!;
+            await _unitOfWork.ExecuteTransactionAsync(async () =>
+            {
+                await DeactivatePreviousEvaluationsAsync(clientId);
+                saved = await _evaluationRepository.AddAsync(evaluation);
+            });
 
             return new BuyAbilityResultDto
             {

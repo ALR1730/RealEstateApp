@@ -22,9 +22,8 @@ namespace RealEstateApp.Core.Application.Interfaces.Repositories
         Task<List<Offer>> GetByPropertyIdsAsync(IEnumerable<int> propertyIds);
 
         /// <summary>
-        /// Ejecuta de forma atómica bajo una transacción explícita la aceptación de una oferta,
-        /// la actualización de la propiedad a "Vendida" y el rechazo masivo del resto de ofertas pendientes.
+        /// Obtiene las ofertas competidoras activas (Pending o CounterOffered) de una propiedad excluyendo la oferta aceptada.
         /// </summary>
-        Task AcceptOfferTransactionAsync(int offerId);
+        Task<List<Offer>> GetActiveCompetingOffersAsync(int propertyId, int excludeOfferId);
     }
 }

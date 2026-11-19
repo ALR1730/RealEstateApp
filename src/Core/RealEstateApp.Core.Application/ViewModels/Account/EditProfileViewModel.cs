@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
+using System.Text.Json.Serialization;
+using RealEstateApp.Core.Application.DTOs.Common;
 
 namespace RealEstateApp.Core.Application.ViewModels.Account
 {
@@ -39,7 +40,8 @@ namespace RealEstateApp.Core.Application.ViewModels.Account
         public string? ProfilePictureUrl { get; set; }
 
         [Display(Name = "Cambiar Foto de Perfil")]
-        public IFormFile? ProfilePictureFile { get; set; }
+        [JsonIgnore]
+        public FileUploadDto? ProfilePictureFile { get; set; }
 
         [DataType(DataType.Password)]
         [Display(Name = "Contraseña Actual (Requerida si desea cambiar contraseña)")]

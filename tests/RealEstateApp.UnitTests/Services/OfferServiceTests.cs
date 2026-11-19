@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentAssertions;
@@ -23,6 +25,7 @@ namespace RealEstateApp.UnitTests.Services
         private readonly Mock<IPropertyRepository> _propertyRepositoryMock;
         private readonly Mock<IUserActivityService> _userActivityServiceMock;
         private readonly Mock<ICommissionService> _commissionServiceMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly IMapper _mapper;
         private readonly OfferService _sut;
 
@@ -32,14 +35,24 @@ namespace RealEstateApp.UnitTests.Services
             _propertyRepositoryMock = new Mock<IPropertyRepository>();
             _userActivityServiceMock = new Mock<IUserActivityService>();
             _commissionServiceMock = new Mock<ICommissionService>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
             _mapper = AutoMapperTestFactory.CreateMapper();
+
+            _unitOfWorkMock
+                .Setup(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default))
+                .Returns<Func<Task>, CancellationToken>(async (action, _) => await action());
+
+            _offerRepositoryMock
+                .Setup(r => r.GetActiveCompetingOffersAsync(It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync(new List<Offer>());
 
             _sut = new OfferService(
                 _offerRepositoryMock.Object,
                 _propertyRepositoryMock.Object,
                 _userActivityServiceMock.Object,
                 _commissionServiceMock.Object,
-                _mapper
+                _mapper,
+                _unitOfWorkMock.Object
             );
         }
 
@@ -50,7 +63,6 @@ namespace RealEstateApp.UnitTests.Services
             var property = new Property
             {
                 Id = 1,
-                Status = PropertyStatus.Available,
                 Price = 100000m
             };
 
@@ -87,9 +99,9 @@ namespace RealEstateApp.UnitTests.Services
             var property = new Property
             {
                 Id = 2,
-                Status = PropertyStatus.Sold,
                 Price = 100000m
             };
+            property.MarkAsSold();
 
             var saveVm = new SaveOfferViewModel
             {
@@ -117,7 +129,6 @@ namespace RealEstateApp.UnitTests.Services
             {
                 Id = offerId,
                 PropertyId = 1,
-                Status = OfferStatus.Pending,
                 MontoOfertado = 80000m,
                 ClienteId = "client-001"
             };
@@ -152,8 +163,7 @@ namespace RealEstateApp.UnitTests.Services
             var offer = new Offer
             {
                 Id = offerId,
-                PropertyId = 1,
-                Status = OfferStatus.Pending
+                PropertyId = 1
             };
 
             _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId))
@@ -170,28 +180,35 @@ namespace RealEstateApp.UnitTests.Services
         }
 
         [Fact]
-        public async Task AcceptCounterOffer_ShouldTransitionToPendingBeforeAtomicAccept()
+        public async Task AcceptCounterOffer_DebeAceptarContraofertaYVenderPropiedadAtomicamente_CuandoClienteEsPropietario()
         {
             // Arrange
             int offerId = 15;
+            var property = new Property { Id = 1, AgentId = "agent-001" };
             var offer = new Offer
             {
                 Id = offerId,
+                PropertyId = 1,
                 ClienteId = "client-001",
-                Status = OfferStatus.CounterOffered,
-                CounterOfferAmount = 87000m
+                MontoOfertado = 82000m
             };
+            offer.MakeCounterOffer(87000m, null);
 
             _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId))
                 .ReturnsAsync(offer);
+            _propertyRepositoryMock.Setup(r => r.FindByIdAsync(1))
+                .ReturnsAsync(property);
 
             // Act
             await _sut.AcceptCounterOffer(offerId, "client-001");
 
-            // Assert: primero transita a Pending (requisito de la aceptación atómica) y luego ejecuta la transacción
-            offer.Status.Should().Be(OfferStatus.Pending);
+            // Assert
+            offer.Status.Should().Be(OfferStatus.Accepted);
+            property.Status.Should().Be(PropertyStatus.Sold);
+            _unitOfWorkMock.Verify(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default), Times.Once);
             _offerRepositoryMock.Verify(r => r.UpdateAsync(offer), Times.Once);
-            _offerRepositoryMock.Verify(r => r.AcceptOfferTransactionAsync(offerId), Times.Once);
+            _propertyRepositoryMock.Verify(r => r.UpdateAsync(property), Times.Once);
+            _offerRepositoryMock.Verify(r => r.GetActiveCompetingOffersAsync(1, offerId), Times.Once);
             _commissionServiceMock.Verify(c => c.CreateForAcceptedOfferAsync(offerId), Times.Once);
             _userActivityServiceMock.Verify(u => u.LogActivityAsync(
                 "client-001",
@@ -211,8 +228,9 @@ namespace RealEstateApp.UnitTests.Services
             {
                 Id = offerId,
                 ClienteId = "client-001",
-                Status = OfferStatus.CounterOffered
+                MontoOfertado = 80000m
             };
+            offer.MakeCounterOffer(85000m, null);
 
             _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId))
                 .ReturnsAsync(offer);
@@ -224,7 +242,7 @@ namespace RealEstateApp.UnitTests.Services
             await act.Should().ThrowAsync<ValidationException>()
                 .WithMessage("No tiene permisos para modificar esta oferta");
             _offerRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<Offer>()), Times.Never);
-            _offerRepositoryMock.Verify(r => r.AcceptOfferTransactionAsync(It.IsAny<int>()), Times.Never);
+            _unitOfWorkMock.Verify(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default), Times.Never);
         }
 
         [Fact]
@@ -232,36 +250,28 @@ namespace RealEstateApp.UnitTests.Services
         {
             // Arrange
             int offerId = 42;
+            var property = new Property { Id = 1, AgentId = "agent-001" };
             var offer = new Offer
             {
                 Id = offerId,
                 PropertyId = 1,
-                Status = OfferStatus.Pending
+                MontoOfertado = 4_000_000m
             };
             _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId)).ReturnsAsync(offer);
             _propertyRepositoryMock.Setup(r => r.GetAgentIdByPropertyIdAsync(1))
                 .ReturnsAsync("agent-001");
-
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            unitOfWorkMock
-                .Setup(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default))
-                .Returns<Func<Task>, System.Threading.CancellationToken>(async (action, _) => await action());
-
-            var sutWithUow = new OfferService(
-                _offerRepositoryMock.Object,
-                _propertyRepositoryMock.Object,
-                _userActivityServiceMock.Object,
-                _commissionServiceMock.Object,
-                _mapper,
-                unitOfWorkMock.Object
-            );
+            _propertyRepositoryMock.Setup(r => r.FindByIdAsync(1))
+                .ReturnsAsync(property);
 
             // Act
-            await sutWithUow.AcceptOffer(offerId, "agent-001");
+            await _sut.AcceptOffer(offerId, "agent-001");
 
             // Assert
-            unitOfWorkMock.Verify(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default), Times.Once);
-            _offerRepositoryMock.Verify(r => r.AcceptOfferTransactionAsync(offerId), Times.Once);
+            offer.Status.Should().Be(OfferStatus.Accepted);
+            property.Status.Should().Be(PropertyStatus.Sold);
+            _unitOfWorkMock.Verify(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default), Times.Once);
+            _offerRepositoryMock.Verify(r => r.UpdateAsync(offer), Times.Once);
+            _propertyRepositoryMock.Verify(r => r.UpdateAsync(property), Times.Once);
             _commissionServiceMock.Verify(c => c.CreateForAcceptedOfferAsync(offerId), Times.Once);
         }
 
@@ -275,37 +285,29 @@ namespace RealEstateApp.UnitTests.Services
         {
             // Arrange
             int offerId = 55;
+            var property = new Property { Id = 2, AgentId = "agent-001" };
             var offer = new Offer
             {
                 Id = offerId,
+                PropertyId = 2,
                 ClienteId = "client-001",
-                Status = OfferStatus.CounterOffered,
-                CounterOfferAmount = 5_500_000m
+                MontoOfertado = 5_000_000m
             };
-
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            unitOfWorkMock
-                .Setup(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default))
-                .Returns<Func<Task>, System.Threading.CancellationToken>(async (action, _) => await action());
+            offer.MakeCounterOffer(5_500_000m, null);
 
             _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId)).ReturnsAsync(offer);
-
-            var sutWithUow = new OfferService(
-                _offerRepositoryMock.Object,
-                _propertyRepositoryMock.Object,
-                _userActivityServiceMock.Object,
-                _commissionServiceMock.Object,
-                _mapper,
-                unitOfWorkMock.Object
-            );
+            _propertyRepositoryMock.Setup(r => r.FindByIdAsync(2)).ReturnsAsync(property);
 
             // Act
-            await sutWithUow.AcceptCounterOffer(offerId, "client-001");
+            await _sut.AcceptCounterOffer(offerId, "client-001");
 
-            // Assert: la transacción UoW debe envolver AcceptOfferTransaction + CreateForAcceptedOffer
-            unitOfWorkMock.Verify(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default), Times.Once,
+            // Assert: la transacción UoW debe envolver la aceptación, el cierre de propiedad/competidoras y la comisión
+            _unitOfWorkMock.Verify(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default), Times.Once,
                 "Las operaciones de cierre deben ejecutarse dentro de una transacción UoW para garantizar atomicidad ACID");
-            _offerRepositoryMock.Verify(r => r.AcceptOfferTransactionAsync(offerId), Times.Once);
+            offer.Status.Should().Be(OfferStatus.Accepted);
+            property.Status.Should().Be(PropertyStatus.Sold);
+            _offerRepositoryMock.Verify(r => r.UpdateAsync(offer), Times.Once);
+            _propertyRepositoryMock.Verify(r => r.UpdateAsync(property), Times.Once);
             _commissionServiceMock.Verify(c => c.CreateForAcceptedOfferAsync(offerId), Times.Once);
             _userActivityServiceMock.Verify(u => u.LogActivityAsync(
                 "client-001",

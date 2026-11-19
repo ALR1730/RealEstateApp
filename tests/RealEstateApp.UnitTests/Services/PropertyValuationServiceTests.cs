@@ -57,8 +57,7 @@ namespace RealEstateApp.UnitTests.Services
                 ProvinceId = 1,
                 Sector = "Bella Vista",
                 Latitude = 18.4500,
-                Longitude = -69.9500,
-                Status = PropertyStatus.Available
+                Longitude = -69.9500
             };
 
             var comparables = new List<Property>
@@ -76,8 +75,7 @@ namespace RealEstateApp.UnitTests.Services
                     ProvinceId = 1,
                     Sector = "Bella Vista",
                     Latitude = 18.4510,
-                    Longitude = -69.9510,
-                    Status = PropertyStatus.Available
+                    Longitude = -69.9510
                 },
                 new Property
                 {
@@ -92,8 +90,7 @@ namespace RealEstateApp.UnitTests.Services
                     ProvinceId = 1,
                     Sector = "Bella Vista",
                     Latitude = 18.4520,
-                    Longitude = -69.9520,
-                    Status = PropertyStatus.Available
+                    Longitude = -69.9520
                 }
             };
 

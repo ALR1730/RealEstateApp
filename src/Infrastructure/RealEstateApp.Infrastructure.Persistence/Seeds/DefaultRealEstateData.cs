@@ -154,8 +154,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         MontoSeparacion = 5000.00m,
                         PorcentajeInicialRequerido = 20,
                         IsFeatured = true,
-                        FeaturedUntil = DateTime.UtcNow.AddDays(30),
-                        Status = PropertyStatus.Available
+                        FeaturedUntil = DateTime.UtcNow.AddDays(30)
                     };
 
                     var prop2 = new Property
@@ -182,8 +181,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         MontoSeparacion = 15000.00m,
                         PorcentajeInicialRequerido = 30,
                         IsFeatured = true,
-                        FeaturedUntil = DateTime.UtcNow.AddDays(30),
-                        Status = PropertyStatus.Available
+                        FeaturedUntil = DateTime.UtcNow.AddDays(30)
                     };
 
                     var prop3 = new Property
@@ -207,8 +205,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         VideoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
                         Tour360Url = "https://matterport.com/discover",
                         MontoSeparacion = 2500.00m,
-                        PorcentajeInicialRequerido = 10,
-                        Status = PropertyStatus.Available
+                        PorcentajeInicialRequerido = 10
                     };
 
                     var prop4 = new Property
@@ -232,9 +229,9 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         VideoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
                         Tour360Url = "https://matterport.com/discover",
                         MontoSeparacion = 20000.00m,
-                        PorcentajeInicialRequerido = 25,
-                        Status = PropertyStatus.Sold
+                        PorcentajeInicialRequerido = 25
                     };
+                    prop4.MarkAsSold();
 
                     await dbContext.Properties.AddRangeAsync(prop1, prop2, prop3, prop4);
                     await dbContext.SaveChangesAsync();
@@ -295,24 +292,26 @@ namespace RealEstateApp.Infrastructure.Persistence.Seeds
                         // 5.2 Ofertas
                         if (!await dbContext.Offers.AnyAsync())
                         {
+                            var pendingSeedOffer = new Offer
+                            {
+                                PropertyId = prop1.Id,
+                                ClienteId = client1.Id,
+                                MontoOfertado = 185000.00m,
+                                FechaOferta = DateTime.UtcNow.AddDays(-2)
+                            };
+                            var acceptedSeedOffer = new Offer
+                            {
+                                PropertyId = prop4.Id,
+                                ClienteId = client2.Id,
+                                MontoOfertado = 510000.00m,
+                                FechaOferta = DateTime.UtcNow.AddDays(-5)
+                            };
+                            acceptedSeedOffer.Accept();
+
                             var offers = new List<Offer>
                             {
-                                new Offer
-                                {
-                                    PropertyId = prop1.Id,
-                                    ClienteId = client1.Id,
-                                    MontoOfertado = 185000.00m,
-                                    FechaOferta = DateTime.UtcNow.AddDays(-2),
-                                    Status = RealEstateApp.Core.Domain.Enums.OfferStatus.Pending
-                                },
-                                new Offer
-                                {
-                                    PropertyId = prop4.Id,
-                                    ClienteId = client2.Id,
-                                    MontoOfertado = 510000.00m,
-                                    FechaOferta = DateTime.UtcNow.AddDays(-5),
-                                    Status = RealEstateApp.Core.Domain.Enums.OfferStatus.Accepted
-                                }
+                                pendingSeedOffer,
+                                acceptedSeedOffer
                             };
                             await dbContext.Offers.AddRangeAsync(offers);
                         }

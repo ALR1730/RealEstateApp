@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.DTOs.Dashboard;
+using RealEstateApp.Core.Application.DTOs.Property;
 using RealEstateApp.Core.Application.Helpers;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
@@ -35,8 +36,6 @@ namespace RealEstateApp.Core.Application.Services
         private readonly ICurrencyService? _currencyService;
         private readonly IMapper _mapper;
         private readonly ILogger<PropertyService> _logger;
-
-        private const int MaxOwnerProperties = 2;
 
         /// <summary>
         /// Constructor principal utilizado por el contenedor de Inyección de Dependencias.
@@ -173,6 +172,41 @@ namespace RealEstateApp.Core.Application.Services
                 await ValidateAgentPropertyLimitsAsync(vm.AgentId);
             }
 
+            return await CreatePropertyInternalAsync(vm);
+        }
+
+        public async Task<SavePropertyViewModel> AddForOwnerAsync(SavePropertyViewModel vm, string ownerUserId)
+        {
+            if (string.IsNullOrWhiteSpace(ownerUserId))
+            {
+                throw new ValidationException("El identificador del propietario es obligatorio.");
+            }
+
+            var existingProperties = await _propertyRepository.GetByAgentIdAsync(ownerUserId);
+            if (existingProperties.Count >= PropertyLimits.MaxOwnerProperties)
+            {
+                throw new ValidationException(
+                    $"Como propietario directo puedes publicar un máximo de {PropertyLimits.MaxOwnerProperties} inmuebles simultáneos.");
+            }
+
+            vm.AgentId = ownerUserId;
+            return await CreatePropertyInternalAsync(vm);
+        }
+
+        public async Task<OwnerPropertiesSummaryDto> GetOwnerPropertiesSummaryAsync(string ownerUserId)
+        {
+            var properties = await GetByAgentId(ownerUserId);
+            return new OwnerPropertiesSummaryDto
+            {
+                MaxAllowed = PropertyLimits.MaxOwnerProperties,
+                CurrentCount = properties.Count,
+                CanCreate = properties.Count < PropertyLimits.MaxOwnerProperties,
+                Properties = properties
+            };
+        }
+
+        private async Task<SavePropertyViewModel> CreatePropertyInternalAsync(SavePropertyViewModel vm)
+        {
             var property = _mapper.Map<Property>(vm);
             property.Name = vm.Name;
 
@@ -191,8 +225,10 @@ namespace RealEstateApp.Core.Application.Services
                 prefix,
                 async code => await _propertyRepository.GetByCodeAsync(code) != null);
 
-            property.Status = PropertyStatus.Available;
-            property.AgentId = vm.AgentId;
+            if (!string.IsNullOrWhiteSpace(vm.AgentId))
+            {
+                property.AssignToAgent(vm.AgentId);
+            }
 
             property = await _propertyRepository.AddAsync(property);
 
@@ -391,10 +427,10 @@ namespace RealEstateApp.Core.Application.Services
             var ownerSubscription = await _subscriptionService.GetCurrentSubscriptionByAgentIdAsync(agentId);
             if (ownerSubscription != null && ownerSubscription.PlanName == "Owner")
             {
-                if (existingCount >= MaxOwnerProperties)
+                if (existingCount >= PropertyLimits.MaxOwnerProperties)
                 {
                     throw new ValidationException(
-                        $"Como propietario directo puedes publicar un máximo de {MaxOwnerProperties} inmuebles simultáneos. " +
+                        $"Como propietario directo puedes publicar un máximo de {PropertyLimits.MaxOwnerProperties} inmuebles simultáneos. " +
                         $"Actualmente tienes {existingCount} propiedad(es) activa(s).");
                 }
             }

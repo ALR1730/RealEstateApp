@@ -78,20 +78,12 @@ namespace RealEstateApp.Core.Application.Services
 
             DateTime appDate = vm.GetParsedAppointmentDate();
 
-            if (appDate == DateTime.MinValue || appDate <= DateTime.Now)
-            {
-                throw new DomainException("La fecha propuesta para la cita debe ser en el futuro.");
-            }
-
-            var appointment = new PropertyAppointment
-            {
-                PropertyId = vm.PropertyId,
-                ClienteId = clienteId,
-                AgentId = property.AgentId,
-                AppointmentDate = appDate,
-                Status = AppointmentStatus.Pending,
-                Notes = vm.Comments
-            };
+            var appointment = PropertyAppointment.Schedule(
+                vm.PropertyId,
+                clienteId,
+                property.AgentId,
+                appDate,
+                vm.Comments);
 
             var created = await _appointmentRepository.AddAsync(appointment);
 
@@ -119,16 +111,7 @@ namespace RealEstateApp.Core.Application.Services
                 throw new DomainException("La cita no existe.");
             }
 
-            if (appointment.AgentId != agentId)
-            {
-                throw new DomainException("No tiene permisos para modificar esta cita.");
-            }
-
-            appointment.Status = AppointmentStatus.Confirmed;
-            if (!string.IsNullOrEmpty(agentNotes))
-            {
-                appointment.AgentNotes = agentNotes;
-            }
+            appointment.Confirm(agentId, agentNotes);
 
             await _appointmentRepository.UpdateAsync(appointment);
 
@@ -151,16 +134,7 @@ namespace RealEstateApp.Core.Application.Services
                 throw new DomainException("La cita no existe.");
             }
 
-            if (appointment.ClienteId != userId && appointment.AgentId != userId)
-            {
-                throw new DomainException("No tiene permisos para cancelar esta cita.");
-            }
-
-            appointment.Status = AppointmentStatus.Cancelled;
-            if (!string.IsNullOrEmpty(reason))
-            {
-                appointment.AgentNotes = reason;
-            }
+            appointment.Cancel(userId, reason);
 
             await _appointmentRepository.UpdateAsync(appointment);
 
@@ -182,16 +156,7 @@ namespace RealEstateApp.Core.Application.Services
                 throw new DomainException("La cita no existe.");
             }
 
-            if (appointment.AgentId != agentId)
-            {
-                throw new DomainException("No tiene permisos para modificar esta cita.");
-            }
-
-            appointment.Status = AppointmentStatus.Completed;
-            if (!string.IsNullOrEmpty(agentNotes))
-            {
-                appointment.AgentNotes = agentNotes;
-            }
+            appointment.Complete(agentId, agentNotes);
 
             await _appointmentRepository.UpdateAsync(appointment);
 
