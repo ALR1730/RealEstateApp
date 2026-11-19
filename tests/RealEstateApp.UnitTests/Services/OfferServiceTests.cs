@@ -124,8 +124,8 @@ namespace RealEstateApp.UnitTests.Services
 
             _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId))
                 .ReturnsAsync(offer);
-            _propertyRepositoryMock.Setup(r => r.GetByIdAsync(1))
-                .ReturnsAsync(new Property { Id = 1, AgentId = "agent-001" });
+            _propertyRepositoryMock.Setup(r => r.GetAgentIdByPropertyIdAsync(1))
+                .ReturnsAsync("agent-001");
 
             // Act
             await _sut.CounterOffer(offerId, 85000m, "Monto mínimo aceptable", "agent-001");
@@ -158,8 +158,8 @@ namespace RealEstateApp.UnitTests.Services
 
             _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId))
                 .ReturnsAsync(offer);
-            _propertyRepositoryMock.Setup(r => r.GetByIdAsync(1))
-                .ReturnsAsync(new Property { Id = 1, AgentId = "agent-001" });
+            _propertyRepositoryMock.Setup(r => r.GetAgentIdByPropertyIdAsync(1))
+                .ReturnsAsync("agent-001");
 
             // Act
             await _sut.RejectOffer(offerId, "agent-001");
@@ -239,8 +239,8 @@ namespace RealEstateApp.UnitTests.Services
                 Status = OfferStatus.Pending
             };
             _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId)).ReturnsAsync(offer);
-            _propertyRepositoryMock.Setup(r => r.GetByIdAsync(1))
-                .ReturnsAsync(new Property { Id = 1, AgentId = "agent-001" });
+            _propertyRepositoryMock.Setup(r => r.GetAgentIdByPropertyIdAsync(1))
+                .ReturnsAsync("agent-001");
 
             var unitOfWorkMock = new Mock<IUnitOfWork>();
             unitOfWorkMock

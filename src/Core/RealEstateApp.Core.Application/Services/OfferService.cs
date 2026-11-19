@@ -148,11 +148,11 @@ namespace RealEstateApp.Core.Application.Services
             if (string.IsNullOrWhiteSpace(agentUserId))
                 throw new ValidationException("No tiene permisos para gestionar ofertas de esta propiedad.");
 
-            var property = await _propertyRepository.GetByIdAsync(offer.PropertyId);
-            if (property == null)
+            var ownerAgentId = await _propertyRepository.GetAgentIdByPropertyIdAsync(offer.PropertyId);
+            if (ownerAgentId == null)
                 throw new NotFoundException("La propiedad asociada a la oferta no existe.");
 
-            if (property.AgentId != agentUserId)
+            if (ownerAgentId != agentUserId)
                 throw new ValidationException("No tiene permisos para gestionar ofertas de esta propiedad.");
         }
 
