@@ -21,9 +21,9 @@ services:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
       - key: SeedInitialData
-        value: "true"
+        value: "false"
       - key: EnableSwaggerInProduction
-        value: "true"
+        value: "false"
       - key: JWTSettings__Key
         generateValue: true
       - key: JWTSettings__Issuer
@@ -31,7 +31,7 @@ services:
       - key: JWTSettings__Audience
         value: RealEstateAppClient
       - key: JWTSettings__DurationInMinutes
-        value: "1440"
+        value: "60"
 
   # 2. Frontend React SPA (Static Site)
   - type: web

@@ -34,13 +34,13 @@ namespace RealEstateApp.Infrastructure.Shared.Services
 
             if (!smtpConfigured)
             {
-                Console.WriteLine($"[EmailService-Dev] To: {to} | Subject: {subject} | Body: {body}");
+                Console.WriteLine($"[EmailService] SMTP no configurado; envío omitido (Asunto: {subject}).");
                 return Task.CompletedTask;
             }
 
             if (!int.TryParse(portStr, out var port))
             {
-                Console.WriteLine($"[EmailService-Dev] Puerto SMTP inválido '{portStr}', usando consola. To: {to} | Subject: {subject}");
+                Console.WriteLine($"[EmailService] Puerto SMTP inválido; envío omitido (Asunto: {subject}).");
                 return Task.CompletedTask;
             }
 

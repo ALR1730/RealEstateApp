@@ -46,6 +46,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         /// Registra un nuevo usuario Cliente en la plataforma.
         /// </summary>
         [HttpPost("register-client")]
+        [EnableRateLimiting("AuthPolicy")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegisterResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RegisterClientAsync([FromBody] RegisterRequest request)
@@ -65,6 +66,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         /// Registra un nuevo usuario Agente Inmobiliario en la plataforma.
         /// </summary>
         [HttpPost("register-agent")]
+        [EnableRateLimiting("AuthPolicy")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegisterResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RegisterAgentAsync([FromBody] RegisterRequest request)
@@ -192,6 +194,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         /// Solicita el restablecimiento de contraseña vía correo electrónico.
         /// </summary>
         [HttpPost("forgot-password")]
+        [EnableRateLimiting("AuthPolicy")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ForgotPasswordAsync([FromBody] ForgotPasswordRequest request)
         {
@@ -204,6 +207,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         /// Restablece la contraseña utilizando el token enviado por correo.
         /// </summary>
         [HttpPost("reset-password")]
+        [EnableRateLimiting("AuthPolicy")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ResetPasswordAsync([FromBody] ResetPasswordRequest request)

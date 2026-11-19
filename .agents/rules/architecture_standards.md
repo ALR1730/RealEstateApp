@@ -1,3 +1,7 @@
+---
+trigger: always_on
+description: Estándares de Arquitectura Limpia, Fronteras, DTOs vs ViewModels y Anti-Mockitis
+---
 # Estándares de Arquitectura Limpia y Fronteras (Clean Architecture)
 
 ## 1. Principio Fundamental de Fronteras Limpias (Uncle Bob)

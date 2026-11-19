@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using RealEstateApp.Core.Application.DTOs.AiSearch;
 using RealEstateApp.Core.Application.Interfaces.Services;
 
@@ -28,6 +29,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         /// </summary>
         [HttpPost("query")]
         [AllowAnonymous]
+        [EnableRateLimiting("PublicComputePolicy")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AiSearchInterpretationDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Query([FromBody] AiSearchQueryRequest request)
@@ -58,6 +60,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         /// </summary>
         [HttpPost("interpret")]
         [AllowAnonymous]
+        [EnableRateLimiting("PublicComputePolicy")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AiSearchInterpretationDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Interpret([FromBody] AiSearchQueryRequest request)

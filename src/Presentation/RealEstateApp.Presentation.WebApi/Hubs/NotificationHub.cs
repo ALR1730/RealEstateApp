@@ -26,17 +26,5 @@ namespace RealEstateApp.Presentation.WebApi.Hubs
             }
             await base.OnDisconnectedAsync(exception);
         }
-
-        public async Task SendNotificationToUser(string userId, string title, string message, string type, string redirectUrl)
-        {
-            await Clients.Group($"user_{userId}").SendAsync("ReceiveNotification", new
-            {
-                title,
-                message,
-                type,
-                redirectUrl,
-                createdAtFormatted = System.DateTime.Now.ToString("hh:mm tt | dd/MM")
-            });
-        }
     }
 }

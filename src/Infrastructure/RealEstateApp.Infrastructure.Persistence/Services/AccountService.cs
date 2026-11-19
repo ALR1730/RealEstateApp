@@ -506,10 +506,11 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
 
         public async Task<string> ForgotPasswordAsync(ForgotPasswordRequest request, string? origin = null)
         {
+            const string genericMessage = "Si el correo proporcionado está registrado, recibirá un enlace con las instrucciones para restablecer su contraseña.";
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                return $"Si el correo {request.Email} está registrado, recibirá un enlace para restablecer su contraseña.";
+                return genericMessage;
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -525,20 +526,22 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
                 $"Para restablecer su contraseña, haga clic en el siguiente enlace: <a href='{resetUrl}'>Restablecer Contraseña</a>. Si no solicitó este cambio, ignore este mensaje."
             );
 
-            return $"Se ha enviado un correo a {request.Email} con las instrucciones para restablecer su contraseña.";
+            return genericMessage;
         }
 
         public async Task<string> ResetPasswordAsync(ResetPasswordRequest request)
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user == null)
-            {
-                return "No existe ningún usuario registrado con el correo proporcionado.";
-            }
+            const string invalidResetMessage = "No se pudo restablecer la contraseña. Verifique los datos y que el enlace no haya expirado.";
 
             if (request.NewPassword != request.ConfirmPassword)
             {
                 return "Las contraseñas no coinciden.";
+            }
+
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return invalidResetMessage;
             }
 
             try
@@ -550,11 +553,11 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
                     return "Contraseña restablecida exitosamente. Ya puede iniciar sesión con su nueva contraseña.";
                 }
 
-                return string.Join(", ", result.Errors.Select(e => e.Description));
+                return invalidResetMessage;
             }
             catch (Exception)
             {
-                return "El token de restablecimiento es inválido o ha expirado.";
+                return invalidResetMessage;
             }
         }
 

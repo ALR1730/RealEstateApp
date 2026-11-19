@@ -63,6 +63,12 @@ builder.Services.AddRateLimiter(options =>
         opt.Window = TimeSpan.FromMinutes(1);
         opt.QueueLimit = 0;
     });
+    options.AddFixedWindowLimiter("PublicComputePolicy", opt =>
+    {
+        opt.PermitLimit = 30;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueLimit = 0;
+    });
 });
 
 // Configurar política de CORS adaptativa (local + Render)
@@ -89,8 +95,9 @@ builder.Services.AddCors(options =>
         policy.SetIsOriginAllowed(origin =>
         {
             if (defaultOrigins.Any(d => string.Equals(d, origin, StringComparison.OrdinalIgnoreCase))) return true;
-            if (Uri.TryCreate(origin, UriKind.Absolute, out var uri) && 
-                (uri.Host.EndsWith(".onrender.com", StringComparison.OrdinalIgnoreCase) || uri.Host == "localhost"))
+            if (builder.Environment.IsDevelopment() &&
+                Uri.TryCreate(origin, UriKind.Absolute, out var uri) &&
+                (uri.Host == "localhost" || uri.Host == "127.0.0.1"))
             {
                 return true;
             }
@@ -162,7 +169,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false;
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
     options.SaveToken = true;
     options.MapInboundClaims = false;
     options.TokenValidationParameters = new TokenValidationParameters

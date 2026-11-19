@@ -24,17 +24,20 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IPropertyRepository _propertyRepository;
         private readonly IFileStorageService _fileStorageService;
         private readonly IAccountService _accountService;
+        private readonly IFileValidationService _fileValidationService;
 
         public PropertyDocumentService(
             IPropertyDocumentRepository documentRepository,
             IPropertyRepository propertyRepository,
             IFileStorageService fileStorageService,
-            IAccountService accountService)
+            IAccountService accountService,
+            IFileValidationService? fileValidationService = null)
         {
             _documentRepository = documentRepository;
             _propertyRepository = propertyRepository;
             _fileStorageService = fileStorageService;
             _accountService = accountService;
+            _fileValidationService = fileValidationService ?? new FileValidationService();
         }
 
         public async Task<PropertyDocumentViewModel> UploadAsync(
@@ -55,11 +58,7 @@ namespace RealEstateApp.Core.Application.Services
             if (!DocumentTypeConstants.IsValid(documentType))
                 throw new ValidationException("Tipo de documento inválido.");
 
-            if (fileStream == null || fileStream.Length == 0)
-                throw new ValidationException("Debe seleccionar un archivo para subir.");
-
-            if (fileStream.Length > 10 * 1024 * 1024)
-                throw new ValidationException("El archivo no puede superar los 10 MB.");
+            await _fileValidationService.ValidateAsync(fileStream, fileName, contentType, FileUploadPolicy.LegalDocument);
 
             var fileUrl = await _fileStorageService.UploadFileAsync(fileStream, fileName, ContainerName);
 

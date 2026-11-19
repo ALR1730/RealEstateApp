@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Domain.Entities;
+using RealEstateApp.Core.Domain.Exceptions;
 
 namespace RealEstateApp.Core.Application.Services
 {
@@ -18,43 +19,22 @@ namespace RealEstateApp.Core.Application.Services
     public class PropertyImageService : IPropertyImageService
     {
         private const string ContainerName = "properties";
-        private const long MaxImageSizeBytes = 10 * 1024 * 1024; // 10 MB
-
-        /// <summary>
-        /// Whitelist de MIME types permitidos para imágenes de propiedades.
-        /// OWASP: la validación de MIME siempre se realiza en el servidor, nunca se confía en el cliente.
-        /// </summary>
-        private static readonly HashSet<string> AllowedMimeTypes = new(StringComparer.OrdinalIgnoreCase)
-        {
-            "image/jpeg",
-            "image/jpg",
-            "image/png",
-            "image/webp"
-        };
-
-        /// <summary>
-        /// Firmas mágicas (magic bytes) de los formatos permitidos.
-        /// Previene bypass de Content-Type con archivos renombrados (ej: malware.jpg).
-        /// </summary>
-        private static readonly List<byte[]> AllowedSignatures = new()
-        {
-            new byte[] { 0xFF, 0xD8, 0xFF },              // JPEG
-            new byte[] { 0x89, 0x50, 0x4E, 0x47 },        // PNG
-            new byte[] { 0x52, 0x49, 0x46, 0x46 }         // WebP (RIFF header)
-        };
 
         private readonly IPropertyImageRepository _propertyImageRepository;
         private readonly IFileStorageService _fileStorageService;
+        private readonly IFileValidationService _fileValidationService;
         private readonly ILogger<PropertyImageService> _logger;
 
         public PropertyImageService(
             IPropertyImageRepository propertyImageRepository,
             IFileStorageService fileStorageService,
-            ILogger<PropertyImageService>? logger = null)
+            ILogger<PropertyImageService>? logger = null,
+            IFileValidationService? fileValidationService = null)
         {
             _propertyImageRepository = propertyImageRepository;
             _fileStorageService = fileStorageService;
             _logger = logger ?? NullLogger<PropertyImageService>.Instance;
+            _fileValidationService = fileValidationService ?? new FileValidationService();
         }
 
         public async Task<List<PropertyImage>> SaveImagesAsync(int propertyId, IReadOnlyList<IFormFile>? files, int maxImages = 15)
@@ -69,31 +49,29 @@ namespace RealEstateApp.Core.Application.Services
             {
                 if (file.Length <= 0) continue;
 
-                // Guardia 1: Tamaño máximo (10 MB)
-                if (file.Length > MaxImageSizeBytes)
+                if (file.Length > FileValidationService.MaxPropertyImageBytes)
                 {
                     _logger.LogWarning("Archivo rechazado: tamaño {Size} bytes supera el límite de {Max} bytes. Propiedad {PropertyId}.",
-                        file.Length, MaxImageSizeBytes, propertyId);
-                    continue;
-                }
-
-                // Guardia 2: MIME type declarado en el header HTTP
-                if (!AllowedMimeTypes.Contains(file.ContentType))
-                {
-                    _logger.LogWarning("Archivo rechazado: MIME type '{ContentType}' no permitido. Propiedad {PropertyId}.",
-                        file.ContentType, propertyId);
-                    continue;
-                }
-
-                // Guardia 3: Firma mágica del stream (previene renombrado de archivos maliciosos)
-                if (!await HasAllowedMagicBytesAsync(file))
-                {
-                    _logger.LogWarning("Archivo rechazado: firma binaria no coincide con ningún formato de imagen permitido. Propiedad {PropertyId}.",
-                        propertyId);
+                        file.Length, FileValidationService.MaxPropertyImageBytes, propertyId);
                     continue;
                 }
 
                 using var stream = file.OpenReadStream();
+                try
+                {
+                    await _fileValidationService.ValidateAsync(stream, file.FileName, file.ContentType, FileUploadPolicy.PropertyImage);
+                }
+                catch (ValidationException ex)
+                {
+                    _logger.LogWarning(ex, "Archivo rechazado para propiedad {PropertyId}: {Message}", propertyId, ex.Message);
+                    continue;
+                }
+
+                if (stream.CanSeek)
+                {
+                    stream.Position = 0;
+                }
+
                 var imageUrl = await _fileStorageService.UploadFileAsync(stream, file.FileName, ContainerName);
                 imageEntities.Add(new PropertyImage
                 {
@@ -108,21 +86,6 @@ namespace RealEstateApp.Core.Application.Services
             }
 
             return imageEntities;
-        }
-
-        /// <summary>
-        /// Verifica que los primeros bytes del archivo coincidan con una firma conocida.
-        /// Esto previene ataques de bypass donde se renombra un archivo ejecutable con extensión .jpg.
-        /// </summary>
-        private static async Task<bool> HasAllowedMagicBytesAsync(IFormFile file)
-        {
-            var header = new byte[4];
-            using var stream = file.OpenReadStream();
-            var bytesRead = await stream.ReadAsync(header, 0, header.Length);
-            if (bytesRead < 3) return false;
-
-            return AllowedSignatures.Any(sig =>
-                header.Take(sig.Length).SequenceEqual(sig));
         }
 
 
