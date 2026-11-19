@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using RealEstateApp.Core.Application.Interfaces.Services;
+using RealEstateApp.Core.Domain.Exceptions;
 
 namespace RealEstateApp.Infrastructure.Shared.Services
 {
@@ -11,6 +13,7 @@ namespace RealEstateApp.Infrastructure.Shared.Services
     /// </summary>
     public class FileStorageService : IFileStorageService
     {
+        private static readonly Regex SafeContainerRegex = new("^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
         private readonly string _basePath;
 
         /// <summary>
@@ -32,44 +35,58 @@ namespace RealEstateApp.Infrastructure.Shared.Services
         /// <returns>URL relativa del archivo subido (ej: "/uploads/properties/guid_filename.jpg").</returns>
         public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string containerName)
         {
-            // Crear nombre único para evitar colisiones
+            ValidateContainerName(containerName);
+
             string extension = Path.GetExtension(fileName);
             string uniqueFileName = $"{Guid.NewGuid()}{extension}";
 
-            // Construir la ruta del directorio de destino
-            string uploadsDir = Path.Combine(_basePath, "uploads", containerName);
+            string baseFullPath = GetNormalizedBasePath();
+            string uploadsDir = Path.GetFullPath(Path.Combine(baseFullPath, "uploads", containerName));
+            EnsurePathInsideBase(uploadsDir, baseFullPath);
 
-            // Crear el directorio si no existe
             if (!Directory.Exists(uploadsDir))
             {
                 Directory.CreateDirectory(uploadsDir);
             }
 
-            // Ruta completa del archivo
-            string filePath = Path.Combine(uploadsDir, uniqueFileName);
+            string filePath = Path.GetFullPath(Path.Combine(uploadsDir, uniqueFileName));
+            EnsurePathInsideBase(filePath, baseFullPath);
 
-            // Escribir el archivo al disco
             using (var outputStream = new FileStream(filePath, FileMode.Create))
             {
                 await fileStream.CopyToAsync(outputStream);
             }
 
-            // Retornar URL relativa para uso en la aplicación
-            string relativeUrl = $"/uploads/{containerName}/{uniqueFileName}";
-            return relativeUrl;
+            return $"/uploads/{containerName}/{uniqueFileName}";
         }
 
         /// <summary>
-        /// Elimina un archivo del almacenamiento local.
+        /// Elimina un archivo del almacenamiento local previniendo path traversal.
         /// </summary>
         /// <param name="fileUrl">URL relativa del archivo a eliminar.</param>
-        /// <param name="containerName">Nombre del contenedor (no se usa si la URL es completa).</param>
+        /// <param name="containerName">Nombre del contenedor.</param>
         public Task DeleteFileAsync(string fileUrl, string containerName)
         {
-            // Convertir URL relativa a ruta del sistema de archivos
-            // fileUrl viene como "/uploads/properties/guid_filename.jpg"
-            string relativePath = fileUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-            string fullPath = Path.Combine(_basePath, relativePath);
+            ValidateContainerName(containerName);
+
+            if (string.IsNullOrWhiteSpace(fileUrl))
+            {
+                throw new ValidationException("La ruta del archivo es inválida.");
+            }
+
+            string relativePath = fileUrl
+                .TrimStart('/', '\\')
+                .Replace('/', Path.DirectorySeparatorChar)
+                .Replace('\\', Path.DirectorySeparatorChar);
+
+            if (string.IsNullOrWhiteSpace(relativePath) || Path.IsPathRooted(relativePath))
+            {
+                throw new ValidationException("Ruta de archivo inválida.");
+            }
+
+            string baseFullPath = GetNormalizedBasePath();
+            string fullPath = Path.GetFullPath(Path.Combine(baseFullPath, relativePath));
+            EnsurePathInsideBase(fullPath, baseFullPath);
 
             if (File.Exists(fullPath))
             {
@@ -77,6 +94,27 @@ namespace RealEstateApp.Infrastructure.Shared.Services
             }
 
             return Task.CompletedTask;
+        }
+
+        private static void ValidateContainerName(string containerName)
+        {
+            if (string.IsNullOrWhiteSpace(containerName) || !SafeContainerRegex.IsMatch(containerName))
+            {
+                throw new ValidationException("El nombre del contenedor de archivos es inválido.");
+            }
+        }
+
+        private string GetNormalizedBasePath()
+            => Path.GetFullPath(_basePath)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                + Path.DirectorySeparatorChar;
+
+        private static void EnsurePathInsideBase(string candidateFullPath, string normalizedBasePathWithSeparator)
+        {
+            if (!candidateFullPath.StartsWith(normalizedBasePathWithSeparator, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ValidationException("Ruta de archivo inválida fuera del directorio permitido.");
+            }
         }
     }
 }

@@ -12,6 +12,7 @@ using RealEstateApp.Core.Application.Services;
 using RealEstateApp.Core.Application.ViewModels.Agent;
 using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
+using RealEstateApp.Core.Domain.Exceptions;
 using Xunit;
 
 namespace RealEstateApp.UnitTests.Services
@@ -229,6 +230,37 @@ namespace RealEstateApp.UnitTests.Services
                 a => a.GetUsersByIdsAsync(It.IsAny<IEnumerable<string>>()),
                 Times.Once,
                 "El batch lookup debe ejecutarse exactamente una vez para todas las verificaciones");
+        }
+
+        [Fact]
+        public async Task SubmitVerificationAsync_DebeLanzarValidationException_CuandoImagenTieneMagicBytesEjecutable()
+        {
+            // Arrange
+            var exeHeader = new byte[] { 0x4D, 0x5A, 0x90, 0x00 };
+            var fakeFileMock = new Mock<IFormFile>();
+            fakeFileMock.Setup(f => f.Length).Returns(exeHeader.Length);
+            fakeFileMock.Setup(f => f.FileName).Returns("cedula_falsa.jpg");
+            fakeFileMock.Setup(f => f.ContentType).Returns("image/jpeg");
+            fakeFileMock.Setup(f => f.OpenReadStream()).Returns(() => new MemoryStream(exeHeader));
+
+            var vm = new AgentVerificationViewModel
+            {
+                AgentId = "agent-1",
+                Cedula = "402-0000000-1",
+                FrontImageFile = fakeFileMock.Object
+            };
+
+            _verificationRepoMock.Setup(r => r.GetByAgentIdAsync("agent-1"))
+                .ReturnsAsync((AgentVerification?)null);
+
+            // Act
+            Func<Task> act = () => _sut.SubmitVerificationAsync(vm);
+
+            // Assert
+            await act.Should().ThrowAsync<ValidationException>();
+            _fileStorageMock.Verify(
+                f => f.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never);
         }
     }
 }

@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Agent;
 using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
+using RealEstateApp.Core.Domain.Exceptions;
 
 namespace RealEstateApp.Core.Application.Services
 {
@@ -16,15 +18,18 @@ namespace RealEstateApp.Core.Application.Services
         private readonly IAgentVerificationRepository _verificationRepository;
         private readonly IFileStorageService _fileStorageService;
         private readonly IAccountService _accountService;
+        private readonly IFileValidationService _fileValidationService;
 
         public AgentVerificationService(
             IAgentVerificationRepository verificationRepository,
             IFileStorageService fileStorageService,
-            IAccountService accountService)
+            IAccountService accountService,
+            IFileValidationService? fileValidationService = null)
         {
             _verificationRepository = verificationRepository;
             _fileStorageService = fileStorageService;
             _accountService = accountService;
+            _fileValidationService = fileValidationService ?? new FileValidationService();
         }
 
         public async Task<AgentVerificationViewModel?> GetByAgentIdAsync(string agentId)
@@ -61,20 +66,8 @@ namespace RealEstateApp.Core.Application.Services
             var agentId = vm.AgentId ?? string.Empty;
             var existing = await _verificationRepository.GetByAgentIdAsync(agentId);
 
-            string? frontUrl = existing?.CedulaFrontImageUrl;
-            string? backUrl = existing?.CedulaBackImageUrl;
-
-            if (vm.FrontImageFile != null && vm.FrontImageFile.Length > 0)
-            {
-                using var stream = vm.FrontImageFile.OpenReadStream();
-                frontUrl = await _fileStorageService.UploadFileAsync(stream, vm.FrontImageFile.FileName, "verifications");
-            }
-
-            if (vm.BackImageFile != null && vm.BackImageFile.Length > 0)
-            {
-                using var stream = vm.BackImageFile.OpenReadStream();
-                backUrl = await _fileStorageService.UploadFileAsync(stream, vm.BackImageFile.FileName, "verifications");
-            }
+            string? frontUrl = await ValidateAndUploadVerificationImageAsync(vm.FrontImageFile, existing?.CedulaFrontImageUrl);
+            string? backUrl = await ValidateAndUploadVerificationImageAsync(vm.BackImageFile, existing?.CedulaBackImageUrl);
 
             if (existing != null)
             {
@@ -192,6 +185,28 @@ namespace RealEstateApp.Core.Application.Services
                 var adminFull = $"{admin.FirstName} {admin.LastName}".Trim();
                 vm.ReviewedByAdminName = !string.IsNullOrEmpty(adminFull) ? adminFull : (admin.UserName ?? "Administrador");
             }
+        }
+
+        private async Task<string?> ValidateAndUploadVerificationImageAsync(IFormFile? file, string? currentUrl)
+        {
+            if (file == null || file.Length <= 0)
+            {
+                return currentUrl;
+            }
+
+            if (file.Length > FileValidationService.MaxVerificationImageBytes)
+            {
+                throw new ValidationException("La imagen de verificación no puede superar los 5 MB.");
+            }
+
+            using var stream = file.OpenReadStream();
+            await _fileValidationService.ValidateAsync(stream, file.FileName, file.ContentType, FileUploadPolicy.VerificationImage);
+            if (stream.CanSeek)
+            {
+                stream.Position = 0;
+            }
+
+            return await _fileStorageService.UploadFileAsync(stream, file.FileName, "verifications");
         }
     }
 }

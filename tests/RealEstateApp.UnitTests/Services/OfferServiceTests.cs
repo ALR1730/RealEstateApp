@@ -116,6 +116,7 @@ namespace RealEstateApp.UnitTests.Services
             var offer = new Offer
             {
                 Id = offerId,
+                PropertyId = 1,
                 Status = OfferStatus.Pending,
                 MontoOfertado = 80000m,
                 ClienteId = "client-001"
@@ -123,6 +124,8 @@ namespace RealEstateApp.UnitTests.Services
 
             _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId))
                 .ReturnsAsync(offer);
+            _propertyRepositoryMock.Setup(r => r.GetAgentIdByPropertyIdAsync(1))
+                .ReturnsAsync("agent-001");
 
             // Act
             await _sut.CounterOffer(offerId, 85000m, "Monto mínimo aceptable", "agent-001");
@@ -149,14 +152,17 @@ namespace RealEstateApp.UnitTests.Services
             var offer = new Offer
             {
                 Id = offerId,
+                PropertyId = 1,
                 Status = OfferStatus.Pending
             };
 
             _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId))
                 .ReturnsAsync(offer);
+            _propertyRepositoryMock.Setup(r => r.GetAgentIdByPropertyIdAsync(1))
+                .ReturnsAsync("agent-001");
 
             // Act
-            await _sut.RejectOffer(offerId);
+            await _sut.RejectOffer(offerId, "agent-001");
 
             // Assert
             offer.Status.Should().Be(OfferStatus.Rejected);
@@ -226,6 +232,16 @@ namespace RealEstateApp.UnitTests.Services
         {
             // Arrange
             int offerId = 42;
+            var offer = new Offer
+            {
+                Id = offerId,
+                PropertyId = 1,
+                Status = OfferStatus.Pending
+            };
+            _offerRepositoryMock.Setup(r => r.GetByIdAsync(offerId)).ReturnsAsync(offer);
+            _propertyRepositoryMock.Setup(r => r.GetAgentIdByPropertyIdAsync(1))
+                .ReturnsAsync("agent-001");
+
             var unitOfWorkMock = new Mock<IUnitOfWork>();
             unitOfWorkMock
                 .Setup(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default))
@@ -241,7 +257,7 @@ namespace RealEstateApp.UnitTests.Services
             );
 
             // Act
-            await sutWithUow.AcceptOffer(offerId);
+            await sutWithUow.AcceptOffer(offerId, "agent-001");
 
             // Assert
             unitOfWorkMock.Verify(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default), Times.Once);

@@ -23,5 +23,10 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         /// Obtiene todos los hilos de chat de un usuario.
         /// </summary>
         Task<List<ChatViewModel>> GetUserChats(string userId);
+
+        /// <summary>
+        /// Verifica si un usuario tiene permisos para participar en un hilo de chat.
+        /// </summary>
+        Task<bool> CanUserAccessThreadAsync(int propertyId, string userId, string recipientId);
     }
 }

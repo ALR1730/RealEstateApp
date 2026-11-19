@@ -17,6 +17,7 @@ namespace RealEstateApp.Core.Application
 
             #region Application Services
 
+            services.AddSingleton<IFileValidationService, FileValidationService>();
             services.AddTransient<IPropertyService, PropertyService>();
             services.AddTransient<IPropertyImageService, PropertyImageService>();
             services.AddTransient<IPropertyEnrichmentService, PropertyEnrichmentService>();

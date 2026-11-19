@@ -387,5 +387,14 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 PropertiesByType = typeCounts
             };
         }
+
+        public async Task<string?> GetAgentIdByPropertyIdAsync(int propertyId)
+        {
+            return await _dbContext.Set<Property>()
+                .AsNoTracking()
+                .Where(p => p.Id == propertyId)
+                .Select(p => p.AgentId)
+                .FirstOrDefaultAsync();
+        }
     }
 }

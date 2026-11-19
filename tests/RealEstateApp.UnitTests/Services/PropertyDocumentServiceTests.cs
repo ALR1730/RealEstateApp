@@ -44,7 +44,7 @@ namespace RealEstateApp.UnitTests.Services
                 _accountServiceMock.Object);
         }
 
-        private static MemoryStream CreateStream(string content = "pdf-content")
+        private static MemoryStream CreateStream(string content = "%PDF-1.4\npdf-content")
             => new(Encoding.UTF8.GetBytes(content));
 
         [Fact]
@@ -114,6 +114,31 @@ namespace RealEstateApp.UnitTests.Services
             // Assert
             await act.Should().ThrowAsync<ValidationException>()
                 .WithMessage("*Tipo de documento inválido*");
+        }
+
+        [Theory]
+        [InlineData("payload.html", "text/html", "<html><script>alert(1)</script></html>")]
+        [InlineData("vector.svg", "image/svg+xml", "<svg onload='alert(1)'></svg>")]
+        [InlineData("fake.pdf", "application/pdf", "<html>not-a-pdf</html>")]
+        public async Task UploadAsync_ArchivoPeligrosoOFalsificado_ThrowsValidationExceptionSinSubirAlStorage(
+            string fileName,
+            string contentType,
+            string content)
+        {
+            // Arrange
+            var property = new Property { Id = 5, AgentId = "agent-1", Name = "Casa" };
+            _propertyRepositoryMock.Setup(r => r.GetByIdAsync(5)).ReturnsAsync(property);
+
+            using var stream = CreateStream(content);
+
+            // Act
+            Func<Task> act = async () => await _sut.UploadAsync(5, DocumentTypeConstants.Titulo, "agent-1", stream, fileName, contentType);
+
+            // Assert
+            await act.Should().ThrowAsync<ValidationException>();
+            _fileStorageServiceMock.Verify(
+                f => f.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never);
         }
 
         [Fact]

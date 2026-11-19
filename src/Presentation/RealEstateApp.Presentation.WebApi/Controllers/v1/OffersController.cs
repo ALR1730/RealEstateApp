@@ -84,9 +84,12 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AcceptOfferAsync(int id)
         {
+            var agentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(agentId)) return Unauthorized();
+
             try
             {
-                await _offerService.AcceptOffer(id);
+                await _offerService.AcceptOffer(id, agentId);
                 return Ok(new { success = true, message = "Oferta aceptada. La propiedad ha sido marcada como Vendida y las demás ofertas fueron rechazadas automáticamente." });
             }
             catch (System.Exception ex)
@@ -103,9 +106,12 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> RejectOfferAsync(int id)
         {
+            var agentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(agentId)) return Unauthorized();
+
             try
             {
-                await _offerService.RejectOffer(id);
+                await _offerService.RejectOffer(id, agentId);
                 return Ok(new { success = true, message = "Oferta rechazada exitosamente." });
             }
             catch (System.Exception ex)

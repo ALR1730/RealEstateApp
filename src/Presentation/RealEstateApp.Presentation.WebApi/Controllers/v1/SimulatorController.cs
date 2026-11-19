@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using RealEstateApp.Core.Application.Interfaces.Services;
 
 namespace RealEstateApp.Presentation.WebApi.Controllers.v1
@@ -26,6 +27,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         /// Endpoint público.
         /// </summary>
         [HttpPost("calculate")]
+        [EnableRateLimiting("PublicComputePolicy")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MortgageSimulationResult))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult Calculate([FromBody] MortgageRequest request)

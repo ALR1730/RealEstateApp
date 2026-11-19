@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using RealEstateApp.Core.Application.Interfaces.Services;
+using RealEstateApp.Core.Domain.Exceptions;
 
 namespace RealEstateApp.Infrastructure.Shared.Services
 {
@@ -10,6 +11,11 @@ namespace RealEstateApp.Infrastructure.Shared.Services
     /// </summary>
     public class FinancingService : IFinancingService
     {
+        private const int MinTermYears = 1;
+        private const int MaxTermYears = 40;
+        private const decimal MinAnnualRate = 0m;
+        private const decimal MaxAnnualRate = 100m;
+
         /// <summary>
         /// Genera la tabla de amortización completa usando el sistema francés.
         /// Fórmula: M = P × [r(1+r)^n] / [(1+r)^n − 1]
@@ -22,6 +28,8 @@ namespace RealEstateApp.Infrastructure.Shared.Services
         public List<AmortizationScheduleItem> GenerateAmortizationSchedule(
             decimal propertyPrice, decimal downPayment, decimal annualRate, int termInYears)
         {
+            ValidateParameters(propertyPrice, downPayment, annualRate, termInYears);
+
             var schedule = new List<AmortizationScheduleItem>();
 
             // Monto del préstamo = Precio - Enganche
@@ -94,6 +102,8 @@ namespace RealEstateApp.Infrastructure.Shared.Services
         public MortgageSimulationResult CalculateMortgage(
             decimal propertyPrice, decimal downPayment, decimal annualRate, int termInYears)
         {
+            ValidateParameters(propertyPrice, downPayment, annualRate, termInYears);
+
             var schedule = GenerateAmortizationSchedule(propertyPrice, downPayment, annualRate, termInYears);
 
             decimal loanAmount = propertyPrice > downPayment ? propertyPrice - downPayment : 0;
@@ -125,6 +135,21 @@ namespace RealEstateApp.Infrastructure.Shared.Services
                 TotalCost = Math.Round(loanAmount + totalInterest, 2),
                 Schedule = schedule
             };
+        }
+
+        private static void ValidateParameters(decimal propertyPrice, decimal downPayment, decimal annualRate, int termInYears)
+        {
+            if (propertyPrice <= 0)
+                throw new ValidationException("El precio de la propiedad debe ser mayor a cero.");
+
+            if (downPayment < 0 || downPayment >= propertyPrice)
+                throw new ValidationException("El pago inicial debe ser mayor o igual a cero y menor al precio de la propiedad.");
+
+            if (annualRate < MinAnnualRate || annualRate > MaxAnnualRate)
+                throw new ValidationException("La tasa de interés anual debe estar entre 0% y 100%.");
+
+            if (termInYears < MinTermYears || termInYears > MaxTermYears)
+                throw new ValidationException("El plazo en años debe estar entre 1 y 40 años.");
         }
     }
 }

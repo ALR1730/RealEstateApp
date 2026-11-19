@@ -115,7 +115,7 @@ namespace RealEstateApp.UnitTests.Services
             await _dbContext.SaveChangesAsync();
 
             // Act - Ejecución real del caso de uso
-            await _sut.AcceptOffer(offerToAccept.Id);
+            await _sut.AcceptOffer(offerToAccept.Id, "agent-owner");
 
             // Assert - Verificación de Estado observable directamente en la Base de Datos
             var propertyEnDb = await _dbContext.Properties.FindAsync(property.Id);
@@ -192,7 +192,7 @@ namespace RealEstateApp.UnitTests.Services
             await _dbContext.SaveChangesAsync();
 
             // Act
-            await _sut.AcceptOffer(winningOffer.Id);
+            await _sut.AcceptOffer(winningOffer.Id, "agent-X");
 
             // Assert \u2014 Estado observable real en BD
             var winnerInDb = await _dbContext.Offers.FindAsync(winningOffer.Id);
