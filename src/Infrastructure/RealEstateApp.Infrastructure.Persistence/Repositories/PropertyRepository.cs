@@ -73,21 +73,23 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
             filters ??= new PropertyFilterViewModel();
             var (page, pageSize) = PagedResult<Property>.Normalize(filters.Page ?? filters.PageNumber, filters.PageSize);
 
-            var query = IncludePublicRelations(_dbContext.Set<Property>());
-            query = await ApplyFiltersAsync(query, filters, includeSold);
+            IQueryable<Property> query = _dbContext.Set<Property>().AsNoTracking();
+            query = ApplyIdentityAndLocationFilters(query, filters, includeSold);
+            query = ApplyNumericRangeFilters(query, filters);
+            query = await ApplyFeatureFiltersAsync(query, filters);
 
             var currentUtc = DateTime.UtcNow;
-            query = query
+            var orderedQuery = query
                 .OrderByDescending(p => p.IsFeatured && (!p.FeaturedUntil.HasValue || p.FeaturedUntil > currentUtc))
                 .ThenByDescending(p => p.Created);
 
             if (HasGeoFilter(filters))
             {
-                return await ExecuteGeoFilteredPagedAsync(query, filters, page, pageSize);
+                return await ExecuteGeoFilteredPagedAsync(IncludePublicRelations(orderedQuery), filters, page, pageSize);
             }
 
-            var totalCount = await query.CountAsync();
-            var items = await query
+            var totalCount = await orderedQuery.CountAsync();
+            var items = await IncludePublicRelations(orderedQuery)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -110,7 +112,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .AsSplitQuery();
         }
 
-        private async Task<IQueryable<Property>> ApplyFiltersAsync(
+        private static IQueryable<Property> ApplyIdentityAndLocationFilters(
             IQueryable<Property> query,
             PropertyFilterViewModel filters,
             bool includeSold)
@@ -136,6 +138,16 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
             if (!string.IsNullOrWhiteSpace(filters.Sector))
                 query = query.Where(p => p.Sector != null && p.Sector.Contains(filters.Sector));
 
+            if (!string.IsNullOrWhiteSpace(filters.AgentId))
+                query = query.Where(p => p.AgentId == filters.AgentId);
+
+            return query;
+        }
+
+        private static IQueryable<Property> ApplyNumericRangeFilters(
+            IQueryable<Property> query,
+            PropertyFilterViewModel filters)
+        {
             if (filters.MinPrice.HasValue)
                 query = query.Where(p => p.PriceInDOP >= filters.MinPrice.Value);
 
@@ -160,6 +172,13 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
             if (filters.MaxSizeInMeters.HasValue)
                 query = query.Where(p => p.SizeInMeters <= filters.MaxSizeInMeters.Value);
 
+            return query;
+        }
+
+        private async Task<IQueryable<Property>> ApplyFeatureFiltersAsync(
+            IQueryable<Property> query,
+            PropertyFilterViewModel filters)
+        {
             if (filters.OnlyFinanciable == true)
                 query = query.Where(p => p.IsFinanciable);
 
@@ -176,9 +195,6 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 query = query.Where(p => p.PropertyImprovements != null &&
                     p.PropertyImprovements.Any(pi => filters.ImprovementIds.Contains(pi.ImprovementId)));
             }
-
-            if (!string.IsNullOrWhiteSpace(filters.AgentId))
-                query = query.Where(p => p.AgentId == filters.AgentId);
 
             if (filters.OnlyFeatured == true)
             {

@@ -14,7 +14,7 @@ export const MapPage: React.FC = () => {
     const loadProperties = async () => {
       try {
         setIsLoading(true);
-        const data = await propertiesService.getAll();
+        const data = await propertiesService.getAll({ page: 1, pageSize: 50 });
         setProperties(data);
       } catch (err) {
         console.error('Error loading properties for map:', err);

@@ -22,7 +22,7 @@ export const ManageAllPropertiesPage: React.FC = () => {
   const loadData = async () => {
     try {
       const [propsData, agentsData] = await Promise.all([
-        propertiesService.getAll(),
+        propertiesService.getAll({ page: 1, pageSize: 50 }),
         adminService.getAgents(),
       ]);
       setProperties(propsData || []);
