@@ -226,7 +226,7 @@ try
         try
         {
             var dbContext = services.GetRequiredService<ApplicationDbContext>();
-            if (dbContext.Database.IsRelational())
+            if (dbContext.Database.IsSqlServer())
             {
                 try
                 {

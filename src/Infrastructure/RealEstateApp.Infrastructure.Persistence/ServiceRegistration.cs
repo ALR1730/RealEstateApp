@@ -21,33 +21,21 @@ namespace RealEstateApp.Infrastructure.Persistence
 
             services.AddHttpContextAccessor();
 
-            if (configuration.GetValue<bool>("UseInMemoryDatabase"))
+            var dbSettings = DatabaseConnectionResolver.Resolve(configuration);
+
+            if (dbSettings.Provider == DatabaseProviderType.InMemory)
             {
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseInMemoryDatabase("ApplicationDb"));
             }
             else
             {
-                var connectionString = configuration.GetConnectionString("DefaultConnection")
-                    ?? configuration["DATABASE_URL"]
-                    ?? configuration["DATABASE_URL_INTERNAL"];
-
-                var isPostgres = configuration.GetValue<bool>("UsePostgreSQL") ||
-                    (!string.IsNullOrWhiteSpace(connectionString) &&
-                     (connectionString.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
-                      connectionString.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase) ||
-                      connectionString.Contains("Host=", StringComparison.OrdinalIgnoreCase) ||
-                      (connectionString.Contains("Server=", StringComparison.OrdinalIgnoreCase) && connectionString.Contains("Port=5432", StringComparison.OrdinalIgnoreCase))));
-
-                var trustServerCertificate = configuration.GetValue<bool>("Database:TrustServerCertificate") ||
-                    string.Equals(configuration["DB_TRUST_SERVER_CERTIFICATE"], "true", StringComparison.OrdinalIgnoreCase);
-
                 services.AddDbContext<ApplicationDbContext>(options =>
                 {
-                    if (isPostgres && !string.IsNullOrWhiteSpace(connectionString))
+                    if (dbSettings.Provider == DatabaseProviderType.PostgreSql &&
+                        !string.IsNullOrWhiteSpace(dbSettings.ConnectionString))
                     {
-                        var formattedPgConn = PostgresConnectionStringParser.Parse(connectionString, trustServerCertificate);
-                        options.UseNpgsql(formattedPgConn, m =>
+                        options.UseNpgsql(dbSettings.ConnectionString, m =>
                         {
                             m.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
                         });
@@ -55,7 +43,7 @@ namespace RealEstateApp.Infrastructure.Persistence
                     else
                     {
                         options.UseSqlServer(
-                            connectionString,
+                            dbSettings.ConnectionString,
                             m =>
                             {
                                 m.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);

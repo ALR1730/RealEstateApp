@@ -7,7 +7,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using RealEstateApp.Core.Domain.Entities;
+using RealEstateApp.Infrastructure.Persistence;
 using RealEstateApp.Infrastructure.Persistence.Configuration;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
 using Xunit;
@@ -118,6 +122,130 @@ namespace RealEstateApp.UnitTests.Persistence
             fromQueryString.Should().Contain("Port=5433");
             fromQueryString.Should().Contain("SSL Mode=VerifyFull");
             fromQueryString.Should().Contain("Trust Server Certificate=true");
+        }
+
+        [Fact]
+        public void DatabaseConnectionResolver_DebePriorizarDatabaseUrlSobreDefaultConnection_CuandoAmbosEstanPresentes()
+        {
+            // Arrange
+            const string neonUrl = "postgresql://neondb_owner:npg_Secret@ep-test-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["UseInMemoryDatabase"] = "false",
+                    ["ConnectionStrings:DefaultConnection"] = "Server=(localdb)\\MSSQLLocalDB;Database=RealEstateAppDb;Trusted_Connection=True;MultipleActiveResultSets=true",
+                    ["DATABASE_URL"] = neonUrl
+                })
+                .Build();
+
+            // Act
+            var settings = DatabaseConnectionResolver.Resolve(configuration);
+
+            // Assert
+            settings.Provider.Should().Be(DatabaseProviderType.PostgreSql);
+            settings.ConnectionString.Should().NotBeNullOrWhiteSpace();
+
+            var builder = new NpgsqlConnectionStringBuilder(settings.ConnectionString);
+            builder.Host.Should().Be("ep-test-pooler.us-east-2.aws.neon.tech");
+            builder.Port.Should().Be(5432);
+            builder.Database.Should().Be("neondb");
+            builder.Username.Should().Be("neondb_owner");
+            builder.Password.Should().Be("npg_Secret");
+            builder.SslMode.Should().Be(SslMode.Require);
+            builder.ChannelBinding.Should().Be(Npgsql.ChannelBinding.Require);
+        }
+
+        [Fact]
+        public void DatabaseConnectionResolver_DebeUsarSqlServerDefaultConnection_CuandoDatabaseUrlEstaVacio()
+        {
+            // Arrange
+            const string localConnection = "Server=(localdb)\\MSSQLLocalDB;Database=RealEstateAppDb;Trusted_Connection=True;";
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["UseInMemoryDatabase"] = "false",
+                    ["DATABASE_URL"] = "   ",
+                    ["ConnectionStrings:DefaultConnection"] = localConnection
+                })
+                .Build();
+
+            // Act
+            var settings = DatabaseConnectionResolver.Resolve(configuration);
+
+            // Assert
+            settings.Provider.Should().Be(DatabaseProviderType.SqlServer);
+            settings.ConnectionString.Should().Be(localConnection);
+        }
+
+        [Fact]
+        public void DatabaseConnectionResolver_DebeUsarInMemory_CuandoUseInMemoryDatabaseEsTrueInclusoConDatabaseUrl()
+        {
+            // Arrange
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["UseInMemoryDatabase"] = "true",
+                    ["DATABASE_URL"] = "postgresql://neondb_owner:npg_Secret@ep-test-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
+                })
+                .Build();
+
+            // Act
+            var settings = DatabaseConnectionResolver.Resolve(configuration);
+
+            // Assert
+            settings.Provider.Should().Be(DatabaseProviderType.InMemory);
+            settings.ConnectionString.Should().BeNull();
+        }
+
+        [Fact]
+        public void PostgresConnectionStringParser_DebeNormalizarParametrosDeNeon_CuandoUsaVerifyFullYChannelBinding()
+        {
+            // Arrange
+            const string neonUrl = "postgresql://neondb_owner:npg_Pass123@ep-cool-pooler.us-east-2.aws.neon.tech/neondb?sslmode=verify-full&channel_binding=require";
+
+            // Act
+            var parsed = PostgresConnectionStringParser.Parse(neonUrl);
+
+            // Assert
+            var builder = new NpgsqlConnectionStringBuilder(parsed);
+            builder.Host.Should().Be("ep-cool-pooler.us-east-2.aws.neon.tech");
+            builder.Port.Should().Be(5432);
+            builder.Database.Should().Be("neondb");
+            builder.Username.Should().Be("neondb_owner");
+            builder.Password.Should().Be("npg_Pass123");
+            builder.SslMode.Should().Be(SslMode.VerifyFull);
+            builder.ChannelBinding.Should().Be(Npgsql.ChannelBinding.Require);
+            parsed.Should().NotContainEquivalentOf("Trust Server Certificate");
+        }
+
+        [Fact]
+        public void ServiceRegistration_DebeRegistrarProveedorNpgsql_CuandoDatabaseUrlCoexisteConDefaultConnection()
+        {
+            // Arrange
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["UseInMemoryDatabase"] = "false",
+                    ["ConnectionStrings:DefaultConnection"] = "Server=(localdb)\\MSSQLLocalDB;Database=RealEstateAppDb;Trusted_Connection=True;MultipleActiveResultSets=true",
+                    ["DATABASE_URL"] = "postgresql://neondb_owner:npg_Secret@ep-test-pooler.us-east-2.aws.neon.tech/neondb?sslmode=verify-full&channel_binding=require"
+                })
+                .Build();
+
+            var services = new ServiceCollection();
+            services.AddLogging();
+            services.AddPersistenceInfrastructure(configuration);
+
+            using var serviceProvider = services.BuildServiceProvider();
+            using var scope = serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            // Act
+            var isNpgsql = dbContext.Database.IsNpgsql();
+            var isSqlServer = dbContext.Database.IsSqlServer();
+
+            // Assert
+            isNpgsql.Should().BeTrue();
+            isSqlServer.Should().BeFalse();
         }
 
         private static string DescribeOperations(IReadOnlyList<MigrationOperation> operations)
