@@ -62,7 +62,7 @@ export const HomePage: React.FC = () => {
       try {
         setIsLoading(true);
         const [propsData, typesData, salesData, agentsData] = await Promise.all([
-          propertiesService.getAll(),
+          propertiesService.getAll({ page: 1, pageSize: 6 }),
           catalogsService.getPropertyTypes(),
           catalogsService.getSaleTypes(),
           agentsService.getPublicAgents().catch(() => []),

@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using RealEstateApp.Core.Application.DTOs.Account;
+using RealEstateApp.Core.Application.DTOs.Common;
 using RealEstateApp.Core.Application.DTOs.Dashboard;
 using RealEstateApp.Core.Application.DTOs.Property;
 using RealEstateApp.Core.Application.Helpers;
@@ -106,6 +107,16 @@ namespace RealEstateApp.Core.Application.Services
             var list = _mapper.Map<List<PropertyViewModel>>(properties);
             await _propertyEnrichmentService.EnrichPropertiesWithCurrencyAsync(list);
             return list;
+        }
+
+        public async Task<PagedResult<PropertyViewModel>> GetAllPagedAsync(
+            int page = PagedResult<PropertyViewModel>.DefaultPage,
+            int pageSize = PagedResult<PropertyViewModel>.DefaultPageSize)
+        {
+            var paged = await _propertyRepository.GetPagedAsync(page, pageSize);
+            var list = _mapper.Map<List<PropertyViewModel>>(paged.Items);
+            await _propertyEnrichmentService.EnrichPropertiesWithCurrencyAsync(list);
+            return PagedResult<PropertyViewModel>.Create(list, paged.Page, paged.PageSize, paged.TotalCount);
         }
 
         public async Task<PropertyViewModel?> GetByIdViewModel(int id)
@@ -331,11 +342,19 @@ namespace RealEstateApp.Core.Application.Services
 
         public async Task<List<PropertyViewModel>> GetAllWithFilters(PropertyFilterViewModel filters)
         {
-            var properties = await _propertyRepository.GetWithFiltersAsync(filters);
-            var list = _mapper.Map<List<PropertyViewModel>>(properties);
+            var paged = await GetWithFiltersPagedAsync(filters, includeSold: true);
+            return paged.Items.ToList();
+        }
+
+        public async Task<PagedResult<PropertyViewModel>> GetWithFiltersPagedAsync(
+            PropertyFilterViewModel filters,
+            bool includeSold = true)
+        {
+            var paged = await _propertyRepository.GetWithFiltersPagedAsync(filters, includeSold);
+            var list = _mapper.Map<List<PropertyViewModel>>(paged.Items);
             await _propertyEnrichmentService.EnrichPropertiesWithCurrencyAsync(list);
             await _propertyEnrichmentService.EnrichAgentNamesAsync(list);
-            return list;
+            return PagedResult<PropertyViewModel>.Create(list, paged.Page, paged.PageSize, paged.TotalCount);
         }
 
         public async Task<List<PropertyViewModel>> GetByAgentId(string agentId)

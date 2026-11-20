@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using RealEstateApp.Core.Application.DTOs.Common;
 using RealEstateApp.Core.Application.DTOs.Dashboard;
 using RealEstateApp.Core.Application.DTOs.Property;
 using RealEstateApp.Core.Application.ViewModels.Property;
@@ -13,6 +14,9 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
     public interface IPropertyService
     {
         Task<List<PropertyViewModel>> GetAllViewModel();
+        Task<PagedResult<PropertyViewModel>> GetAllPagedAsync(
+            int page = PagedResult<PropertyViewModel>.DefaultPage,
+            int pageSize = PagedResult<PropertyViewModel>.DefaultPageSize);
         Task<PropertyViewModel?> GetByIdViewModel(int id);
         Task<SavePropertyViewModel?> GetByIdSaveViewModel(int id);
         Task<SavePropertyViewModel> Add(SavePropertyViewModel vm);
@@ -26,6 +30,11 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         /// Filtra propiedades por criterios combinados.
         /// </summary>
         Task<List<PropertyViewModel>> GetAllWithFilters(PropertyFilterViewModel filters);
+
+        /// <summary>
+        /// Filtra propiedades por criterios combinados devolviendo una página acotada.
+        /// </summary>
+        Task<PagedResult<PropertyViewModel>> GetWithFiltersPagedAsync(PropertyFilterViewModel filters, bool includeSold = true);
 
         /// <summary>
         /// Obtiene propiedades de un agente específico.

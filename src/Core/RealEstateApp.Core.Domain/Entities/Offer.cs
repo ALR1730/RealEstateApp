@@ -5,7 +5,7 @@ using RealEstateApp.Core.Domain.Exceptions;
 
 namespace RealEstateApp.Core.Domain.Entities
 {
-    public class Offer : AuditableBaseEntity
+    public class Offer : AuditableBaseEntity, IHasConcurrencyToken
     {
         public decimal MontoOfertado { get; set; }
         public OfferStatus Status { get; private set; } = OfferStatus.Pending;
@@ -13,6 +13,7 @@ namespace RealEstateApp.Core.Domain.Entities
         public DateTime FechaOferta { get; set; } = DateTime.UtcNow;
         public string? PreApprovalLetterUrl { get; set; }
         public string? Notes { get; set; }
+        public int RowVersion { get; private set; } = 1;
 
         // Campos de Contra-Oferta (Ítem 2.1)
         public decimal? CounterOfferAmount { get; private set; }
@@ -125,6 +126,11 @@ namespace RealEstateApp.Core.Domain.Entities
             }
 
             Status = OfferStatus.Rejected;
+        }
+
+        public void IncrementRowVersion()
+        {
+            RowVersion++;
         }
 
         #endregion

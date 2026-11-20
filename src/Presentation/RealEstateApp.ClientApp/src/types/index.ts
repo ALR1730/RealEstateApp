@@ -1,5 +1,15 @@
 export type UserRole = 'Admin' | 'Agent' | 'Client' | 'Developer' | 'Owner';
 
+export interface PagedResult<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
 export interface FilterState {
   code?: string;
   propertyTypeId?: number;
@@ -22,6 +32,8 @@ export interface FilterState {
   userLat?: number;
   userLng?: number;
   maxDistanceKm?: number;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface User {

@@ -15,8 +15,10 @@ const FILTER_URL_KEYS: (keyof FilterState)[] = [
   'minRooms', 'minBathrooms', 'minSizeInMeters', 'maxSizeInMeters',
   'provinceId', 'municipalityId', 'sector', 'agentId',
   'onlyFeatured', 'onlyVerifiedAgents', 'onlyFinanciable', 'onlyWithVirtualTour',
-  'maxDistanceKm', 'improvementIds',
+  'maxDistanceKm', 'improvementIds', 'page',
 ];
+
+const CATALOG_PAGE_SIZE = 12;
 
 const FILTER_LABELS: Record<string, string> = {
   code: 'Código',
@@ -65,6 +67,8 @@ function readFiltersFromURL(sp: URLSearchParams): FilterState {
   f.maxDistanceKm = num(sp.get('maxDistanceKm'));
   f.userLat = num(sp.get('userLat'));
   f.userLng = num(sp.get('userLng'));
+  const parsedPage = num(sp.get('page'));
+  if (parsedPage && parsedPage >= 1) f.page = parsedPage;
   const imps = sp.getAll('improvementIds').map(Number).filter((n) => !Number.isNaN(n));
   if (imps.length > 0) f.improvementIds = imps;
   return f;
@@ -91,6 +95,8 @@ export const PropertiesCatalogPage: React.FC = () => {
   const { isAuthenticated, isClient } = useAuth();
   const { t } = useLanguage();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
   const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([]);
   const [saleTypes, setSaleTypes] = useState<SaleType[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
@@ -115,8 +121,13 @@ export const PropertiesCatalogPage: React.FC = () => {
     let isMounted = true;
     const fetchCatalogData = async () => {
       try {
-        const cleanParams: Record<string, string | number | boolean | string[]> = {};
+        setIsLoading(true);
+        const cleanParams: Record<string, string | number | boolean | string[]> = {
+          page: filters.page && filters.page >= 1 ? filters.page : 1,
+          pageSize: CATALOG_PAGE_SIZE,
+        };
         Object.entries(filters).forEach(([k, v]) => {
+          if (k === 'page' || k === 'pageSize') return;
           if (v === undefined || v === '' || v === null || v === false) return;
           if (Array.isArray(v)) {
             cleanParams.ImprovementIds = v.map(String);
@@ -124,14 +135,16 @@ export const PropertiesCatalogPage: React.FC = () => {
           }
           cleanParams[k] = v;
         });
-        const [props, types, sales] = await Promise.all([
-          propertiesService.getAll(cleanParams),
+        const [pagedProps, types, sales] = await Promise.all([
+          propertiesService.getPaged(cleanParams),
           catalogsService.getPropertyTypes(),
           catalogsService.getSaleTypes(),
         ]);
 
         if (!isMounted) return;
-        setProperties(props);
+        setProperties(pagedProps.items);
+        setTotalCount(pagedProps.totalCount);
+        setTotalPages(pagedProps.totalPages);
         setPropertyTypes(types);
         setSaleTypes(sales);
 
@@ -160,21 +173,34 @@ export const PropertiesCatalogPage: React.FC = () => {
     };
   }, [filters, isAuthenticated, isClient]);
 
+  const applyFiltersAndUrl = (nextFilters: FilterState) => {
+    const nextParams = writeFiltersToURL(nextFilters);
+    lastAppliedUrl.current = nextParams.toString();
+    setFilters(nextFilters);
+    setSearchParams(nextParams);
+  };
+
   const handleFilterChange = (newFilters: FilterState) => {
-    setFilters(newFilters);
-    setSearchParams(writeFiltersToURL(newFilters));
+    applyFiltersAndUrl({ ...newFilters, page: 1 });
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    const safeTotalPages = totalPages > 0 ? totalPages : 1;
+    const bounded = Math.max(1, Math.min(nextPage, safeTotalPages));
+    applyFiltersAndUrl({ ...filters, page: bounded });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleResetFilters = () => {
+    lastAppliedUrl.current = '';
     setFilters({});
     setSearchParams({});
   };
 
   const handleRemoveFilter = (key: keyof FilterState) => {
-    const next = { ...filters };
+    const next = { ...filters, page: 1 };
     delete next[key];
-    setFilters(next);
-    setSearchParams(writeFiltersToURL(next));
+    applyFiltersAndUrl(next);
   };
 
   const handleSaveSearch = async () => {
@@ -223,8 +249,10 @@ export const PropertiesCatalogPage: React.FC = () => {
     return b.id - a.id;
   });
 
+  const currentPage = filters.page && filters.page >= 1 ? filters.page : 1;
+
   const activeFilters = Object.entries(filters).filter(
-    ([k, v]) => v !== undefined && v !== '' && v !== null && v !== false && !['userLat', 'userLng'].includes(k)
+    ([k, v]) => v !== undefined && v !== '' && v !== null && v !== false && !['userLat', 'userLng', 'page', 'pageSize'].includes(k)
   );
 
   const getFilterDisplayValue = (key: string, value: unknown): string => {
@@ -327,7 +355,13 @@ export const PropertiesCatalogPage: React.FC = () => {
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-4 text-xs font-semibold text-slate-700 dark:text-slate-200">
             <div className="flex items-center gap-2">
               <SlidersHorizontal className="w-4 h-4 text-brand-600 dark:text-brand-400" />
-              <span>{t('catalog.showing', 'Mostrando')} <strong>{sortedProperties.length}</strong> {t('catalog.properties', 'inmuebles')}</span>
+              <span>
+                {t('catalog.showing', 'Mostrando')} <strong>{sortedProperties.length}</strong>{' '}
+                {totalCount > sortedProperties.length
+                  ? `de ${totalCount} `
+                  : ''}
+                {t('catalog.properties', 'inmuebles')}
+              </span>
             </div>
 
             <div className="flex items-center gap-3">
@@ -394,15 +428,41 @@ export const PropertiesCatalogPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
-              {sortedProperties.map((prop) => (
-                <PropertyCard
-                  key={prop.id}
-                  property={prop}
-                  isFavoriteInitial={favoriteIds.has(prop.id)}
-                />
-              ))}
-            </div>
+            <>
+              <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
+                {sortedProperties.map((prop) => (
+                  <PropertyCard
+                    key={prop.id}
+                    property={prop}
+                    isFavoriteInitial={favoriteIds.has(prop.id)}
+                  />
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-3 pt-4">
+                  <button
+                    type="button"
+                    disabled={currentPage <= 1}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    className="px-4 py-2 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    Anterior
+                  </button>
+                  <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={currentPage >= totalPages}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    className="px-4 py-2 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

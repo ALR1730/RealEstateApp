@@ -52,7 +52,7 @@ namespace RealEstateApp.Core.Application.Services
                 var vm = _mapper.Map<SavedSearchViewModel>(item);
                 vm.SummaryCriteria = BuildCriteriaSummary(item);
 
-                // Calcular cuántas propiedades coinciden actualmente
+                // Calcular cuántas propiedades coinciden actualmente sin descargar entidades completas
                 var filter = new PropertyFilterViewModel
                 {
                     PropertyTypeId = item.PropertyTypeId,
@@ -69,11 +69,13 @@ namespace RealEstateApp.Core.Application.Services
                     MinSizeInMeters = item.MinSizeInMeters,
                     MaxSizeInMeters = item.MaxSizeInMeters,
                     OnlyFinanciable = item.OnlyFinanciable,
-                    OnlyWithVirtualTour = item.OnlyWithVirtualTour
+                    OnlyWithVirtualTour = item.OnlyWithVirtualTour,
+                    Page = 1,
+                    PageSize = 1
                 };
 
-                var matchingProps = await _propertyRepository.GetWithFiltersAsync(filter);
-                vm.CurrentMatchingCount = matchingProps.Count;
+                var matchingProps = await _propertyRepository.GetWithFiltersPagedAsync(filter, includeSold: false);
+                vm.CurrentMatchingCount = matchingProps.TotalCount;
 
                 viewModels.Add(vm);
             }

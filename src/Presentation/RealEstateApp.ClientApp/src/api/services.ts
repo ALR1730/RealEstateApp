@@ -1,6 +1,7 @@
 import { apiClient } from './axiosClient';
 import { 
-  AuthResponse, 
+  AuthResponse,
+  PagedResult,
   Property, 
   Offer, 
   Appointment, 
@@ -163,6 +164,52 @@ export function adaptProperties(props: any[]): Property[] {
   return props.map(adaptProperty);
 }
 
+export function adaptPagedProperties(payload: unknown): PagedResult<Property> {
+  if (Array.isArray(payload)) {
+    const items = adaptProperties(payload);
+    return {
+      items,
+      page: 1,
+      pageSize: items.length || 20,
+      totalCount: items.length,
+      totalPages: items.length > 0 ? 1 : 0,
+      hasPreviousPage: false,
+      hasNextPage: false,
+    };
+  }
+
+  if (payload && typeof payload === 'object') {
+    const raw = payload as Partial<PagedResult<any>>;
+    const items = adaptProperties(Array.isArray(raw.items) ? raw.items : []);
+    const page = typeof raw.page === 'number' && raw.page >= 1 ? raw.page : 1;
+    const pageSize = typeof raw.pageSize === 'number' && raw.pageSize >= 1 ? raw.pageSize : 20;
+    const totalCount = typeof raw.totalCount === 'number' && raw.totalCount >= 0 ? raw.totalCount : items.length;
+    const totalPages = typeof raw.totalPages === 'number'
+      ? raw.totalPages
+      : (totalCount > 0 ? Math.ceil(totalCount / pageSize) : 0);
+
+    return {
+      items,
+      page,
+      pageSize,
+      totalCount,
+      totalPages,
+      hasPreviousPage: raw.hasPreviousPage ?? page > 1,
+      hasNextPage: raw.hasNextPage ?? page < totalPages,
+    };
+  }
+
+  return {
+    items: [],
+    page: 1,
+    pageSize: 20,
+    totalCount: 0,
+    totalPages: 0,
+    hasPreviousPage: false,
+    hasNextPage: false,
+  };
+}
+
 export function adaptVerification(v: any): any {
   if (!v) return v;
   let status = v.status;
@@ -174,9 +221,14 @@ export function adaptVerification(v: any): any {
 
 // ==================== PROPERTIES SERVICE ====================
 export const propertiesService = {
-  getAll: async (params?: any): Promise<Property[]> => {
-    const res = await apiClient.get<any[]>('/properties', { params });
-    return adaptProperties(res.data || []);
+  getPaged: async (params?: Record<string, unknown>): Promise<PagedResult<Property>> => {
+    const res = await apiClient.get<PagedResult<any> | any[]>('/properties', { params });
+    return adaptPagedProperties(res.data);
+  },
+
+  getAll: async (params?: Record<string, unknown>): Promise<Property[]> => {
+    const paged = await propertiesService.getPaged(params);
+    return paged.items;
   },
 
   getById: async (id: number): Promise<Property> => {
