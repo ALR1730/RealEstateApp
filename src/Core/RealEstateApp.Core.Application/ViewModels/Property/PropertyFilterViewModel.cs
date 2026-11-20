@@ -81,11 +81,12 @@ namespace RealEstateApp.Core.Application.ViewModels.Property
         [Display(Name = "Mejoras / Amenidades")]
         public List<int>? ImprovementIds { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "El número de página debe ser mayor o igual a 1")]
+        [Display(Name = "Número de Página")]
+        public int? Page { get; set; }
+
         [Display(Name = "Número de Página")]
         public int? PageNumber { get; set; }
 
-        [Range(1, 100, ErrorMessage = "El tamaño de página debe estar entre 1 y 100")]
         [Display(Name = "Tamaño de Página")]
         public int? PageSize { get; set; }
 

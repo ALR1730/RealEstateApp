@@ -191,6 +191,11 @@ namespace RealEstateApp.Core.Application.Services
             var property = await _propertyRepository.FindByIdAsync(acceptedOffer.PropertyId);
             if (property != null)
             {
+                if (property.Status == PropertyStatus.Sold)
+                {
+                    throw new DomainException("La propiedad ya ha sido vendida.");
+                }
+
                 property.MarkAsSold();
                 await _propertyRepository.UpdateAsync(property);
             }

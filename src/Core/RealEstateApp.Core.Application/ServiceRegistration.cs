@@ -3,6 +3,7 @@ using System.Reflection;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.Mappings;
 using RealEstateApp.Core.Application.Services;
+using RealEstateApp.Core.Application.Services.AiSearch;
 
 namespace RealEstateApp.Core.Application
 {
@@ -41,6 +42,13 @@ namespace RealEstateApp.Core.Application
             services.AddTransient<IReviewService, ReviewService>();
             services.AddTransient<ICommissionService, CommissionService>();
             services.AddTransient<IPropertyDocumentService, PropertyDocumentService>();
+            services.AddSingleton<IAiQueryEntityExtractor, PropertyTypeExtractor>();
+            services.AddSingleton<IAiQueryEntityExtractor, SaleTypeExtractor>();
+            services.AddSingleton<IAiQueryEntityExtractor, RoomsAndBathroomsExtractor>();
+            services.AddSingleton<IAiQueryEntityExtractor, PriceRangeExtractor>();
+            services.AddSingleton<IAiQueryEntityExtractor, LocationExtractor>();
+            services.AddSingleton<IAiQueryEntityExtractor, ImprovementExtractor>();
+            services.AddSingleton<IAiQueryEntityExtractor, SpecialCriteriaExtractor>();
             services.AddTransient<IAiSearchService, AiSearchService>();
 
             #endregion

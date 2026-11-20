@@ -220,6 +220,59 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.AgentReview", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AgentId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ClienteId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgentId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("ClienteId", "AgentId", "PropertyId")
+                        .IsUnique();
+
+                    b.ToTable("AgentReviews", (string)null);
+                });
+
             modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.AgentSubscription", b =>
                 {
                     b.Property<int>("Id")
@@ -335,6 +388,93 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                     b.ToTable("AgentVerifications", (string)null);
                 });
 
+            modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.BuyAbilityEvaluation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AvailableDownPayment")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreditScoreRating")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<decimal>("DebtToIncomeRatio")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<decimal>("EstimatedAnnualRate")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<DateTime>("EvaluationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EvaluationResult")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("MaxMonthlyPayment")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MaxMortgageAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MaxPropertyPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MonthlyDebtPayments")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MonthlyGrossIncome")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MonthlyNetIncome")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Observations")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("RecommendedTermYears")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.ToTable("BuyAbilityEvaluations", (string)null);
+                });
+
             modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.Chat", b =>
                 {
                     b.Property<int>("Id")
@@ -392,6 +532,66 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                     b.HasIndex("PropertyId");
 
                     b.ToTable("Chats", (string)null);
+                });
+
+            modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.Commission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AgentId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OfferId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Rate")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("SalePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Pendiente");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgentId");
+
+                    b.HasIndex("OfferId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("Commissions", (string)null);
                 });
 
             modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.Favorite", b =>
@@ -465,6 +665,96 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Improvements", (string)null);
+                });
+
+            modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.LeadPipeline", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AgentId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("BudgetCurrency")
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("EstimatedBudget")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("LastContactDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LeadEmail")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("LeadName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("LeadPhone")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime?>("NextFollowUpDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Normal");
+
+                    b.Property<int?>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Source")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Stage")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Nuevo Lead");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgentId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("Stage");
+
+                    b.ToTable("LeadPipelines", (string)null);
                 });
 
             modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.MortgageSimulation", b =>
@@ -622,11 +912,20 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                     b.Property<decimal>("MontoOfertado")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<string>("PreApprovalLetterUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PropertyId")
                         .HasColumnType("int");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -737,6 +1036,11 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                     b.Property<int>("Rooms")
                         .HasColumnType("int");
 
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<int>("SaleTypeId")
                         .HasColumnType("int");
 
@@ -828,6 +1132,64 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                     b.HasIndex("PropertyId");
 
                     b.ToTable("PropertyAppointments", (string)null);
+                });
+
+            modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.PropertyDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("UploadedBy")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyId");
+
+                    b.ToTable("PropertyDocuments", (string)null);
                 });
 
             modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.PropertyImage", b =>
@@ -970,6 +1332,72 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PropertyTypes", (string)null);
+                });
+
+            modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.PropertyValuation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ComparableCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ConfidenceScore")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<decimal>("EstimatedPricePerSqm")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("EstimatedTotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("MaxPricePerSqm")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MinPricePerSqm")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SearchRadiusKm")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<decimal>("StandardDeviation")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyId");
+
+                    b.ToTable("PropertyValuations", (string)null);
                 });
 
             modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.Province", b =>
@@ -1159,6 +1587,9 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                     b.Property<bool>("AllowsVideo")
                         .HasColumnType("bit");
 
+                    b.Property<decimal?>("CommissionPercentage")
+                        .HasColumnType("decimal(5,2)");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
@@ -1284,6 +1715,17 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.AgentReview", b =>
+                {
+                    b.HasOne("RealEstateApp.Core.Domain.Entities.Property", "Property")
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Property");
+                });
+
             modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.AgentSubscription", b =>
                 {
                     b.HasOne("RealEstateApp.Core.Domain.Entities.SubscriptionPlan", "SubscriptionPlan")
@@ -1305,6 +1747,25 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                     b.Navigation("Property");
                 });
 
+            modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.Commission", b =>
+                {
+                    b.HasOne("RealEstateApp.Core.Domain.Entities.Offer", "Offer")
+                        .WithMany()
+                        .HasForeignKey("OfferId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("RealEstateApp.Core.Domain.Entities.Property", "Property")
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Offer");
+
+                    b.Navigation("Property");
+                });
+
             modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.Favorite", b =>
                 {
                     b.HasOne("RealEstateApp.Core.Domain.Entities.Property", "Property")
@@ -1312,6 +1773,16 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Property");
+                });
+
+            modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.LeadPipeline", b =>
+                {
+                    b.HasOne("RealEstateApp.Core.Domain.Entities.Property", "Property")
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Property");
                 });
@@ -1393,6 +1864,17 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                     b.Navigation("Property");
                 });
 
+            modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.PropertyDocument", b =>
+                {
+                    b.HasOne("RealEstateApp.Core.Domain.Entities.Property", "Property")
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Property");
+                });
+
             modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.PropertyImage", b =>
                 {
                     b.HasOne("RealEstateApp.Core.Domain.Entities.Property", "Property")
@@ -1427,6 +1909,17 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("RealEstateApp.Core.Domain.Entities.Property", "Property")
                         .WithMany("PriceHistories")
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Property");
+                });
+
+            modelBuilder.Entity("RealEstateApp.Core.Domain.Entities.PropertyValuation", b =>
+                {
+                    b.HasOne("RealEstateApp.Core.Domain.Entities.Property", "Property")
+                        .WithMany()
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

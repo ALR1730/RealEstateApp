@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using RealEstateApp.Core.Application.DTOs.Common;
 using RealEstateApp.Core.Application.DTOs.Dashboard;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
+using RealEstateApp.Core.Application.ViewModels.Property;
 using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
@@ -11,59 +14,90 @@ using RealEstateApp.Infrastructure.Persistence.Contexts;
 namespace RealEstateApp.Infrastructure.Persistence.Repositories
 {
     /// <summary>
-    /// Repositorio de propiedades con carga de relaciones (Eager Loading).
+    /// Repositorio de propiedades con carga de relaciones públicas y paginación acotada.
     /// </summary>
     public class PropertyRepository : GenericRepository<Property>, IPropertyRepository
     {
         public PropertyRepository(ApplicationDbContext dbContext) : base(dbContext) { }
 
         /// <summary>
-        /// Obtiene todas las propiedades con sus relaciones cargadas.
+        /// Obtiene hasta un máximo acotado de propiedades recientes con sus relaciones públicas.
         /// </summary>
         public override async Task<List<Property>> GetAllAsync()
         {
-            return await _dbContext.Set<Property>()
-                .AsNoTracking()
-                .Include(p => p.PropertyType)
-                .Include(p => p.SaleType)
-                .Include(p => p.Province)
-                .Include(p => p.Municipality)
-                .Include(p => p.Images)
-                .Include(p => p.PropertyImprovements!)
-                    .ThenInclude(pi => pi.Improvement)
-                .Include(p => p.Favorites)
-                .AsSplitQuery()
+            return await IncludePublicRelations(_dbContext.Set<Property>())
                 .OrderByDescending(p => p.Created)
+                .Take(PagedResult<Property>.MaxPageSize)
                 .ToListAsync();
         }
 
-        /// <summary>
-        /// Obtiene una propiedad por ID con todas sus relaciones.
-        /// </summary>
-        public override async Task<Property?> GetByIdAsync(int id)
+        public async Task<PagedResult<Property>> GetPagedAsync(
+            int page = PagedResult<Property>.DefaultPage,
+            int pageSize = PagedResult<Property>.DefaultPageSize)
         {
-            return await _dbContext.Set<Property>()
+            var (normalizedPage, normalizedSize) = PagedResult<Property>.Normalize(page, pageSize);
+
+            var totalCount = await _dbContext.Set<Property>()
                 .AsNoTracking()
-                .Include(p => p.PropertyType)
-                .Include(p => p.SaleType)
-                .Include(p => p.Province)
-                .Include(p => p.Municipality)
-                .Include(p => p.Images)
-                .Include(p => p.PropertyImprovements!)
-                    .ThenInclude(pi => pi.Improvement)
-                .Include(p => p.Favorites)
-                .Include(p => p.Offers)
-                .Include(p => p.Chats)
-                .AsSplitQuery()
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .CountAsync();
+
+            var items = await IncludePublicRelations(_dbContext.Set<Property>())
+                .OrderByDescending(p => p.Created)
+                .Skip((normalizedPage - 1) * normalizedSize)
+                .Take(normalizedSize)
+                .ToListAsync();
+
+            return PagedResult<Property>.Create(items, normalizedPage, normalizedSize, totalCount);
         }
 
         /// <summary>
-        /// Obtiene propiedades aplicando filtros combinados directamente en la base de datos (IQueryable).
+        /// Obtiene una propiedad pública por ID sin cargar colecciones privadas (Offers ni Chats).
         /// </summary>
-        public async Task<List<Property>> GetWithFiltersAsync(RealEstateApp.Core.Application.ViewModels.Property.PropertyFilterViewModel filters)
+        public override async Task<Property?> GetByIdAsync(int id)
         {
-            var query = _dbContext.Set<Property>()
+            return await IncludePublicRelations(_dbContext.Set<Property>())
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<List<Property>> GetWithFiltersAsync(PropertyFilterViewModel filters)
+        {
+            var paged = await GetWithFiltersPagedAsync(filters, includeSold: true);
+            return paged.Items.ToList();
+        }
+
+        /// <summary>
+        /// Obtiene propiedades paginadas aplicando filtros combinados directamente en la base de datos.
+        /// </summary>
+        public async Task<PagedResult<Property>> GetWithFiltersPagedAsync(PropertyFilterViewModel filters, bool includeSold = true)
+        {
+            filters ??= new PropertyFilterViewModel();
+            var (page, pageSize) = PagedResult<Property>.Normalize(filters.Page ?? filters.PageNumber, filters.PageSize);
+
+            var query = IncludePublicRelations(_dbContext.Set<Property>());
+            query = await ApplyFiltersAsync(query, filters, includeSold);
+
+            var currentUtc = DateTime.UtcNow;
+            query = query
+                .OrderByDescending(p => p.IsFeatured && (!p.FeaturedUntil.HasValue || p.FeaturedUntil > currentUtc))
+                .ThenByDescending(p => p.Created);
+
+            if (HasGeoFilter(filters))
+            {
+                return await ExecuteGeoFilteredPagedAsync(query, filters, page, pageSize);
+            }
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return PagedResult<Property>.Create(items, page, pageSize, totalCount);
+        }
+
+        private static IQueryable<Property> IncludePublicRelations(IQueryable<Property> source)
+        {
+            return source
                 .AsNoTracking()
                 .Include(p => p.PropertyType)
                 .Include(p => p.SaleType)
@@ -73,103 +107,78 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .Include(p => p.PropertyImprovements!)
                     .ThenInclude(pi => pi.Improvement)
                 .Include(p => p.Favorites)
-                .AsSplitQuery()
-                .AsQueryable();
+                .AsSplitQuery();
+        }
+
+        private async Task<IQueryable<Property>> ApplyFiltersAsync(
+            IQueryable<Property> query,
+            PropertyFilterViewModel filters,
+            bool includeSold)
+        {
+            if (!includeSold)
+                query = query.Where(p => p.Status != PropertyStatus.Sold);
 
             if (!string.IsNullOrWhiteSpace(filters.Code))
-            {
                 query = query.Where(p => p.Code == filters.Code);
-            }
 
             if (filters.PropertyTypeId.HasValue)
-            {
                 query = query.Where(p => p.PropertyTypeId == filters.PropertyTypeId.Value);
-            }
 
             if (filters.SaleTypeId.HasValue)
-            {
                 query = query.Where(p => p.SaleTypeId == filters.SaleTypeId.Value);
-            }
 
             if (filters.ProvinceId.HasValue)
-            {
                 query = query.Where(p => p.ProvinceId == filters.ProvinceId.Value);
-            }
 
             if (filters.MunicipalityId.HasValue)
-            {
                 query = query.Where(p => p.MunicipalityId == filters.MunicipalityId.Value);
-            }
 
             if (!string.IsNullOrWhiteSpace(filters.Sector))
-            {
                 query = query.Where(p => p.Sector != null && p.Sector.Contains(filters.Sector));
-            }
 
             if (filters.MinPrice.HasValue)
-            {
                 query = query.Where(p => p.PriceInDOP >= filters.MinPrice.Value);
-            }
 
             if (filters.MaxPrice.HasValue)
-            {
                 query = query.Where(p => p.PriceInDOP <= filters.MaxPrice.Value);
-            }
 
             if (filters.MinRooms.HasValue)
-            {
                 query = query.Where(p => p.Rooms >= filters.MinRooms.Value);
-            }
 
             if (filters.MaxRooms.HasValue)
-            {
                 query = query.Where(p => p.Rooms <= filters.MaxRooms.Value);
-            }
 
             if (filters.MinBathrooms.HasValue)
-            {
                 query = query.Where(p => p.Bathrooms >= filters.MinBathrooms.Value);
-            }
 
             if (filters.MaxBathrooms.HasValue)
-            {
                 query = query.Where(p => p.Bathrooms <= filters.MaxBathrooms.Value);
-            }
 
             if (filters.MinSizeInMeters.HasValue)
-            {
                 query = query.Where(p => p.SizeInMeters >= filters.MinSizeInMeters.Value);
-            }
 
             if (filters.MaxSizeInMeters.HasValue)
-            {
                 query = query.Where(p => p.SizeInMeters <= filters.MaxSizeInMeters.Value);
-            }
 
             if (filters.OnlyFinanciable == true)
-            {
                 query = query.Where(p => p.IsFinanciable);
-            }
 
             if (filters.OnlyWithVirtualTour == true)
             {
-                query = query.Where(p => 
+                query = query.Where(p =>
                     (p.MatterportModelId != null && p.MatterportModelId != "") ||
                     (p.Tour360Url != null && p.Tour360Url != "") ||
-                    (p.VideoUrl != null && p.VideoUrl != "")
-                );
+                    (p.VideoUrl != null && p.VideoUrl != ""));
             }
 
             if (filters.ImprovementIds != null && filters.ImprovementIds.Count > 0)
             {
-                query = query.Where(p => p.PropertyImprovements != null && 
+                query = query.Where(p => p.PropertyImprovements != null &&
                     p.PropertyImprovements.Any(pi => filters.ImprovementIds.Contains(pi.ImprovementId)));
             }
 
             if (!string.IsNullOrWhiteSpace(filters.AgentId))
-            {
                 query = query.Where(p => p.AgentId == filters.AgentId);
-            }
 
             if (filters.OnlyFeatured == true)
             {
@@ -180,36 +189,57 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
             if (filters.OnlyVerifiedAgents == true)
             {
                 var verifiedAgentIds = await _dbContext.AgentVerifications
-                    .Where(v => v.Status == RealEstateApp.Core.Domain.Constants.VerificationStatus.Approved)
+                    .Where(v => v.Status == VerificationStatus.Approved)
                     .Select(v => v.AgentId)
                     .ToListAsync();
 
                 query = query.Where(p => verifiedAgentIds.Contains(p.AgentId));
             }
 
-            var currentUtc = DateTime.UtcNow;
-            query = query
-                .OrderByDescending(p => p.IsFeatured && (!p.FeaturedUntil.HasValue || p.FeaturedUntil > currentUtc))
-                .ThenByDescending(p => p.Created);
+            return query;
+        }
 
-            if (filters.PageNumber.HasValue && filters.PageSize.HasValue)
-            {
-                var pageNumber = filters.PageNumber.Value < 1 ? 1 : filters.PageNumber.Value;
-                var pageSize = filters.PageSize.Value < 1 ? 10 : filters.PageSize.Value;
-                query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            }
+        private static bool HasGeoFilter(PropertyFilterViewModel filters)
+        {
+            return filters.UserLat.HasValue
+                && filters.UserLng.HasValue
+                && filters.MaxDistanceKm.HasValue
+                && filters.MaxDistanceKm.Value > 0;
+        }
 
-            var results = await query.ToListAsync();
+        private static async Task<PagedResult<Property>> ExecuteGeoFilteredPagedAsync(
+            IQueryable<Property> query,
+            PropertyFilterViewModel filters,
+            int page,
+            int pageSize)
+        {
+            var uLat = filters.UserLat!.Value;
+            var uLng = filters.UserLng!.Value;
+            var maxDist = filters.MaxDistanceKm!.Value;
 
-            if (filters.UserLat.HasValue && filters.UserLng.HasValue && filters.MaxDistanceKm.HasValue && filters.MaxDistanceKm.Value > 0)
-            {
-                var uLat = filters.UserLat.Value;
-                var uLng = filters.UserLng.Value;
-                var maxDist = filters.MaxDistanceKm.Value;
-                results = results.Where(p => p.Latitude != 0 && p.Longitude != 0 && CalculateDistanceKm(uLat, uLng, p.Latitude, p.Longitude) <= maxDist).ToList();
-            }
+            // Pre-filtrado SQL por bounding box para acotar candidatos antes de evaluar Haversine.
+            var latDelta = maxDist / 111.045;
+            var cosLat = Math.Max(0.01, Math.Abs(Math.Cos(uLat * Math.PI / 180.0)));
+            var lonDelta = maxDist / (111.045 * cosLat);
 
-            return results;
+            var candidates = await query
+                .Where(p =>
+                    p.Latitude != 0 && p.Longitude != 0 &&
+                    p.Latitude >= uLat - latDelta && p.Latitude <= uLat + latDelta &&
+                    p.Longitude >= uLng - lonDelta && p.Longitude <= uLng + lonDelta)
+                .ToListAsync();
+
+            var filtered = candidates
+                .Where(p => CalculateDistanceKm(uLat, uLng, p.Latitude, p.Longitude) <= maxDist)
+                .ToList();
+
+            var totalCount = filtered.Count;
+            var pagedItems = filtered
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return PagedResult<Property>.Create(pagedItems, page, pageSize, totalCount);
         }
 
         private static double CalculateDistanceKm(double lat1, double lon1, double lat2, double lon2)
@@ -229,17 +259,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
         /// </summary>
         public async Task<List<Property>> GetByAgentIdAsync(string agentId)
         {
-            return await _dbContext.Set<Property>()
-                .AsNoTracking()
-                .Include(p => p.PropertyType)
-                .Include(p => p.SaleType)
-                .Include(p => p.Province)
-                .Include(p => p.Municipality)
-                .Include(p => p.Images)
-                .Include(p => p.PropertyImprovements!)
-                    .ThenInclude(pi => pi.Improvement)
-                .Include(p => p.Favorites)
-                .AsSplitQuery()
+            return await IncludePublicRelations(_dbContext.Set<Property>())
                 .Where(p => p.AgentId == agentId)
                 .OrderByDescending(p => p.Created)
                 .ToListAsync();
@@ -250,17 +270,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
         /// </summary>
         public async Task<Property?> GetByCodeAsync(string code)
         {
-            return await _dbContext.Set<Property>()
-                .AsNoTracking()
-                .Include(p => p.PropertyType)
-                .Include(p => p.SaleType)
-                .Include(p => p.Province)
-                .Include(p => p.Municipality)
-                .Include(p => p.Images)
-                .Include(p => p.PropertyImprovements!)
-                    .ThenInclude(pi => pi.Improvement)
-                .Include(p => p.Favorites)
-                .AsSplitQuery()
+            return await IncludePublicRelations(_dbContext.Set<Property>())
                 .FirstOrDefaultAsync(p => p.Code == code);
         }
 

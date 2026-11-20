@@ -7,7 +7,7 @@ using RealEstateApp.Core.Domain.ValueObjects;
 
 namespace RealEstateApp.Core.Domain.Entities
 {
-    public class Property : AuditableBaseEntity
+    public class Property : AuditableBaseEntity, IHasConcurrencyToken
     {
         public string Name { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty;
@@ -20,6 +20,7 @@ namespace RealEstateApp.Core.Domain.Entities
         public string Description { get; set; } = string.Empty;
         public string AgentId { get; set; } = string.Empty;
         public string Status { get; private set; } = PropertyStatus.Available;
+        public int RowVersion { get; private set; } = 1;
 
         // Nuevos campos de mejoras funcionales V2
         public double Latitude { get; set; }
@@ -170,6 +171,11 @@ namespace RealEstateApp.Core.Domain.Entities
             }
 
             AgentId = newAgentId;
+        }
+
+        public void IncrementRowVersion()
+        {
+            RowVersion++;
         }
 
         #endregion

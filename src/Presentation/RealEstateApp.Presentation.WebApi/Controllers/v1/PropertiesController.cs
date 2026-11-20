@@ -7,8 +7,8 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using RealEstateApp.Core.Application.DTOs.Common;
 using RealEstateApp.Core.Application.DTOs.Property;
-using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Property;
 using RealEstateApp.Core.Domain.Constants;
@@ -28,29 +28,20 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         }
 
         /// <summary>
-        /// Obtiene el catálogo de propiedades con soporte para filtros combinados.
+        /// Obtiene el catálogo paginado de propiedades con soporte para filtros combinados.
         /// Endpoint público.
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<PropertyDto>))]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> GetAsync([FromQuery] PropertyFilterViewModel filter)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<PropertyDto>))]
+        public async Task<IActionResult> GetAsync([FromQuery] PropertyFilterViewModel? filter)
         {
-            var propertyViewModels = await _propertyService.GetAllWithFilters(filter);
+            var isAgentOrAdmin = User?.Identity != null && User.Identity.IsAuthenticated && (User.IsInRole("Agent") || User.IsInRole("Admin") || User.IsInRole("Developer"));
+            var pagedResult = await _propertyService.GetWithFiltersPagedAsync(
+                filter ?? new PropertyFilterViewModel(),
+                includeSold: isAgentOrAdmin);
 
-            var isAgentOrAdmin = User.Identity != null && User.Identity.IsAuthenticated && (User.IsInRole("Agent") || User.IsInRole("Admin") || User.IsInRole("Developer"));
-            if (!isAgentOrAdmin && propertyViewModels != null)
-            {
-                propertyViewModels = propertyViewModels.Where(p => p.Status != PropertyStatus.Sold).ToList();
-            }
-
-            if (propertyViewModels == null || propertyViewModels.Count == 0)
-            {
-                return Ok(new List<PropertyDto>());
-            }
-
-            var propertyDtos = _mapper.Map<List<PropertyDto>>(propertyViewModels);
-            return Ok(propertyDtos);
+            var propertyDtos = _mapper.Map<List<PropertyDto>>(pagedResult.Items);
+            return Ok(PagedResult<PropertyDto>.Create(propertyDtos, pagedResult.Page, pagedResult.PageSize, pagedResult.TotalCount));
         }
 
         /// <summary>

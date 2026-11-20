@@ -6,6 +6,7 @@ using RealEstateApp.Core.Application.Interfaces;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.Settings;
+using RealEstateApp.Infrastructure.Persistence.Configuration;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
 using RealEstateApp.Infrastructure.Persistence.Repositories;
 using RealEstateApp.Infrastructure.Persistence.Services;
@@ -38,11 +39,14 @@ namespace RealEstateApp.Infrastructure.Persistence
                       connectionString.Contains("Host=", StringComparison.OrdinalIgnoreCase) ||
                       (connectionString.Contains("Server=", StringComparison.OrdinalIgnoreCase) && connectionString.Contains("Port=5432", StringComparison.OrdinalIgnoreCase))));
 
+                var trustServerCertificate = configuration.GetValue<bool>("Database:TrustServerCertificate") ||
+                    string.Equals(configuration["DB_TRUST_SERVER_CERTIFICATE"], "true", StringComparison.OrdinalIgnoreCase);
+
                 services.AddDbContext<ApplicationDbContext>(options =>
                 {
                     if (isPostgres && !string.IsNullOrWhiteSpace(connectionString))
                     {
-                        var formattedPgConn = ConvertPostgresUrlToConnectionString(connectionString);
+                        var formattedPgConn = PostgresConnectionStringParser.Parse(connectionString, trustServerCertificate);
                         options.UseNpgsql(formattedPgConn, m =>
                         {
                             m.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
@@ -58,7 +62,6 @@ namespace RealEstateApp.Infrastructure.Persistence
                                 m.UseNetTopologySuite();
                             });
                     }
-                    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
                 });
             }
 
@@ -126,33 +129,6 @@ namespace RealEstateApp.Infrastructure.Persistence
             services.AddScoped<IPropertyDocumentRepository, PropertyDocumentRepository>();
 
             #endregion
-        }
-
-        private static string ConvertPostgresUrlToConnectionString(string connectionString)
-        {
-            if (string.IsNullOrWhiteSpace(connectionString)) return connectionString;
-            if (!connectionString.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) &&
-                !connectionString.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
-            {
-                return connectionString;
-            }
-
-            try
-            {
-                var uri = new Uri(connectionString);
-                var userInfo = uri.UserInfo.Split(':');
-                var user = userInfo.Length > 0 ? Uri.UnescapeDataString(userInfo[0]) : "";
-                var pass = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
-                var host = uri.Host;
-                var port = uri.Port > 0 ? uri.Port : 5432;
-                var db = uri.AbsolutePath.TrimStart('/');
-
-                return $"Host={host};Port={port};Database={db};Username={user};Password={pass};SSL Mode=Require;Trust Server Certificate=true;";
-            }
-            catch
-            {
-                return connectionString;
-            }
         }
     }
 }
