@@ -12,6 +12,7 @@ using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Property;
 using RealEstateApp.Core.Domain.Constants;
+using RealEstateApp.Presentation.WebApi.Models.Requests;
 
 namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 {
@@ -122,14 +123,15 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(SavePropertyViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateAsync([FromForm] SavePropertyViewModel model)
+        public async Task<IActionResult> CreateAsync([FromForm] SavePropertyFormRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var agentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var model = request.ToViewModel();
+            var agentId = CurrentUserId;
             if (!string.IsNullOrEmpty(agentId))
             {
                 model.AgentId = agentId;
@@ -148,9 +150,9 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateAsync(int id, [FromForm] SavePropertyViewModel model)
+        public async Task<IActionResult> UpdateAsync(int id, [FromForm] SavePropertyFormRequest request)
         {
-            if (id != model.Id)
+            if (id != request.Id)
             {
                 return BadRequest(new { hasError = true, error = "El ID de la ruta no coincide con el modelo." });
             }
@@ -161,13 +163,13 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return NotFound();
             }
 
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUserId = CurrentUserId;
             if (User.IsInRole("Agent") && existing.AgentId != currentUserId)
             {
                 return Forbid();
             }
 
-            await _propertyService.Update(model, id);
+            await _propertyService.Update(request.ToViewModel(), id);
             return Ok(new { success = true, message = "Propiedad actualizada exitosamente." });
         }
 
@@ -219,15 +221,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                     return Forbid();
             }
 
-            try
-            {
-                await _propertyService.ToggleFeaturedAsync(id, durationDays);
-                return Ok(new { success = true, message = "Estado destacado actualizado exitosamente." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            await _propertyService.ToggleFeaturedAsync(id, durationDays);
+            return Ok(new { success = true, message = "Estado destacado actualizado exitosamente." });
         }
 
         /// <summary>
@@ -244,15 +239,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return BadRequest(new { hasError = true, error = "Debe indicar el nuevo agente." });
             }
 
-            try
-            {
-                await _propertyService.ReassignAgent(id, request.NewAgentId);
-                return Ok(new { success = true, message = "Propiedad reasignada exitosamente." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            await _propertyService.ReassignAgent(id, request.NewAgentId);
+            return Ok(new { success = true, message = "Propiedad reasignada exitosamente." });
         }
 
         public class ReassignRequest

@@ -3,9 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
-using RealEstateApp.Core.Domain.Constants;
 using RealEstateApp.Core.Domain.Entities;
-using RealEstateApp.Core.Domain.Exceptions;
+using RealEstateApp.Core.Domain.Enums;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
 
 namespace RealEstateApp.Infrastructure.Persistence.Repositories
@@ -49,66 +48,13 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .ToListAsync();
         }
 
-        public async Task AcceptOfferTransactionAsync(int offerId)
+        public async Task<List<Offer>> GetActiveCompetingOffersAsync(int propertyId, int excludeOfferId)
         {
-            if (_dbContext.Database.IsRelational() && _dbContext.Database.CurrentTransaction == null)
-            {
-                using var transaction = await _dbContext.Database.BeginTransactionAsync();
-                try
-                {
-                    await AcceptOfferCoreAsync(offerId);
-                    await transaction.CommitAsync();
-                }
-                catch
-                {
-                    await transaction.RollbackAsync();
-                    throw;
-                }
-            }
-            else
-            {
-                await AcceptOfferCoreAsync(offerId);
-            }
-        }
-
-        private async Task AcceptOfferCoreAsync(int offerId)
-        {
-            var offer = await _dbContext.Set<Offer>().FirstOrDefaultAsync(o => o.Id == offerId);
-            if (offer == null)
-            {
-                throw new NotFoundException("La oferta no existe");
-            }
-
-            if (offer.Status != RealEstateApp.Core.Domain.Enums.OfferStatus.Pending)
-            {
-                throw new ValidationException("Solo se pueden aceptar ofertas pendientes");
-            }
-
-            // 1. Aceptar la oferta elegida
-            offer.Status = RealEstateApp.Core.Domain.Enums.OfferStatus.Accepted;
-
-            // 2. Marcar la propiedad como "Vendida"
-            var property = await _dbContext.Set<Property>().FirstOrDefaultAsync(p => p.Id == offer.PropertyId);
-            if (property != null)
-            {
-                property.Status = PropertyStatus.Sold;
-            }
-
-            // 3. Rechazar en cascada todas las demás ofertas pendientes O en contraoferta de esa propiedad.
-            //    Las contraofertas activas también deben rechazarse: no puede quedar ninguna oferta
-            //    activa sobre un inmueble que ya fue vendido.
-            var otherOffers = await _dbContext.Set<Offer>()
-                .Where(o => o.PropertyId == offer.PropertyId && o.Id != offerId &&
-                            (o.Status == RealEstateApp.Core.Domain.Enums.OfferStatus.Pending ||
-                             o.Status == RealEstateApp.Core.Domain.Enums.OfferStatus.CounterOffered))
+            return await _dbContext.Set<Offer>()
+                .Where(o => o.PropertyId == propertyId
+                            && o.Id != excludeOfferId
+                            && (o.Status == OfferStatus.Pending || o.Status == OfferStatus.CounterOffered))
                 .ToListAsync();
-
-            foreach (var otherOffer in otherOffers)
-            {
-                otherOffer.Status = RealEstateApp.Core.Domain.Enums.OfferStatus.Rejected;
-            }
-
-            await _dbContext.SaveChangesAsync();
         }
     }
 }

@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using RealEstateApp.Core.Application.DTOs.Common;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Domain.Entities;
@@ -37,7 +37,7 @@ namespace RealEstateApp.Core.Application.Services
             _fileValidationService = fileValidationService ?? new FileValidationService();
         }
 
-        public async Task<List<PropertyImage>> SaveImagesAsync(int propertyId, IReadOnlyList<IFormFile>? files, int maxImages = 15)
+        public async Task<List<PropertyImage>> SaveImagesAsync(int propertyId, IReadOnlyList<FileUploadDto>? files, int maxImages = 15)
         {
             if (files == null || files.Count == 0) return new List<PropertyImage>();
 
@@ -56,7 +56,7 @@ namespace RealEstateApp.Core.Application.Services
                     continue;
                 }
 
-                using var stream = file.OpenReadStream();
+                using var stream = file.Content;
                 try
                 {
                     await _fileValidationService.ValidateAsync(stream, file.FileName, file.ContentType, FileUploadPolicy.PropertyImage);

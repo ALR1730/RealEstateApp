@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using RealEstateApp.Core.Application.DTOs.Dashboard;
+using RealEstateApp.Core.Application.DTOs.Property;
 using RealEstateApp.Core.Application.ViewModels.Property;
 
 namespace RealEstateApp.Core.Application.Interfaces.Services
@@ -15,6 +16,8 @@ namespace RealEstateApp.Core.Application.Interfaces.Services
         Task<PropertyViewModel?> GetByIdViewModel(int id);
         Task<SavePropertyViewModel?> GetByIdSaveViewModel(int id);
         Task<SavePropertyViewModel> Add(SavePropertyViewModel vm);
+        Task<SavePropertyViewModel> AddForOwnerAsync(SavePropertyViewModel vm, string ownerUserId);
+        Task<OwnerPropertiesSummaryDto> GetOwnerPropertiesSummaryAsync(string ownerUserId);
         Task Update(SavePropertyViewModel vm, int id);
         Task Delete(int id);
         Task DeleteImage(int imageId);

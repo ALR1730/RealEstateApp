@@ -69,7 +69,7 @@ namespace RealEstateApp.Core.Application.Mappings
 
             // SavePropertyViewModel → Property (escritura desde formulario)
             CreateMap<SavePropertyViewModel, Property>()
-                .ForMember(dest => dest.Images, opt => opt.Ignore()) // Se maneja manualmente (IFormFile)
+                .ForMember(dest => dest.Images, opt => opt.Ignore()) // Se maneja manualmente (FileUploadDto)
                 .ForMember(dest => dest.PropertyImprovements, opt => opt.Ignore()) // Se maneja manualmente
                 .ForMember(dest => dest.PropertyType, opt => opt.Ignore())
                 .ForMember(dest => dest.SaleType, opt => opt.Ignore())

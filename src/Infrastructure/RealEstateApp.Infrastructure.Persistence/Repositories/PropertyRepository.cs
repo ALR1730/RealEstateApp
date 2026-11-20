@@ -396,5 +396,11 @@ namespace RealEstateApp.Infrastructure.Persistence.Repositories
                 .Select(p => p.AgentId)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<Property?> FindByIdAsync(int id)
+        {
+            return await _dbContext.Set<Property>()
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
     }
 }

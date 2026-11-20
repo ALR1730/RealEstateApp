@@ -49,6 +49,18 @@ describe('Formatters & Utilities', () => {
       expect(getApiErrorMessage(err)).toBe('Propiedad no encontrada');
     });
 
+    it('extracts data.detail over data.title for RFC 7807 ProblemDetails', () => {
+      const err = {
+        response: {
+          data: {
+            title: 'Error de validación',
+            detail: 'El monto debe ser mayor a cero',
+          },
+        },
+      };
+      expect(getApiErrorMessage(err)).toBe('El monto debe ser mayor a cero');
+    });
+
     it('extracts data.title if ProblemDetails RFC 7807', () => {
       const err = { response: { data: { title: 'One or more validation errors occurred.' } } };
       expect(getApiErrorMessage(err)).toBe('One or more validation errors occurred.');

@@ -1,4 +1,4 @@
-namespace RealEstateApp.Core.Domain.Settings
+namespace RealEstateApp.Core.Application.Settings
 {
     /// <summary>
     /// Configuración de opciones para la generación y validación de tokens JWT.

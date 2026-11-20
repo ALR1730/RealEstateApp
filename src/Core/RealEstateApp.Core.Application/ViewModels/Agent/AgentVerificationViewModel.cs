@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
+using System.Text.Json.Serialization;
+using RealEstateApp.Core.Application.DTOs.Common;
 using RealEstateApp.Core.Domain.Constants;
 
 namespace RealEstateApp.Core.Application.ViewModels.Agent
@@ -18,10 +19,12 @@ namespace RealEstateApp.Core.Application.ViewModels.Agent
         public string Cedula { get; set; } = string.Empty;
 
         [Display(Name = "Foto Frontal de la Cédula")]
-        public IFormFile? FrontImageFile { get; set; }
+        [JsonIgnore]
+        public FileUploadDto? FrontImageFile { get; set; }
 
         [Display(Name = "Foto Posterior de la Cédula")]
-        public IFormFile? BackImageFile { get; set; }
+        [JsonIgnore]
+        public FileUploadDto? BackImageFile { get; set; }
 
         public string? FrontImageUrl { get; set; }
         public string? BackImageUrl { get; set; }

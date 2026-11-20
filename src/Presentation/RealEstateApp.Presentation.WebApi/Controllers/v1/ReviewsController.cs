@@ -1,25 +1,19 @@
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Review;
-using RealEstateApp.Core.Domain.Exceptions;
 
 namespace RealEstateApp.Presentation.WebApi.Controllers.v1
 {
     public class ReviewsController : BaseApiController
     {
         private readonly IReviewService _reviewService;
-        private readonly UserManager<IdentityUser> _userManager;
 
-        public ReviewsController(
-            IReviewService reviewService,
-            UserManager<IdentityUser> userManager)
+        public ReviewsController(IReviewService reviewService)
         {
             _reviewService = reviewService;
-            _userManager = userManager;
         }
 
         /// <summary>
@@ -54,7 +48,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> HasReviewed([FromQuery] string agentId, [FromQuery] int propertyId)
         {
-            var clientId = _userManager.GetUserId(User);
+            var clientId = CurrentUserId;
             if (string.IsNullOrEmpty(clientId)) return Unauthorized();
 
             var hasReviewed = await _reviewService.HasReviewedAsync(clientId, agentId, propertyId);
@@ -69,7 +63,7 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> CanReview([FromQuery] string agentId, [FromQuery] int propertyId)
         {
-            var clientId = _userManager.GetUserId(User);
+            var clientId = CurrentUserId;
             if (string.IsNullOrEmpty(clientId)) return Unauthorized();
 
             var canReview = await _reviewService.CanReviewAsync(clientId, agentId, propertyId);
@@ -90,18 +84,11 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return BadRequest(new { hasError = true, error = "La calificación debe estar entre 1 y 5 estrellas." });
             }
 
-            var clientId = _userManager.GetUserId(User);
+            var clientId = CurrentUserId;
             if (string.IsNullOrEmpty(clientId)) return Unauthorized();
 
-            try
-            {
-                await _reviewService.SubmitReviewAsync(vm, clientId);
-                return Ok(new { success = true, message = "¡Gracias por tu calificación!" });
-            }
-            catch (ValidationException ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            await _reviewService.SubmitReviewAsync(vm, clientId);
+            return Ok(new { success = true, message = "¡Gracias por tu calificación!" });
         }
 
         /// <summary>

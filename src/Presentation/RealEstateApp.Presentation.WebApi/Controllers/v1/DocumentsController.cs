@@ -38,27 +38,16 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return BadRequest(new { hasError = true, error = "Debe seleccionar un archivo." });
             }
 
-            try
-            {
-                using var stream = request.File.OpenReadStream();
-                var doc = await _documentService.UploadAsync(
-                    request.PropertyId,
-                    request.DocumentType,
-                    currentUserId,
-                    stream,
-                    request.File.FileName,
-                    request.File.ContentType);
+            using var stream = request.File.OpenReadStream();
+            var doc = await _documentService.UploadAsync(
+                request.PropertyId,
+                request.DocumentType,
+                currentUserId,
+                stream,
+                request.File.FileName,
+                request.File.ContentType);
 
-                return Ok(new { success = true, message = "Documento subido exitosamente.", document = doc });
-            }
-            catch (ValidationException ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new { hasError = true, error = ex.Message });
-            }
+            return Ok(new { success = true, message = "Documento subido exitosamente.", document = doc });
         }
 
         /// <summary>

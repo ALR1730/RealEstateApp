@@ -126,8 +126,7 @@ namespace RealEstateApp.UnitTests.Services
                 Id = appointmentId,
                 AgentId = agentId,
                 ClienteId = "client-001",
-                PropertyId = 1,
-                Status = AppointmentStatus.Pending
+                PropertyId = 1
             };
 
             _appointmentRepositoryMock.Setup(r => r.GetByIdAsync(appointmentId))

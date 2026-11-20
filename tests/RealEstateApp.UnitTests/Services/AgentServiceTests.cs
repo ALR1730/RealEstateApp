@@ -69,8 +69,8 @@ namespace RealEstateApp.UnitTests.Services
 
             var properties = new List<Property>
             {
-                new Property { Id = 1, AgentId = "agent-1", Status = RealEstateApp.Core.Domain.Constants.PropertyStatus.Available },
-                new Property { Id = 2, AgentId = "agent-1", Status = RealEstateApp.Core.Domain.Constants.PropertyStatus.Available }
+                new Property { Id = 1, AgentId = "agent-1" },
+                new Property { Id = 2, AgentId = "agent-1" }
             };
 
             var verifications = new List<AgentVerification>

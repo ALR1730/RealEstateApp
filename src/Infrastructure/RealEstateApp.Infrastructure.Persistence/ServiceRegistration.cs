@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RealEstateApp.Core.Application.Interfaces;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
-using RealEstateApp.Core.Domain.Settings;
+using RealEstateApp.Core.Application.Settings;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
 using RealEstateApp.Infrastructure.Persistence.Repositories;
 using RealEstateApp.Infrastructure.Persistence.Services;

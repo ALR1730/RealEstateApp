@@ -9,6 +9,28 @@ namespace RealEstateApp.UnitTests.Domain
 {
     public class OfferDomainTests
     {
+        private static Offer CreateOfferInStatus(OfferStatus status, string clienteId = "")
+        {
+            var offer = new Offer { ClienteId = clienteId };
+            switch (status)
+            {
+                case OfferStatus.Pending:
+                    break;
+                case OfferStatus.Accepted:
+                    offer.Accept();
+                    break;
+                case OfferStatus.Rejected:
+                    offer.Reject();
+                    break;
+                case OfferStatus.CounterOffered:
+                    offer.MakeCounterOffer(300000m, null);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(status));
+            }
+            return offer;
+        }
+
         [Fact]
         public void SetOfferAmount_DebeActualizarMonto_CuandoMontoEsPositivo()
         {
@@ -42,7 +64,7 @@ namespace RealEstateApp.UnitTests.Domain
         public void Accept_DebeCambiarEstadoAAccepted_CuandoOfertaEsPending()
         {
             // Arrange
-            var offer = new Offer { Status = OfferStatus.Pending };
+            var offer = CreateOfferInStatus(OfferStatus.Pending);
 
             // Act
             offer.Accept();
@@ -58,7 +80,7 @@ namespace RealEstateApp.UnitTests.Domain
         public void Accept_DebeLanzarDomainException_CuandoOfertaNoEsPending(OfferStatus estadoInvalido)
         {
             // Arrange
-            var offer = new Offer { Status = estadoInvalido };
+            var offer = CreateOfferInStatus(estadoInvalido);
 
             // Act
             Action act = () => offer.Accept();
@@ -72,7 +94,7 @@ namespace RealEstateApp.UnitTests.Domain
         public void Reject_DebeCambiarEstadoARejected_CuandoOfertaEsPending()
         {
             // Arrange
-            var offer = new Offer { Status = OfferStatus.Pending };
+            var offer = CreateOfferInStatus(OfferStatus.Pending);
 
             // Act
             offer.Reject();
@@ -87,7 +109,7 @@ namespace RealEstateApp.UnitTests.Domain
         public void Reject_DebeLanzarDomainException_CuandoOfertaNoEsPending(OfferStatus estadoInvalido)
         {
             // Arrange
-            var offer = new Offer { Status = estadoInvalido };
+            var offer = CreateOfferInStatus(estadoInvalido);
 
             // Act
             Action act = () => offer.Reject();
@@ -101,7 +123,7 @@ namespace RealEstateApp.UnitTests.Domain
         public void MakeCounterOffer_DebeAsignarDatosYCambiarEstadoACounterOffered_CuandoOfertaEsPending()
         {
             // Arrange
-            var offer = new Offer { Status = OfferStatus.Pending };
+            var offer = CreateOfferInStatus(OfferStatus.Pending);
 
             // Act
             offer.MakeCounterOffer(280000m, "Monto mínimo aceptable");
@@ -120,7 +142,7 @@ namespace RealEstateApp.UnitTests.Domain
         public void MakeCounterOffer_DebeLanzarDomainException_CuandoMontoEsCeroONegativo(decimal montoInvalido)
         {
             // Arrange
-            var offer = new Offer { Status = OfferStatus.Pending };
+            var offer = CreateOfferInStatus(OfferStatus.Pending);
 
             // Act
             Action act = () => offer.MakeCounterOffer(montoInvalido, "Mensaje");
@@ -134,7 +156,7 @@ namespace RealEstateApp.UnitTests.Domain
         public void MakeCounterOffer_DebeLanzarDomainException_CuandoOfertaNoEsPending()
         {
             // Arrange
-            var offer = new Offer { Status = OfferStatus.Rejected };
+            var offer = CreateOfferInStatus(OfferStatus.Rejected);
 
             // Act
             Action act = () => offer.MakeCounterOffer(200000m, "Mensaje");
@@ -148,12 +170,7 @@ namespace RealEstateApp.UnitTests.Domain
         public void AcceptCounterOffer_DebeCambiarEstadoAAccepted_CuandoUsuarioEsElClientePropietario()
         {
             // Arrange
-            var offer = new Offer
-            {
-                ClienteId = "client-123",
-                Status = OfferStatus.CounterOffered,
-                CounterOfferAmount = 300000m
-            };
+            var offer = CreateOfferInStatus(OfferStatus.CounterOffered, "client-123");
 
             // Act
             offer.AcceptCounterOffer("client-123");
@@ -166,11 +183,7 @@ namespace RealEstateApp.UnitTests.Domain
         public void AcceptCounterOffer_DebeLanzarDomainException_CuandoUsuarioNoEsElClientePropietario()
         {
             // Arrange
-            var offer = new Offer
-            {
-                ClienteId = "client-123",
-                Status = OfferStatus.CounterOffered
-            };
+            var offer = CreateOfferInStatus(OfferStatus.CounterOffered, "client-123");
 
             // Act
             Action act = () => offer.AcceptCounterOffer("impostor-456");
@@ -184,11 +197,7 @@ namespace RealEstateApp.UnitTests.Domain
         public void AcceptCounterOffer_DebeLanzarDomainException_CuandoOfertaNoTieneContraOfertaActiva()
         {
             // Arrange
-            var offer = new Offer
-            {
-                ClienteId = "client-123",
-                Status = OfferStatus.Pending
-            };
+            var offer = CreateOfferInStatus(OfferStatus.Pending, "client-123");
 
             // Act
             Action act = () => offer.AcceptCounterOffer("client-123");

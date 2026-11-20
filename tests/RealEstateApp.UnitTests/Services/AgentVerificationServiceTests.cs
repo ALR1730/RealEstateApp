@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
 using Moq;
 using RealEstateApp.Core.Application.DTOs.Account;
+using RealEstateApp.Core.Application.DTOs.Common;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.Services;
@@ -237,17 +237,17 @@ namespace RealEstateApp.UnitTests.Services
         {
             // Arrange
             var exeHeader = new byte[] { 0x4D, 0x5A, 0x90, 0x00 };
-            var fakeFileMock = new Mock<IFormFile>();
-            fakeFileMock.Setup(f => f.Length).Returns(exeHeader.Length);
-            fakeFileMock.Setup(f => f.FileName).Returns("cedula_falsa.jpg");
-            fakeFileMock.Setup(f => f.ContentType).Returns("image/jpeg");
-            fakeFileMock.Setup(f => f.OpenReadStream()).Returns(() => new MemoryStream(exeHeader));
+            using var fakeFile = new FileUploadDto(
+                new MemoryStream(exeHeader),
+                "cedula_falsa.jpg",
+                "image/jpeg",
+                exeHeader.Length);
 
             var vm = new AgentVerificationViewModel
             {
                 AgentId = "agent-1",
                 Cedula = "402-0000000-1",
-                FrontImageFile = fakeFileMock.Object
+                FrontImageFile = fakeFile
             };
 
             _verificationRepoMock.Setup(r => r.GetByAgentIdAsync("agent-1"))

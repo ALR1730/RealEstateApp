@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -84,16 +83,9 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ChangeStatusAsync(string id, [FromBody] ChangeAgentStatusRequest request)
         {
-            try
-            {
-                await _agentService.ChangeStatusAsync(id, request.IsActive);
-                var statusText = request.IsActive ? "activado" : "inactivado";
-                return Ok(new { hasError = false, message = $"El agente fue {statusText} exitosamente." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            await _agentService.ChangeStatusAsync(id, request.IsActive);
+            var statusText = request.IsActive ? "activado" : "inactivado";
+            return Ok(new { hasError = false, message = $"El agente fue {statusText} exitosamente." });
         }
     }
 

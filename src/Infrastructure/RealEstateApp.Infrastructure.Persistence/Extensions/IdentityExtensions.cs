@@ -1,7 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Identity;
 
-namespace RealEstateApp.Core.Application.Extensions
+namespace RealEstateApp.Infrastructure.Persistence.Extensions
 {
     /// <summary>
     /// Métodos de extensión centralizados para IdentityUser.

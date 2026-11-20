@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentAssertions;
 using Moq;
+using RealEstateApp.Core.Application.Interfaces;
 using RealEstateApp.Core.Application.Interfaces.Repositories;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.Services;
@@ -19,6 +21,7 @@ namespace RealEstateApp.UnitTests.Services
         private readonly Mock<IBuyAbilityEvaluationRepository> _repositoryMock;
         private readonly Mock<ICurrencyService> _currencyServiceMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly BuyAbilityService _sut;
 
         public BuyAbilityServiceTests()
@@ -26,6 +29,11 @@ namespace RealEstateApp.UnitTests.Services
             _repositoryMock = new Mock<IBuyAbilityEvaluationRepository>();
             _currencyServiceMock = new Mock<ICurrencyService>();
             _mapperMock = new Mock<IMapper>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
+
+            _unitOfWorkMock
+                .Setup(u => u.ExecuteTransactionAsync(It.IsAny<Func<Task>>(), default))
+                .Returns<Func<Task>, CancellationToken>(async (action, _) => await action());
 
             _repositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<BuyAbilityEvaluation>());
             _repositoryMock.Setup(r => r.AddAsync(It.IsAny<BuyAbilityEvaluation>()))
@@ -38,7 +46,8 @@ namespace RealEstateApp.UnitTests.Services
             _sut = new BuyAbilityService(
                 _repositoryMock.Object,
                 _currencyServiceMock.Object,
-                _mapperMock.Object
+                _mapperMock.Object,
+                _unitOfWorkMock.Object
             );
         }
 

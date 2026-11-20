@@ -118,20 +118,11 @@ namespace RealEstateApp.Core.Application.Services
             var existing = await _agentSubscriptionRepository.GetActiveByAgentIdAsync(agentId);
             if (existing != null)
             {
-                existing.IsActive = false;
-                existing.EndDate = DateTime.UtcNow;
+                existing.Cancel();
                 await _agentSubscriptionRepository.UpdateAsync(existing);
             }
 
-            var newSub = new AgentSubscription
-            {
-                AgentId = agentId,
-                SubscriptionPlanId = planId,
-                StartDate = DateTime.UtcNow,
-                EndDate = DateTime.UtcNow.AddMonths(1),
-                IsActive = true,
-                AutoRenew = true
-            };
+            var newSub = AgentSubscription.CreateActive(agentId, planId);
 
             await _agentSubscriptionRepository.AddAsync(newSub);
             return true;

@@ -12,13 +12,13 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RealEstateApp.Core.Application.DTOs.Account;
 using RealEstateApp.Core.Application.DTOs.Dashboard;
-using RealEstateApp.Core.Application.Extensions;
 using RealEstateApp.Core.Application.Interfaces.Services;
-using RealEstateApp.Core.Domain.Exceptions;
+using RealEstateApp.Core.Application.Settings;
 using RealEstateApp.Core.Application.ViewModels.Account;
 using RealEstateApp.Core.Domain.Enums;
-using RealEstateApp.Core.Domain.Settings;
+using RealEstateApp.Core.Domain.Exceptions;
 using RealEstateApp.Infrastructure.Persistence.Contexts;
+using RealEstateApp.Infrastructure.Persistence.Extensions;
 
 namespace RealEstateApp.Infrastructure.Persistence.Services
 {
@@ -308,7 +308,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Services
                     await _fileStorageService.DeleteFileAsync(oldPicture, "profiles");
                 }
 
-                using var stream = model.ProfilePictureFile.OpenReadStream();
+                using var stream = model.ProfilePictureFile.Content;
                 model.ProfilePictureUrl = await _fileStorageService.UploadFileAsync(stream, model.ProfilePictureFile.FileName, "profiles");
             }
 

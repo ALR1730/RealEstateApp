@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -39,19 +37,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return BadRequest(ModelState);
             }
 
-            try
-            {
-                var result = await _aiSearchService.SearchByNaturalLanguageAsync(request.Query);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new
-                {
-                    hasError = true,
-                    error = "Ocurrió un error al procesar la búsqueda semántica con IA: " + ex.Message
-                });
-            }
+            var result = await _aiSearchService.SearchByNaturalLanguageAsync(request.Query);
+            return Ok(result);
         }
 
         /// <summary>

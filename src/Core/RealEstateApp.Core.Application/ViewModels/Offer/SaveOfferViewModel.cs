@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
+using System.Text.Json.Serialization;
+using RealEstateApp.Core.Application.DTOs.Common;
 
 namespace RealEstateApp.Core.Application.ViewModels.Offer
 {
@@ -26,7 +27,8 @@ namespace RealEstateApp.Core.Application.ViewModels.Offer
         /// Archivo de carta de pre-aprobación bancaria (PDF o imagen).
         /// </summary>
         [Display(Name = "Carta de Pre-aprobación Bancaria")]
-        public IFormFile? PreApprovalLetter { get; set; }
+        [JsonIgnore]
+        public FileUploadDto? PreApprovalLetter { get; set; }
 
         public string? PreApprovalLetterUrl { get; set; }
 

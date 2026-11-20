@@ -87,15 +87,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             var agentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(agentId)) return Unauthorized();
 
-            try
-            {
-                await _offerService.AcceptOffer(id, agentId);
-                return Ok(new { success = true, message = "Oferta aceptada. La propiedad ha sido marcada como Vendida y las demás ofertas fueron rechazadas automáticamente." });
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            await _offerService.AcceptOffer(id, agentId);
+            return Ok(new { success = true, message = "Oferta aceptada. La propiedad ha sido marcada como Vendida y las demás ofertas fueron rechazadas automáticamente." });
         }
 
         /// <summary>
@@ -109,15 +102,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             var agentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(agentId)) return Unauthorized();
 
-            try
-            {
-                await _offerService.RejectOffer(id, agentId);
-                return Ok(new { success = true, message = "Oferta rechazada exitosamente." });
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            await _offerService.RejectOffer(id, agentId);
+            return Ok(new { success = true, message = "Oferta rechazada exitosamente." });
         }
 
         /// <summary>
@@ -137,15 +123,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
                 return BadRequest(new { hasError = true, error = "El monto de la contra-oferta debe ser mayor a cero." });
             }
 
-            try
-            {
-                await _offerService.CounterOffer(id, model.CounterAmount, model.CounterMessage, agentId);
-                return Ok(new { success = true, message = "Contra-oferta enviada exitosamente al cliente." });
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            await _offerService.CounterOffer(id, model.CounterAmount, model.CounterMessage, agentId);
+            return Ok(new { success = true, message = "Contra-oferta enviada exitosamente al cliente." });
         }
 
         /// <summary>
@@ -161,15 +140,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             var clientId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(clientId)) return Unauthorized();
 
-            try
-            {
-                await _offerService.AcceptCounterOffer(id, clientId);
-                return Ok(new { success = true, message = "Contra-oferta aceptada. La propiedad ha sido marcada como Vendida." });
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            await _offerService.AcceptCounterOffer(id, clientId);
+            return Ok(new { success = true, message = "Contra-oferta aceptada. La propiedad ha sido marcada como Vendida." });
         }
 
         /// <summary>
@@ -184,15 +156,8 @@ namespace RealEstateApp.Presentation.WebApi.Controllers.v1
             var clientId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(clientId)) return Unauthorized();
 
-            try
-            {
-                await _offerService.RejectCounterOffer(id, clientId);
-                return Ok(new { success = true, message = "Contra-oferta rechazada." });
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest(new { hasError = true, error = ex.Message });
-            }
+            await _offerService.RejectCounterOffer(id, clientId);
+            return Ok(new { success = true, message = "Contra-oferta rechazada." });
         }
 
         public class CounterOfferRequest
